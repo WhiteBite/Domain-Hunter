@@ -127,6 +127,7 @@ export const en: Dict = {
   'gen.combinator.mode.suffix': 'Suffixes',
   'gen.combinator.mode.both': 'Both',
   'gen.combinator.presets': 'Presets',
+  'gen.combinator.reset': 'Reset affixes',
 
   'gen.syllables.title': 'Syllable mixer',
   'gen.syllables.desc':

@@ -67,7 +67,25 @@
           {current.lang === 'en' ? 'RU' : 'EN'}
         </button>
         <button class="icon-btn" onclick={toggleTheme} aria-label={t('theme.label')} title={t('theme.label')}>
-          <span aria-hidden="true">{current.theme === 'dark' ? '☀' : '☾'}</span>
+          <svg class="theme-icon icon-moon" viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M13.2 9.6A5.8 5.8 0 0 1 6.4 2.8a5.8 5.8 0 1 0 6.8 6.8Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <svg class="theme-icon icon-sun" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="2.8" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path
+              d="M8 1.6v1.8M8 12.6v1.8M1.6 8h1.8M12.6 8h1.8M3.5 3.5l1.3 1.3M11.2 11.2l1.3 1.3M12.5 3.5l-1.3 1.3M4.8 11.2l-1.3 1.3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
         </button>
       </div>
     </div>
@@ -182,6 +200,24 @@
   .icon-btn:hover {
     background: var(--bg-sunken);
     color: var(--text);
+  }
+
+  .theme-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+  }
+
+  .icon-sun {
+    display: none;
+  }
+
+  :global([data-theme='dark']) .icon-sun {
+    display: block;
+  }
+
+  :global([data-theme='dark']) .icon-moon {
+    display: none;
   }
 
   .tabs {

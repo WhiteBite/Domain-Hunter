@@ -128,6 +128,7 @@ export const ru: Dict = {
   'gen.combinator.mode.suffix': 'Суффиксы',
   'gen.combinator.mode.both': 'Оба',
   'gen.combinator.presets': 'Пресеты',
+  'gen.combinator.reset': 'Сбросить аффиксы',
 
   'gen.syllables.title': 'Мешалка слогов',
   'gen.syllables.desc':

@@ -249,7 +249,7 @@
           </select>
         </label>
         <button class="btn ghost" onclick={() => (affixes = DEFAULT_AFFIXES.join('\n'))}>
-          {t('gen.combinator.presets')}
+          {t('gen.combinator.reset')}
         </button>
         <button class="btn primary" onclick={generateCombinator}>{t('gen.generate')}</button>
       </div>

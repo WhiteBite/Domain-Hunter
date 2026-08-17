@@ -217,9 +217,24 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
-    max-height: 280px;
+    max-height: 340px;
     overflow-y: auto;
-    padding: var(--space-1) 0;
+    padding: var(--space-1) var(--space-1) var(--space-1) 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .chips::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chips::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-full);
+  }
+
+  .chips::-webkit-scrollbar-track {
+    background: transparent;
   }
   .chip {
     display: inline-flex;
