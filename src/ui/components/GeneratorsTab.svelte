@@ -264,6 +264,10 @@
       {/each}
     </div>
 
+    {#if kws().length === 0}
+      <p class="hint-line">{t('gen.idea.hint')}</p>
+    {/if}
+
     <details class="params">
       <summary>{t('gen.params')}</summary>
       <div class="params-body">
@@ -317,29 +321,31 @@
           <option value="added">{t('gen.tray.sort.added')}</option>
           <option value="az">{t('gen.tray.sort.az')}</option>
         </select>
-        <input
-          class="set-name"
-          type="text"
-          bind:value={newSetName}
-          placeholder={t('gen.themes.newSet')}
-          aria-label={t('gen.tray.save')}
-        />
-        <button class="btn" type="button" onclick={saveSet} disabled={candidates.length === 0}>
-          {t('gen.tray.save')}
-        </button>
-        <button
-          class="btn ghost"
-          type="button"
-          onclick={() => (candidates = [])}
-          disabled={candidates.length === 0}
-        >
-          {t('gen.tray.clear')}
-        </button>
         <button class="btn primary" type="button" onclick={checkNow} disabled={candidates.length === 0}>
           {t('gen.output.check')}
         </button>
       </div>
     </header>
+    <div class="controls">
+      <input
+        class="set-name"
+        type="text"
+        bind:value={newSetName}
+        placeholder={t('gen.themes.newSet')}
+        aria-label={t('gen.tray.save')}
+      />
+      <button class="btn" type="button" onclick={saveSet} disabled={candidates.length === 0}>
+        {t('gen.tray.save')}
+      </button>
+      <button
+        class="btn ghost"
+        type="button"
+        onclick={() => (candidates = [])}
+        disabled={candidates.length === 0}
+      >
+        {t('gen.tray.clear')}
+      </button>
+    </div>
     {#if candidates.length === 0}
       <p class="muted">{t('gen.tray.empty')}</p>
     {:else}
@@ -622,6 +628,12 @@
     background: var(--accent-soft);
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .hint-line {
+    margin: 0;
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
   }
 
   .params summary,

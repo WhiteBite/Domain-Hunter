@@ -377,14 +377,10 @@
                 </div>
               </td>
               <td class="price-cell">
-                <span style="color: {priceColor(row.renewal)}">
-                  {formatPrice(row.renewal, get(settings))}
-                </span>
+                <span class="price-neutral">{formatPrice(row.renewal, get(settings))}</span>
               </td>
               <td class="price-cell">
-                <span style="color: {priceColor(row.tco)}">
-                  {formatPrice(row.tco, get(settings))}
-                </span>
+                <span class="price-neutral">{formatPrice(row.tco, get(settings))}</span>
               </td>
               <td class="actions-cell">
                 <div class="actions">
@@ -575,6 +571,10 @@
   .status-cell {
     white-space: nowrap;
   }
+  .price-neutral {
+    color: var(--text-secondary);
+  }
+
   .price-cell {
     white-space: nowrap;
   }

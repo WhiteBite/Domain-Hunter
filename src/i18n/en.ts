@@ -148,6 +148,7 @@ export const en: Dict = {
   'gen.idea.keywords': 'Keywords',
   'gen.idea.keywords.placeholder': 'midas, gold',
   'gen.idea.techniques': 'Techniques',
+  'gen.idea.hint': 'All techniques except the syllable mixer use your keywords.',
   'gen.params': 'Technique parameters',
   'gen.generate.all': 'Generate candidates',
   'gen.tray.empty': 'Generate names or click theme words — everything collects here, ready for one-click checking.',

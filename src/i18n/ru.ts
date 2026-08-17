@@ -149,6 +149,7 @@ export const ru: Dict = {
   'gen.idea.keywords': 'Ключевые слова',
   'gen.idea.keywords.placeholder': 'midas, gold',
   'gen.idea.techniques': 'Техники',
+  'gen.idea.hint': 'Все техники, кроме мешалки слогов, работают с вашими ключевыми словами.',
   'gen.params': 'Параметры техник',
   'gen.generate.all': 'Придумать кандидаты',
   'gen.tray.empty': 'Генерируйте имена или кликайте по словам тем — всё собирается здесь и готово к проверке в один клик.',
