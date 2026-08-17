@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
-  import { activeTab, checkInput, registry } from '../store';
+  import { activeTab, checkInput, registry, pendingShareRun } from '../store';
   import { KEYS, readJson, writeJson } from '../settings';
   import { combinator, type CombinatorMode } from '../../generators/combinator';
   import { mixSyllables } from '../../generators/syllables';
@@ -104,6 +104,8 @@
   function checkNow(): void {
     if (candidates.length === 0) return;
     checkInput.set(candidates.join('\n'));
+    // The Check tab auto-starts the run as soon as it mounts.
+    pendingShareRun.set(true);
     activeTab.set('check');
   }
 
@@ -195,6 +197,12 @@
           type="text"
           bind:value={keywords}
           placeholder={t('gen.idea.keywords.placeholder')}
+          onkeydown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              generateAll();
+            }
+          }}
         />
       </label>
       <button class="btn primary big" type="button" onclick={generateAll}>
