@@ -1,0 +1,74 @@
+[
+  {
+    "id": "porkbun",
+    "name": "Porkbun",
+    "searchUrl": "https://porkbun.com/checkout/search?q={domain}",
+    "affiliate": { "program": "ambassador-inhouse", "viable": true, "note": "No network approval; link-based." }
+  },
+  {
+    "id": "cloudflare",
+    "name": "Cloudflare Registrar",
+    "searchUrl": "https://domains.cloudflare.com/",
+    "affiliate": { "program": "none", "viable": false, "note": "At-cost pricing; no public search deep-link (login wall)." }
+  },
+  {
+    "id": "dynadot",
+    "name": "Dynadot",
+    "searchUrl": "https://www.dynadot.com/domain/search.html?domain={domain}",
+    "affiliate": { "program": "ambassador-inhouse", "viable": true, "note": "30% domains; in-house program." }
+  },
+  {
+    "id": "spaceship",
+    "name": "Spaceship",
+    "searchUrl": "https://spaceship.com/domains/search/?q={domain}",
+    "affiliate": { "program": "impact", "viable": true, "note": "25% domains via Impact." }
+  },
+  {
+    "id": "namecheap",
+    "name": "Namecheap",
+    "searchUrl": "https://namecheap.com/domains/registration/results/?domain={domain}",
+    "affiliate": { "program": "impact", "viable": true, "note": "20% domains; first purchase only." }
+  },
+  {
+    "id": "namesilo",
+    "name": "NameSilo",
+    "searchUrl": "https://www.namesilo.com/domain_search.php?domain={domain}",
+    "affiliate": { "program": "none", "viable": false }
+  },
+  {
+    "id": "hover",
+    "name": "Hover",
+    "searchUrl": "https://www.hover.com/domains/results?q={domain}",
+    "affiliate": { "program": "impactradius", "viable": true, "note": "20%; no minimum sales." }
+  },
+  {
+    "id": "gandi",
+    "name": "Gandi",
+    "searchUrl": "https://gandi.net/domain/search?q={domain}",
+    "affiliate": { "program": "cj", "viable": true }
+  },
+  {
+    "id": "godaddy",
+    "name": "GoDaddy",
+    "searchUrl": "https://www.godaddy.com/domainsearch/find?checkAvail=1&domainToCheck={domain}",
+    "affiliate": { "program": "cj", "viable": true, "note": "Use www base; regional variants unreliable." }
+  },
+  {
+    "id": "ovhcloud",
+    "name": "OVHcloud",
+    "searchUrl": "https://www.ovhcloud.com/en/domains/?q={domain}",
+    "affiliate": { "program": "none", "viable": false }
+  },
+  {
+    "id": "regru",
+    "name": "REG.RU",
+    "searchUrl": "https://www.reg.ru/whois/{domain}",
+    "affiliate": { "program": "none", "viable": false, "note": "Best-effort link for RU audience." }
+  },
+  {
+    "id": "beget",
+    "name": "Beget",
+    "searchUrl": "https://beget.com/en/domains",
+    "affiliate": { "program": "none", "viable": false, "note": "No query-param deep-link." }
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "asOf": "2026-08-17",
+  "note": "Registry wholesale floor prices in USD cents. A retail price below the floor is a first-year promo (or suspicious). Sources: Verisign price cap schedule ($10.26 until Nov 1 2026, then $10.97), PIR ($11.00 from Jun 2026), Registry Margin League 2026 for ccTLDs.",
+  "floors": {
+    "com": 1026,
+    "net": 1091,
+    "org": 1100,
+    "de": 116,
+    "nl": 506,
+    "uk": 526,
+    "fr": 586
+  }
+}

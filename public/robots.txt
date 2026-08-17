@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://whitebite.github.io/Domain-Hunter/sitemap.xml

@@ -1,0 +1,2963 @@
+{
+  "generatedAt": "2026-08-17T16:58:14.583Z",
+  "sources": [
+    "snapshot"
+  ],
+  "tlds": {
+    "academy": {
+      "cloudflare": {
+        "reg": 3620,
+        "renew": 3620,
+        "transfer": null
+      }
+    },
+    "accountants": {
+      "cloudflare": {
+        "reg": 9020,
+        "renew": 9020,
+        "transfer": null
+      }
+    },
+    "actor": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "agency": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "associates": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "audio": {
+      "cloudflare": {
+        "reg": 10020,
+        "renew": 10020,
+        "transfer": null
+      }
+    },
+    "bar": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "bargains": {
+      "cloudflare": {
+        "reg": 2320,
+        "renew": 2320,
+        "transfer": null
+      }
+    },
+    "beer": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "bike": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "biz": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "black": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "blue": {
+      "cloudflare": {
+        "reg": 1920,
+        "renew": 1920,
+        "transfer": null
+      }
+    },
+    "boutique": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "builders": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "cab": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "camera": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "camp": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "capital": {
+      "cloudflare": {
+        "reg": 5520,
+        "renew": 5520,
+        "transfer": null
+      }
+    },
+    "cards": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "care": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "careers": {
+      "cloudflare": {
+        "reg": 5520,
+        "renew": 5520,
+        "transfer": null
+      }
+    },
+    "cash": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "catering": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "cc": {
+      "cloudflare": {
+        "reg": 800,
+        "renew": 800,
+        "transfer": null
+      }
+    },
+    "center": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "ceo": {
+      "cloudflare": {
+        "reg": 8520,
+        "renew": 7020,
+        "transfer": null
+      }
+    },
+    "cheap": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "christmas": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "church": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "claims": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "cleaning": {
+      "cloudflare": {
+        "reg": 5820,
+        "renew": 5820,
+        "transfer": null
+      }
+    },
+    "clinic": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "clothing": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "club": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "co": {
+      "cloudflare": {
+        "reg": 1500,
+        "renew": 3000,
+        "transfer": null
+      }
+    },
+    "codes": {
+      "cloudflare": {
+        "reg": 5520,
+        "renew": 5520,
+        "transfer": null
+      }
+    },
+    "coffee": {
+      "cloudflare": {
+        "reg": 3320,
+        "renew": 3320,
+        "transfer": null
+      }
+    },
+    "college": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "com": {
+      "cloudflare": {
+        "reg": 1046,
+        "renew": 1046,
+        "transfer": null
+      }
+    },
+    "community": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "company": {
+      "cloudflare": {
+        "reg": 1620,
+        "renew": 1620,
+        "transfer": null
+      }
+    },
+    "computer": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "construction": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "contractors": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "cooking": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "cool": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "credit": {
+      "cloudflare": {
+        "reg": 8020,
+        "renew": 8020,
+        "transfer": null
+      }
+    },
+    "creditcard": {
+      "cloudflare": {
+        "reg": 12520,
+        "renew": 12520,
+        "transfer": null
+      }
+    },
+    "cruises": {
+      "cloudflare": {
+        "reg": 4320,
+        "renew": 4320,
+        "transfer": null
+      }
+    },
+    "dance": {
+      "cloudflare": {
+        "reg": 2120,
+        "renew": 2120,
+        "transfer": null
+      }
+    },
+    "dating": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "democrat": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "dental": {
+      "cloudflare": {
+        "reg": 6020,
+        "renew": 6020,
+        "transfer": null
+      }
+    },
+    "diamonds": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "digital": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "directory": {
+      "cloudflare": {
+        "reg": 2120,
+        "renew": 2120,
+        "transfer": null
+      }
+    },
+    "discount": {
+      "cloudflare": {
+        "reg": 2320,
+        "renew": 2320,
+        "transfer": null
+      }
+    },
+    "domains": {
+      "cloudflare": {
+        "reg": 3320,
+        "renew": 3320,
+        "transfer": null
+      }
+    },
+    "education": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "email": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "engineering": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "enterprises": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "equipment": {
+      "cloudflare": {
+        "reg": 2220,
+        "renew": 2220,
+        "transfer": null
+      }
+    },
+    "estate": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "events": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "exchange": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "expert": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "exposed": {
+      "cloudflare": {
+        "reg": 1720,
+        "renew": 1720,
+        "transfer": null
+      }
+    },
+    "fail": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "farm": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "finance": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "financial": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "fish": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "fishing": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "fitness": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "flights": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "florist": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "fm": {
+      "cloudflare": {
+        "reg": 8500,
+        "renew": 8500,
+        "transfer": null
+      }
+    },
+    "foo": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "foundation": {
+      "cloudflare": {
+        "reg": 2170,
+        "renew": 2170,
+        "transfer": null
+      }
+    },
+    "fund": {
+      "cloudflare": {
+        "reg": 5520,
+        "renew": 5520,
+        "transfer": null
+      }
+    },
+    "furniture": {
+      "cloudflare": {
+        "reg": 8020,
+        "renew": 8020,
+        "transfer": null
+      }
+    },
+    "futbol": {
+      "cloudflare": {
+        "reg": 1320,
+        "renew": 1320,
+        "transfer": null
+      }
+    },
+    "gallery": {
+      "cloudflare": {
+        "reg": 2220,
+        "renew": 2220,
+        "transfer": null
+      }
+    },
+    "glass": {
+      "cloudflare": {
+        "reg": 5620,
+        "renew": 5620,
+        "transfer": null
+      }
+    },
+    "graphics": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "gratis": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "gripe": {
+      "cloudflare": {
+        "reg": 520,
+        "renew": 520,
+        "transfer": null
+      }
+    },
+    "guide": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "guitars": {
+      "cloudflare": {
+        "reg": 10020,
+        "renew": 10020,
+        "transfer": null
+      }
+    },
+    "guru": {
+      "cloudflare": {
+        "reg": 3320,
+        "renew": 3320,
+        "transfer": null
+      }
+    },
+    "haus": {
+      "cloudflare": {
+        "reg": 2620,
+        "renew": 2620,
+        "transfer": null
+      }
+    },
+    "holdings": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "holiday": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "horse": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "house": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "immobilien": {
+      "cloudflare": {
+        "reg": 2920,
+        "renew": 2920,
+        "transfer": null
+      }
+    },
+    "industries": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "info": {
+      "cloudflare": {
+        "reg": 2120,
+        "renew": 2120,
+        "transfer": null
+      }
+    },
+    "institute": {
+      "cloudflare": {
+        "reg": 2120,
+        "renew": 2120,
+        "transfer": null
+      }
+    },
+    "insure": {
+      "cloudflare": {
+        "reg": 5620,
+        "renew": 5620,
+        "transfer": null
+      }
+    },
+    "international": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "investments": {
+      "cloudflare": {
+        "reg": 10020,
+        "renew": 10020,
+        "transfer": null
+      }
+    },
+    "io": {
+      "cloudflare": {
+        "reg": 5000,
+        "renew": 5000,
+        "transfer": null
+      }
+    },
+    "kaufen": {
+      "cloudflare": {
+        "reg": 2320,
+        "renew": 2320,
+        "transfer": null
+      }
+    },
+    "kim": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "kitchen": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "land": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "lease": {
+      "cloudflare": {
+        "reg": 4320,
+        "renew": 4320,
+        "transfer": null
+      }
+    },
+    "life": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "lighting": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "limited": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "limo": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "loans": {
+      "cloudflare": {
+        "reg": 9020,
+        "renew": 9020,
+        "transfer": null
+      }
+    },
+    "luxe": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "management": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "marketing": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "me": {
+      "cloudflare": {
+        "reg": 1656,
+        "renew": 1656,
+        "transfer": null
+      }
+    },
+    "media": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "miami": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "mobi": {
+      "cloudflare": {
+        "reg": 4020,
+        "renew": 4020,
+        "transfer": null
+      }
+    },
+    "moda": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "net": {
+      "cloudflare": {
+        "reg": 1186,
+        "renew": 1186,
+        "transfer": null
+      }
+    },
+    "ninja": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "org": {
+      "cloudflare": {
+        "reg": 850,
+        "renew": 1120,
+        "transfer": null
+      }
+    },
+    "partners": {
+      "cloudflare": {
+        "reg": 5520,
+        "renew": 5520,
+        "transfer": null
+      }
+    },
+    "parts": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "photography": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "photos": {
+      "cloudflare": {
+        "reg": 2320,
+        "renew": 2320,
+        "transfer": null
+      }
+    },
+    "pics": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "pictures": {
+      "cloudflare": {
+        "reg": 1220,
+        "renew": 1220,
+        "transfer": null
+      }
+    },
+    "pink": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "plumbing": {
+      "cloudflare": {
+        "reg": 5620,
+        "renew": 5620,
+        "transfer": null
+      }
+    },
+    "pro": {
+      "cloudflare": {
+        "reg": 2120,
+        "renew": 2120,
+        "transfer": null
+      }
+    },
+    "productions": {
+      "cloudflare": {
+        "reg": 3120,
+        "renew": 3120,
+        "transfer": null
+      }
+    },
+    "properties": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "pub": {
+      "cloudflare": {
+        "reg": 3120,
+        "renew": 3120,
+        "transfer": null
+      }
+    },
+    "recipes": {
+      "cloudflare": {
+        "reg": 6020,
+        "renew": 6020,
+        "transfer": null
+      }
+    },
+    "red": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "reisen": {
+      "cloudflare": {
+        "reg": 1620,
+        "renew": 1620,
+        "transfer": null
+      }
+    },
+    "rentals": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "repair": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "report": {
+      "cloudflare": {
+        "reg": 1920,
+        "renew": 1920,
+        "transfer": null
+      }
+    },
+    "rest": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "reviews": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "rocks": {
+      "cloudflare": {
+        "reg": 1720,
+        "renew": 1720,
+        "transfer": null
+      }
+    },
+    "rodeo": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "schule": {
+      "cloudflare": {
+        "reg": 2220,
+        "renew": 2220,
+        "transfer": null
+      }
+    },
+    "services": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "shoes": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "singles": {
+      "cloudflare": {
+        "reg": 2620,
+        "renew": 2620,
+        "transfer": null
+      }
+    },
+    "social": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "solar": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "solutions": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "soy": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "supplies": {
+      "cloudflare": {
+        "reg": 1920,
+        "renew": 1920,
+        "transfer": null
+      }
+    },
+    "supply": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "support": {
+      "cloudflare": {
+        "reg": 2120,
+        "renew": 2120,
+        "transfer": null
+      }
+    },
+    "surgery": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "systems": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "tax": {
+      "cloudflare": {
+        "reg": 5220,
+        "renew": 5220,
+        "transfer": null
+      }
+    },
+    "technology": {
+      "cloudflare": {
+        "reg": 2220,
+        "renew": 2220,
+        "transfer": null
+      }
+    },
+    "tienda": {
+      "cloudflare": {
+        "reg": 4620,
+        "renew": 4620,
+        "transfer": null
+      }
+    },
+    "tips": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "today": {
+      "cloudflare": {
+        "reg": 2220,
+        "renew": 2220,
+        "transfer": null
+      }
+    },
+    "tools": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "town": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "toys": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "training": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "tv": {
+      "cloudflare": {
+        "reg": 2500,
+        "renew": 2500,
+        "transfer": null
+      }
+    },
+    "uk": {
+      "cloudflare": {
+        "reg": 530,
+        "renew": 530,
+        "transfer": null
+      }
+    },
+    "university": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "us": {
+      "cloudflare": {
+        "reg": 650,
+        "renew": 650,
+        "transfer": null
+      }
+    },
+    "vacations": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "ventures": {
+      "cloudflare": {
+        "reg": 4620,
+        "renew": 4620,
+        "transfer": null
+      }
+    },
+    "viajes": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "villas": {
+      "cloudflare": {
+        "reg": 4620,
+        "renew": 4620,
+        "transfer": null
+      }
+    },
+    "vision": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "vodka": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "voyage": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "watch": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "wiki": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "works": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "wtf": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "xyz": {
+      "cloudflare": {
+        "reg": 1230,
+        "renew": 1120,
+        "transfer": null
+      }
+    },
+    "zone": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "condos": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "consulting": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "ink": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "maison": {
+      "cloudflare": {
+        "reg": 4420,
+        "renew": 4420,
+        "transfer": null
+      }
+    },
+    "reise": {
+      "cloudflare": {
+        "reg": 7520,
+        "renew": 7520,
+        "transfer": null
+      }
+    },
+    "attorney": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "degree": {
+      "cloudflare": {
+        "reg": 4020,
+        "renew": 4020,
+        "transfer": null
+      }
+    },
+    "dentist": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "host": {
+      "cloudflare": {
+        "reg": 7920,
+        "renew": 7920,
+        "transfer": null
+      }
+    },
+    "lawyer": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "market": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "mortgage": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "press": {
+      "cloudflare": {
+        "reg": 6220,
+        "renew": 6220,
+        "transfer": null
+      }
+    },
+    "software": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "space": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "vet": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "website": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "engineer": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "gives": {
+      "cloudflare": {
+        "reg": 2170,
+        "renew": 2170,
+        "transfer": null
+      }
+    },
+    "rehab": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "republican": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "green": {
+      "cloudflare": {
+        "reg": 6220,
+        "renew": 6220,
+        "transfer": null
+      }
+    },
+    "surf": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "direct": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "place": {
+      "cloudflare": {
+        "reg": 1720,
+        "renew": 1720,
+        "transfer": null
+      }
+    },
+    "lgbt": {
+      "cloudflare": {
+        "reg": 6220,
+        "renew": 6220,
+        "transfer": null
+      }
+    },
+    "auction": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "city": {
+      "cloudflare": {
+        "reg": 2220,
+        "renew": 2220,
+        "transfer": null
+      }
+    },
+    "deals": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "healthcare": {
+      "cloudflare": {
+        "reg": 6820,
+        "renew": 6820,
+        "transfer": null
+      }
+    },
+    "gifts": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "restaurant": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "sarl": {
+      "cloudflare": {
+        "reg": 520,
+        "renew": 520,
+        "transfer": null
+      }
+    },
+    "diet": {
+      "cloudflare": {
+        "reg": 10020,
+        "renew": 10020,
+        "transfer": null
+      }
+    },
+    "hosting": {
+      "cloudflare": {
+        "reg": 30020,
+        "renew": 30020,
+        "transfer": null
+      }
+    },
+    "how": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "business": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "network": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "immo": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "pizza": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "boo": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "dad": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "day": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "esq": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "mov": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "new": {
+      "cloudflare": {
+        "reg": 40020,
+        "renew": 40020,
+        "transfer": null
+      }
+    },
+    "rsvp": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "nexus": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "prof": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "world": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "casa": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "work": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "forsale": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "band": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "rip": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "wedding": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "yoga": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "delivery": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "energy": {
+      "cloudflare": {
+        "reg": 9020,
+        "renew": 9020,
+        "transfer": null
+      }
+    },
+    "coach": {
+      "cloudflare": {
+        "reg": 6020,
+        "renew": 6020,
+        "transfer": null
+      }
+    },
+    "legal": {
+      "cloudflare": {
+        "reg": 5520,
+        "renew": 5520,
+        "transfer": null
+      }
+    },
+    "memorial": {
+      "cloudflare": {
+        "reg": 4020,
+        "renew": 4020,
+        "transfer": null
+      }
+    },
+    "money": {
+      "cloudflare": {
+        "reg": 2720,
+        "renew": 2720,
+        "transfer": null
+      }
+    },
+    "irish": {
+      "cloudflare": {
+        "reg": 1720,
+        "renew": 1720,
+        "transfer": null
+      }
+    },
+    "fashion": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "garden": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "dev": {
+      "cloudflare": {
+        "reg": 1220,
+        "renew": 1220,
+        "transfer": null
+      }
+    },
+    "tires": {
+      "cloudflare": {
+        "reg": 7020,
+        "renew": 7020,
+        "transfer": null
+      }
+    },
+    "flowers": {
+      "cloudflare": {
+        "reg": 10000,
+        "renew": 10000,
+        "transfer": null
+      }
+    },
+    "sale": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "video": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "fit": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "bingo": {
+      "cloudflare": {
+        "reg": 4120,
+        "renew": 4120,
+        "transfer": null
+      }
+    },
+    "chat": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "style": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "tennis": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "bid": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "cricket": {
+      "cloudflare": {
+        "reg": 2018,
+        "renew": 2018,
+        "transfer": null
+      }
+    },
+    "design": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "jetzt": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "party": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "science": {
+      "cloudflare": {
+        "reg": 1018,
+        "renew": 1018,
+        "transfer": null
+      }
+    },
+    "trade": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "webcam": {
+      "cloudflare": {
+        "reg": 1018,
+        "renew": 1018,
+        "transfer": null
+      }
+    },
+    "apartments": {
+      "cloudflare": {
+        "reg": 4420,
+        "renew": 4420,
+        "transfer": null
+      }
+    },
+    "fans": {
+      "cloudflare": {
+        "reg": 820,
+        "renew": 820,
+        "transfer": null
+      }
+    },
+    "casino": {
+      "cloudflare": {
+        "reg": 12520,
+        "renew": 12520,
+        "transfer": null
+      }
+    },
+    "football": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "school": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "forex": {
+      "cloudflare": {
+        "reg": 8020,
+        "renew": 8020,
+        "transfer": null
+      }
+    },
+    "markets": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "trading": {
+      "cloudflare": {
+        "reg": 1620,
+        "renew": 1620,
+        "transfer": null
+      }
+    },
+    "online": {
+      "cloudflare": {
+        "reg": 2770,
+        "renew": 2770,
+        "transfer": null
+      }
+    },
+    "page": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "site": {
+      "cloudflare": {
+        "reg": 2770,
+        "renew": 2770,
+        "transfer": null
+      }
+    },
+    "news": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "tech": {
+      "cloudflare": {
+        "reg": 4920,
+        "renew": 4920,
+        "transfer": null
+      }
+    },
+    "accountant": {
+      "cloudflare": {
+        "reg": 2018,
+        "renew": 2018,
+        "transfer": null
+      }
+    },
+    "date": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "download": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "faith": {
+      "cloudflare": {
+        "reg": 1018,
+        "renew": 1018,
+        "transfer": null
+      }
+    },
+    "gold": {
+      "cloudflare": {
+        "reg": 8020,
+        "renew": 8020,
+        "transfer": null
+      }
+    },
+    "golf": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "loan": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "movie": {
+      "cloudflare": {
+        "reg": 27020,
+        "renew": 27020,
+        "transfer": null
+      }
+    },
+    "plus": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "review": {
+      "cloudflare": {
+        "reg": 1018,
+        "renew": 1018,
+        "transfer": null
+      }
+    },
+    "tours": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "win": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "love": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "racing": {
+      "cloudflare": {
+        "reg": 1018,
+        "renew": 1018,
+        "transfer": null
+      }
+    },
+    "cafe": {
+      "cloudflare": {
+        "reg": 4020,
+        "renew": 4020,
+        "transfer": null
+      }
+    },
+    "express": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "jewelry": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "show": {
+      "cloudflare": {
+        "reg": 3420,
+        "renew": 3420,
+        "transfer": null
+      }
+    },
+    "team": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "broker": {
+      "cloudflare": {
+        "reg": 2820,
+        "renew": 2820,
+        "transfer": null
+      }
+    },
+    "dog": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "rent": {
+      "cloudflare": {
+        "reg": 4520,
+        "renew": 4520,
+        "transfer": null
+      }
+    },
+    "theater": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "lol": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "hockey": {
+      "cloudflare": {
+        "reg": 4620,
+        "renew": 4620,
+        "transfer": null
+      }
+    },
+    "run": {
+      "cloudflare": {
+        "reg": 2120,
+        "renew": 2120,
+        "transfer": null
+      }
+    },
+    "taxi": {
+      "cloudflare": {
+        "reg": 4820,
+        "renew": 4820,
+        "transfer": null
+      }
+    },
+    "coupons": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "soccer": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "men": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "fyi": {
+      "cloudflare": {
+        "reg": 520,
+        "renew": 520,
+        "transfer": null
+      }
+    },
+    "mba": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "cloud": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "realty": {
+      "cloudflare": {
+        "reg": 28020,
+        "renew": 28020,
+        "transfer": null
+      }
+    },
+    "game": {
+      "cloudflare": {
+        "reg": 30020,
+        "renew": 30020,
+        "transfer": null
+      }
+    },
+    "live": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "studio": {
+      "cloudflare": {
+        "reg": 3120,
+        "renew": 3120,
+        "transfer": null
+      }
+    },
+    "app": {
+      "cloudflare": {
+        "reg": 1420,
+        "renew": 1420,
+        "transfer": null
+      }
+    },
+    "bet": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "pet": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "baby": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "blog": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "cam": {
+      "cloudflare": {
+        "reg": 1420,
+        "renew": 1420,
+        "transfer": null
+      }
+    },
+    "compare": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "contact": {
+      "cloudflare": {
+        "reg": 1120,
+        "renew": 1120,
+        "transfer": null
+      }
+    },
+    "family": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "games": {
+      "cloudflare": {
+        "reg": 2620,
+        "renew": 2620,
+        "transfer": null
+      }
+    },
+    "gmbh": {
+      "cloudflare": {
+        "reg": 3520,
+        "renew": 3520,
+        "transfer": null
+      }
+    },
+    "group": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "health": {
+      "cloudflare": {
+        "reg": 6020,
+        "renew": 6020,
+        "transfer": null
+      }
+    },
+    "ltd": {
+      "cloudflare": {
+        "reg": 2420,
+        "renew": 2420,
+        "transfer": null
+      }
+    },
+    "mom": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "promo": {
+      "cloudflare": {
+        "reg": 1920,
+        "renew": 1920,
+        "transfer": null
+      }
+    },
+    "protection": {
+      "cloudflare": {
+        "reg": 200020,
+        "renew": 200020,
+        "transfer": null
+      }
+    },
+    "salon": {
+      "cloudflare": {
+        "reg": 4420,
+        "renew": 4420,
+        "transfer": null
+      }
+    },
+    "security": {
+      "cloudflare": {
+        "reg": 200020,
+        "renew": 200020,
+        "transfer": null
+      }
+    },
+    "select": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "shopping": {
+      "cloudflare": {
+        "reg": 2320,
+        "renew": 2320,
+        "transfer": null
+      }
+    },
+    "storage": {
+      "cloudflare": {
+        "reg": 50020,
+        "renew": 50020,
+        "transfer": null
+      }
+    },
+    "store": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "stream": {
+      "cloudflare": {
+        "reg": 418,
+        "renew": 518,
+        "transfer": null
+      }
+    },
+    "theatre": {
+      "cloudflare": {
+        "reg": 50020,
+        "renew": 50020,
+        "transfer": null
+      }
+    },
+    "vin": {
+      "cloudflare": {
+        "reg": 4620,
+        "renew": 4620,
+        "transfer": null
+      }
+    },
+    "vip": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "wine": {
+      "cloudflare": {
+        "reg": 4620,
+        "renew": 4620,
+        "transfer": null
+      }
+    },
+    "doctor": {
+      "cloudflare": {
+        "reg": 9020,
+        "renew": 9020,
+        "transfer": null
+      }
+    },
+    "monster": {
+      "cloudflare": {
+        "reg": 1230,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "observer": {
+      "cloudflare": {
+        "reg": 920,
+        "renew": 920,
+        "transfer": null
+      }
+    },
+    "boston": {
+      "cloudflare": {
+        "reg": 1820,
+        "renew": 1820,
+        "transfer": null
+      }
+    },
+    "hospital": {
+      "cloudflare": {
+        "reg": 4420,
+        "renew": 4420,
+        "transfer": null
+      }
+    },
+    "fun": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "phd": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "co.uk": {
+      "cloudflare": {
+        "reg": 530,
+        "renew": 530,
+        "transfer": null
+      }
+    },
+    "com.co": {
+      "cloudflare": {
+        "reg": 1000,
+        "renew": 1000,
+        "transfer": null
+      }
+    },
+    "link": {
+      "cloudflare": {
+        "reg": 720,
+        "renew": 720,
+        "transfer": null
+      }
+    },
+    "me.uk": {
+      "cloudflare": {
+        "reg": 530,
+        "renew": 530,
+        "transfer": null
+      }
+    },
+    "net.co": {
+      "cloudflare": {
+        "reg": 1500,
+        "renew": 1500,
+        "transfer": null
+      }
+    },
+    "net.uk": {
+      "cloudflare": {
+        "reg": 530,
+        "renew": 530,
+        "transfer": null
+      }
+    },
+    "nom.co": {
+      "cloudflare": {
+        "reg": 1500,
+        "renew": 1500,
+        "transfer": null
+      }
+    },
+    "org.uk": {
+      "cloudflare": {
+        "reg": 530,
+        "renew": 530,
+        "transfer": null
+      }
+    },
+    "ac": {
+      "cloudflare": {
+        "reg": 4500,
+        "renew": 4500,
+        "transfer": null
+      }
+    },
+    "airforce": {
+      "cloudflare": {
+        "reg": 8020,
+        "renew": 8020,
+        "transfer": null
+      }
+    },
+    "army": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "dealer": {
+      "cloudflare": {
+        "reg": 200020,
+        "renew": 200020,
+        "transfer": null
+      }
+    },
+    "fan": {
+      "cloudflare": {
+        "reg": 4220,
+        "renew": 4220,
+        "transfer": null
+      }
+    },
+    "feedback": {
+      "cloudflare": {
+        "reg": 30020,
+        "renew": 30020,
+        "transfer": null
+      }
+    },
+    "forum": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "global": {
+      "cloudflare": {
+        "reg": 7520,
+        "renew": 7520,
+        "transfer": null
+      }
+    },
+    "help": {
+      "cloudflare": {
+        "reg": 2220,
+        "renew": 2220,
+        "transfer": null
+      }
+    },
+    "icu": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "inc": {
+      "cloudflare": {
+        "reg": 200020,
+        "renew": 200020,
+        "transfer": null
+      }
+    },
+    "navy": {
+      "cloudflare": {
+        "reg": 3220,
+        "renew": 3220,
+        "transfer": null
+      }
+    },
+    "organic": {
+      "cloudflare": {
+        "reg": 6620,
+        "renew": 6620,
+        "transfer": null
+      }
+    },
+    "sh": {
+      "cloudflare": {
+        "reg": 4500,
+        "renew": 4500,
+        "transfer": null
+      }
+    },
+    "ski": {
+      "cloudflare": {
+        "reg": 5020,
+        "renew": 5020,
+        "transfer": null
+      }
+    },
+    "uno": {
+      "cloudflare": {
+        "reg": 2020,
+        "renew": 2020,
+        "transfer": null
+      }
+    },
+    "adult": {
+      "cloudflare": {
+        "reg": 9520,
+        "renew": 9520,
+        "transfer": null
+      }
+    },
+    "porn": {
+      "cloudflare": {
+        "reg": 9520,
+        "renew": 9520,
+        "transfer": null
+      }
+    },
+    "sex": {
+      "cloudflare": {
+        "reg": 9520,
+        "renew": 9520,
+        "transfer": null
+      }
+    },
+    "travel": {
+      "cloudflare": {
+        "reg": 11520,
+        "renew": 11520,
+        "transfer": null
+      }
+    },
+    "ai": {
+      "cloudflare": {
+        "reg": 8000,
+        "renew": 8000,
+        "transfer": null
+      }
+    },
+    "com.ai": {
+      "cloudflare": {
+        "reg": 8000,
+        "renew": 8000,
+        "transfer": null
+      }
+    },
+    "net.ai": {
+      "cloudflare": {
+        "reg": 8000,
+        "renew": 8000,
+        "transfer": null
+      }
+    },
+    "off.ai": {
+      "cloudflare": {
+        "reg": 8000,
+        "renew": 8000,
+        "transfer": null
+      }
+    },
+    "org.ai": {
+      "cloudflare": {
+        "reg": 8000,
+        "renew": 8000,
+        "transfer": null
+      }
+    },
+    "shop": {
+      "cloudflare": {
+        "reg": 3020,
+        "renew": 3020,
+        "transfer": null
+      }
+    },
+    "ngo": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "ong": {
+      "cloudflare": {
+        "reg": 1520,
+        "renew": 1520,
+        "transfer": null
+      }
+    },
+    "build": {
+      "cloudflare": {
+        "reg": 2520,
+        "renew": 2520,
+        "transfer": null
+      }
+    },
+    "xxx": {
+      "cloudflare": {
+        "reg": 9520,
+        "renew": 9520,
+        "transfer": null
+      }
+    },
+    "ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "charity": {
+      "cloudflare": {
+        "reg": 2170,
+        "renew": 2170,
+        "transfer": null
+      }
+    },
+    "giving": {
+      "cloudflare": {
+        "reg": 2170,
+        "renew": 2170,
+        "transfer": null
+      }
+    },
+    "co.nz": {
+      "cloudflare": {
+        "reg": 1560,
+        "renew": 1560,
+        "transfer": null
+      }
+    },
+    "com.mx": {
+      "cloudflare": {
+        "reg": 1675,
+        "renew": 1675,
+        "transfer": null
+      }
+    },
+    "geek.nz": {
+      "cloudflare": {
+        "reg": 1560,
+        "renew": 1560,
+        "transfer": null
+      }
+    },
+    "mx": {
+      "cloudflare": {
+        "reg": 3070,
+        "renew": 3070,
+        "transfer": null
+      }
+    },
+    "net.nz": {
+      "cloudflare": {
+        "reg": 1560,
+        "renew": 1560,
+        "transfer": null
+      }
+    },
+    "nz": {
+      "cloudflare": {
+        "reg": 1560,
+        "renew": 1560,
+        "transfer": null
+      }
+    },
+    "org.mx": {
+      "cloudflare": {
+        "reg": 1515,
+        "renew": 1515,
+        "transfer": null
+      }
+    },
+    "org.nz": {
+      "cloudflare": {
+        "reg": 1560,
+        "renew": 1560,
+        "transfer": null
+      }
+    },
+    "ing": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "meme": {
+      "cloudflare": {
+        "reg": 1020,
+        "renew": 1020,
+        "transfer": null
+      }
+    },
+    "ab.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "bc.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "mb.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "nb.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "nl.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "ns.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "nt.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "nu.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "on.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "pe.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "qc.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "sk.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "vote": {
+      "cloudflare": {
+        "reg": 7020,
+        "renew": 7020,
+        "transfer": null
+      }
+    },
+    "yk.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    },
+    "yt.ca": {
+      "cloudflare": {
+        "reg": 919,
+        "renew": 919,
+        "transfer": null
+      }
+    }
+  },
+  "coupons": {}
+}

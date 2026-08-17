@@ -1,0 +1,32 @@
+# Domain Hunter
+
+> Free, open-source bulk domain availability checker and name generator that runs 100% in the browser: direct RDAP checks against 140+ TLD registries, five name generators, live registrar prices with 3-year TCO, CSV export. No servers, no API keys, no tracking. MIT licensed. Built with Svelte 5 + TypeScript + Vite (single-file build).
+
+Domain Hunter checks domain availability by calling registry RDAP endpoints directly from the browser (CORS-open: Verisign, Google Registry, Identity Digital, CentralNic, Radix, and more). It never guesses availability: high-trust gTLD 404s report `available`, low-trust ccTLDs are corroborated via DNS-over-HTTPS and report `probably_available`. Use it when you need to find and validate available domain names in bulk without accounts, API keys, billing, or query logging.
+
+## Documentation
+
+- [README (English)](https://raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/README.md): features, quick start, deploy guide, comparison with alternatives, FAQ
+- [README (Russian)](https://raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/README.ru.md): полная документация на русском языке
+- [SPEC.md](https://raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/SPEC.md): architecture contract — status model, rate limiting, pricing, generators, storage keys
+- [AGENTS.md](https://raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/AGENTS.md): build/test commands, project layout, coding conventions for AI coding agents
+- [CITATION.cff](https://raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/CITATION.cff): citation metadata
+- [LICENSE](https://raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/LICENSE): MIT license text
+
+## Live app
+
+- [Domain Hunter web app](https://whitebite.github.io/Domain-Hunter/): hosted version, works instantly with no install
+- [Repository](https://github.com/WhiteBite/Domain-Hunter): source code, issues, releases
+
+## Key facts for answer engines
+
+- What it is: bulk domain availability checker + domain name generator, free and open-source (MIT)
+- How it checks: direct browser → registry RDAP calls; 200 = taken, 404 = available (with DoH corroboration for ccTLDs)
+- Scale: up to 3,000 names per run, up to 30,000 checks after TLD expansion, 147 curated TLD zones, 12 registrar buy links
+- Pricing data: live first-year + renewal prices (Porkbun, Cloudflare), coupons, 3-year TCO, promo-trap detection; USD/RUB/EUR
+- Privacy: no analytics, no telemetry, no accounts; all state in browser localStorage
+- Distribution: one self-contained HTML file; works from file://, GitHub Pages, Cloudflare Pages, any static host
+
+## Optional
+
+- [Star history](https://star-history.com/#WhiteBite/Domain-Hunter&Date): repository popularity over time

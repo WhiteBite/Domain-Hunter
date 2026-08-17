@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use Domain Hunter in your work, please cite it as below."
+type: software
+title: "Domain Hunter — Bulk Domain Availability Checker & Name Generator"
+abstract: >-
+  Free, open-source, browser-only bulk domain availability checker.
+  Direct RDAP checks against 140+ TLD registries, five name generators,
+  live registrar prices with 3-year TCO, CSV export. No servers,
+  no API keys, no tracking.
+authors:
+  - alias: WhiteBite
+version: 2.0.0
+date-released: "2026-08-17"
+license: MIT
+repository-code: "https://github.com/WhiteBite/Domain-Hunter"
+url: "https://whitebite.github.io/Domain-Hunter/"
+keywords:
+  - domain availability
+  - domain name generator
+  - RDAP
+  - WHOIS alternative
+  - bulk domain search
+  - TLD
+  - domaining

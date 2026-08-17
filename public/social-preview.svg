@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1020"/>
+      <stop offset="1" stop-color="#131a33"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#6366f1" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <circle cx="1090" cy="140" r="340" fill="url(#glow)"/>
+  <circle cx="150" cy="560" r="300" fill="url(#glow)"/>
+
+  <!-- target mark -->
+  <g transform="translate(110,250)">
+    <circle r="70" fill="none" stroke="#6366f1" stroke-width="14"/>
+    <circle r="22" fill="#6366f1"/>
+    <circle r="70" fill="none" stroke="#818cf8" stroke-width="3" opacity="0.4">
+      <animate attributeName="r" values="70;95" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <text x="230" y="238" font-family="Segoe UI, Arial, sans-serif" font-size="84" font-weight="700" fill="#f1f5f9">Domain Hunter</text>
+  <text x="232" y="310" font-family="Segoe UI, Arial, sans-serif" font-size="38" fill="#a5b4fc">Free bulk domain availability checker</text>
+
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="27" fill="#c7d2fe">
+    <g transform="translate(232,390)">
+      <rect x="0" y="-30" rx="22" width="196" height="52" fill="#1e2547" stroke="#3f4a8a" stroke-width="1.5"/>
+      <text x="24" y="4">140+ TLDs</text>
+    </g>
+    <g transform="translate(448,390)">
+      <rect x="0" y="-30" rx="22" width="190" height="52" fill="#1e2547" stroke="#3f4a8a" stroke-width="1.5"/>
+      <text x="22" y="4">No API keys</text>
+    </g>
+    <g transform="translate(658,390)">
+      <rect x="0" y="-30" rx="22" width="185" height="52" fill="#1e2547" stroke="#3f4a8a" stroke-width="1.5"/>
+      <text x="22" y="4">No tracking</text>
+    </g>
+    <g transform="translate(863,390)">
+      <rect x="0" y="-30" rx="22" width="185" height="52" fill="#1e2547" stroke="#3f4a8a" stroke-width="1.5"/>
+      <text x="22" y="4">CSV export</text>
+    </g>
+  </g>
+
+  <text x="110" y="565" font-family="Segoe UI, Arial, sans-serif" font-size="30" fill="#64748b">github.com/WhiteBite/Domain-Hunter</text>
+</svg>

@@ -1,0 +1,163 @@
+/* ============================================================
+   Domain Hunter design tokens (SPEC §12).
+   Light is default; [data-theme='dark'] overrides custom props.
+   All component colors MUST reference these variables.
+   ============================================================ */
+
+:root {
+  /* type */
+  --font-sans:
+    'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+
+  /* spacing grid (4px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 999px;
+
+  /* layout */
+  --content-max: 1120px;
+
+  /* motion */
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --dur: 160ms;
+
+  /* light palette */
+  --bg: #fafafa;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #f2f3f5;
+  --border: #e4e6ea;
+  --border-strong: #cfd3da;
+  --text: #17181c;
+  --text-secondary: #5c616b;
+  --text-tertiary: #8a909b;
+
+  --accent: #5b5bd6;
+  --accent-hover: #4a4ac4;
+  --accent-soft: #ecebfb;
+  --on-accent: #ffffff;
+
+  --green: #1a9e4b;
+  --green-soft: #e2f5e9;
+  --amber: #b07d10;
+  --amber-soft: #fbf0d7;
+  --red: #d13c3c;
+  --red-soft: #fdeaea;
+  --neutral-soft: #eef0f2;
+
+  --price-cheap: #1a9e4b;
+  --price-mid: #b07d10;
+  --price-high: #d13c3c;
+
+  --shadow-sm: 0 1px 2px rgb(16 17 20 / 5%);
+  --shadow-md: 0 2px 8px rgb(16 17 20 / 8%), 0 1px 2px rgb(16 17 20 / 5%);
+  --shadow-lg: 0 8px 28px rgb(16 17 20 / 12%);
+
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+[data-theme='dark'] {
+  --bg: #101114;
+  --bg-elevated: #17181c;
+  --bg-sunken: #0b0c0e;
+  --border: #26282e;
+  --border-strong: #34373f;
+  --text: #eceef1;
+  --text-secondary: #a2a8b3;
+  --text-tertiary: #6f7580;
+
+  --accent: #7c7cf0;
+  --accent-hover: #9090f4;
+  --accent-soft: #232343;
+  --on-accent: #101114;
+
+  --green: #3fc46f;
+  --green-soft: #12301d;
+  --amber: #d9a83f;
+  --amber-soft: #33270e;
+  --red: #e26060;
+  --red-soft: #391717;
+  --neutral-soft: #212329;
+
+  --price-cheap: #3fc46f;
+  --price-mid: #d9a83f;
+  --price-high: #e26060;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 40%), 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-lg: 0 8px 28px rgb(0 0 0 / 50%);
+}
+
+/* ---- base ---- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
