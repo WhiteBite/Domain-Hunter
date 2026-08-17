@@ -10,7 +10,7 @@ Free, open-source bulk domain availability checker that runs entirely in your br
 
 **[▶ Live demo](https://whitebite.github.io/Domain-Hunter/)** — works instantly, nothing to install.
 
-![Domain Hunter — results streaming in](docs/screenshot.png)
+![Domain Hunter checking five brand names across 15 TLDs — streaming results with status badges, first-year and renewal prices, CSV export](docs/screenshot-en-check.png)
 
 Domain Hunter checks domain availability directly against registry **RDAP** endpoints (Verisign, Google Registry, Identity Digital, CentralNic, Radix…), generates brandable name ideas with five built-in generators, shows **live registrar prices** with 3-year TCO, and exports everything to CSV. It is a privacy-friendly alternative to WHOIS lookup services and paid domain APIs like WhoisXML or DomainTools — the whole app is one self-contained HTML file.
 
@@ -24,6 +24,8 @@ Domain Hunter checks domain availability directly against registry **RDAP** endp
 - **Polite to registries** — per-infrastructure AIMD rate limiting (e.g. Google Registry's strict ~1 rps is honored), automatic backoff on HTTP 429 with `Retry-After`, and result caching in `localStorage`.
 - **Share and export** — one-click share links (`#s=` encodes query + zones, auto-starts the run), Excel-compatible CSV export (BOM + quoting), copy/recheck per row.
 - **Private by design** — no analytics, no telemetry, no accounts. All state lives in your browser's `localStorage`. Bilingual UI (English/Russian), light and dark themes, mobile-friendly.
+
+![Domain Hunter name generators in dark theme: combinator, syllable mixer, thematic word sets, TLD-hacks and mutations](docs/screenshot-en-generators.png)
 
 ## Quick start
 

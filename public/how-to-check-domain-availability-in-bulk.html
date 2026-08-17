@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How to Check Domain Availability in Bulk — Free, No API Keys</title>
+<meta name="description" content="Registrar search boxes check one name at a time and log your queries. Here is how to check thousands of domains at once, for free, directly against registry RDAP endpoints — no server, no API key." />
+<link rel="canonical" href="https://whitebite.github.io/Domain-Hunter/how-to-check-domain-availability-in-bulk.html" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="How to Check Domain Availability in Bulk — Free, No API Keys" />
+<meta property="og:description" content="Bulk RDAP checks straight from your browser: the method, the steps, and the honesty caveats." />
+<meta property="og:url" content="https://whitebite.github.io/Domain-Hunter/how-to-check-domain-availability-in-bulk.html" />
+<meta property="og:image" content="https://whitebite.github.io/Domain-Hunter/social-preview.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How to Check Domain Availability in Bulk — Free, No API Keys",
+  "datePublished": "2026-08-18",
+  "dateModified": "2026-08-18",
+  "author": { "@type": "Person", "name": "WhiteBite", "url": "https://github.com/WhiteBite" },
+  "mainEntityOfPage": "https://whitebite.github.io/Domain-Hunter/how-to-check-domain-availability-in-bulk.html",
+  "isPartOf": { "@type": "WebSite", "name": "Domain Hunter", "url": "https://whitebite.github.io/Domain-Hunter/" }
+}
+</script>
+<style>
+  body { font: 17px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; color: #1e2433; background: #fafbfc; }
+  h1 { font-size: 1.9rem; line-height: 1.25; } h2 { font-size: 1.25rem; margin-top: 2.2rem; }
+  a { color: #4f5ae8; } code { background: #eef0f6; padding: .1em .35em; border-radius: 4px; }
+  .cta { display: inline-block; margin: 1.4rem 0; padding: .7rem 1.2rem; background: #4f5ae8; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; }
+  footer { margin-top: 3rem; color: #6b7280; font-size: .9rem; }
+</style>
+</head>
+<body>
+<h1>How to Check Domain Availability in Bulk — Free, No API Keys</h1>
+<p>Every registrar's search box checks one name at a time, and it logs what you type — which is exactly why serious domain hunters avoid it for brainstorming. Paid APIs (WhoisXML, DomainTools) solve bulk checking but start around $19/month and keep query logs. There is a third way: <strong>RDAP, the public JSON successor to WHOIS, called directly from your browser</strong>.</p>
+
+<h2>Why bulk checking works without a server in 2026</h2>
+<p>Registries like Verisign (.com/.net), Google Registry (.dev/.app/.page), Identity Digital (.io/.ai/.me), CentralNic and Radix expose RDAP over HTTPS with permissive CORS headers. An HTTP <code>200</code> means the domain is registered; a <code>404</code> means it is not in the registry. Because CORS is open, a plain web page can call these endpoints directly — no backend, no API key, no proxy.</p>
+
+<h2>How to run a bulk check, step by step</h2>
+<ol>
+  <li>Open <a href="https://whitebite.github.io/Domain-Hunter/">Domain Hunter</a> (free, open-source, runs in your browser).</li>
+  <li>Paste your candidate names — one per line, up to 3,000. URLs and paths are cleaned automatically.</li>
+  <li>Pick zones: 140+ TLDs are curated (from <code>com</code> and <code>dev</code> to <code>so</code> and <code>ly</code>), and new gTLDs are discovered via the live IANA registry map.</li>
+  <li>Press <em>Check availability</em>. Results stream in with status, first-year price, renewal and 3-year TCO; export everything to CSV.</li>
+</ol>
+
+<h2>Is an “available” result trustworthy?</h2>
+<p>For ICANN-contracted gTLDs an RDAP 404 is authoritative. Some ccTLDs have less reliable RDAP, so a good tool corroborates with DNS (NS lookups over DNS-over-HTTPS) and reports <em>probably available</em> instead of overpromising. And remember: availability is a snapshot — a name can be registered seconds after you check it.</p>
+
+<h2>Staying polite to registries</h2>
+<p>RDAP is the registries' own public interface, and bulk use is fine when rate-limited: per-registry spacing, exponential backoff on HTTP 429, and honoring <code>Retry-After</code>. Google Registry, for example, is capped near one request per second.</p>
+
+<a class="cta" href="https://whitebite.github.io/Domain-Hunter/">Check domains in bulk — free, no signup</a>
+<p>Source code (MIT): <a href="https://github.com/WhiteBite/Domain-Hunter">github.com/WhiteBite/Domain-Hunter</a></p>
+<footer><a href="./index.html">Domain Hunter</a> · <a href="./domain-name-ideas-that-are-actually-available.html">How to find domain name ideas that are actually available</a></footer>
+</body>
+</html>

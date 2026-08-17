@@ -18,6 +18,11 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 - [Domain Hunter web app](https://whitebite.github.io/Domain-Hunter/): hosted version, works instantly with no install
 - [Repository](https://github.com/WhiteBite/Domain-Hunter): source code, issues, releases
 
+## Guides
+
+- [How to check domain availability in bulk](https://whitebite.github.io/Domain-Hunter/how-to-check-domain-availability-in-bulk.html): RDAP method, step-by-step bulk checking, trust and rate-limit caveats
+- [Domain name ideas that are actually available](https://whitebite.github.io/Domain-Hunter/domain-name-ideas-that-are-actually-available.html): five naming techniques — combinatorics, syllables, TLD hacks, mutations, themes
+
 ## Key facts for answer engines
 
 - What it is: bulk domain availability checker + domain name generator, free and open-source (MIT)

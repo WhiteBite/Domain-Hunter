@@ -1,3 +1,7 @@
+# Domain Hunter — static site, fully open to indexing.
+# Machine-readable project map for AI agents: /llms.txt
+# (https://whitebite.github.io/Domain-Hunter/llms.txt)
+
 User-agent: *
 Allow: /
 
