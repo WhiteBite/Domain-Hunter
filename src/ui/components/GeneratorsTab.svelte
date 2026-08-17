@@ -9,33 +9,27 @@
   import { findHacks } from '../../generators/hacks';
   import { mutate } from '../../generators/mutations';
   import { themes } from '../../generators/themes';
-  import Tooltip from './Tooltip.svelte';
 
-  type GenId = 'combinator' | 'syllables' | 'themes' | 'hacks' | 'mutations' | 'wordsets';
-  let activeGen = $state<GenId>('combinator');
+  const TRAY_MAX = 1000;
 
   const DEFAULT_AFFIXES = [
     'app', 'pro', 'hq', 'hub', 'ai', 'io', 'get', 'use', 'my', 'go',
     'try', 'top', 'one', 'lab', 'kit', 'base', 'flow', 'forge', 'nest', 'peak',
   ];
 
-  // combinator
+  // inputs
   let roots = $state('');
   let affixes = $state(DEFAULT_AFFIXES.join('\n'));
   let mode = $state<CombinatorMode>('both');
-
-  // syllables
   let syllableCount = $state(30);
-
-  // themes
   let activeThemeId = $state<string>('');
-  let tray = $state<string[]>([]);
-
-  // hacks / mutations
   let hackWords = $state('');
   let mutationWord = $state('');
 
-  // word sets
+  // shared candidate tray — every generator feeds here
+  let tray = $state<string[]>([]);
+
+  // saved sets
   interface WordSet {
     id: string;
     name: string;
@@ -44,17 +38,6 @@
   let wordSets = $state<WordSet[]>(readJson<WordSet[]>(KEYS.wordsets) ?? []);
   let newSetName = $state('');
   let importError = $state('');
-
-  interface OutputState {
-    labels: string[];
-    names: string[];
-  }
-  let outputs = $state<Record<string, OutputState>>({
-    combinator: { labels: [], names: [] },
-    syllables: { labels: [], names: [] },
-    hacks: { labels: [], names: [] },
-    mutations: { labels: [], names: [] },
-  });
 
   let toast = $state('');
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -72,90 +55,73 @@
       .filter(Boolean);
   }
 
-  function setOutput(gen: string, labels: string[], names: string[]): void {
-    outputs[gen] = { labels: labels.slice(0, 500), names: names.slice(0, 500) };
+  function addToTray(names: string[]): void {
+    if (names.length === 0) return;
+    const merged = [...tray];
+    let added = 0;
+    for (const n of names) {
+      if (merged.includes(n)) continue;
+      if (merged.length >= TRAY_MAX) break;
+      merged.push(n);
+      added += 1;
+    }
+    tray = merged;
+    showToast(t('gen.output.added', { n: added }));
   }
 
+  function removeFromTray(name: string): void {
+    tray = tray.filter((w) => w !== name);
+  }
+
+  function toggleWord(word: string): void {
+    tray = tray.includes(word)
+      ? tray.filter((w) => w !== word)
+      : [...tray, word].slice(0, TRAY_MAX);
+  }
+
+  // generators → tray
   function generateCombinator(): void {
-    const names = combinator(lines(roots), lines(affixes), mode);
-    setOutput('combinator', names, names);
+    addToTray(combinator(lines(roots), lines(affixes), mode));
   }
 
   function generateSyllables(): void {
     const count = Math.max(1, Math.min(200, syllableCount || 30));
-    const names = mixSyllables({ count, seed: Date.now() });
-    setOutput('syllables', names, names);
+    addToTray(mixSyllables({ count, seed: Date.now() }));
   }
 
-  function generateHacks(wordsOverride?: string[]): void {
-    const words = wordsOverride ?? lines(hackWords);
-    const found = findHacks(words, get(registry).hackTlds);
-    setOutput(
-      'hacks',
-      found.map((f) => f.domain.replace(`.${f.tld}`, `·${f.tld}`)),
-      found.map((f) => f.domain),
-    );
+  function generateHacks(): void {
+    addToTray(findHacks(lines(hackWords), get(registry).hackTlds).map((f) => f.domain));
   }
 
-  function generateMutations(wordsOverride?: string[]): void {
-    const words = wordsOverride ?? (mutationWord.trim() ? [mutationWord.trim()] : []);
-    const all: string[] = [];
-    for (const w of words) all.push(...mutate(w));
-    const names = [...new Set(all)];
-    setOutput('mutations', names, names);
+  function generateMutations(): void {
+    const word = mutationWord.trim();
+    if (!word) return;
+    addToTray(mutate(word));
   }
 
-  function checkNow(names: string[]): void {
-    if (names.length === 0) return;
-    checkInput.set(names.join('\n'));
+  // tray actions
+  function checkNow(): void {
+    if (tray.length === 0) return;
+    checkInput.set(tray.join('\n'));
     activeTab.set('check');
   }
 
-  function addToCheck(names: string[]): void {
-    if (names.length === 0) return;
-    const existing = get(checkInput);
-    checkInput.set(existing ? `${existing}\n${names.join('\n')}` : names.join('\n'));
-    showToast(t('gen.output.added', { n: names.length }));
-  }
-
-  const activeTheme = $derived(themes.find((th) => th.id === activeThemeId) ?? null);
-
-  function toggleTray(word: string): void {
-    tray = tray.includes(word) ? tray.filter((w) => w !== word) : [...tray, word];
-  }
-
-  function trayToCombinator(): void {
-    roots = tray.join('\n');
-    activeGen = 'combinator';
-  }
-
-  function trayToHacks(): void {
-    hackWords = tray.join('\n');
-    activeGen = 'hacks';
-    generateHacks(tray);
-  }
-
-  function trayToMutations(): void {
-    mutationWord = tray[0] ?? '';
-    activeGen = 'mutations';
-    generateMutations(tray);
-  }
-
-  function saveWordSets(): void {
-    writeJson(KEYS.wordsets, wordSets);
-  }
-
-  function createSetFromTray(): void {
+  function saveSet(): void {
     if (tray.length === 0) return;
     const name = newSetName.trim() || `${t('gen.themes.newSet')} ${wordSets.length + 1}`;
     wordSets = [...wordSets, { id: crypto.randomUUID(), name, words: [...tray] }];
     newSetName = '';
-    saveWordSets();
+    writeJson(KEYS.wordsets, wordSets);
+    showToast(t('settings.saved'));
+  }
+
+  function loadSet(set: WordSet): void {
+    addToTray(set.words);
   }
 
   function deleteSet(id: string): void {
     wordSets = wordSets.filter((ws) => ws.id !== id);
-    saveWordSets();
+    writeJson(KEYS.wordsets, wordSets);
   }
 
   function download(filename: string, content: string): void {
@@ -188,21 +154,14 @@
         }
       }
       wordSets = [...map.values()];
-      saveWordSets();
+      writeJson(KEYS.wordsets, wordSets);
       importError = '';
     } catch {
       importError = t('settings.import.error');
     }
   }
 
-  const navItems: { id: GenId; labelKey: string }[] = [
-    { id: 'combinator', labelKey: 'gen.combinator.title' },
-    { id: 'syllables', labelKey: 'gen.syllables.title' },
-    { id: 'themes', labelKey: 'gen.themes.title' },
-    { id: 'hacks', labelKey: 'gen.hacks.title' },
-    { id: 'mutations', labelKey: 'gen.mutations.title' },
-    { id: 'wordsets', labelKey: 'gen.themes.custom' },
-  ];
+  const activeTheme = $derived(themes.find((th) => th.id === activeThemeId) ?? null);
 
   onDestroy(() => clearTimeout(toastTimer));
 </script>
@@ -211,32 +170,21 @@
   <h2>{t('gen.title')}</h2>
   <p class="desc">{t('gen.description')}</p>
 
-  <nav class="pills" aria-label={t('gen.title')}>
-    {#each navItems as item}
-      <button
-        class="pill"
-        class:active={activeGen === item.id}
-        aria-pressed={activeGen === item.id}
-        onclick={() => (activeGen = item.id)}
-      >
-        {t(item.labelKey)}
-      </button>
-    {/each}
-  </nav>
-
-  {#if activeGen === 'combinator'}
-    {@const out = outputs['combinator']}
+  <div class="cards">
+    <!-- Combinator -->
     <div class="card">
-      <h3>{t('gen.combinator.title')}</h3>
-      <p class="panel-desc">{t('gen.combinator.desc')}</p>
-      <div class="grid">
+      <header>
+        <h3>{t('gen.combinator.title')}</h3>
+        <p>{t('gen.combinator.desc')}</p>
+      </header>
+      <div class="fields">
         <label>
           {t('gen.combinator.roots')}
-          <textarea rows="5" bind:value={roots} placeholder="myapp&#10;orbit"></textarea>
+          <textarea rows="3" bind:value={roots} placeholder="myapp&#10;orbit"></textarea>
         </label>
         <label>
           {t('gen.combinator.affixes')}
-          <textarea rows="5" bind:value={affixes}></textarea>
+          <textarea rows="3" bind:value={affixes}></textarea>
         </label>
       </div>
       <div class="controls">
@@ -248,76 +196,78 @@
             <option value="both">{t('gen.combinator.mode.both')}</option>
           </select>
         </label>
-        <button class="btn ghost" onclick={() => (affixes = DEFAULT_AFFIXES.join('\n'))}>
+        <button class="btn ghost" type="button" onclick={() => (affixes = DEFAULT_AFFIXES.join('\n'))}>
           {t('gen.combinator.reset')}
         </button>
-        <button class="btn primary" onclick={generateCombinator}>{t('gen.generate')}</button>
+        <button class="btn primary" type="button" onclick={generateCombinator}>
+          {t('gen.generate')}
+        </button>
       </div>
-      {#if out && out.labels.length > 0}
-        <div class="output">
-          <div class="output-head">
-            <span>{t('gen.output.count', { n: out.labels.length })}</span>
-            <span class="output-actions">
-              <button class="btn primary" onclick={() => checkNow(out.names)}>
-                {t('gen.output.check')}
-              </button>
-              <button class="btn" onclick={() => addToCheck(out.names)}>{t('gen.output.add')}</button>
-            </span>
-          </div>
-          <ul class="output-list">
-            {#each out.labels as label}
-              <li>{label}</li>
-            {/each}
-          </ul>
-        </div>
-      {:else}
-        <p class="muted">{t('gen.output.empty')}</p>
-      {/if}
     </div>
-  {:else if activeGen === 'syllables'}
-    {@const out = outputs['syllables']}
+
+    <!-- Syllable mixer -->
     <div class="card">
-      <h3>{t('gen.syllables.title')}</h3>
-      <p class="panel-desc">{t('gen.syllables.desc')}</p>
+      <header>
+        <h3>{t('gen.syllables.title')}</h3>
+        <p>{t('gen.syllables.desc')}</p>
+      </header>
       <div class="controls">
         <label class="inline">
           {t('gen.syllables.count')}
           <input type="number" min="1" max="200" bind:value={syllableCount} />
         </label>
-        <button class="btn primary" onclick={generateSyllables}>{t('gen.generate')}</button>
+        <button class="btn primary" type="button" onclick={generateSyllables}>
+          {t('gen.generate')}
+        </button>
       </div>
-      {#if out && out.labels.length > 0}
-        <div class="output">
-          <div class="output-head">
-            <span>{t('gen.output.count', { n: out.labels.length })}</span>
-            <span class="output-actions">
-              <button class="btn primary" onclick={() => checkNow(out.names)}>
-                {t('gen.output.check')}
-              </button>
-              <button class="btn" onclick={() => addToCheck(out.names)}>{t('gen.output.add')}</button>
-            </span>
-          </div>
-          <ul class="output-list">
-            {#each out.labels as label}
-              <li>{label}</li>
-            {/each}
-          </ul>
-        </div>
-      {:else}
-        <p class="muted">{t('gen.output.empty')}</p>
-      {/if}
     </div>
-  {:else if activeGen === 'themes'}
+
+    <!-- TLD hacks -->
     <div class="card">
-      <h3>{t('gen.themes.title')}</h3>
-      <p class="panel-desc">{t('gen.themes.desc')}</p>
+      <header>
+        <h3>{t('gen.hacks.title')}</h3>
+        <p>{t('gen.hacks.desc')}</p>
+      </header>
+      <label>
+        {t('gen.hacks.words')}
+        <textarea rows="3" bind:value={hackWords} placeholder="family&#10;studio"></textarea>
+      </label>
+      <div class="controls">
+        <button class="btn primary" type="button" onclick={generateHacks}>{t('gen.generate')}</button>
+      </div>
+    </div>
+
+    <!-- Mutations -->
+    <div class="card">
+      <header>
+        <h3>{t('gen.mutations.title')}</h3>
+        <p>{t('gen.mutations.desc')}</p>
+      </header>
+      <div class="controls">
+        <label class="inline grow">
+          {t('gen.mutations.word')}
+          <input type="text" bind:value={mutationWord} placeholder="midas" />
+        </label>
+        <button class="btn primary" type="button" onclick={generateMutations}>
+          {t('gen.generate')}
+        </button>
+      </div>
+    </div>
+
+    <!-- Word themes -->
+    <div class="card wide">
+      <header>
+        <h3>{t('gen.themes.title')}</h3>
+        <p>{t('gen.themes.desc')}</p>
+      </header>
       {#if themes.length === 0}
         <p class="muted">{t('gen.output.empty')}</p>
       {:else}
         <div class="chips">
           {#each themes as theme}
             <button
-              class="chip"
+              class="chip cat"
+              type="button"
               class:active={activeThemeId === theme.id}
               onclick={() => (activeThemeId = theme.id)}
             >
@@ -330,138 +280,73 @@
             {#each activeTheme.words as word}
               <button
                 class="word"
+                type="button"
                 class:selected={tray.includes(word.w)}
                 title={word.hint ?? ''}
-                onclick={() => toggleTray(word.w)}
+                onclick={() => toggleWord(word.w)}
               >
                 {word.w}
               </button>
             {/each}
           </div>
         {/if}
-        <div class="tray">
-          <h4>
-            <Tooltip text={t('gen.themes.desc')}>
-              <span>{t('gen.themes.custom')}</span>
-            </Tooltip>
-          </h4>
-          {#if tray.length === 0}
-            <p class="muted">{t('gen.themes.trayEmpty')}</p>
-          {:else}
-            <div class="words">
-              {#each tray as word}
-                <button class="word selected" onclick={() => toggleTray(word)}>{word}</button>
-              {/each}
-            </div>
-            <div class="controls">
-              <button class="btn" onclick={trayToCombinator}>{t('gen.combinator.title')}</button>
-              <button class="btn" onclick={trayToHacks}>{t('gen.hacks.title')}</button>
-              <button class="btn" onclick={trayToMutations}>{t('gen.mutations.title')}</button>
-              <button class="btn primary" onclick={() => checkNow(tray)}>{t('gen.output.check')}</button>
-              <button class="btn" onclick={() => addToCheck(tray)}>{t('gen.output.add')}</button>
-            </div>
-            <div class="controls">
-              <input
-                type="text"
-                bind:value={newSetName}
-                placeholder={t('gen.themes.newSet')}
-                aria-label={t('gen.themes.newSet')}
-              />
-              <button class="btn" onclick={createSetFromTray}>{t('gen.themes.newSet')}</button>
-            </div>
-          {/if}
-        </div>
       {/if}
     </div>
-  {:else if activeGen === 'hacks'}
-    {@const out = outputs['hacks']}
-    <div class="card">
-      <h3>{t('gen.hacks.title')}</h3>
-      <p class="panel-desc">{t('gen.hacks.desc')}</p>
-      <label>
-        {t('gen.hacks.words')}
-        <textarea rows="5" bind:value={hackWords} placeholder="family&#10;studio"></textarea>
-      </label>
+  </div>
+
+  <!-- Shared candidate tray -->
+  <div class="card tray">
+    <header class="tray-head">
+      <h3>
+        {t('gen.tray.title')}
+        {#if tray.length > 0}
+          <span class="count-badge">{tray.length}</span>
+        {/if}
+      </h3>
       <div class="controls">
-        <button class="btn primary" onclick={() => generateHacks()}>{t('gen.generate')}</button>
+        <input
+          class="set-name"
+          type="text"
+          bind:value={newSetName}
+          placeholder={t('gen.themes.newSet')}
+          aria-label={t('gen.tray.save')}
+        />
+        <button class="btn" type="button" onclick={saveSet} disabled={tray.length === 0}>
+          {t('gen.tray.save')}
+        </button>
+        <button class="btn ghost" type="button" onclick={() => (tray = [])} disabled={tray.length === 0}>
+          {t('gen.tray.clear')}
+        </button>
+        <button class="btn primary" type="button" onclick={checkNow} disabled={tray.length === 0}>
+          {t('gen.output.check')}
+        </button>
       </div>
-      {#if out && out.labels.length > 0}
-        <div class="output">
-          <div class="output-head">
-            <span>{t('gen.output.count', { n: out.labels.length })}</span>
-            <span class="output-actions">
-              <button class="btn primary" onclick={() => checkNow(out.names)}>
-                {t('gen.output.check')}
-              </button>
-              <button class="btn" onclick={() => addToCheck(out.names)}>{t('gen.output.add')}</button>
-            </span>
-          </div>
-          <ul class="output-list">
-            {#each out.labels as label}
-              <li>{label}</li>
-            {/each}
-          </ul>
-        </div>
-      {:else}
-        <p class="muted">{t('gen.output.empty')}</p>
-      {/if}
-    </div>
-  {:else if activeGen === 'mutations'}
-    {@const out = outputs['mutations']}
-    <div class="card">
-      <h3>{t('gen.mutations.title')}</h3>
-      <p class="panel-desc">{t('gen.mutations.desc')}</p>
-      <div class="controls">
-        <label class="inline grow">
-          {t('gen.mutations.word')}
-          <input type="text" bind:value={mutationWord} placeholder="midas" />
-        </label>
-        <button class="btn primary" onclick={() => generateMutations()}>{t('gen.generate')}</button>
+    </header>
+    {#if tray.length === 0}
+      <p class="muted">{t('gen.tray.empty')}</p>
+    {:else}
+      <div class="tray-words">
+        {#each tray as name}
+          <button
+            class="tray-chip"
+            type="button"
+            title={t('gen.tray.remove')}
+            onclick={() => removeFromTray(name)}
+          >
+            {name}
+            <span aria-hidden="true">×</span>
+          </button>
+        {/each}
       </div>
-      {#if out && out.labels.length > 0}
-        <div class="output">
-          <div class="output-head">
-            <span>{t('gen.output.count', { n: out.labels.length })}</span>
-            <span class="output-actions">
-              <button class="btn primary" onclick={() => checkNow(out.names)}>
-                {t('gen.output.check')}
-              </button>
-              <button class="btn" onclick={() => addToCheck(out.names)}>{t('gen.output.add')}</button>
-            </span>
-          </div>
-          <ul class="output-list">
-            {#each out.labels as label}
-              <li>{label}</li>
-            {/each}
-          </ul>
-        </div>
-      {:else}
-        <p class="muted">{t('gen.output.empty')}</p>
-      {/if}
-    </div>
-  {:else}
-    <div class="card">
+    {/if}
+  </div>
+
+  <!-- Saved sets -->
+  <div class="card sets">
+    <header class="tray-head">
       <h3>{t('gen.themes.custom')}</h3>
-      {#if wordSets.length === 0}
-        <p class="muted">{t('gen.wordsets.empty')}</p>
-      {:else}
-        <ul class="set-list">
-          {#each wordSets as set}
-            <li class="set-row">
-              <span class="set-name">{set.name}</span>
-              <span class="muted">{t('gen.output.count', { n: set.words.length })}</span>
-              <span class="row-actions">
-                <button class="btn" onclick={() => addToCheck(set.words)}>{t('gen.output.add')}</button>
-                <button class="btn danger" onclick={() => deleteSet(set.id)}>
-                  {t('gen.themes.delete')}
-                </button>
-              </span>
-            </li>
-          {/each}
-        </ul>
-      {/if}
       <div class="controls">
-        <button class="btn" onclick={exportSets}>{t('gen.themes.export')}</button>
+        <button class="btn" type="button" onclick={exportSets}>{t('gen.themes.export')}</button>
         <label class="btn file-btn">
           {t('gen.themes.import')}
           <input
@@ -476,11 +361,29 @@
           />
         </label>
       </div>
-      {#if importError}
-        <p class="error">{importError}</p>
-      {/if}
-    </div>
-  {/if}
+    </header>
+    {#if importError}
+      <p class="error">{importError}</p>
+    {/if}
+    {#if wordSets.length === 0}
+      <p class="muted">{t('gen.wordsets.empty')}</p>
+    {:else}
+      <ul class="set-list">
+        {#each wordSets as set}
+          <li class="set-row">
+            <span class="set-name-label">{set.name}</span>
+            <span class="muted">{t('gen.output.count', { n: set.words.length })}</span>
+            <span class="row-actions">
+              <button class="btn" type="button" onclick={() => loadSet(set)}>{t('gen.sets.load')}</button>
+              <button class="btn danger" type="button" onclick={() => deleteSet(set.id)}>
+                {t('gen.themes.delete')}
+              </button>
+            </span>
+          </li>
+        {/each}
+      </ul>
+    {/if}
+  </div>
 
   {#if toast}
     <div class="toast" role="status">{toast}</div>
@@ -504,70 +407,55 @@
     color: var(--text-secondary);
   }
 
-  .pills {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  .pill {
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--text-secondary);
-    border-radius: var(--radius-full);
-    padding: var(--space-2) var(--space-4);
-    min-height: 40px;
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
-  }
-
-  .pill:hover {
-    background: var(--bg-sunken);
-  }
-
-  .pill.active {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--accent);
-    font-weight: 500;
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: var(--space-3);
   }
 
   .card {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: var(--space-4) var(--space-5);
+    padding: var(--space-4);
     box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    min-width: 0;
   }
 
-  .card h3 {
+  .card.wide {
+    grid-column: 1 / -1;
+  }
+
+  .card header h3 {
     margin: 0;
     font-size: var(--text-base);
   }
 
-  .card h4 {
-    margin: 0;
-    font-size: var(--text-sm);
-  }
-
-  .panel-desc {
-    margin: 0;
+  .card header p {
+    margin: var(--space-1) 0 0;
     color: var(--text-tertiary);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
   }
 
-  .grid {
+  .fields {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-3);
   }
 
-  @media (max-width: 640px) {
-    .grid {
+  .fields label {
+    min-width: 0;
+  }
+
+  .fields textarea {
+    width: 100%;
+  }
+
+  @media (max-width: 560px) {
+    .fields {
       grid-template-columns: 1fr;
     }
   }
@@ -595,7 +483,7 @@
 
   textarea {
     resize: vertical;
-    min-height: 96px;
+    min-height: 72px;
   }
 
   .controls {
@@ -618,7 +506,7 @@
 
   .grow {
     flex: 1;
-    min-width: 200px;
+    min-width: 160px;
   }
 
   .btn {
@@ -636,8 +524,13 @@
     transition: background var(--dur) var(--ease);
   }
 
-  .btn:hover {
+  .btn:hover:not(:disabled) {
     background: var(--bg-sunken);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 
   .btn.primary {
@@ -646,7 +539,7 @@
     color: var(--on-accent);
   }
 
-  .btn.primary:hover {
+  .btn.primary:hover:not(:disabled) {
     background: var(--accent-hover);
   }
 
@@ -669,7 +562,7 @@
     flex-wrap: wrap;
   }
 
-  .chip {
+  .chip.cat {
     border: 1px solid var(--border);
     background: var(--bg);
     color: var(--text-secondary);
@@ -681,7 +574,7 @@
     transition: background var(--dur) var(--ease);
   }
 
-  .chip.active {
+  .chip.cat.active {
     background: var(--accent-soft);
     border-color: var(--accent);
     color: var(--accent);
@@ -691,9 +584,11 @@
     display: flex;
     gap: var(--space-1);
     flex-wrap: wrap;
-    max-height: 260px;
+    max-height: 240px;
     overflow-y: auto;
     padding: var(--space-1);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
   }
 
   .word {
@@ -717,55 +612,63 @@
     color: var(--accent);
   }
 
-  .tray {
-    border-top: 1px solid var(--border);
-    padding-top: var(--space-3);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .output {
-    border-top: 1px solid var(--border);
-    padding-top: var(--space-3);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .output-head {
+  .tray-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
     flex-wrap: wrap;
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
   }
 
-  .output-actions {
+  .tray-head h3 {
+    margin: 0;
+    font-size: var(--text-base);
     display: flex;
+    align-items: center;
     gap: var(--space-2);
   }
 
-  .output-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: var(--space-1);
-    max-height: 320px;
-    overflow-y: auto;
+  .count-badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: var(--radius-full);
+    padding: 0 var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 600;
   }
 
-  .output-list li {
-    font-family: var(--font-mono, ui-monospace, 'Cascadia Code', Consolas, monospace);
-    font-size: var(--text-xs);
+  .set-name {
+    max-width: 180px;
+  }
+
+  .tray-words {
+    display: flex;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+    max-height: 280px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .tray-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    border: 1px solid var(--border);
     background: var(--bg-sunken);
+    color: var(--text);
     border-radius: var(--radius-sm);
     padding: var(--space-1) var(--space-2);
-    overflow-wrap: anywhere;
+    font-size: var(--text-xs);
+    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .tray-chip:hover {
+    border-color: var(--red);
+    color: var(--red);
   }
 
   .set-list {
@@ -784,7 +687,7 @@
     flex-wrap: wrap;
   }
 
-  .set-name {
+  .set-name-label {
     font-weight: 500;
   }
 
