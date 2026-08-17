@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
   import { activeTab, checkInput, registry } from '../store';
@@ -17,17 +17,18 @@
     'try', 'top', 'one', 'lab', 'kit', 'base', 'flow', 'forge', 'nest', 'peak',
   ];
 
-  // inputs
-  let roots = $state('');
+  // idea
+  let keywords = $state('');
+  let tech = $state({ combinator: true, mutations: true, hacks: true, syllables: true });
   let affixes = $state(DEFAULT_AFFIXES.join('\n'));
   let mode = $state<CombinatorMode>('both');
   let syllableCount = $state(30);
-  let activeThemeId = $state<string>('');
-  let hackWords = $state('');
-  let mutationWord = $state('');
 
-  // shared candidate tray — every generator feeds here
-  let tray = $state<string[]>([]);
+  // combined candidate list — the single output of every technique
+  let candidates = $state<string[]>([]);
+
+  // themes browsing
+  let activeThemeId = $state<string>('');
 
   // saved sets
   interface WordSet {
@@ -55,9 +56,16 @@
       .filter(Boolean);
   }
 
-  function addToTray(names: string[]): void {
+  function kws(): string[] {
+    return keywords
+      .split(/[\s,;]+/)
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+  }
+
+  function addCandidates(names: string[]): void {
     if (names.length === 0) return;
-    const merged = [...tray];
+    const merged = [...candidates];
     let added = 0;
     for (const n of names) {
       if (merged.includes(n)) continue;
@@ -65,58 +73,51 @@
       merged.push(n);
       added += 1;
     }
-    tray = merged;
+    candidates = merged;
     showToast(t('gen.output.added', { n: added }));
   }
 
-  function removeFromTray(name: string): void {
-    tray = tray.filter((w) => w !== name);
+  function removeCandidate(name: string): void {
+    candidates = candidates.filter((w) => w !== name);
   }
 
-  function toggleWord(word: string): void {
-    tray = tray.includes(word)
-      ? tray.filter((w) => w !== word)
-      : [...tray, word].slice(0, TRAY_MAX);
+  function generateAll(): void {
+    const words = kws();
+    const out: string[] = [];
+    if (tech.combinator && words.length > 0) {
+      out.push(...combinator(words, lines(affixes), mode));
+    }
+    if (tech.mutations) {
+      for (const w of words) out.push(...mutate(w));
+    }
+    if (tech.hacks && words.length > 0) {
+      out.push(...findHacks(words, get(registry).hackTlds).map((f) => f.domain));
+    }
+    if (tech.syllables) {
+      const count = Math.max(1, Math.min(200, syllableCount || 30));
+      out.push(...mixSyllables({ count, seed: Date.now() }));
+    }
+    addCandidates(out);
   }
 
-  // generators → tray
-  function generateCombinator(): void {
-    addToTray(combinator(lines(roots), lines(affixes), mode));
-  }
-
-  function generateSyllables(): void {
-    const count = Math.max(1, Math.min(200, syllableCount || 30));
-    addToTray(mixSyllables({ count, seed: Date.now() }));
-  }
-
-  function generateHacks(): void {
-    addToTray(findHacks(lines(hackWords), get(registry).hackTlds).map((f) => f.domain));
-  }
-
-  function generateMutations(): void {
-    const word = mutationWord.trim();
-    if (!word) return;
-    addToTray(mutate(word));
-  }
-
-  // tray actions
+  // candidates actions
   function checkNow(): void {
-    if (tray.length === 0) return;
-    checkInput.set(tray.join('\n'));
+    if (candidates.length === 0) return;
+    checkInput.set(candidates.join('\n'));
     activeTab.set('check');
   }
 
   function saveSet(): void {
-    if (tray.length === 0) return;
+    if (candidates.length === 0) return;
     const name = newSetName.trim() || `${t('gen.themes.newSet')} ${wordSets.length + 1}`;
-    wordSets = [...wordSets, { id: crypto.randomUUID(), name, words: [...tray] }];
+    wordSets = [...wordSets, { id: crypto.randomUUID(), name, words: [...candidates] }];
     newSetName = '';
     writeJson(KEYS.wordsets, wordSets);
     showToast(t('settings.saved'));
   }
 
   function loadSet(set: WordSet): void {
-    addToTray(set.words);
+    addCandidates(set.words);
   }
 
   function deleteSet(id: string): void {
@@ -163,144 +164,92 @@
 
   const activeTheme = $derived(themes.find((th) => th.id === activeThemeId) ?? null);
 
+  const techToggles: { key: keyof typeof tech; labelKey: string }[] = [
+    { key: 'combinator', labelKey: 'gen.combinator.title' },
+    { key: 'mutations', labelKey: 'gen.mutations.title' },
+    { key: 'hacks', labelKey: 'gen.hacks.title' },
+    { key: 'syllables', labelKey: 'gen.syllables.title' },
+  ];
+
+  onMount(() => {
+    // Show value immediately: a deterministic sample of syllable names.
+    if (candidates.length === 0) {
+      candidates = mixSyllables({ count: 24, seed: 7 });
+    }
+  });
+
   onDestroy(() => clearTimeout(toastTimer));
 </script>
 
 <section class="generators">
   <h2>{t('gen.title')}</h2>
-  <p class="desc">{t('gen.description')}</p>
+  <p class="desc">{t('gen.idea.desc')}</p>
 
-  <div class="cards">
-    <!-- Combinator -->
-    <div class="card">
-      <header>
-        <h3>{t('gen.combinator.title')}</h3>
-        <p>{t('gen.combinator.desc')}</p>
-      </header>
-      <div class="fields">
-        <label>
-          {t('gen.combinator.roots')}
-          <textarea rows="3" bind:value={roots} placeholder="myapp&#10;orbit"></textarea>
+  <!-- Idea → generate -->
+  <div class="card">
+    <h3 class="card-title">{t('gen.idea.title')}</h3>
+    <div class="idea-grid">
+      <label class="grow">
+        {t('gen.idea.keywords')}
+        <input
+          type="text"
+          bind:value={keywords}
+          placeholder={t('gen.idea.keywords.placeholder')}
+        />
+      </label>
+      <button class="btn primary big" type="button" onclick={generateAll}>
+        {t('gen.generate.all')}
+      </button>
+    </div>
+
+    <div class="techs" role="group" aria-label={t('gen.idea.techniques')}>
+      {#each techToggles as toggle}
+        <label class="tech" class:active={tech[toggle.key]}>
+          <input type="checkbox" bind:checked={tech[toggle.key]} />
+          <span>{t(toggle.labelKey)}</span>
         </label>
+      {/each}
+    </div>
+
+    <details class="params">
+      <summary>{t('gen.params')}</summary>
+      <div class="params-body">
         <label>
           {t('gen.combinator.affixes')}
           <textarea rows="3" bind:value={affixes}></textarea>
         </label>
-      </div>
-      <div class="controls">
-        <label class="inline">
-          {t('gen.combinator.mode')}
-          <select bind:value={mode}>
-            <option value="prefix">{t('gen.combinator.mode.prefix')}</option>
-            <option value="suffix">{t('gen.combinator.mode.suffix')}</option>
-            <option value="both">{t('gen.combinator.mode.both')}</option>
-          </select>
-        </label>
-        <button class="btn ghost" type="button" onclick={() => (affixes = DEFAULT_AFFIXES.join('\n'))}>
-          {t('gen.combinator.reset')}
-        </button>
-        <button class="btn primary" type="button" onclick={generateCombinator}>
-          {t('gen.generate')}
-        </button>
-      </div>
-    </div>
-
-    <!-- Syllable mixer -->
-    <div class="card">
-      <header>
-        <h3>{t('gen.syllables.title')}</h3>
-        <p>{t('gen.syllables.desc')}</p>
-      </header>
-      <div class="controls">
-        <label class="inline">
-          {t('gen.syllables.count')}
-          <input type="number" min="1" max="200" bind:value={syllableCount} />
-        </label>
-        <button class="btn primary" type="button" onclick={generateSyllables}>
-          {t('gen.generate')}
-        </button>
-      </div>
-    </div>
-
-    <!-- TLD hacks -->
-    <div class="card">
-      <header>
-        <h3>{t('gen.hacks.title')}</h3>
-        <p>{t('gen.hacks.desc')}</p>
-      </header>
-      <label>
-        {t('gen.hacks.words')}
-        <textarea rows="3" bind:value={hackWords} placeholder="family&#10;studio"></textarea>
-      </label>
-      <div class="controls">
-        <button class="btn primary" type="button" onclick={generateHacks}>{t('gen.generate')}</button>
-      </div>
-    </div>
-
-    <!-- Mutations -->
-    <div class="card">
-      <header>
-        <h3>{t('gen.mutations.title')}</h3>
-        <p>{t('gen.mutations.desc')}</p>
-      </header>
-      <div class="controls">
-        <label class="inline grow">
-          {t('gen.mutations.word')}
-          <input type="text" bind:value={mutationWord} placeholder="midas" />
-        </label>
-        <button class="btn primary" type="button" onclick={generateMutations}>
-          {t('gen.generate')}
-        </button>
-      </div>
-    </div>
-
-    <!-- Word themes -->
-    <div class="card wide">
-      <header>
-        <h3>{t('gen.themes.title')}</h3>
-        <p>{t('gen.themes.desc')}</p>
-      </header>
-      {#if themes.length === 0}
-        <p class="muted">{t('gen.output.empty')}</p>
-      {:else}
-        <div class="chips">
-          {#each themes as theme}
-            <button
-              class="chip cat"
-              type="button"
-              class:active={activeThemeId === theme.id}
-              onclick={() => (activeThemeId = theme.id)}
-            >
-              {t(theme.labelKey)}
-            </button>
-          {/each}
+        <div class="params-row">
+          <label class="inline">
+            {t('gen.combinator.mode')}
+            <select bind:value={mode}>
+              <option value="prefix">{t('gen.combinator.mode.prefix')}</option>
+              <option value="suffix">{t('gen.combinator.mode.suffix')}</option>
+              <option value="both">{t('gen.combinator.mode.both')}</option>
+            </select>
+          </label>
+          <label class="inline">
+            {t('gen.syllables.count')}
+            <input type="number" min="1" max="200" bind:value={syllableCount} />
+          </label>
+          <button
+            class="btn ghost"
+            type="button"
+            onclick={() => (affixes = DEFAULT_AFFIXES.join('\n'))}
+          >
+            {t('gen.combinator.reset')}
+          </button>
         </div>
-        {#if activeTheme}
-          <div class="words">
-            {#each activeTheme.words as word}
-              <button
-                class="word"
-                type="button"
-                class:selected={tray.includes(word.w)}
-                title={word.hint ?? ''}
-                onclick={() => toggleWord(word.w)}
-              >
-                {word.w}
-              </button>
-            {/each}
-          </div>
-        {/if}
-      {/if}
-    </div>
+      </div>
+    </details>
   </div>
 
-  <!-- Shared candidate tray -->
-  <div class="card tray">
+  <!-- Combined candidates -->
+  <div class="card">
     <header class="tray-head">
       <h3>
         {t('gen.tray.title')}
-        {#if tray.length > 0}
-          <span class="count-badge">{tray.length}</span>
+        {#if candidates.length > 0}
+          <span class="count-badge">{candidates.length}</span>
         {/if}
       </h3>
       <div class="controls">
@@ -311,27 +260,32 @@
           placeholder={t('gen.themes.newSet')}
           aria-label={t('gen.tray.save')}
         />
-        <button class="btn" type="button" onclick={saveSet} disabled={tray.length === 0}>
+        <button class="btn" type="button" onclick={saveSet} disabled={candidates.length === 0}>
           {t('gen.tray.save')}
         </button>
-        <button class="btn ghost" type="button" onclick={() => (tray = [])} disabled={tray.length === 0}>
+        <button
+          class="btn ghost"
+          type="button"
+          onclick={() => (candidates = [])}
+          disabled={candidates.length === 0}
+        >
           {t('gen.tray.clear')}
         </button>
-        <button class="btn primary" type="button" onclick={checkNow} disabled={tray.length === 0}>
+        <button class="btn primary" type="button" onclick={checkNow} disabled={candidates.length === 0}>
           {t('gen.output.check')}
         </button>
       </div>
     </header>
-    {#if tray.length === 0}
+    {#if candidates.length === 0}
       <p class="muted">{t('gen.tray.empty')}</p>
     {:else}
       <div class="tray-words">
-        {#each tray as name}
+        {#each candidates as name}
           <button
             class="tray-chip"
             type="button"
             title={t('gen.tray.remove')}
-            onclick={() => removeFromTray(name)}
+            onclick={() => removeCandidate(name)}
           >
             {name}
             <span aria-hidden="true">×</span>
@@ -341,11 +295,53 @@
     {/if}
   </div>
 
+  <!-- Browse theme words -->
+  <div class="card">
+    <header>
+      <h3>{t('gen.themes.title')}</h3>
+      <p>{t('gen.themes.desc')}</p>
+    </header>
+    {#if themes.length === 0}
+      <p class="muted">{t('gen.output.empty')}</p>
+    {:else}
+      <div class="chips">
+        {#each themes as theme}
+          <button
+            class="chip cat"
+            type="button"
+            class:active={activeThemeId === theme.id}
+            onclick={() => (activeThemeId = theme.id)}
+          >
+            {t(theme.labelKey)}
+          </button>
+        {/each}
+      </div>
+      {#if activeTheme}
+        <div class="words">
+          {#each activeTheme.words as word}
+            <button
+              class="word"
+              type="button"
+              class:selected={candidates.includes(word.w)}
+              title={word.hint ?? ''}
+              onclick={() =>
+                candidates.includes(word.w)
+                  ? removeCandidate(word.w)
+                  : addCandidates([word.w])}
+            >
+              {word.w}
+            </button>
+          {/each}
+        </div>
+      {/if}
+    {/if}
+  </div>
+
   <!-- Saved sets -->
-  <div class="card sets">
-    <header class="tray-head">
-      <h3>{t('gen.themes.custom')}</h3>
-      <div class="controls">
+  <details class="card sets-card">
+    <summary class="sets-summary">
+      <span>{t('gen.themes.custom')}</span>
+      <span class="controls" onclick={(e) => e.stopPropagation()}>
         <button class="btn" type="button" onclick={exportSets}>{t('gen.themes.export')}</button>
         <label class="btn file-btn">
           {t('gen.themes.import')}
@@ -360,8 +356,8 @@
             }}
           />
         </label>
-      </div>
-    </header>
+      </span>
+    </summary>
     {#if importError}
       <p class="error">{importError}</p>
     {/if}
@@ -374,7 +370,9 @@
             <span class="set-name-label">{set.name}</span>
             <span class="muted">{t('gen.output.count', { n: set.words.length })}</span>
             <span class="row-actions">
-              <button class="btn" type="button" onclick={() => loadSet(set)}>{t('gen.sets.load')}</button>
+              <button class="btn" type="button" onclick={() => loadSet(set)}>
+                {t('gen.sets.load')}
+              </button>
               <button class="btn danger" type="button" onclick={() => deleteSet(set.id)}>
                 {t('gen.themes.delete')}
               </button>
@@ -383,7 +381,7 @@
         {/each}
       </ul>
     {/if}
-  </div>
+  </details>
 
   {#if toast}
     <div class="toast" role="status">{toast}</div>
@@ -395,6 +393,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
+    max-width: 980px;
   }
 
   h2 {
@@ -405,12 +404,6 @@
   .desc {
     margin: 0;
     color: var(--text-secondary);
-  }
-
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: var(--space-3);
   }
 
   .card {
@@ -425,11 +418,12 @@
     min-width: 0;
   }
 
-  .card.wide {
-    grid-column: 1 / -1;
+  .card header h3 {
+    margin: 0;
+    font-size: var(--text-base);
   }
 
-  .card header h3 {
+  .card-title {
     margin: 0;
     font-size: var(--text-base);
   }
@@ -440,24 +434,16 @@
     font-size: var(--text-xs);
   }
 
-  .fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .idea-grid {
+    display: flex;
     gap: var(--space-3);
+    align-items: flex-end;
+    flex-wrap: wrap;
   }
 
-  .fields label {
-    min-width: 0;
-  }
-
-  .fields textarea {
-    width: 100%;
-  }
-
-  @media (max-width: 560px) {
-    .fields {
-      grid-template-columns: 1fr;
-    }
+  .grow {
+    flex: 1;
+    min-width: 220px;
   }
 
   label {
@@ -484,29 +470,7 @@
   textarea {
     resize: vertical;
     min-height: 72px;
-  }
-
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-  }
-
-  .inline {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .inline input,
-  .inline select {
-    max-width: 140px;
-  }
-
-  .grow {
-    flex: 1;
-    min-width: 160px;
+    width: 100%;
   }
 
   .btn {
@@ -543,6 +507,12 @@
     background: var(--accent-hover);
   }
 
+  .btn.big {
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    font-weight: 500;
+  }
+
   .btn.ghost {
     background: transparent;
   }
@@ -554,6 +524,136 @@
 
   .file-btn {
     cursor: pointer;
+  }
+
+  .techs {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .tech {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    min-height: 36px;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+
+  .tech input {
+    accent-color: var(--accent);
+    margin: 0;
+  }
+
+  .tech.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .params summary,
+  .sets-summary {
+    cursor: pointer;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    user-select: none;
+  }
+
+  .params-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+  }
+
+  .params-row {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .inline {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .inline input,
+  .inline select {
+    max-width: 140px;
+  }
+
+  .tray-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .tray-head h3 {
+    margin: 0;
+    font-size: var(--text-base);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .count-badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: var(--radius-full);
+    padding: 0 var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 600;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .set-name {
+    max-width: 180px;
+  }
+
+  .tray-words {
+    display: flex;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .tray-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    border: 1px solid var(--border);
+    background: var(--bg-sunken);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .tray-chip:hover {
+    border-color: var(--red);
+    color: var(--red);
   }
 
   .chips {
@@ -612,63 +712,18 @@
     color: var(--accent);
   }
 
-  .tray-head {
+  .sets-card {
+    gap: var(--space-3);
+  }
+
+  .sets-summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
     flex-wrap: wrap;
-  }
-
-  .tray-head h3 {
-    margin: 0;
-    font-size: var(--text-base);
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .count-badge {
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-radius: var(--radius-full);
-    padding: 0 var(--space-2);
-    font-size: var(--text-xs);
-    font-weight: 600;
-  }
-
-  .set-name {
-    max-width: 180px;
-  }
-
-  .tray-words {
-    display: flex;
-    gap: var(--space-1);
-    flex-wrap: wrap;
-    max-height: 280px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) transparent;
-  }
-
-  .tray-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    border: 1px solid var(--border);
-    background: var(--bg-sunken);
+    font-weight: 500;
     color: var(--text);
-    border-radius: var(--radius-sm);
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--text-xs);
-    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
-    cursor: pointer;
-    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
-  }
-
-  .tray-chip:hover {
-    border-color: var(--red);
-    color: var(--red);
   }
 
   .set-list {

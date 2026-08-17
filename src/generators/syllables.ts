@@ -20,6 +20,17 @@ export interface SyllableMixerOptions {
 const MAX_OUTPUT = 500;
 const CONSONANTS = new Set<string>('bcdfghjklmnpqrstvwxyz'.split(''));
 
+/** Onsets that are valid at the START of an English word (medial syllables may use the full bank). */
+const INITIAL_ONSETS: string[] = [
+  '', 'b', 'c', 'd', 'f', 'g', 'h', 'k', 'l', 'm', 'n', 'p', 'r', 's', 't', 'v', 'w', 'z',
+  'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr', 'sh', 'sk', 'sl', 'sm',
+  'sn', 'sp', 'st', 'sw', 'th', 'tr', 'tw', 'ch', 'qu', 'str', 'spr', 'spl', 'scr',
+];
+
+/** Word-final letters/digraphs that sound natural in English. */
+const GOOD_ENDING =
+  /[aeioubdfgklmnpstvz]$|(sh|ch|th|ng|nd|nt|ld|rd|st|rk|rm|rn|rt|ft|ct|pt|lk|lp|lm)$/;
+
 /**
  * Phonotactic filter (SPEC §10.2):
  * - total length 4–12
@@ -64,6 +75,11 @@ export function mixSyllables(opts: SyllableMixerOptions): string[] {
   const rimes = syllableData.rimes;
   if (onsets.length === 0 || rimes.length === 0) return [];
 
+  // Medial syllables stay open (vowel or vowel + sonorant) so syllable
+  // boundaries never pile consonants; only the final syllable may close.
+  const openRimes = rimes.filter((r) => /[aeiou]$/.test(r) || /[aeiou][lmnr]$/.test(r));
+  const medialRimes = openRimes.length > 0 ? openRimes : rimes;
+
   // Generate 5×count candidates, filter by phonotactics, score, return top count.
   const target = count * 5;
   const seen = new Set<string>();
@@ -76,8 +92,11 @@ export function mixSyllables(opts: SyllableMixerOptions): string[] {
     const numSyl = randInt(minSyl, maxSyl, rng);
     let word = '';
     for (let s = 0; s < numSyl; s++) {
-      word += pickRandom(onsets, rng) + pickRandom(rimes, rng);
+      const onset = s === 0 ? pickRandom(INITIAL_ONSETS, rng) : pickRandom(onsets, rng);
+      const rime = s === numSyl - 1 ? pickRandom(rimes, rng) : pickRandom(medialRimes, rng);
+      word += onset + rime;
     }
+    if (!GOOD_ENDING.test(word)) continue;
     if (!passesPhonotactics(word)) continue;
     if (seen.has(word)) continue;
     seen.add(word);
