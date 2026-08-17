@@ -25,7 +25,24 @@
   let syllableCount = $state(30);
 
   // combined candidate list — the single output of every technique
-  let candidates = $state<string[]>([]);
+  type SrcId = 'combinator' | 'mutations' | 'hacks' | 'syllables' | 'themes' | 'sets';
+  interface Cand {
+    n: string;
+    src: SrcId;
+  }
+  let candidates = $state<Cand[]>([]);
+  let trayFilter = $state('');
+  let traySort = $state<'added' | 'az'>('added');
+
+  const GROUP_ORDER: SrcId[] = ['combinator', 'mutations', 'hacks', 'syllables', 'themes', 'sets'];
+  const GROUP_LABEL: Record<SrcId, string> = {
+    combinator: 'gen.combinator.title',
+    mutations: 'gen.mutations.title',
+    hacks: 'gen.hacks.title',
+    syllables: 'gen.syllables.title',
+    themes: 'gen.themes.title',
+    sets: 'gen.themes.custom',
+  };
 
   // themes browsing
   let activeThemeId = $state<string>('');
@@ -63,14 +80,16 @@
       .filter(Boolean);
   }
 
-  function addCandidates(names: string[]): void {
+  function addCandidates(names: string[], src: SrcId): void {
     if (names.length === 0) return;
     const merged = [...candidates];
+    const have = new Set(merged.map((c) => c.n));
     let added = 0;
     for (const n of names) {
-      if (merged.includes(n)) continue;
+      if (have.has(n)) continue;
       if (merged.length >= TRAY_MAX) break;
-      merged.push(n);
+      have.add(n);
+      merged.push({ n, src });
       added += 1;
     }
     candidates = merged;
@@ -78,32 +97,58 @@
   }
 
   function removeCandidate(name: string): void {
-    candidates = candidates.filter((w) => w !== name);
+    candidates = candidates.filter((w) => w.n !== name);
   }
+
+  function hasCandidate(name: string): boolean {
+    return candidates.some((c) => c.n === name);
+  }
+
+  const visibleCandidates = $derived.by(() => {
+    const f = trayFilter.trim().toLowerCase();
+    let list = f ? candidates.filter((c) => c.n.toLowerCase().includes(f)) : candidates;
+    if (traySort === 'az') list = [...list].sort((a, b) => a.n.localeCompare(b.n));
+    return list;
+  });
+
+  const candidateGroups = $derived.by(() => {
+    const map = new Map<SrcId, Cand[]>();
+    for (const c of visibleCandidates) {
+      const arr = map.get(c.src) ?? [];
+      arr.push(c);
+      map.set(c.src, arr);
+    }
+    return GROUP_ORDER.filter((g) => map.has(g)).map((g) => ({ id: g, items: map.get(g) ?? [] }));
+  });
+
+  const TECH_CAP = 50;
 
   function generateAll(): void {
     const words = kws();
-    const out: string[] = [];
     if (tech.combinator && words.length > 0) {
-      out.push(...combinator(words, lines(affixes), mode));
+      addCandidates(combinator(words, lines(affixes), mode).slice(0, TECH_CAP), 'combinator');
     }
-    if (tech.mutations) {
-      for (const w of words) out.push(...mutate(w));
+    if (tech.mutations && words.length > 0) {
+      const muts: string[] = [];
+      for (const w of words) muts.push(...mutate(w));
+      addCandidates(muts.slice(0, TECH_CAP), 'mutations');
     }
     if (tech.hacks && words.length > 0) {
-      out.push(...findHacks(words, get(registry).hackTlds).map((f) => f.domain));
+      addCandidates(
+        findHacks(words, get(registry).hackTlds).map((f) => f.domain).slice(0, TECH_CAP),
+        'hacks',
+      );
     }
     if (tech.syllables) {
       const count = Math.max(1, Math.min(200, syllableCount || 30));
-      out.push(...mixSyllables({ count, seed: Date.now() }));
+      addCandidates(mixSyllables({ count, seed: Date.now() }), 'syllables');
     }
-    addCandidates(out);
   }
 
   // candidates actions
   function checkNow(): void {
     if (candidates.length === 0) return;
-    checkInput.set(candidates.join('\n'));
+    checkInput.set(candidates.map((c) => c.n).join('\n'));
     // The Check tab auto-starts the run as soon as it mounts.
     pendingShareRun.set(true);
     activeTab.set('check');
@@ -112,14 +157,14 @@
   function saveSet(): void {
     if (candidates.length === 0) return;
     const name = newSetName.trim() || `${t('gen.themes.newSet')} ${wordSets.length + 1}`;
-    wordSets = [...wordSets, { id: crypto.randomUUID(), name, words: [...candidates] }];
+    wordSets = [...wordSets, { id: crypto.randomUUID(), name, words: candidates.map((c) => c.n) }];
     newSetName = '';
     writeJson(KEYS.wordsets, wordSets);
     showToast(t('settings.saved'));
   }
 
   function loadSet(set: WordSet): void {
-    addCandidates(set.words);
+    addCandidates(set.words, 'sets');
   }
 
   function deleteSet(id: string): void {
@@ -176,7 +221,7 @@
   onMount(() => {
     // Show value immediately: a deterministic sample of syllable names.
     if (candidates.length === 0) {
-      candidates = mixSyllables({ count: 24, seed: 7 });
+      candidates = mixSyllables({ count: 24, seed: 7 }).map((n) => ({ n, src: 'syllables' as SrcId }));
     }
   });
 
@@ -262,6 +307,17 @@
       </h3>
       <div class="controls">
         <input
+          class="filter"
+          type="search"
+          bind:value={trayFilter}
+          placeholder={t('gen.tray.filter')}
+          aria-label={t('gen.tray.filter')}
+        />
+        <select class="sort" bind:value={traySort} aria-label={t('gen.tray.sort')}>
+          <option value="added">{t('gen.tray.sort.added')}</option>
+          <option value="az">{t('gen.tray.sort.az')}</option>
+        </select>
+        <input
           class="set-name"
           type="text"
           bind:value={newSetName}
@@ -287,19 +343,24 @@
     {#if candidates.length === 0}
       <p class="muted">{t('gen.tray.empty')}</p>
     {:else}
-      <div class="tray-words">
-        {#each candidates as name}
-          <button
-            class="tray-chip"
-            type="button"
-            title={t('gen.tray.remove')}
-            onclick={() => removeCandidate(name)}
-          >
-            {name}
-            <span aria-hidden="true">×</span>
-          </button>
-        {/each}
-      </div>
+      {#each candidateGroups as group (group.id)}
+        <div class="group">
+          <span class="group-label">{t(GROUP_LABEL[group.id])}</span>
+          <div class="tray-words">
+            {#each group.items as cand (cand.n)}
+              <button
+                class="tray-chip"
+                type="button"
+                title={t('gen.tray.remove')}
+                onclick={() => removeCandidate(cand.n)}
+              >
+                {cand.n}
+                <span aria-hidden="true">×</span>
+              </button>
+            {/each}
+          </div>
+        </div>
+      {/each}
     {/if}
   </div>
 
@@ -330,12 +391,10 @@
             <button
               class="word"
               type="button"
-              class:selected={candidates.includes(word.w)}
+              class:selected={hasCandidate(word.w)}
               title={word.hint ?? ''}
               onclick={() =>
-                candidates.includes(word.w)
-                  ? removeCandidate(word.w)
-                  : addCandidates([word.w])}
+                hasCandidate(word.w) ? removeCandidate(word.w) : addCandidates([word.w], 'themes')}
             >
               {word.w}
             </button>
@@ -632,6 +691,27 @@
 
   .set-name {
     max-width: 180px;
+  }
+
+  .filter {
+    max-width: 180px;
+  }
+
+  .sort {
+    max-width: 150px;
+  }
+
+  .group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .group-label {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .tray-words {
