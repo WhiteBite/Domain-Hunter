@@ -29,7 +29,6 @@
 
   const tooMany = $derived(parsed.names.length > MAX_NAMES || candidateCount > MAX_CANDIDATES);
   const overNames = $derived(parsed.names.length > MAX_NAMES);
-  const overCandidates = $derived(candidateCount > MAX_CANDIDATES);
 </script>
 
 <div class="domain-input">

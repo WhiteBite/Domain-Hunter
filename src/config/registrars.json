@@ -2,79 +2,317 @@
   {
     "id": "porkbun",
     "name": "Porkbun",
+    "market": "global",
     "searchUrl": "https://porkbun.com/checkout/search?q={domain}",
-    "affiliate": { "program": "ambassador-inhouse", "viable": true, "note": "No network approval; link-based." }
+    "affiliate": {
+      "program": "ambassador-inhouse",
+      "viable": true,
+      "note": "No network approval; link-based."
+    }
   },
   {
     "id": "cloudflare",
     "name": "Cloudflare Registrar",
+    "market": "global",
     "searchUrl": "https://domains.cloudflare.com/",
-    "affiliate": { "program": "none", "viable": false, "note": "At-cost pricing; no public search deep-link (login wall)." }
+    "affiliate": {
+      "program": "none",
+      "viable": false,
+      "note": "At-cost pricing; no public search deep-link (login wall)."
+    }
   },
   {
     "id": "dynadot",
     "name": "Dynadot",
+    "market": "global",
     "searchUrl": "https://www.dynadot.com/domain/search.html?domain={domain}",
-    "affiliate": { "program": "ambassador-inhouse", "viable": true, "note": "30% domains; in-house program." }
+    "affiliate": {
+      "program": "ambassador-inhouse",
+      "viable": true,
+      "note": "30% domains."
+    }
   },
   {
     "id": "spaceship",
     "name": "Spaceship",
+    "market": "global",
     "searchUrl": "https://spaceship.com/domains/search/?q={domain}",
-    "affiliate": { "program": "impact", "viable": true, "note": "25% domains via Impact." }
+    "affiliate": {
+      "program": "impact",
+      "viable": true,
+      "note": "25% domains."
+    }
   },
   {
     "id": "namecheap",
     "name": "Namecheap",
+    "market": "global",
     "searchUrl": "https://namecheap.com/domains/registration/results/?domain={domain}",
-    "affiliate": { "program": "impact", "viable": true, "note": "20% domains; first purchase only." }
+    "affiliate": {
+      "program": "impact",
+      "viable": true,
+      "note": "20% domains; first purchase only."
+    }
   },
   {
     "id": "namesilo",
     "name": "NameSilo",
+    "market": "global",
     "searchUrl": "https://www.namesilo.com/domain_search.php?domain={domain}",
-    "affiliate": { "program": "none", "viable": false }
+    "affiliate": {
+      "program": "none",
+      "viable": false
+    }
   },
   {
     "id": "hover",
     "name": "Hover",
+    "market": "global",
     "searchUrl": "https://www.hover.com/domains/results?q={domain}",
-    "affiliate": { "program": "impactradius", "viable": true, "note": "20%; no minimum sales." }
+    "affiliate": {
+      "program": "impactradius",
+      "viable": true,
+      "note": "20%; no minimum."
+    }
   },
   {
     "id": "gandi",
     "name": "Gandi",
+    "market": "eu",
     "searchUrl": "https://gandi.net/domain/search?q={domain}",
-    "affiliate": { "program": "cj", "viable": true }
+    "affiliate": {
+      "program": "cj",
+      "viable": true
+    }
   },
   {
     "id": "godaddy",
     "name": "GoDaddy",
+    "market": "global",
     "searchUrl": "https://www.godaddy.com/domainsearch/find?checkAvail=1&domainToCheck={domain}",
-    "affiliate": { "program": "cj", "viable": true, "note": "Use www base; regional variants unreliable." }
+    "affiliate": {
+      "program": "cj",
+      "viable": true,
+      "note": "$100 min payout."
+    }
   },
   {
     "id": "ovhcloud",
     "name": "OVHcloud",
+    "market": "eu",
     "searchUrl": "https://www.ovhcloud.com/en/domains/?q={domain}",
-    "affiliate": { "program": "none", "viable": false }
+    "affiliate": {
+      "program": "none",
+      "viable": false
+    }
   },
   {
     "id": "regru",
     "name": "REG.RU",
+    "market": "ru",
     "searchUrl": "https://www.reg.ru/whois/{domain}",
-    "affiliate": { "program": "none", "viable": false, "note": "Best-effort link for RU audience." }
+    "affiliate": {
+      "program": "none",
+      "viable": false
+    }
   },
   {
     "id": "beget",
     "name": "Beget",
+    "market": "ru",
     "searchUrl": "https://beget.com/en/domains",
-    "affiliate": { "program": "none", "viable": false, "note": "No query-param deep-link." }
+    "affiliate": {
+      "program": "none",
+      "viable": false,
+      "note": "Landing page only."
+    }
   },
   {
     "id": "valuedomain",
     "name": "ValueDomain",
+    "market": "other",
     "searchUrl": "https://www.value-domain.com/",
-    "affiliate": { "program": "none", "viable": false, "note": "Landing page only; appears in regctl price snapshots." }
+    "affiliate": {
+      "program": "none",
+      "viable": false,
+      "note": "Landing page only; appears in regctl snapshots."
+    }
+  },
+  {
+    "id": "namedotcom",
+    "name": "Name.com",
+    "market": "global",
+    "searchUrl": "https://www.name.com/domain/search/{domain}"
+  },
+  {
+    "id": "dreamhost",
+    "name": "DreamHost",
+    "market": "global",
+    "searchUrl": "https://www.dreamhost.com/domains/?domain={domain}"
+  },
+  {
+    "id": "hostinger",
+    "name": "Hostinger",
+    "market": "global",
+    "searchUrl": "https://www.hostinger.com/domain-checker?domain={domain}"
+  },
+  {
+    "id": "bluehost",
+    "name": "Bluehost",
+    "market": "global",
+    "searchUrl": "https://www.bluehost.com/domains/domain-search?domain={domain}"
+  },
+  {
+    "id": "domaincom",
+    "name": "Domain.com",
+    "market": "global",
+    "searchUrl": "https://www.domain.com/domain/search/?search={domain}"
+  },
+  {
+    "id": "networksolutions",
+    "name": "Network Solutions",
+    "market": "global",
+    "searchUrl": "https://www.networksolutions.com/domain-search?domain={domain}"
+  },
+  {
+    "id": "marcaria",
+    "name": "Marcaria",
+    "market": "global",
+    "searchUrl": "https://www.marcaria.com/domain-search?domain={domain}"
+  },
+  {
+    "id": "wordpress",
+    "name": "WordPress.com",
+    "market": "global",
+    "searchUrl": "https://wordpress.com/domains/search/{domain}"
+  },
+  {
+    "id": "hostgator",
+    "name": "HostGator",
+    "market": "global",
+    "searchUrl": "https://www.hostgator.com/domains/domain-search?domain={domain}"
+  },
+  {
+    "id": "registerdotcom",
+    "name": "Register.com",
+    "market": "global",
+    "searchUrl": "https://www.register.com/domain/search?domain={domain}"
+  },
+  {
+    "id": "resellerclub",
+    "name": "ResellerClub",
+    "market": "global",
+    "searchUrl": "https://www.resellerclub.com/domain/search?domain={domain}"
+  },
+  {
+    "id": "bigrock",
+    "name": "BigRock",
+    "market": "other",
+    "searchUrl": "https://www.bigrock.com/domain/search?domain={domain}"
+  },
+  {
+    "id": "sedo",
+    "name": "Sedo",
+    "market": "global",
+    "searchUrl": "https://www.sedo.com/search/?domain={domain}",
+    "note": "Aftermarket/marketplace, not a registrar."
+  },
+  {
+    "id": "markmonitor",
+    "name": "MarkMonitor",
+    "market": "global",
+    "searchUrl": "https://www.markmonitor.com/",
+    "note": "Corporate/enterprise; landing only."
+  },
+  {
+    "id": "csc",
+    "name": "CSC",
+    "market": "global",
+    "searchUrl": "https://www.cscglobal.com/",
+    "note": "Corporate/enterprise; landing only."
+  },
+  {
+    "id": "123reg",
+    "name": "123-reg",
+    "market": "eu",
+    "searchUrl": "https://www.123-reg.co.uk/domain-names/?domain={domain}"
+  },
+  {
+    "id": "transip",
+    "name": "TransIP",
+    "market": "eu",
+    "searchUrl": "https://www.transip.nl/domeinnamen/?q={domain}"
+  },
+  {
+    "id": "strato",
+    "name": "STRATO",
+    "market": "eu",
+    "searchUrl": "https://www.strato.de/domain/?q={domain}"
+  },
+  {
+    "id": "hosteurope",
+    "name": "Host Europe",
+    "market": "eu",
+    "searchUrl": "https://www.hosteurope.de/domain/?q={domain}"
+  },
+  {
+    "id": "fasthosts",
+    "name": "Fasthosts",
+    "market": "eu",
+    "searchUrl": "https://www.fasthosts.co.uk/domain-names/search/?domain={domain}"
+  },
+  {
+    "id": "heartinternet",
+    "name": "Heart Internet",
+    "market": "eu",
+    "searchUrl": "https://www.heartinternet.uk/domain-names?domain={domain}"
+  },
+  {
+    "id": "crazydomains",
+    "name": "Crazy Domains",
+    "market": "other",
+    "searchUrl": "https://www.crazydomains.com/domain-search/?domain={domain}"
+  },
+  {
+    "id": "timeweb",
+    "name": "Timeweb",
+    "market": "ru",
+    "searchUrl": "https://timeweb.com/ru/services/domains/?domain={domain}"
+  },
+  {
+    "id": "nicru",
+    "name": "NIC.ru",
+    "market": "ru",
+    "searchUrl": "https://www.nic.ru/domain/search/?domain={domain}"
+  },
+  {
+    "id": "aliyun",
+    "name": "Aliyun (HiChina)",
+    "market": "cn",
+    "searchUrl": "https://wanwang.aliyun.com/domain/search?q={domain}"
+  },
+  {
+    "id": "westcn",
+    "name": "West.cn",
+    "market": "cn",
+    "searchUrl": "https://www.west.cn/domains/?domain={domain}"
+  },
+  {
+    "id": "dnspod",
+    "name": "DNSPod (Tencent)",
+    "market": "cn",
+    "searchUrl": "https://www.dnspod.cn/domain/search?domain={domain}"
+  },
+  {
+    "id": "22cn",
+    "name": "22.cn",
+    "market": "cn",
+    "searchUrl": "https://www.22.cn/domain/search?domain={domain}"
+  },
+  {
+    "id": "cndns",
+    "name": "CNDNS",
+    "market": "cn",
+    "searchUrl": "https://www.cndns.com/domain/search?domain={domain}"
   }
 ]

@@ -45,6 +45,7 @@
   );
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <span
   class="badge {variant} {size}"
   role="img"

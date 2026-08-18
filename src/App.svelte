@@ -98,6 +98,7 @@
         </button>
       </div>
     </div>
+    <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
     <nav class="tabs" role="tablist" aria-label={t('app.name')}>
       {#each tabs as tabDef (tabDef.id)}
         <button

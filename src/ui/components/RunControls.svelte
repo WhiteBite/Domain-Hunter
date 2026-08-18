@@ -29,8 +29,6 @@
 
   let ignoreCache = $state(false);
   let resumeSnapshot = $state<RunSnapshot | null>(null);
-  let showResume = $state(false);
-
   let engine: EngineHandle | null = null;
   let engineCandidates: string[] = [];
   let completedByEngine: Set<string> = new Set();
@@ -341,35 +339,6 @@
     flex-direction: column;
     gap: var(--space-3);
   }
-  .resume-banner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
-    background: var(--amber-soft);
-    border-radius: var(--radius-md);
-  }
-  .resume-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: var(--text-sm);
-  }
-  .resume-text strong {
-    color: var(--amber);
-    font-size: var(--text-sm);
-  }
-  .resume-text span {
-    color: var(--text-secondary);
-    font-size: var(--text-xs);
-  }
-  .resume-actions {
-    display: flex;
-    gap: var(--space-2);
-  }
   .controls-row {
     display: flex;
     flex-wrap: wrap;
@@ -416,15 +385,6 @@
   .btn.stop:hover {
     background: color-mix(in srgb, var(--red) 88%, black);
     border-color: var(--red);
-  }
-  .btn.ghost {
-    background: transparent;
-    border-color: var(--border);
-    color: var(--text-secondary);
-  }
-  .btn.ghost:hover {
-    background: var(--bg-sunken);
-    color: var(--text);
   }
   .checkbox {
     display: inline-flex;

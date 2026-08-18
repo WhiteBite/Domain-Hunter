@@ -6,7 +6,6 @@
   import {
     bestEntry,
     formatPrice,
-    tco3,
     priceTier,
     isBelowFloor,
     isPromoTrap,
@@ -14,7 +13,6 @@
   } from '../../pricing/pricing';
   import { createEngine } from '../../core/engine';
   import type { EngineHandle } from '../../core/engine';
-  import { KEYS } from '../settings';
   import { put as putCache } from '../../core/cache';
   import { t } from '../../i18n';
   import StatusBadge from './StatusBadge.svelte';
@@ -111,7 +109,7 @@
     visibleCount = 100;
   });
 
-  let sentinelEl: HTMLElement | null = null;
+  let sentinelEl: HTMLElement | null = $state(null);
   let observer: IntersectionObserver | null = null;
   let rafId: number | null = null;
 

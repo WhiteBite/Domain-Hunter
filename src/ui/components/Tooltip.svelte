@@ -10,6 +10,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions a11y_no_noninteractive_tabindex -->
 <span
   class="tip-wrap"
   onmouseenter={() => (visible = true)}
@@ -18,6 +19,7 @@
   onfocusout={() => (visible = false)}
   onkeydown={onKeydown}
 >
+  <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
   <span class="tip-trigger" tabindex="0" aria-describedby={visible ? tipId : undefined}>
     {@render children()}
   </span>

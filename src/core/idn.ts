@@ -87,6 +87,7 @@ export function toAscii(domain: string): string {
     .toLowerCase()
     .split('.')
     .map((label) =>
+      // eslint-disable-next-line no-control-regex -- ASCII range check (0x00-0x7F)
       /^[\u0000-\u007F]+$/.test(label) ? label : `xn--${punycodeEncodeLabel(label)}`,
     )
     .join('.');

@@ -1,8 +1,8 @@
-name: Harvest Prices
+name: Harvest Prices (Full Scrape)
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -25,12 +25,12 @@ jobs:
 
       - run: npm ci
 
-      - run: node scripts/harvest-prices.mjs --api-only
+      - run: node scripts/harvest-prices.mjs
 
       - name: Commit snapshot if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/config/pricing.snapshot.json
-          git diff --quiet --cached -- src/config/pricing.snapshot.json || git commit -m "chore: update pricing snapshot (hourly API)"
+          git diff --quiet --cached -- src/config/pricing.snapshot.json || git commit -m "chore: update pricing snapshot (daily full scrape)"
           git push

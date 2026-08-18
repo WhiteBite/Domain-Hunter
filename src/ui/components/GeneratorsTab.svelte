@@ -81,13 +81,6 @@
     toastTimer = setTimeout(() => (toast = ''), 1800);
   }
 
-  function lines(text: string): string[] {
-    return text
-      .split('\n')
-      .map((l) => l.trim())
-      .filter(Boolean);
-  }
-
   function splitList(text: string): string[] {
     return text
       .split(/[\s,;]+/)
@@ -482,6 +475,7 @@
   <details class="card sets-card">
     <summary class="sets-summary">
       <span>{t('gen.themes.custom')}</span>
+      <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
       <span class="controls" onclick={(e) => e.stopPropagation()}>
         <button class="btn" type="button" onclick={exportSets}>{t('gen.themes.export')}</button>
         <label class="btn file-btn">
