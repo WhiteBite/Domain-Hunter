@@ -13,6 +13,8 @@ Domain Hunter is a free, open-source, **100% client-side** bulk domain availabil
 - `npm run preview` — serve the production build locally
 - `npm run typecheck` — `tsc --noEmit`, must pass before committing
 - `npm test` — Vitest suites in `tests/` (pure logic only: status interpretation, AIMD, queue, punycode, CSV, i18n parity, generators, pricing merge)
+- `npm run test:e2e` — Playwright E2E against `dist/index.html` (all network mocked, build dist first)
+- `npm run test:e2e:ui` — Playwright E2E in interactive UI mode
 - `npm run build:worker` — regenerate the optional Cloudflare CORS proxy `worker.js` from `src/config/tlds.json`
 
 ## Project layout
@@ -36,7 +38,7 @@ src/
   generators/           # combinator, syllables, hacks, mutations, themes (pure functions)
   i18n/                 # en.ts + ru.ts — flat dot-keys, identical key sets (parity enforced)
   ui/                   # tokens.css, stores, csv/share/theme/settings, components/
-tests/                  # Vitest suites
+tests/                  # Vitest suites (pure logic) + e2e/ (Playwright E2E, mocked network)
 scripts/                # CI helpers (price harvest, zone health, worker build)
 ```
 
@@ -55,6 +57,7 @@ scripts/                # CI helpers (price harvest, zone health, worker build)
 ## Boundaries
 
 - ✅ Always: run `npm run typecheck` after changes; add/update tests for changed logic; keep README/llms.txt facts (zone counts, feature lists) in sync with code.
+- ✅ Always: run `npm run test:e2e` after changing UI components or adding interactive elements (inventory meta-test enforces data-testid coverage).
 - ⚠️ Ask first: changing the status model (SPEC §7), adding runtime network destinations, adding dependencies, touching CI workflows.
 - 🚫 Never: commit secrets or API keys, add analytics/telemetry of any kind, hardcode credentials, add CDN references, inject RDAP response bodies into the DOM.
 

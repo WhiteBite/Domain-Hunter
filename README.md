@@ -110,7 +110,7 @@ Nowhere but your browser. Settings, cache, and custom word sets live in `localSt
 
 ## Tech stack
 
-Svelte 5 + TypeScript (strict), Vite 7, and `vite-plugin-singlefile` — the entire app (JS, CSS, fonts, Web Worker checking engine) compiles into **one HTML file** that also works from `file://`. Tests use Vitest; CI deploys to GitHub Pages via GitHub Actions.
+Svelte 5 + TypeScript (strict), Vite 7, and `vite-plugin-singlefile` — the entire app (JS, CSS, fonts, Web Worker checking engine) compiles into **one HTML file** that also works from `file://`. Tests use Vitest for pure logic and Playwright E2E (with mocked network) for UI; CI deploys to GitHub Pages via GitHub Actions.
 
 ## Contributing
 

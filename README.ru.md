@@ -74,7 +74,7 @@ npm run dev       # dev-сервер Vite для разработки
 
 ## Технологии
 
-Svelte 5 + TypeScript (strict), Vite 7, `vite-plugin-singlefile` — всё приложение (JS, CSS, шрифты, Web Worker) компилируется в **один HTML-файл**, который работает даже с `file://`. Тесты — Vitest, деплой — GitHub Actions на GitHub Pages.
+Svelte 5 + TypeScript (strict), Vite 7, `vite-plugin-singlefile` — всё приложение (JS, CSS, шрифты, Web Worker) компилируется в **один HTML-файл**, который работает даже с `file://`. Тесты — Vitest для логики и Playwright E2E (с замоканной сетью) для UI; деплой — GitHub Actions на GitHub Pages.
 
 ## Участие в разработке
 

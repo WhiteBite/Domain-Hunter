@@ -30,7 +30,7 @@ disagree, SPEC wins unless the SPEC is factually impossible.
 | Checking engine | Web Worker, imported via `?worker&inline` (blob, works on `file://`) |
 | Fonts | `@fontsource-variable/inter` (local files, latin+cyrillic) — no CDN |
 | State | Svelte stores + versioned localStorage (`dh:v1:*`) |
-| Tests | Vitest (pure logic) |
+| Tests | Vitest (pure logic) + Playwright E2E (mocked network, against `dist/index.html` over `file://`) |
 | CI | GitHub Actions: deploy, weekly price snapshot, weekly zone health |
 
 ## 3. Repository layout
@@ -86,7 +86,7 @@ Domain-Hunter/
 ├── worker.js                   # optional Cloudflare CORS proxy (generated, shared config)
 ├── .github/workflows/
 │   ├── deploy.yml  prices.yml  zone-health.yml
-└── tests/                      # vitest suites
+└── tests/                      # vitest suites (pure logic) + e2e/ (Playwright E2E, mocked network)
 ```
 
 ## 4. Verified facts (do not re-litigate; re-verify only via scripts/zone-health)
@@ -365,6 +365,7 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 8. Vitest suite green: status interpretation, AIMD, queue caps, punycode, CSV BOM, i18n parity,
    generators determinism, pricing merge.
 9. README: screenshot, description, local run, Pages deploy, price/availability disclaimers.
+10. Playwright E2E suite green: per-tab specs, cross-cutting, inventory meta-test.
 
 ## 16. Out of scope for v2 (roadmap v2.1+)
 
