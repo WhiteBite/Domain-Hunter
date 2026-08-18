@@ -17,6 +17,7 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { openApp, navigateToTab } from './helpers/setup';
 import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockRdap } from './helpers/mocks';
 import { ALL_TESTIDS, DYNAMIC_TESTID_PREFIXES } from './helpers/manifest';
@@ -154,7 +155,7 @@ test.describe('Inventory meta-test', () => {
   });
 
   test('manifest matches src/ (no drift)', async () => {
-    const srcFiles = listFiles(new URL('src/', ROOT).pathname.replace(/^\//, ''));
+    const srcFiles = listFiles(fileURLToPath(new URL('src/', ROOT)));
     const srcContent = srcFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
 
     const missingStatic = ALL_TESTIDS.filter((id) => !srcContent.includes(`"${id}"`));
@@ -167,7 +168,7 @@ test.describe('Inventory meta-test', () => {
   });
 
   test('every manifest testid is referenced by at least one spec', async () => {
-    const e2eDir = new URL('.', import.meta.url).pathname.replace(/^\//, '');
+    const e2eDir = fileURLToPath(new URL('.', import.meta.url));
     const specFiles = readdirSync(e2eDir)
       .filter((f) => f.endsWith('.spec.ts') && f !== 'inventory.spec.ts');
     expect(specFiles.length).toBeGreaterThan(0);

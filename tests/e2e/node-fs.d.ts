@@ -12,3 +12,7 @@ declare module 'node:fs' {
     options: { withFileTypes: true },
   ): Array<{ name: string; isDirectory(): boolean }>;
 }
+
+declare module 'node:url' {
+  export function fileURLToPath(url: URL | string): string;
+}
