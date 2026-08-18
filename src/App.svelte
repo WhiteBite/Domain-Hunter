@@ -7,6 +7,8 @@
   import './ui/tokens.css';
   import CheckTab from './ui/components/CheckTab.svelte';
   import GeneratorsTab from './ui/components/GeneratorsTab.svelte';
+  import DropsTab from './ui/components/DropsTab.svelte';
+  import SocialTab from './ui/components/SocialTab.svelte';
   import SettingsTab from './ui/components/SettingsTab.svelte';
   import AboutTab from './ui/components/AboutTab.svelte';
 
@@ -25,6 +27,8 @@
   const tabs: { id: TabId; labelKey: string }[] = [
     { id: 'check', labelKey: 'tab.check' },
     { id: 'generators', labelKey: 'tab.generators' },
+    { id: 'drops', labelKey: 'tab.drops' },
+    { id: 'social', labelKey: 'tab.social' },
     { id: 'settings', labelKey: 'tab.settings' },
     { id: 'about', labelKey: 'tab.about' },
   ];
@@ -114,6 +118,10 @@
       <CheckTab />
     {:else if tab === 'generators'}
       <GeneratorsTab />
+    {:else if tab === 'drops'}
+      <DropsTab />
+    {:else if tab === 'social'}
+      <SocialTab />
     {:else if tab === 'settings'}
       <SettingsTab />
     {:else}

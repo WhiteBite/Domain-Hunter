@@ -6,8 +6,30 @@ export const ru: Dict = {
 
   'tab.check': 'Проверка',
   'tab.generators': 'Генераторы',
+  'tab.drops': 'Дропы',
+  'tab.social': 'Соцсети',
   'tab.settings': 'Настройки',
   'tab.about': 'О проекте',
+
+  'drops.title': 'Дропнутые домены',
+  'drops.desc':
+    'Недавно дропнутые домены — брендовые имена по обычной цене регистрации. Еженедельный снапшот публичных дроп-листов.',
+  'drops.search': 'Фильтр по имени или зоне',
+  'drops.add': 'На проверку',
+  'drops.addAll': 'Добавить все показанные в проверку',
+  'drops.empty': 'Нет дропнутых доменов по фильтру.',
+  'drops.snapshot': 'Снапшот: {date}',
+  'drops.count': 'Доменов: {n}',
+
+  'social.title': 'Проверка соцсетей',
+  'social.desc':
+    'Свободно ли это имя на крупных платформах? GitHub и TikTok проверяются live; остальные — честно «неизвестно» со ссылкой для ручной проверки.',
+  'social.placeholder': 'имя_пользователя',
+  'social.check': 'Проверить',
+  'social.free': 'Свободно',
+  'social.taken': 'Занято',
+  'social.unknown': 'Неизвестно',
+  'social.open': 'Открыть профиль',
 
   'theme.label': 'Тема',
   'theme.light': 'Светлая',

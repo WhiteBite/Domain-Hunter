@@ -6,8 +6,30 @@ export const en: Dict = {
 
   'tab.check': 'Check',
   'tab.generators': 'Generators',
+  'tab.drops': 'Dropped',
+  'tab.social': 'Social',
   'tab.settings': 'Settings',
   'tab.about': 'About',
+
+  'drops.title': 'Dropped domains',
+  'drops.desc':
+    'Recently dropped domains — brandable names at plain registration price. Weekly snapshot of public dropped lists.',
+  'drops.search': 'Filter by name or zone',
+  'drops.add': 'To check',
+  'drops.addAll': 'Add all shown to check',
+  'drops.empty': 'No dropped domains match the filter.',
+  'drops.snapshot': 'Snapshot: {date}',
+  'drops.count': '{n} domains',
+
+  'social.title': 'Check social handles',
+  'social.desc':
+    'Is the same name free on major platforms? GitHub and TikTok are checked live; the others get honest “unknown” with a manual link.',
+  'social.placeholder': 'username',
+  'social.check': 'Check',
+  'social.free': 'Free',
+  'social.taken': 'Taken',
+  'social.unknown': 'Unknown',
+  'social.open': 'Open profile',
 
   'theme.label': 'Theme',
   'theme.light': 'Light',
