@@ -15,16 +15,6 @@ export interface CsvRow {
   checkedAt: string;
 }
 
-const CSV_HEADERS = [
-  'domain',
-  'status',
-  'tld',
-  'priceFirstYear',
-  'priceRenewal',
-  'bestRegistrar',
-  'checkedAt',
-] as const;
-
 /**
  * Convert check results to CSV rows with prices from the pricing table.
  * checkedAt is rendered as an ISO 8601 string.
@@ -62,9 +52,10 @@ function escapeCsvField(field: string): string {
 /**
  * Build a CSV string from rows: BOM prefix, header row, CRLF line endings,
  * RFC 4180 quoting for fields containing comma/quote/newline.
+ * @param headers - Translated header labels (one per column).
  */
-export function buildCsv(rows: CsvRow[]): string {
-  const lines: string[] = [CSV_HEADERS.join(',')];
+export function buildCsv(rows: CsvRow[], headers: string[]): string {
+  const lines: string[] = [headers.join(',')];
   for (const row of rows) {
     lines.push(
       [

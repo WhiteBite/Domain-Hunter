@@ -12,7 +12,11 @@
     pendingShareRun,
     resumePrompt,
     resumeAction,
+    startRequest,
+    type RunPhase,
   } from '../store';
+  import { history, recordRun, clearHistory } from '../history';
+  import type { HistoryEntry } from '../../types';
   import { loadPricing, freshnessLabel } from '../../pricing/pricing';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import { encodeShare, parseShare, clearShare } from '../share';
@@ -27,6 +31,9 @@
   let shareCopied = $state(false);
   let shareTimer: ReturnType<typeof setTimeout> | undefined;
   let showHint = $state(false);
+  let collapsed = $state(false);
+  let prevPhase: RunPhase | null = null;
+  let unsubRunState: (() => void) | undefined;
 
   function dismissHint(): void {
     showHint = false;
@@ -37,7 +44,36 @@
     }
   }
 
-  onDestroy(() => clearTimeout(shareTimer));
+  function nameCount(query: string): number {
+    return query.split('\n').filter((l) => l.trim().length > 0).length;
+  }
+
+  function queryPreview(query: string): string {
+    const first = query.split('\n').find((l) => l.trim().length > 0) ?? '';
+    const trimmed = first.trim();
+    return trimmed.length > 48 ? trimmed.slice(0, 48) + '…' : trimmed;
+  }
+
+  function formatTime(ts: number): string {
+    const locale = $settings.lang === 'ru' ? 'ru-RU' : 'en-US';
+    return new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(ts);
+  }
+
+  function restore(e: HistoryEntry): void {
+    checkInput.set(e.query);
+    selectedTlds.set([...e.tlds]);
+    startRequest.update((n) => n + 1);
+  }
+
+  onDestroy(() => {
+    clearTimeout(shareTimer);
+    unsubRunState?.();
+  });
 
   onMount(() => {
     if (!get(pricing)) {
@@ -64,6 +100,28 @@
       clearShare();
       if (shared.q || shared.run) pendingShareRun.set(true);
     }
+
+    // Record completed runs into history (SPEC §5 dh:v1:history).
+    unsubRunState = runState.subscribe((state) => {
+      if (prevPhase === 'running' && state.phase === 'done') {
+        const r = get(results);
+        let available = 0;
+        let taken = 0;
+        let problems = 0;
+        for (const cr of r.values()) {
+          if (cr.status === 'available' || cr.status === 'probably_available') available++;
+          else if (cr.status === 'taken') taken++;
+          else problems++;
+        }
+        recordRun({
+          ts: Date.now(),
+          query: get(checkInput).trim().slice(0, 2000),
+          tlds: [...get(selectedTlds)],
+          counts: { total: r.size, available, taken, problems },
+        });
+      }
+      prevPhase = state.phase;
+    });
   });
 
   const freshness = $derived.by(() => {
@@ -77,7 +135,16 @@
   function handleExportCsv() {
     const table = $pricing?.table ?? null;
     const rows = resultsToCsvRows(get(results), table, get(settings));
-    const csv = buildCsv(rows);
+    const headers = [
+      t('csv.domain'),
+      t('csv.status'),
+      t('csv.tld'),
+      t('csv.priceFirstYear'),
+      t('csv.priceRenewal'),
+      t('csv.bestRegistrar'),
+      t('csv.checkedAt'),
+    ];
+    const csv = buildCsv(rows, headers);
     const date = new Date().toISOString().slice(0, 10);
     downloadCsv(`domain-hunter-${date}.csv`, csv);
   }
@@ -197,11 +264,58 @@
     </div>
   </header>
 
-  <div class="grid">
+  <div class="grid" class:collapsed>
     <div class="col-left">
-      <DomainInput />
-      <TldPicker />
-      <RunControls />
+      <button
+        class="panel-toggle"
+        type="button"
+        data-testid="check-panel-toggle"
+        aria-label={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
+        title={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
+        onclick={() => (collapsed = !collapsed)}
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true" class={collapsed ? 'rot' : ''}>
+          <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+      {#if !collapsed}
+        <DomainInput />
+        <TldPicker />
+        <RunControls />
+        <section class="history-section">
+          <div class="history-head">
+            <h3 class="side-title">{t('check.history.title')}</h3>
+            {#if $history.length > 0}
+              <button class="hint-dismiss" type="button" data-testid="history-clear" onclick={clearHistory}>
+                {t('check.history.clear')}
+              </button>
+            {/if}
+          </div>
+          {#if $history.length === 0}
+            <p class="history-empty">{t('check.history.empty')}</p>
+          {:else}
+            <ul class="history-list">
+              {#each $history as e, i}
+                <li>
+                  <button
+                    class="history-entry"
+                    type="button"
+                    data-testid={`history-entry-${i}`}
+                    title={t('check.history.restore')}
+                    onclick={() => restore(e)}
+                  >
+                    <span class="h-time">{formatTime(e.ts)}</span>
+                    <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
+                    <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
+                  </button>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </section>
+      {:else}
+        <span class="panel-summary">{nameCount($checkInput)} × {$selectedTlds.length}</span>
+      {/if}
     </div>
     <div class="col-right">
       <ProgressBar />
@@ -398,6 +512,102 @@
     flex-direction: column;
     gap: var(--space-3);
     min-width: 0;
+  }
+  .grid.collapsed {
+    grid-template-columns: auto 1fr;
+  }
+  .panel-toggle {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .panel-toggle:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+  .panel-toggle svg {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--dur) var(--ease);
+  }
+  .panel-toggle svg.rot {
+    transform: rotate(180deg);
+  }
+  .panel-summary {
+    writing-mode: vertical-rl;
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+  .history-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .history-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .history-entry {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+  .history-entry:hover {
+    border-color: var(--border-strong);
+    background: var(--bg-sunken);
+  }
+  .history-entry .h-time {
+    color: var(--text-tertiary);
+  }
+  .history-entry .h-query {
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-entry .h-avail {
+    color: var(--text-tertiary);
+  }
+  .history-empty {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    margin: 0;
+  }
+  .side-title {
+    margin: 0;
+    font-size: var(--text-sm);
+    font-weight: 600;
   }
   @media (max-width: 860px) {
     .grid {

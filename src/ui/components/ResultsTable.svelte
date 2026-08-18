@@ -15,13 +15,14 @@
   import type { EngineHandle } from '../../core/engine';
   import { put as putCache } from '../../core/cache';
   import { t } from '../../i18n';
+  import { favorites, toggleFavorite } from '../favorites';
   import StatusBadge from './StatusBadge.svelte';
 
   import registrarsJson from '../../config/registrars.json';
 
   const registrars = registrarsJson as unknown as RegistrarConfig[];
 
-  type FilterKey = 'all' | 'available' | 'taken' | 'problems';
+  type FilterKey = 'all' | 'available' | 'taken' | 'problems' | 'favorites';
   type SortKey = 'name' | 'price' | 'renew' | 'tco' | 'status';
   type SortDir = 'asc' | 'desc';
 
@@ -31,6 +32,8 @@
   let visibleCount = $state(100);
   let copied = $state<Set<string>>(new Set());
   let rechecking = $state<Set<string>>(new Set());
+  let query = $state('');
+  let selected = $state<Set<string>>(new Set());
 
   interface RowData {
     result: CheckResult;
@@ -60,22 +63,34 @@
   });
 
   const filtered = $derived.by(() => {
+    let arr: RowData[];
     switch (filter) {
       case 'available':
-        return rows.filter(
+        arr = rows.filter(
           (r) =>
             r.result.status === 'available' ||
             r.result.status === 'probably_available',
         );
+        break;
       case 'taken':
-        return rows.filter((r) => r.result.status === 'taken');
+        arr = rows.filter((r) => r.result.status === 'taken');
+        break;
       case 'problems':
-        return rows.filter(
+        arr = rows.filter(
           (r) => r.result.status === 'unknown' || r.result.status === 'error',
         );
+        break;
+      case 'favorites':
+        arr = rows.filter((r) => $favorites.has(r.result.domain));
+        break;
       default:
-        return rows;
+        arr = rows;
     }
+    const q = query.trim().toLowerCase();
+    if (q) {
+      arr = arr.filter((r) => r.result.domain.toLowerCase().includes(q));
+    }
+    return arr;
   });
 
   const sorted = $derived.by(() => {
@@ -106,7 +121,20 @@
     void filter;
     void sortKey;
     void sortDir;
+    void query;
     visibleCount = 100;
+  });
+
+  $effect(() => {
+    const resultsMap = $results;
+    if (selected.size === 0) return;
+    const next = new Set<string>();
+    for (const d of selected) {
+      if (resultsMap.has(d)) next.add(d);
+    }
+    if (next.size !== selected.size) {
+      selected = next;
+    }
   });
 
   let sentinelEl: HTMLElement | null = $state(null);
@@ -379,10 +407,31 @@
         <button class="filter" class:active={filter === 'problems'} onclick={() => (filter = 'problems')} type="button" data-testid="results-filter-problems">
           {t('results.filters.problems')}
         </button>
+        <button class="filter" class:active={filter === 'favorites'} onclick={() => (filter = 'favorites')} type="button" data-testid="results-filter-favorites">
+          {t('results.filters.favorites')}{#if $favorites.size > 0} · {$favorites.size}{/if}
+        </button>
       </div>
+      <input
+        class="search"
+        type="search"
+        placeholder={t('results.search')}
+        aria-label={t('results.search')}
+        bind:value={query}
+        data-testid="results-search"
+      />
       <span class="count" aria-live="polite" data-testid="results-showing-count">
         {t('results.showing', { shown: visible.length, total: sorted.length })}
       </span>
+      {#if selected.size > 0}
+        <button class="action-small" type="button" onclick={async () => { await copyText([...selected].sort().join('\n')); selected = new Set(); }} data-testid="results-copy-selected">
+          {t('results.copy.selected', { n: selected.size })}
+        </button>
+      {/if}
+      {#if filter === 'favorites' && $favorites.size > 0}
+        <button class="action-small" type="button" onclick={() => copyText([...$favorites].sort().join('\n'))} data-testid="results-copy-favorites">
+          {t('results.fav.copy', { n: $favorites.size })}
+        </button>
+      {/if}
       {#if $runState.phase === 'done' && filter === 'all' && availableTotal > 0}
         <button class="filter suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
           {t('results.showAvailable', { n: availableTotal })}
@@ -390,10 +439,30 @@
       {/if}
     </div>
 
+    {#if filter === 'favorites' && $favorites.size === 0}
+      <p class="fav-empty">{t('results.favorites.empty')}</p>
+    {:else}
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
+            <th class="select-cell">
+              <input
+                type="checkbox"
+                data-testid="results-select-all"
+                aria-label={t('results.select.all')}
+                checked={visible.length > 0 && visible.every((r) => selected.has(r.result.domain))}
+                onchange={() => {
+                  const next = new Set(selected);
+                  if (visible.every((r) => next.has(r.result.domain))) {
+                    for (const r of visible) next.delete(r.result.domain);
+                  } else {
+                    for (const r of visible) next.add(r.result.domain);
+                  }
+                  selected = next;
+                }}
+              />
+            </th>
             <th aria-sort={ariaSort('name')}>
               <button class="sort-btn" onclick={() => toggleSort('name')} type="button" data-testid="results-sort-name">
                 {t('results.sort.name')}
@@ -434,7 +503,22 @@
             {@const coupon = couponFor(row.result.tld)}
             {@const trap = row.best ? isPromoTrap(row.best.entry) : false}
             {@const promo = row.firstYear != null && isBelowFloor(row.result.tld, row.firstYear)}
+            {@const isFav = $favorites.has(row.result.domain)}
             <tr class:available={isAvail} data-testid={`results-row-${sanitizeId(row.result.domain)}`}>
+              <td class="select-cell">
+                <input
+                  type="checkbox"
+                  checked={selected.has(row.result.domain)}
+                  data-testid={`results-row-select-${sanitizeId(row.result.domain)}`}
+                  aria-label={t('results.select.row.aria', { domain: row.result.domain })}
+                  onchange={() => {
+                    const next = new Set(selected);
+                    if (next.has(row.result.domain)) next.delete(row.result.domain);
+                    else next.add(row.result.domain);
+                    selected = next;
+                  }}
+                />
+              </td>
               <td class="domain-cell">
                 {#if buy}
                   <a
@@ -480,6 +564,21 @@
               </td>
               <td class="actions-cell">
                 <div class="actions">
+                  <button
+                    class="action-btn"
+                    class:active={isFav}
+                    onclick={() => toggleFavorite(row.result.domain)}
+                    type="button"
+                    aria-label={isFav ? t('results.fav.remove') : t('results.fav.add')}
+                    title={isFav ? t('results.fav.remove') : t('results.fav.add')}
+                    data-testid={`results-row-fav-${sanitizeId(row.result.domain)}`}
+                  >
+                    {#if isFav}
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="currentColor" /></svg>
+                    {:else}
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+                    {/if}
+                  </button>
                   <button
                     class="action-btn"
                     onclick={() => handleCopy(row.result.domain)}
@@ -544,7 +643,7 @@
             {#if isAvail && detailFor === row.result.domain}
               {@const d = details[row.result.domain]}
               <tr class="detail-row">
-                <td colspan="6">
+                <td colspan="7">
                   {#if !d || d.loading}
                     <span class="detail-muted">{t('results.detail.loading')}</span>
                   {:else if d.failed}
@@ -587,6 +686,7 @@
       </table>
       <div bind:this={sentinelEl} class="sentinel" aria-hidden="true"></div>
     </div>
+    {/if}
   </div>
 {/if}
 
@@ -602,6 +702,12 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-2);
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: var(--bg);
+    padding: var(--space-2) 0;
+    margin: calc(-1 * var(--space-2)) 0 0;
   }
   .filters {
     display: flex;
@@ -736,9 +842,9 @@
     vertical-align: middle;
   }
 
-  th:nth-child(3),
   th:nth-child(4),
-  th:nth-child(5) {
+  th:nth-child(5),
+  th:nth-child(6) {
     text-align: right;
   }
 
@@ -912,5 +1018,50 @@
     background: var(--green-soft);
     border-color: var(--green);
     color: var(--green);
+  }
+  .search {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    min-height: 32px;
+    background: var(--bg-elevated);
+    width: 180px;
+    color: var(--text);
+  }
+  .search:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .action-small {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: var(--on-accent);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
+    min-height: 32px;
+    transition: all var(--dur) var(--ease);
+  }
+  .action-small:hover {
+    opacity: 0.9;
+  }
+  .fav-empty {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+    padding: var(--space-4) var(--space-3);
+    text-align: center;
+  }
+  input[type='checkbox'] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+  .select-cell {
+    width: 28px;
+    white-space: nowrap;
   }
 </style>

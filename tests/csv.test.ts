@@ -74,41 +74,51 @@ describe('buildCsv', () => {
     checkedAt: '2026-01-01T00:00:00.000Z',
   };
 
+  const defaultHeaders = [
+    'Domain',
+    'Status',
+    'TLD',
+    'First year',
+    'Renewal',
+    'Cheapest registrar',
+    'Checked at',
+  ];
+
   it('starts with BOM', () => {
-    const csv = buildCsv([]);
+    const csv = buildCsv([], defaultHeaders);
     expect(csv.charCodeAt(0)).toBe(0xfeff);
   });
 
   it('contains header row', () => {
-    const csv = buildCsv([]);
+    const csv = buildCsv([], defaultHeaders);
     expect(csv).toContain(
-      'domain,status,tld,priceFirstYear,priceRenewal,bestRegistrar,checkedAt',
+      'Domain,Status,TLD,First year,Renewal,Cheapest registrar,Checked at',
     );
   });
 
   it('uses CRLF line endings', () => {
-    const csv = buildCsv([sampleRow]);
+    const csv = buildCsv([sampleRow], defaultHeaders);
     expect(csv).toContain('\r\n');
     expect(csv).not.toContain('\n\r');
   });
 
   it('does not quote simple fields', () => {
-    const csv = buildCsv([sampleRow]);
+    const csv = buildCsv([sampleRow], defaultHeaders);
     expect(csv).toContain('a.com,available,com');
   });
 
   it('quotes fields containing commas', () => {
-    const csv = buildCsv([{ ...sampleRow, domain: 'a,b.com' }]);
+    const csv = buildCsv([{ ...sampleRow, domain: 'a,b.com' }], defaultHeaders);
     expect(csv).toContain('"a,b.com"');
   });
 
   it('quotes fields containing double-quotes and doubles them', () => {
-    const csv = buildCsv([{ ...sampleRow, domain: 'a"b.com' }]);
+    const csv = buildCsv([{ ...sampleRow, domain: 'a"b.com' }], defaultHeaders);
     expect(csv).toContain('"a""b.com"');
   });
 
   it('quotes fields containing newlines', () => {
-    const csv = buildCsv([{ ...sampleRow, status: 'available\nextra' }]);
+    const csv = buildCsv([{ ...sampleRow, status: 'available\nextra' }], defaultHeaders);
     expect(csv).toContain('"available\nextra"');
   });
 });
