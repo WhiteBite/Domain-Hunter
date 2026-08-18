@@ -2,6 +2,7 @@
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
   import { activeTab, checkInput, pendingShareRun } from '../store';
+  import { favorites, toggleFavorite } from '../favorites';
   import { filterDrops, type DroppedDomain } from '../../core/dropped';
   // Static snapshot shipped with the build (SPEC §17 — dropped-domains feed).
   import snapshot from '../../config/dropped.snapshot.json';
@@ -139,6 +140,25 @@
         <li class="row">
           <span class="domain" aria-label={dom.d + '.' + dom.tld}>{dom.d}<span class="tld">.{dom.tld}</span></span>
           <span class="row-actions">
+            <button
+              class="btn ghost sm fav"
+              class:active={$favorites.has(dom.d + '.' + dom.tld)}
+              type="button"
+              onclick={() => toggleFavorite(dom.d + '.' + dom.tld)}
+              aria-label={$favorites.has(dom.d + '.' + dom.tld) ? t('results.fav.remove') : t('results.fav.add')}
+              title={$favorites.has(dom.d + '.' + dom.tld) ? t('results.fav.remove') : t('results.fav.add')}
+              data-testid={`drops-row-fav-${sanitizeId(dom.d + '.' + dom.tld)}`}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path
+                  d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"
+                  fill={$favorites.has(dom.d + '.' + dom.tld) ? 'currentColor' : 'none'}
+                  stroke="currentColor"
+                  stroke-width="1"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
             <button class="btn ghost sm" type="button" onclick={() => copyDomain(dom)} data-testid={`drops-row-copy-${sanitizeId(dom.d + '.' + dom.tld)}`}>
               {t('results.copy')}
             </button>
@@ -256,6 +276,15 @@
     min-height: 32px;
     padding: 0 var(--space-3);
     font-size: var(--text-xs);
+  }
+
+  .btn.fav.active {
+    color: var(--accent);
+  }
+
+  .btn.fav svg {
+    width: 15px;
+    height: 15px;
   }
 
   .grid {

@@ -9,6 +9,7 @@
   import { findHacks } from '../../generators/hacks';
   import { mutate } from '../../generators/mutations';
   import { themes } from '../../generators/themes';
+  import { favorites, toggleFavorite } from '../favorites';
 
   const TRAY_MAX = 1000;
   const GEN_PREFS_KEY = 'dh:v1:genprefs';
@@ -48,6 +49,7 @@
   let candidates = $derived($genCandidates);
   let trayFilter = $state('');
   let traySort = $state<'added' | 'az'>('added');
+  let expanded = $state<Record<string, boolean>>({});
 
   const GROUP_ORDER: SrcId[] = ['combinator', 'mutations', 'hacks', 'syllables', 'themes', 'sets'];
   const GROUP_LABEL: Record<SrcId, string> = {
@@ -244,11 +246,11 @@
     return n;
   });
 
-  const techToggles: { key: keyof typeof tech; labelKey: string }[] = [
-    { key: 'combinator', labelKey: 'gen.combinator.title' },
-    { key: 'mutations', labelKey: 'gen.mutations.title' },
-    { key: 'hacks', labelKey: 'gen.hacks.title' },
-    { key: 'syllables', labelKey: 'gen.syllables.title' },
+  const techToggles: { key: keyof typeof tech; labelKey: string; descKey: string }[] = [
+    { key: 'combinator', labelKey: 'gen.combinator.title', descKey: 'gen.combinator.desc' },
+    { key: 'mutations', labelKey: 'gen.mutations.title', descKey: 'gen.mutations.desc' },
+    { key: 'hacks', labelKey: 'gen.hacks.title', descKey: 'gen.hacks.desc' },
+    { key: 'syllables', labelKey: 'gen.syllables.title', descKey: 'gen.syllables.desc' },
   ];
 
   async function copyList(): Promise<void> {
@@ -310,7 +312,7 @@
 
     <div class="techs" role="group" aria-label={t('gen.idea.techniques')}>
       {#each techToggles as toggle}
-        <label class="tech" class:active={tech[toggle.key]}>
+        <label class="tech" class:active={tech[toggle.key]} title={t(toggle.descKey)}>
           <input type="checkbox" bind:checked={tech[toggle.key]} data-testid={`gen-toggle-${toggle.key}`} />
           <span>{t(toggle.labelKey)}</span>
         </label>
@@ -424,19 +426,50 @@
         <div class="group">
           <span class="group-label">{t(GROUP_LABEL[group.id])}</span>
           <div class="tray-words">
-            {#each group.items as cand (cand.n)}
-              <button
-                class="tray-chip"
-                type="button"
-                title={t('gen.tray.remove')}
-                onclick={() => removeCandidate(cand.n)}
-                data-testid={`gen-tray-chip-${sanitizeId(cand.n)}`}
-              >
-                {cand.n}
-                <span aria-hidden="true">×</span>
-              </button>
+            {#each (expanded[group.id] ? group.items : group.items.slice(0, 100)) as cand (cand.n)}
+              <span class="tray-chip-wrap">
+                <button
+                  class="chip-fav"
+                  class:active={$favorites.has(cand.n)}
+                  type="button"
+                  onclick={(ev) => { ev.stopPropagation(); toggleFavorite(cand.n); }}
+                  aria-label={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
+                  title={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
+                  data-testid={`gen-tray-fav-${sanitizeId(cand.n)}`}
+                >
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path
+                      d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"
+                      fill={$favorites.has(cand.n) ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      stroke-width="1"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+                <button
+                  class="tray-chip"
+                  type="button"
+                  title={t('gen.tray.remove')}
+                  onclick={() => removeCandidate(cand.n)}
+                  data-testid={`gen-tray-chip-${sanitizeId(cand.n)}`}
+                >
+                  {cand.n}
+                  <span aria-hidden="true">×</span>
+                </button>
+              </span>
             {/each}
           </div>
+          {#if group.items.length > 100}
+            <button
+              class="btn ghost"
+              type="button"
+              onclick={() => (expanded[group.id] = !expanded[group.id])}
+              data-testid={`gen-more-${sanitizeId(group.id)}`}
+            >
+              {expanded[group.id] ? t('gen.tray.less') : t('gen.tray.more', { n: group.items.length - 100 })}
+            </button>
+          {/if}
         </div>
       {/each}
     {/if}
@@ -831,6 +864,31 @@
   .tray-chip:hover {
     border-color: var(--red);
     color: var(--red);
+  }
+
+  .tray-chip-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .chip-fav {
+    border: none;
+    background: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 0 2px;
+    display: inline-flex;
+  }
+
+  .chip-fav:hover,
+  .chip-fav.active {
+    color: var(--accent);
+  }
+
+  .chip-fav svg {
+    width: 12px;
+    height: 12px;
   }
 
   .chips {
