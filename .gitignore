@@ -5,3 +5,5 @@
 node_modules/
 dist/
 .omo/
+playwright-report/
+test-results/

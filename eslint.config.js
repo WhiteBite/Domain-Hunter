@@ -11,6 +11,8 @@ export default tseslint.config(
       '.svelte-kit/**',
       'worker.js',
       'scripts/**/*.mjs',
+      'playwright-report/**',
+      'test-results/**',
     ],
   },
   js.configs.recommended,
