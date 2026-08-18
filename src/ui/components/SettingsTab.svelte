@@ -112,7 +112,9 @@
   <div class="card">
     <h3>{t('settings.appearance')}</h3>
     <div class="row">
-      <label for="theme">{t('settings.theme')}</label>
+      <div class="row-info">
+        <label for="theme">{t('settings.theme')}</label>
+      </div>
       <select
         id="theme"
         value={$settings.theme}
@@ -124,7 +126,9 @@
       </select>
     </div>
     <div class="row">
-      <label for="lang">{t('settings.language')}</label>
+      <div class="row-info">
+        <label for="lang">{t('settings.language')}</label>
+      </div>
       <select
         id="lang"
         value={$settings.lang}
@@ -135,7 +139,9 @@
       </select>
     </div>
     <div class="row">
-      <label for="currency">{t('settings.currency')}</label>
+      <div class="row-info">
+        <label for="currency">{t('settings.currency')}</label>
+      </div>
       <select
         id="currency"
         value={$settings.currency}
@@ -147,7 +153,12 @@
       </select>
     </div>
     <div class="row">
-      <span class="label">{t('settings.rates')}</span>
+      <div class="row-info">
+        <span class="label">{t('settings.rates')}</span>
+        {#if rateError}
+          <p class="error">{rateError}</p>
+        {/if}
+      </div>
       <span class="rates">
         <label class="inline">
           RUB
@@ -170,19 +181,19 @@
           />
         </label>
       </span>
-      {#if rateError}
-        <p class="error">{rateError}</p>
-      {/if}
     </div>
   </div>
 
   <div class="card">
     <h3>{t('settings.engine')}</h3>
     <div class="row">
-      <label for="concurrency">
-        {t('settings.concurrency')}
-        <span class="value-badge">{$settings.concurrency}</span>
-      </label>
+      <div class="row-info">
+        <label for="concurrency">
+          {t('settings.concurrency')}
+          <span class="value-badge">{$settings.concurrency}</span>
+        </label>
+        <p class="hint">{t('settings.concurrency.hint')}</p>
+      </div>
       <input
         id="concurrency"
         type="range"
@@ -191,10 +202,12 @@
         value={$settings.concurrency}
         oninput={(e) => patch('concurrency', Number(e.currentTarget.value))}
       />
-      <p class="hint">{t('settings.concurrency.hint')}</p>
     </div>
     <div class="row">
-      <label for="ttl">{t('settings.cacheTtl')}</label>
+      <div class="row-info">
+        <label for="ttl">{t('settings.cacheTtl')}</label>
+        <p class="hint">{t('settings.cacheTtl.hint')}</p>
+      </div>
       <input
         id="ttl"
         type="number"
@@ -203,10 +216,12 @@
         value={$settings.cacheTtlHours}
         onchange={(e) => patch('cacheTtlHours', Math.max(1, Number(e.currentTarget.value)))}
       />
-      <p class="hint">{t('settings.cacheTtl.hint')}</p>
     </div>
     <div class="row">
-      <label for="proxy">{t('settings.proxy')}</label>
+      <div class="row-info">
+        <label for="proxy">{t('settings.proxy')}</label>
+        <p class="hint">{t('settings.proxy.hint')}</p>
+      </div>
       <input
         id="proxy"
         type="url"
@@ -214,7 +229,6 @@
         value={$settings.proxyUrl}
         oninput={(e) => patch('proxyUrl', e.currentTarget.value)}
       />
-      <p class="hint">{t('settings.proxy.hint')}</p>
     </div>
   </div>
 
@@ -279,8 +293,18 @@
 
   .row {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+
+  .row-info {
+    display: flex;
     flex-direction: column;
     gap: var(--space-1);
+    flex: 1;
+    min-width: 220px;
   }
 
   .row label,
@@ -301,11 +325,18 @@
     padding: var(--space-2) var(--space-3);
     min-height: 40px;
     font-size: var(--text-sm);
-    max-width: 320px;
+  }
+
+  .row > select,
+  .row > input[type='number'],
+  .row > input[type='url'] {
+    width: 320px;
+    max-width: 100%;
   }
 
   input[type='range'] {
-    max-width: 320px;
+    width: 320px;
+    max-width: 100%;
     accent-color: var(--accent);
   }
 

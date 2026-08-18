@@ -15,6 +15,10 @@ await page.screenshot({ path: path.join(docs, 'ui-check.png') });
 await page.getByRole('tab', { name: 'Generators' }).click();
 await page.waitForSelector('text=Your idea');
 await page.screenshot({ path: path.join(docs, 'ui-generators.png') });
+
+await page.getByRole('tab', { name: 'Settings' }).click();
+await page.waitForSelector('text=Appearance');
+await page.screenshot({ path: path.join(docs, 'ui-settings.png') });
 await page.close();
 
 const mob = await browser.newPage({ viewport: { width: 375, height: 740 } });

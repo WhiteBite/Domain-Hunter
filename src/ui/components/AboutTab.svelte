@@ -20,7 +20,6 @@
   <div class="card">
     <h3>{t('about.prices.title')}</h3>
     <p>{t('about.prices.body')}</p>
-    <p class="note">{t('price.disclaimer')}</p>
   </div>
 
   <div class="card footer-card">

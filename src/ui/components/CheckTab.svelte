@@ -119,15 +119,6 @@
 </script>
 
 <section class="check-tab" aria-busy={$runState.phase === 'running'}>
-  {#if showHint}
-    <div class="hint-strip" role="note">
-      <span>{t('check.hint.body')}</span>
-      <button class="hint-dismiss" type="button" onclick={dismissHint}>
-        {t('check.hint.dismiss')}
-      </button>
-    </div>
-  {/if}
-
   {#if $resumePrompt}
     <div class="resume-banner" role="alert">
       <div class="resume-text">
@@ -142,6 +133,15 @@
           {t('check.run.resume.no')}
         </button>
       </div>
+    </div>
+  {/if}
+
+  {#if showHint}
+    <div class="hint-strip" role="note">
+      <span>{t('check.hint.body')}</span>
+      <button class="hint-dismiss" type="button" onclick={dismissHint}>
+        {t('check.hint.dismiss')}
+      </button>
     </div>
   {/if}
 
