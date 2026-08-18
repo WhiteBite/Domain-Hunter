@@ -371,3 +371,26 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 Expired/dropped domains feed (WhoisFreaks daily CSV), social-handle checks, aftermarket search,
 custom domain (CNAME), more registrars in price matrix (keys required), affiliate link activation
 (config already affiliate-ready: Porkbun Ambassador + Dynadot Ambassador first).
+
+## 17. Post-spec evolutions (implemented after §1–16)
+
+- **Interrupted runs**: leaving the Check tab mid-run settles `runState` to
+  `done` and persists a resume snapshot (`dh:v1:run`); the resume banner
+  renders at the top of the Check tab; a fresh run request (share link
+  `run:true` or Generators "Check now") supersedes and discards it.
+- **Candidate tray**: generator output lives in a persisted store
+  (`dh:v1:gentray`), survives tab switches and reloads; the tray shows the
+  projected check count (bare names × selected zones) before running.
+- **Coverage-aware buy links**: the buy button targets the cheapest registrar
+  that has a deep-link template in `registrars.json`, not merely the cheapest
+  price in the table (snapshots may contain registrars without links).
+- **Per-domain detail row**: on-demand lookup via the public DigMyName API
+  (no auth, CORS `*`, rate-limited client-side to on-demand clicks) shows a
+  registry-premium warning with price and the currently cheapest registrar
+  with a buy URL.
+- **Harvest sources**: Porkbun + cfdomainpricing (live and harvest); Dynadot
+  GUEST XML (`tldPrices`, ~805 TLDs) and regctl.sh `prices.json` (Spaceship /
+  Porkbun / Cloudflare / ValueDomain) as best-effort harvest-only sources.
+- **Results table**: sticky header inside its own scroll area, right-aligned
+  tabular-numeral price columns, subtle zebra striping, sticky domain column
+  on narrow screens.
