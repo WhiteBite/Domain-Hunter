@@ -4,100 +4,13 @@
  * Data source: src/config/dropped.snapshot.json is BUNDLED at build time
  * (imported in DropsTab.svelte) — no network fetch for the drops list.
  * Boot-time pricing fetch (from CheckTab onMount, since the app boots on
- * the 'check' tab) is mocked. IANA bootstrap is mocked too (defined but
- * currently uncalled at runtime — mocked defensively).
- *
- * Helper gaps (worked around locally, not fixed):
- *   1. helpers/mocks.ts imports tlds.json which fails under Node.js ESM
- *      ("needs an import attribute of type: json"). Workaround: import only
- *      from helpers/setup (no tlds.json dependency) and inline the mock +
- *      leak-detection helpers.
- *   2. navigateToTab() waits for [data-testid="app-tabpanel-{tab}"] which
- *      does NOT exist in App.svelte (tabs conditionally render components
- *      without a tabpanel wrapper). Workaround: click the tab button and
- *      wait for a tab-specific testid.
+ * the 'check' tab) is mocked. RDAP + DoH are mocked because «To check» /
+ * «Add all» auto-start a run (pendingShareRun), same as Generators Check-now.
  */
 import { test, expect, type Page } from '@playwright/test';
 import { setupPage, grantClipboard, readClipboard } from './helpers/setup';
+import { assertNoNetworkLeaks, getLeakedRequests, mockAll } from './helpers/mocks';
 import { ianaBootstrap, porkbunPricing, cloudflarePricing } from './fixtures';
-
-// ---- Inlined mock helpers (avoid helpers/mocks.ts tlds.json import) ----
-
-const CORS: Record<string, string> = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': '*',
-};
-
-async function mockBootstrap(page: Page, services: unknown): Promise<void> {
-  await page.route('https://data.iana.org/rdap/dns.json', async (route) => {
-    await route.fulfill({
-      status: 200,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify(services),
-    });
-  });
-}
-
-async function mockPricing(
-  page: Page,
-  porkbun: Record<string, unknown>,
-  cloudflare: Record<string, unknown>,
-): Promise<void> {
-  await page.route(
-    'https://api.porkbun.com/api/json/v3/pricing/get',
-    async (route) => {
-      await route.fulfill({
-        status: 200,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pricing: porkbun }),
-      });
-    },
-  );
-  await page.route('https://cfdomainpricing.com/prices.json', async (route) => {
-    await route.fulfill({
-      status: 200,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify(cloudflare),
-    });
-  });
-}
-
-// Catch-all registered FIRST with an allowlist: allowlisted URLs defer via
-// route.fallback() to the specific mocks registered later; anything else is
-// aborted and recorded as a leak. This mirrors the helpers/mocks.ts pattern.
-let leaked: string[] = [];
-
-const ALLOWLIST: RegExp[] = [
-  /^file:/,
-  /^blob:/,
-  /^https:\/\/data\.iana\.org\/rdap\/dns\.json/,
-  /^https:\/\/cloudflare-dns\.com\/dns-query/,
-  /^https:\/\/dns\.google\/resolve/,
-  /^https:\/\/api\.porkbun\.com\/api\/json\/v3\/pricing\/get/,
-  /^https:\/\/cfdomainpricing\.com\/prices\.json/,
-  /^https:\/\/api\.digmyname\.com\/functions\/v1\/public-api\/check/,
-  /^https:\/\/api\.github\.com\//,
-  /^https:\/\/github\.com\//,
-  /^https:\/\/www\.tiktok\.com\//,
-  /^https:\/\/x\.com\//,
-  /^https:\/\/www\.youtube\.com\//,
-  /^https:\/\/www\.instagram\.com\//,
-  /^https:\/\/www\.reddit\.com\//,
-];
-
-async function assertNoLeaks(page: Page): Promise<void> {
-  leaked = [];
-  await page.route(/.*/, async (route) => {
-    const url = route.request().url();
-    if (ALLOWLIST.some((re) => re.test(url))) {
-      await route.fallback();
-      return;
-    }
-    leaked.push(url);
-    await route.abort('blockedbyclient');
-  });
-}
 
 // ---- Test data (from src/config/dropped.snapshot.json, shipped with build) ----
 
@@ -127,16 +40,22 @@ async function gotoDrops(page: Page): Promise<void> {
 
 test.beforeEach(async ({ page, context }) => {
   // Catch-all FIRST with allowlist — defers to specific mocks via fallback().
-  await assertNoLeaks(page);
-  // Specific mocks (registered after catch-all — handle allowlisted URLs).
-  await mockBootstrap(page, ianaBootstrap());
-  await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+  await assertNoNetworkLeaks(page);
+  // Specific mocks: boot pricing + bootstrap, plus RDAP/DoH because «To check»
+  // and «Add all» auto-start a run (RDAP unmatched → 404, DoH unmatched → SERVFAIL).
+  await mockAll(page, {
+    bootstrap: ianaBootstrap(),
+    porkbun: porkbunPricing().pricing,
+    cloudflare: cloudflarePricing(),
+    rdap: [],
+    doh: {},
+  });
   await setupPage(page);
   await grantClipboard(context);
 });
 
-test.afterEach(async () => {
-  expect(leaked).toEqual([]);
+test.afterEach(async ({ page }) => {
+  expect(getLeakedRequests(page)).toEqual([]);
 });
 
 // ---- Tests ----
@@ -183,7 +102,7 @@ test.describe('Drops tab', () => {
       .toBe(FIRST_DOMAIN);
   });
 
-  test('row add button switches to Check tab and places the domain in the input', async ({ page }) => {
+  test('row add button switches to Check, fills the input, and auto-runs', async ({ page }) => {
     await gotoDrops(page);
 
     await page.click(`[data-testid="${FIRST_ADD_TESTID}"]`);
@@ -192,9 +111,15 @@ test.describe('Drops tab', () => {
     await expect(textarea).toBeVisible();
     const value = await textarea.inputValue();
     expect(value).toContain(FIRST_DOMAIN);
+
+    // «To check» auto-starts the run (pendingShareRun): a result row streams in.
+    // .com is high-trust; RDAP unmatched → 404 → available.
+    await expect(
+      page.locator('[data-testid="results-row-acvaldezvillalobos-com"]'),
+    ).toBeVisible({ timeout: 15_000 });
   });
 
-  test('add-all button switches to Check tab with multiple domains in the input', async ({ page }) => {
+  test('add-all button fills many domains and auto-runs', async ({ page }) => {
     await gotoDrops(page);
 
     await page.click('[data-testid="drops-button-add-all"]');
@@ -202,9 +127,14 @@ test.describe('Drops tab', () => {
     const textarea = page.locator('[data-testid="check-input-domains"]');
     await expect(textarea).toBeVisible();
     const value = await textarea.inputValue();
-    // addAll appends up to 500 filtered domains (all 3000 by default, capped at 500).
+    // addAll appends up to 500 filtered domains (capped at 500).
     const lines = value.split('\n').filter((l) => l.trim().length > 0);
     expect(lines.length).toBeGreaterThan(1);
     expect(value).toContain(FIRST_DOMAIN);
+
+    // Auto-run started: progress bar appears (run no longer idle).
+    await expect(page.locator('[data-testid="check-bar-progress"]')).toBeVisible({
+      timeout: 15_000,
+    });
   });
 });

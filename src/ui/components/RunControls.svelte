@@ -48,10 +48,11 @@
       resumePrompt.set(snap);
     }
 
-    // Always listen: a fresh run request (share link run:true or
-    // "Check now" from Generators) supersedes the resume prompt.
+    // Always listen: a fresh run request (share link run:true, Generators
+    // "Check now", Drops "To check") supersedes the resume prompt. Accept it
+    // when idle OR after a finished run ('done'); never interrupt 'running'.
     unsubShare = pendingShareRun.subscribe((pending) => {
-      if (pending && get(runState).phase === 'idle') {
+      if (pending && get(runState).phase !== 'running') {
         pendingShareRun.set(false);
         resumeSnapshot = null;
         resumePrompt.set(null);

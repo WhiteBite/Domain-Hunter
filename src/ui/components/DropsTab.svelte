@@ -1,7 +1,7 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
-  import { activeTab, checkInput } from '../store';
+  import { activeTab, checkInput, pendingShareRun } from '../store';
   import { filterDrops, type DroppedDomain } from '../../core/dropped';
   // Static snapshot shipped with the build (SPEC §17 — dropped-domains feed).
   import snapshot from '../../config/dropped.snapshot.json';
@@ -57,11 +57,14 @@
   function addOne(dom: DroppedDomain): void {
     appendToCheck([dom], 1);
     activeTab.set('check');
+    // «To check» means check: auto-start the run like Generators' Check-now.
+    pendingShareRun.set(true);
   }
 
   function addAll(): void {
     appendToCheck(filtered, 500);
     activeTab.set('check');
+    pendingShareRun.set(true);
   }
 
   async function copyDomain(dom: DroppedDomain): Promise<void> {
