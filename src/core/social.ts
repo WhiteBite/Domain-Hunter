@@ -59,14 +59,36 @@ export async function checkPlatform(
   platform: Platform,
   name: string,
   fetchImpl: typeof fetch = fetch,
+  proxyUrl?: string,
 ): Promise<SocialStatus> {
-  if (!platform.live) return 'unknown';
+  const proxyBase = proxyUrl ? (proxyUrl.endsWith('/') ? proxyUrl : `${proxyUrl}/`) : null;
+
+  async function viaProxy(): Promise<SocialStatus | null> {
+    if (!proxyBase) return null;
+    try {
+      const res = await fetchImpl(`${proxyBase}social/${platform.id}/${encodeURIComponent(name)}`);
+      if (!res.ok) return null;
+      const json = (await res.json()) as { status?: string };
+      return json.status === 'taken' || json.status === 'free' || json.status === 'unknown'
+        ? json.status
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  if (!platform.live) {
+    return (await viaProxy()) ?? 'unknown';
+  }
   const cfg = LIVE[platform.id];
   if (!cfg) return 'unknown';
   try {
     const res = await fetchImpl(cfg.url(name));
-    return cfg.interpret(res.status);
+    if (res.status === 200) return 'taken';
+    if (res.status === 404) return 'free';
+    // 403/429 = anonymous rate limit (GitHub: 60/h per IP) or other refusal.
+    return (await viaProxy()) ?? 'unknown';
   } catch {
-    return 'unknown';
+    return (await viaProxy()) ?? 'unknown';
   }
 }

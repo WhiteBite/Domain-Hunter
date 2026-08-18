@@ -148,10 +148,22 @@ const TLD_MAP = {
   "ch": "https://rdap.nic.ch/domain/",
   "ru": "https://rdap.tcinet.ru/domain/",
   "so": "https://rdap.nic.so/domain/",
-  "ly": "https://rdap.nic.ly/domain/"
+  "ly": "https://rdap.nic.ly/domain/",
+  "pl": "https://rdap.dns.pl/domain/"
 };
 
 const UA = 'domain-hunter-worker/2.0';
+
+// Social handle checks (server-side, bypasses browser CORS blocks).
+const SOCIAL_URLS = {
+  github: (n) => 'https://api.github.com/users/' + n,
+  x: (n) => 'https://x.com/' + n,
+  youtube: (n) => 'https://www.youtube.com/@' + n,
+  instagram: (n) => 'https://www.instagram.com/' + n,
+  reddit: (n) => 'https://www.reddit.com/user/' + n + '/about.json',
+  tiktok: (n) =>
+    'https://www.tiktok.com/oembed?url=' + encodeURIComponent('https://www.tiktok.com/@' + n),
+};
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -170,7 +182,25 @@ export default {
     const path = url.pathname.replace(/^\/+/, '');
 
     if (!path) {
-      return json({ usage: 'GET /{domain}' });
+      return json({ usage: 'GET /{domain} | GET /social/{platform}/{name}' });
+    }
+
+    const socialMatch = path.match(/^social\/([a-z]+)\/([a-z0-9_.]{1,30})$/);
+    if (socialMatch) {
+      const platform = socialMatch[1];
+      const name = socialMatch[2];
+      const buildUrl = SOCIAL_URLS[platform];
+      if (!buildUrl) return json({ platform, error: 'unknown platform' }, 400);
+      try {
+        const res = await fetch(buildUrl(name), {
+          headers: { 'user-agent': UA },
+          redirect: 'follow',
+        });
+        const status = res.status === 200 ? 'taken' : res.status === 404 ? 'free' : 'unknown';
+        return json({ platform, name, status });
+      } catch (err) {
+        return json({ platform, name, status: 'unknown', error: err?.message ?? 'fetch failed' });
+      }
     }
 
     let domain;

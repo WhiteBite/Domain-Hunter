@@ -110,3 +110,35 @@ describe('PLATFORMS', () => {
     expect(byId.reddit).toBe('https://www.reddit.com/user/foo');
   });
 });
+
+describe('checkPlatform — proxy fallback', () => {
+  function jsonBody(status: number, body: unknown): Response {
+    return new Response(JSON.stringify(body), { status });
+  }
+
+  const reddit = PLATFORMS.find((p) => p.id === 'reddit')!;
+  const github = PLATFORMS.find((p) => p.id === 'github')!;
+
+  it('non-live platform resolves through the proxy when provided', async () => {
+    const f = (async (url: string) =>
+      String(url).includes('/social/')
+        ? jsonBody(200, { status: 'taken' })
+        : jsonBody(500, {})) as unknown as typeof fetch;
+    expect(await checkPlatform(reddit, 'name', f, 'https://proxy.test/')).toBe('taken');
+  });
+
+  it('github 403 (rate limit) falls back to the proxy', async () => {
+    const f = (async (url: string) =>
+      String(url).includes('/social/')
+        ? jsonBody(200, { status: 'free' })
+        : jsonBody(403, {})) as unknown as typeof fetch;
+    expect(await checkPlatform(github, 'name', f, 'https://proxy.test')).toBe('free');
+  });
+
+  it('proxy failure keeps unknown', async () => {
+    const f = (async () => {
+      throw new TypeError('proxy down');
+    }) as unknown as typeof fetch;
+    expect(await checkPlatform(reddit, 'name', f, 'https://proxy.test')).toBe('unknown');
+  });
+});

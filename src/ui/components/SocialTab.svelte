@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { CheckStatus } from '../../types';
+  import { get } from 'svelte/store';
   import { t } from '../../i18n';
+  import { settings } from '../store';
   import { PLATFORMS, checkPlatform, isValidHandle, type SocialStatus } from '../../core/social';
   import StatusBadge from './StatusBadge.svelte';
 
@@ -36,7 +38,7 @@
     }));
     await Promise.all(
       PLATFORMS.map((p, i) =>
-        checkPlatform(p, n).then((s) => {
+        checkPlatform(p, n, fetch, get(settings).proxyUrl || undefined).then((s) => {
           cards[i].status = s;
           cards[i].loading = false;
         }),

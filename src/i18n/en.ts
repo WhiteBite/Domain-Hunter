@@ -23,7 +23,7 @@ export const en: Dict = {
 
   'social.title': 'Check social handles',
   'social.desc':
-    'Is the same name free on major platforms? GitHub and TikTok are checked live; the others get honest “unknown” with a manual link.',
+    'Is the same name free on major platforms? GitHub and TikTok are checked live; every platform resolves through your optional CORS proxy (Settings); without it, CORS-blocked networks show honest “unknown” with a manual link. GitHub’s anonymous API is limited to 60 requests/hour per IP — the proxy lifts that too.',
   'social.placeholder': 'username',
   'social.check': 'Check',
   'social.free': 'Free',
