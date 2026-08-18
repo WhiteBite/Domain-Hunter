@@ -348,7 +348,7 @@
       <h3>
         {t('gen.tray.title')}
         {#if candidates.length > 0}
-          <span class="count-badge">{candidates.length}</span>
+          <span class="count-badge" aria-live="polite">{candidates.length}</span>
         {/if}
       </h3>
       <div class="controls">
@@ -516,7 +516,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    max-width: 980px;
+    max-width: 1120px;
   }
 
   h2 {

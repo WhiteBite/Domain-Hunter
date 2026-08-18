@@ -574,6 +574,21 @@
   tr.available:hover {
     background: color-mix(in srgb, var(--green-soft) 80%, transparent);
   }
+  @media (max-width: 700px) {
+    .domain-cell {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: var(--bg-elevated);
+      box-shadow: 1px 0 0 var(--border);
+    }
+    tr.available .domain-cell {
+      background: var(--green-soft);
+    }
+    tbody tr:hover .domain-cell {
+      background: var(--bg-sunken);
+    }
+  }
   td {
     padding: var(--space-2) var(--space-3);
     vertical-align: middle;
