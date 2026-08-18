@@ -33,6 +33,8 @@ export const ALL_TESTIDS = [
   'check-button-share', // share button
   'check-button-csv', // CSV export button
   'check-hint-strip', // hint strip container (role=note)
+  'check-panel-toggle', // left input panel collapse/expand toggle
+  'history-clear', // clear history button
 
   // ---- DomainInput.svelte ----
   'check-input-domains', // domain textarea
@@ -69,7 +71,12 @@ export const ALL_TESTIDS = [
   'results-filter-available', // filter: available
   'results-filter-taken', // filter: taken
   'results-filter-problems', // filter: problems
+  'results-filter-favorites', // filter: favorites
   'results-filter-suggest-available', // suggest-available shortcut
+  'results-search', // results search input
+  'results-select-all', // select-all-visible checkbox (thead)
+  'results-copy-selected', // copy selected domains button
+  'results-copy-favorites', // copy all favorites button
   'results-sort-name', // sort by name
   'results-sort-status', // sort by status
   'results-sort-price', // sort by first-year price
@@ -139,6 +146,9 @@ export const DYNAMIC_TESTID_PREFIXES = [
   // ---- ResultsTable.svelte ----
   'results-row-', // result rows: results-row-{domain}
   'results-row-link-', // domain links: results-row-link-{domain}
+  'results-row-fav-', // favorite star buttons: results-row-fav-{domain}
+  'results-row-select-', // multi-select checkboxes: results-row-select-{domain}
+  'history-entry-', // history restore buttons: history-entry-{index}
   'results-row-copy-', // copy buttons: results-row-copy-{domain}
   'results-row-recheck-', // recheck buttons: results-row-recheck-{domain}
   'results-row-detail-', // detail buttons: results-row-detail-{domain}
@@ -148,12 +158,15 @@ export const DYNAMIC_TESTID_PREFIXES = [
   // ---- GeneratorsTab.svelte ----
   'gen-toggle-', // tech toggle checkboxes: gen-toggle-{key} (combinator|mutations|hacks|syllables)
   'gen-tray-chip-', // tray chips: gen-tray-chip-{name}
+  'gen-tray-fav-', // tray chip favorite stars: gen-tray-fav-{name}
+  'gen-more-', // tray section show more/less: gen-more-{section}
   'gen-theme-chip-', // theme category chips: gen-theme-chip-{id}
   'gen-theme-word-', // theme word buttons: gen-theme-word-{word}
   'gen-set-load-', // saved set load buttons: gen-set-load-{name}
   'gen-set-delete-', // saved set delete buttons: gen-set-delete-{name}
 
   // ---- DropsTab.svelte ----
+  'drops-row-fav-', // drops favorite stars: drops-row-fav-{domain}
   'drops-row-copy-', // drops copy buttons: drops-row-copy-{domain}
   'drops-row-add-', // drops add buttons: drops-row-add-{domain}
 
