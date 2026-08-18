@@ -121,7 +121,7 @@ export const en: Dict = {
   'check.tlds.clearSel': 'Clear selection',
   'check.tlds.unstable':
     'This zone’s RDAP responded unstably during the last automated check',
-  'check.share.run': 'Shift+click — copy a link with auto-start',
+  'check.share.run': 'The link opens with the check already running',
   'results.showAvailable': 'Show available ({n})',
   'results.buy.at': 'Buy at {registrar} · {price}',
   'results.detail.aria': 'Where to buy and premium info',

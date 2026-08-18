@@ -62,7 +62,7 @@
         if (valid.length > 0) selectedTlds.set(valid);
       }
       clearShare();
-      if (shared.run) pendingShareRun.set(true);
+      if (shared.q || shared.run) pendingShareRun.set(true);
     }
   });
 
@@ -104,14 +104,14 @@
     }
   }
 
-  async function handleShare(e: MouseEvent) {
+  async function handleShare() {
     const base = location.href.split('#')[0];
     const url =
       base +
       encodeShare({
         q: get(checkInput),
         tlds: get(selectedTlds),
-        run: e.shiftKey,
+        run: true,
       });
     const ok = await copyText(url);
     if (ok) {
@@ -167,7 +167,7 @@
       <span class="freshness" title={t('settings.currency')}>{$settings.currency}</span>
       <button
         class="action"
-        onclick={(e) => handleShare(e)}
+        onclick={() => void handleShare()}
         type="button"
         disabled={!hasResults}
         title={shareCopied ? t('results.share.copied') : `${t('results.share')} · ${t('check.share.run')}`}

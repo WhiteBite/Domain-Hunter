@@ -122,7 +122,7 @@ export const ru: Dict = {
   'check.tlds.clearSel': 'Сбросить выбор',
   'check.tlds.unstable':
     'RDAP этой зоны нестабильно отвечал при последней автопроверке',
-  'check.share.run': 'Shift+клик — скопировать ссылку с автозапуском',
+  'check.share.run': 'Ссылка открывается с уже запущенной проверкой',
   'results.showAvailable': 'Показать свободные ({n})',
   'results.buy.at': 'Купить у {registrar} · {price}',
   'results.detail.aria': 'Где купить и информация о премиуме',
