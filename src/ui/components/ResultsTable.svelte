@@ -355,6 +355,10 @@
   function registrarName(id: string): string {
     return registrars.find((r) => r.id === id)?.name ?? id;
   }
+
+  function sanitizeId(s: string): string {
+    return s.replace(/[^a-zA-Z0-9]/g, '-');
+  }
 </script>
 
 {#if !hasResults}
@@ -363,24 +367,24 @@
   <div class="results">
     <div class="toolbar">
       <div class="filters" role="group" aria-label={t('results.title')}>
-        <button class="filter" class:active={filter === 'all'} onclick={() => (filter = 'all')} type="button">
+        <button class="filter" class:active={filter === 'all'} onclick={() => (filter = 'all')} type="button" data-testid="results-filter-all">
           {t('results.filters.all')}
         </button>
-        <button class="filter" class:active={filter === 'available'} onclick={() => (filter = 'available')} type="button">
+        <button class="filter" class:active={filter === 'available'} onclick={() => (filter = 'available')} type="button" data-testid="results-filter-available">
           {t('results.filters.available')}
         </button>
-        <button class="filter" class:active={filter === 'taken'} onclick={() => (filter = 'taken')} type="button">
+        <button class="filter" class:active={filter === 'taken'} onclick={() => (filter = 'taken')} type="button" data-testid="results-filter-taken">
           {t('results.filters.taken')}
         </button>
-        <button class="filter" class:active={filter === 'problems'} onclick={() => (filter = 'problems')} type="button">
+        <button class="filter" class:active={filter === 'problems'} onclick={() => (filter = 'problems')} type="button" data-testid="results-filter-problems">
           {t('results.filters.problems')}
         </button>
       </div>
-      <span class="count" aria-live="polite">
+      <span class="count" aria-live="polite" data-testid="results-showing-count">
         {t('results.showing', { shown: visible.length, total: sorted.length })}
       </span>
       {#if $runState.phase === 'done' && filter === 'all' && availableTotal > 0}
-        <button class="filter suggest" type="button" onclick={() => (filter = 'available')}>
+        <button class="filter suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
           {t('results.showAvailable', { n: availableTotal })}
         </button>
       {/if}
@@ -391,31 +395,31 @@
         <thead>
           <tr>
             <th aria-sort={ariaSort('name')}>
-              <button class="sort-btn" onclick={() => toggleSort('name')} type="button">
+              <button class="sort-btn" onclick={() => toggleSort('name')} type="button" data-testid="results-sort-name">
                 {t('results.sort.name')}
                 <span class="sort-arrow" class:visible={sortKey === 'name'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
             <th aria-sort={ariaSort('status')}>
-              <button class="sort-btn" onclick={() => toggleSort('status')} type="button">
+              <button class="sort-btn" onclick={() => toggleSort('status')} type="button" data-testid="results-sort-status">
                 {t('results.col.status')}
                 <span class="sort-arrow" class:visible={sortKey === 'status'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
             <th aria-sort={ariaSort('price')}>
-              <button class="sort-btn" onclick={() => toggleSort('price')} type="button">
+              <button class="sort-btn" onclick={() => toggleSort('price')} type="button" data-testid="results-sort-price">
                 {t('results.col.price')}
                 <span class="sort-arrow" class:visible={sortKey === 'price'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
             <th aria-sort={ariaSort('renew')}>
-              <button class="sort-btn" onclick={() => toggleSort('renew')} type="button">
+              <button class="sort-btn" onclick={() => toggleSort('renew')} type="button" data-testid="results-sort-renew">
                 {t('results.col.renew')}
                 <span class="sort-arrow" class:visible={sortKey === 'renew'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
             <th aria-sort={ariaSort('tco')}>
-              <button class="sort-btn" onclick={() => toggleSort('tco')} type="button" title={t('tooltip.tco')}>
+              <button class="sort-btn" onclick={() => toggleSort('tco')} type="button" title={t('tooltip.tco')} data-testid="results-sort-tco">
                 {t('results.col.tco')}
                 <span class="sort-arrow" class:visible={sortKey === 'tco'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
@@ -430,7 +434,7 @@
             {@const coupon = couponFor(row.result.tld)}
             {@const trap = row.best ? isPromoTrap(row.best.entry) : false}
             {@const promo = row.firstYear != null && isBelowFloor(row.result.tld, row.firstYear)}
-            <tr class:available={isAvail}>
+            <tr class:available={isAvail} data-testid={`results-row-${sanitizeId(row.result.domain)}`}>
               <td class="domain-cell">
                 {#if buy}
                   <a
@@ -439,6 +443,7 @@
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={t('results.domain.aria', { domain: row.result.domain, registrar: registrarFor(row.result.tld).registrar?.name ?? '' })}
+                    data-testid={`results-row-link-${sanitizeId(row.result.domain)}`}
                   >
                     {row.result.domain}
                   </a>
@@ -481,6 +486,7 @@
                     type="button"
                     aria-label={t('results.copy.aria', { domain: row.result.domain })}
                     title={copied.has(row.result.domain) ? t('results.copied') : t('results.copy')}
+                    data-testid={`results-row-copy-${sanitizeId(row.result.domain)}`}
                   >
                     {#if copied.has(row.result.domain)}
                       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -495,6 +501,7 @@
                     disabled={rechecking.has(row.result.domain)}
                     aria-label={t('results.recheck.aria', { domain: row.result.domain })}
                     title={t('results.recheck')}
+                    data-testid={`results-row-recheck-${sanitizeId(row.result.domain)}`}
                   >
                     <svg class:spin={rechecking.has(row.result.domain)} viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v3h-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
                   </button>
@@ -506,6 +513,7 @@
                       type="button"
                       aria-label={t('results.detail.aria')}
                       title={t('results.detail.aria')}
+                      data-testid={`results-row-detail-${sanitizeId(row.result.domain)}`}
                     >
                       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 7.4v3.2M8 5.2v.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
                     </button>
@@ -525,6 +533,7 @@
                             })
                           : t('results.buy')
                       }
+                      data-testid={`results-row-buy-${sanitizeId(row.result.domain)}`}
                     >
                       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     </a>
@@ -564,7 +573,7 @@
                         </span>
                       {/if}
                       {#if d.url}
-                        <a class="detail-buy" href={d.url} target="_blank" rel="noopener noreferrer">
+                        <a class="detail-buy" href={d.url} target="_blank" rel="noopener noreferrer" data-testid={`results-row-detail-buy-${sanitizeId(row.result.domain)}`}>
                           {t('results.detail.buy')}
                         </a>
                       {/if}

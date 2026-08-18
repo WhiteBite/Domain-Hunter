@@ -71,8 +71,9 @@
       autocomplete="off"
       spellcheck="false"
       aria-label={t('social.placeholder')}
+      data-testid="social-input-handle"
     />
-    <button onclick={run} disabled={!valid || running} type="button">
+    <button onclick={run} disabled={!valid || running} type="button" data-testid="social-button-check">
       {t('social.check')}
     </button>
   </div>
@@ -97,6 +98,7 @@
             href={card.profileUrl}
             target="_blank"
             rel="noopener noreferrer"
+            data-testid={`social-card-link-${card.id}`}
           >
             {t('social.open')}
           </a>

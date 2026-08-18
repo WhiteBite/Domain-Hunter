@@ -160,6 +160,7 @@
         id="theme"
         value={$settings.theme}
         onchange={(e) => patch('theme', e.currentTarget.value as Settings['theme'])}
+        data-testid="settings-select-theme"
       >
         <option value="system">{t('theme.system')}</option>
         <option value="light">{t('theme.light')}</option>
@@ -174,6 +175,7 @@
         id="lang"
         value={$settings.lang}
         onchange={(e) => patch('lang', e.currentTarget.value as Settings['lang'])}
+        data-testid="settings-select-lang"
       >
         <option value="en">English</option>
         <option value="ru">Русский</option>
@@ -187,6 +189,7 @@
         id="currency"
         value={$settings.currency}
         onchange={(e) => patch('currency', e.currentTarget.value as Settings['currency'])}
+        data-testid="settings-select-currency"
       >
         <option value="USD">USD ($)</option>
         <option value="RUB">RUB (₽)</option>
@@ -209,6 +212,7 @@
             step="0.01"
             value={$settings.rates.RUB}
             onchange={(e) => patchRate('RUB', Number(e.currentTarget.value))}
+            data-testid="settings-input-rate-rub"
           />
         </label>
         <label class="inline">
@@ -219,6 +223,7 @@
             step="0.01"
             value={$settings.rates.EUR}
             onchange={(e) => patchRate('EUR', Number(e.currentTarget.value))}
+            data-testid="settings-input-rate-eur"
           />
         </label>
       </span>
@@ -242,6 +247,7 @@
         max="12"
         value={$settings.concurrency}
         oninput={(e) => patch('concurrency', Number(e.currentTarget.value))}
+        data-testid="settings-range-concurrency"
       />
     </div>
     <div class="row">
@@ -256,6 +262,7 @@
         max="168"
         value={$settings.cacheTtlHours}
         onchange={(e) => patch('cacheTtlHours', Math.max(1, Number(e.currentTarget.value)))}
+        data-testid="settings-input-ttl"
       />
     </div>
     <div class="row">
@@ -269,6 +276,7 @@
         placeholder="https://your-worker.workers.dev/"
         value={$settings.proxyUrl}
         oninput={(e) => patch('proxyUrl', e.currentTarget.value)}
+        data-testid="settings-input-proxy"
       />
     </div>
     <div class="row">
@@ -278,7 +286,7 @@
         {#if ghUserCode}
           <p class="hint">
             {t('settings.gh.code', { code: ghUserCode })}
-            <a href={ghVerifyUri} target="_blank" rel="noopener noreferrer">
+            <a href={ghVerifyUri} target="_blank" rel="noopener noreferrer" data-testid="settings-link-github-verify">
               {t('settings.gh.open')}
             </a>
           </p>
@@ -287,7 +295,7 @@
       {#if $settings.githubToken}
         <div class="gh-box">
           <span>{ghUser ? t('settings.gh.connected', { name: ghUser }) : '…'}</span>
-          <button class="btn" type="button" onclick={disconnectGithub}>
+          <button class="btn" type="button" onclick={disconnectGithub} data-testid="settings-button-github-disconnect">
             {t('settings.gh.disconnect')}
           </button>
         </div>
@@ -300,12 +308,14 @@
             spellcheck="false"
             placeholder="ghp_… / github_pat_…"
             oninput={(e) => patch('githubToken', e.currentTarget.value.trim())}
+            data-testid="settings-input-github-token"
           />
           <button
             class="btn"
             type="button"
             disabled={ghBusy || !$settings.proxyUrl}
             onclick={() => void connectGithub()}
+            data-testid="settings-button-github-connect"
           >
             {ghBusy ? t('settings.gh.waiting') : t('settings.gh.connect')}
           </button>
@@ -320,13 +330,14 @@
   <div class="card">
     <h3>{t('settings.data')}</h3>
     <div class="actions">
-      <button class="btn" onclick={exportData}>{t('settings.export')}</button>
+      <button class="btn" onclick={exportData} data-testid="settings-button-export">{t('settings.export')}</button>
       <label class="btn file-btn">
         {t('settings.import')}
         <input
           type="file"
           accept="application/json,.json"
           hidden
+          data-testid="settings-input-import"
           onchange={(e) => {
             const file = e.currentTarget.files?.[0];
             if (file) void importData(file);
@@ -334,8 +345,8 @@
           }}
         />
       </label>
-      <button class="btn danger" onclick={clearData}>{t('settings.clear')}</button>
-      <button class="btn ghost" onclick={resetDefaults}>{t('settings.reset')}</button>
+      <button class="btn danger" onclick={clearData} data-testid="settings-button-clear">{t('settings.clear')}</button>
+      <button class="btn ghost" onclick={resetDefaults} data-testid="settings-button-reset">{t('settings.reset')}</button>
     </div>
     {#if importError}
       <p class="error">{importError}</p>

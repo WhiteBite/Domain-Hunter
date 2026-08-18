@@ -57,8 +57,8 @@
   });
 </script>
 
-<a class="skip-link" href="#main-content">{t('a11y.skip')}</a>
-<div class="shell">
+<a class="skip-link" href="#main-content" data-testid="app-skip-link">{t('a11y.skip')}</a>
+<div class="shell" data-testid="app-shell">
   <header class="header">
     <div class="header-inner">
       <div class="brand">
@@ -72,10 +72,10 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick={toggleLang} aria-label={t('lang.label')} title={t('lang.label')}>
+        <button class="icon-btn" onclick={toggleLang} aria-label={t('lang.label')} title={t('lang.label')} data-testid="app-lang-toggle">
           {current.lang === 'en' ? 'RU' : 'EN'}
         </button>
-        <button class="icon-btn" onclick={toggleTheme} aria-label={t('theme.label')} title={t('theme.label')}>
+        <button class="icon-btn" onclick={toggleTheme} aria-label={t('theme.label')} title={t('theme.label')} data-testid="app-theme-toggle">
           <svg class="theme-icon icon-moon" viewBox="0 0 16 16" aria-hidden="true">
             <path
               d="M13.2 9.6A5.8 5.8 0 0 1 6.4 2.8a5.8 5.8 0 1 0 6.8 6.8Z"
@@ -107,6 +107,7 @@
           class:active={tab === tabDef.id}
           aria-selected={tab === tabDef.id}
           onclick={() => selectTab(tabDef.id)}
+          data-testid={`app-tab-${tabDef.id}`}
         >
           {t(tabDef.labelKey)}
         </button>
@@ -132,7 +133,7 @@
 
   <footer class="footer">
     <span>{t('footer.note')}</span>
-    <a href="https://github.com/WhiteBite/Domain-Hunter" target="_blank" rel="noopener noreferrer">
+    <a href="https://github.com/WhiteBite/Domain-Hunter" target="_blank" rel="noopener noreferrer" data-testid="app-footer-github">
       GitHub
     </a>
   </footer>

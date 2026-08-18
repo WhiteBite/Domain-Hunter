@@ -33,7 +33,7 @@
 </script>
 
 {#if $runState.phase !== 'idle' && $runState.total > 0}
-  <div class="progress" id="run-progress" tabindex="-1" role="status" aria-live="polite" aria-atomic="true">
+  <div class="progress" id="run-progress" tabindex="-1" role="status" aria-live="polite" aria-atomic="true" data-testid="check-bar-progress">
     <div class="bar" role="progressbar" aria-valuenow={$runState.done} aria-valuemin="0" aria-valuemax={$runState.total}>
       <div class="fill" style="width: {pct}%"></div>
     </div>

@@ -104,6 +104,7 @@
       placeholder={t('check.tlds.search')}
       bind:value={search}
       aria-label={t('check.tlds.search')}
+      data-testid="tld-input-search"
     />
     <div class="presets" role="group" aria-label={t('check.tlds.title')}>
       <button
@@ -111,6 +112,7 @@
         class:active={activePreset === 'popular'}
         onclick={() => applyPreset('popular')}
         type="button"
+        data-testid="tld-preset-popular"
       >
         {t('check.tlds.presets.popular')}
       </button>
@@ -119,6 +121,7 @@
         class:active={activePreset === 'cheapest'}
         onclick={() => applyPreset('cheapest')}
         type="button"
+        data-testid="tld-preset-cheapest"
       >
         {t('check.tlds.presets.cheapest')}
       </button>
@@ -127,6 +130,7 @@
         class:active={activePreset === 'all'}
         onclick={() => applyPreset('all')}
         type="button"
+        data-testid="tld-preset-all"
       >
         {t('check.tlds.presets.all')}
       </button>
@@ -145,6 +149,7 @@
         aria-selected={selected}
         onclick={() => toggle(cfg.tld)}
         type="button"
+        data-testid={`tld-chip-${cfg.tld}`}
         title={
           flags?.reputationNote
             ? t('check.tlds.spamNote')
@@ -179,10 +184,10 @@
     {/each}
   </div>
 
-  <div class="selected-count" aria-live="polite">
+  <div class="selected-count" aria-live="polite" data-testid="tld-selected-count">
     {t('check.tlds.selected', { n: $selectedTlds.length })}
     {#if $selectedTlds.length > 0}
-      <button class="clear-sel" type="button" onclick={() => selectedTlds.set([])}>
+      <button class="clear-sel" type="button" onclick={() => selectedTlds.set([])} data-testid="tld-button-clear">
         {t('check.tlds.clearSel')}
       </button>
     {/if}

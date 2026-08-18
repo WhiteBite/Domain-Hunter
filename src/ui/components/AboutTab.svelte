@@ -29,6 +29,7 @@
       href="https://github.com/WhiteBite/Domain-Hunter"
       target="_blank"
       rel="noopener noreferrer"
+      data-testid="about-link-github"
     >
       {t('about.github')}
     </a>

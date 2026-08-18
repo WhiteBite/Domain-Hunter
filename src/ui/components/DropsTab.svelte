@@ -90,6 +90,10 @@
   $effect(() => {
     return () => clearTimeout(toastTimer);
   });
+
+  function sanitizeId(s: string): string {
+    return s.replace(/[^a-zA-Z0-9]/g, '-');
+  }
 </script>
 
 <section class="drops">
@@ -103,8 +107,9 @@
       bind:value={query}
       placeholder={t('drops.search')}
       aria-label={t('drops.search')}
+      data-testid="drops-input-search"
     />
-    <select bind:value={tldFilter} aria-label={t('drops.search')}>
+    <select bind:value={tldFilter} aria-label={t('drops.search')} data-testid="drops-select-tld">
       <option value="">{t('check.tlds.presets.all')}</option>
       {#each tldOptions as opt (opt.tld)}
         <option value={opt.tld}>.{opt.tld} ({opt.n})</option>
@@ -117,6 +122,7 @@
       type="button"
       onclick={addAll}
       disabled={filtered.length === 0}
+      data-testid="drops-button-add-all"
     >
       {t('drops.addAll')}
     </button>
@@ -130,10 +136,10 @@
         <li class="row">
           <span class="domain" aria-label={dom.d + '.' + dom.tld}>{dom.d}<span class="tld">.{dom.tld}</span></span>
           <span class="row-actions">
-            <button class="btn ghost sm" type="button" onclick={() => copyDomain(dom)}>
+            <button class="btn ghost sm" type="button" onclick={() => copyDomain(dom)} data-testid={`drops-row-copy-${sanitizeId(dom.d + '.' + dom.tld)}`}>
               {t('results.copy')}
             </button>
-            <button class="btn sm" type="button" onclick={() => addOne(dom)}>
+            <button class="btn sm" type="button" onclick={() => addOne(dom)} data-testid={`drops-row-add-${sanitizeId(dom.d + '.' + dom.tld)}`}>
               {t('drops.add')}
             </button>
           </span>

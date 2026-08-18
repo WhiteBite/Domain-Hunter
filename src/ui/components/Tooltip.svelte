@@ -18,9 +18,10 @@
   onfocusin={() => (visible = true)}
   onfocusout={() => (visible = false)}
   onkeydown={onKeydown}
+  data-testid="tooltip-trigger"
 >
   <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-  <span class="tip-trigger" tabindex="0" aria-describedby={visible ? tipId : undefined}>
+  <span class="tip-trigger" tabindex="0" aria-describedby={visible ? tipId : undefined} data-testid="tooltip-trigger-inner">
     {@render children()}
   </span>
   {#if visible && text}

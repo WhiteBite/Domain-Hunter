@@ -40,6 +40,7 @@
     spellcheck="false"
     autocomplete="off"
     aria-label={t('check.title')}
+    data-testid="check-input-domains"
     onkeydown={(e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
@@ -49,9 +50,9 @@
   ></textarea>
   <div class="meta">
     <span class="hint">{t('check.input.hint')} · {t('check.input.ctrlEnter')}</span>
-    <div class="preview" aria-live="polite">
+    <div class="preview" aria-live="polite" data-testid="check-preview">
       {#if parsed.names.length > 0}
-        <span class="count" class:warn={tooMany}>
+        <span class="count" class:warn={tooMany} data-testid="check-preview-count">
           {t('check.input.parsed', {
             names: parsed.names.length,
             zones: $selectedTlds.length,
@@ -59,10 +60,12 @@
           })}
         </span>
         {#if parsed.invalid > 0}
-          <span class="invalid">{t('check.input.invalid', { n: parsed.invalid })}</span>
+          <span class="invalid" data-testid="check-preview-invalid"
+            >{t('check.input.invalid', { n: parsed.invalid })}</span
+          >
         {/if}
         {#if tooMany}
-          <span class="warn-text">
+          <span class="warn-text" data-testid="check-preview-warn">
             {t('check.input.tooMany', { max: overNames ? MAX_NAMES : MAX_CANDIDATES })}
           </span>
         {/if}

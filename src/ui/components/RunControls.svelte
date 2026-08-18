@@ -303,7 +303,7 @@
 <div class="run-controls">
   <div class="controls-row">
     {#if isRunning}
-      <button class="btn stop" onclick={stopRun} type="button">
+      <button class="btn stop" onclick={stopRun} type="button" data-testid="check-button-stop">
         <svg class="stop-icon" viewBox="0 0 16 16" aria-hidden="true">
           <rect x="4" y="4" width="8" height="8" rx="1" fill="currentColor" />
         </svg>
@@ -316,6 +316,7 @@
         type="button"
         disabled={!canStart}
         title={canStart ? undefined : t('check.start.disabled')}
+        data-testid="check-button-start"
       >
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <path d="M5 3l8 5-8 5V3z" fill="currentColor" />
@@ -325,7 +326,7 @@
     {/if}
 
     <label class="checkbox">
-      <input type="checkbox" bind:checked={ignoreCache} />
+      <input type="checkbox" bind:checked={ignoreCache} data-testid="check-toggle-ignore-cache" />
       <Tooltip text={t('check.run.ignoreCache.tooltip')}>
         <span>{t('check.run.ignoreCache')}</span>
       </Tooltip>

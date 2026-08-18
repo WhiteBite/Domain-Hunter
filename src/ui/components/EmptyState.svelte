@@ -14,7 +14,7 @@
   </svg>
   <h3 class="title">{t('results.empty.title')}</h3>
   <p class="body">{t('results.empty.body')}</p>
-  <button class="cta" onclick={goGenerators} type="button">
+  <button class="cta" onclick={goGenerators} type="button" data-testid="check-button-empty-cta">
     {t('tab.generators')}
     <svg class="arrow" viewBox="0 0 16 16" aria-hidden="true">
       <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />

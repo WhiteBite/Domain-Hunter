@@ -52,6 +52,7 @@
   aria-label={t(labelKey)}
   title={tooltipKey ? t(tooltipKey) : undefined}
   tabindex={tooltipKey ? 0 : undefined}
+  data-testid={`status-badge-${status}`}
 >
   <span class="dot" aria-hidden="true"></span>
   <span class="label">{t(labelKey)}</span>

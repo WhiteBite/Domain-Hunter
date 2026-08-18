@@ -274,6 +274,10 @@
   }
 
   onDestroy(() => clearTimeout(toastTimer));
+
+  function sanitizeId(s: string): string {
+    return s.replace(/[^a-zA-Z0-9]/g, '-');
+  }
 </script>
 
 <section class="generators">
@@ -290,6 +294,7 @@
           type="text"
           bind:value={keywords}
           placeholder={t('gen.idea.keywords.placeholder')}
+          data-testid="gen-input-keywords"
           onkeydown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
@@ -298,7 +303,7 @@
           }}
         />
       </label>
-      <button class="btn primary big" type="button" onclick={generateAll}>
+      <button class="btn primary big" type="button" onclick={generateAll} data-testid="gen-button-generate">
         {t('gen.generate.all')}
       </button>
     </div>
@@ -306,7 +311,7 @@
     <div class="techs" role="group" aria-label={t('gen.idea.techniques')}>
       {#each techToggles as toggle}
         <label class="tech" class:active={tech[toggle.key]}>
-          <input type="checkbox" bind:checked={tech[toggle.key]} />
+          <input type="checkbox" bind:checked={tech[toggle.key]} data-testid={`gen-toggle-${toggle.key}`} />
           <span>{t(toggle.labelKey)}</span>
         </label>
       {/each}
@@ -317,16 +322,16 @@
     {/if}
 
     <details class="params">
-      <summary>{t('gen.params')}</summary>
+      <summary data-testid="gen-summary-params">{t('gen.params')}</summary>
       <div class="params-body">
         <label>
           {t('gen.combinator.affixes')}
-          <textarea rows="3" bind:value={affixes}></textarea>
+          <textarea rows="3" bind:value={affixes} data-testid="gen-textarea-affixes"></textarea>
         </label>
         <div class="params-row">
           <label class="inline">
             {t('gen.combinator.mode')}
-            <select bind:value={mode}>
+            <select bind:value={mode} data-testid="gen-select-mode">
               <option value="prefix">{t('gen.combinator.mode.prefix')}</option>
               <option value="suffix">{t('gen.combinator.mode.suffix')}</option>
               <option value="both">{t('gen.combinator.mode.both')}</option>
@@ -334,12 +339,13 @@
           </label>
           <label class="inline">
             {t('gen.syllables.count')}
-            <input type="number" min="1" max="200" bind:value={syllableCount} />
+            <input type="number" min="1" max="200" bind:value={syllableCount} data-testid="gen-input-syllable-count" />
           </label>
           <button
             class="btn ghost"
             type="button"
             onclick={() => (affixes = DEFAULT_AFFIXES.join(', '))}
+            data-testid="gen-button-affixes-reset"
           >
             {t('gen.combinator.reset')}
           </button>
@@ -354,7 +360,7 @@
       <h3>
         {t('gen.tray.title')}
         {#if candidates.length > 0}
-          <span class="count-badge" aria-live="polite">{candidates.length}</span>
+          <span class="count-badge" aria-live="polite" data-testid="gen-tray-count">{candidates.length}</span>
         {/if}
       </h3>
       <div class="controls">
@@ -364,12 +370,13 @@
           bind:value={trayFilter}
           placeholder={t('gen.tray.filter')}
           aria-label={t('gen.tray.filter')}
+          data-testid="gen-input-tray-filter"
         />
-        <select class="sort" bind:value={traySort} aria-label={t('gen.tray.sort')}>
+        <select class="sort" bind:value={traySort} aria-label={t('gen.tray.sort')} data-testid="gen-select-tray-sort">
           <option value="added">{t('gen.tray.sort.added')}</option>
           <option value="az">{t('gen.tray.sort.az')}</option>
         </select>
-        <button class="btn primary" type="button" onclick={checkNow} disabled={candidates.length === 0}>
+        <button class="btn primary" type="button" onclick={checkNow} disabled={candidates.length === 0} data-testid="gen-button-check-now">
           {t('gen.output.check')}
         </button>
       </div>
@@ -381,8 +388,9 @@
         bind:value={newSetName}
         placeholder={t('gen.themes.newSet')}
         aria-label={t('gen.tray.save')}
+        data-testid="gen-input-set-name"
       />
-      <button class="btn" type="button" onclick={saveSet} disabled={candidates.length === 0}>
+      <button class="btn" type="button" onclick={saveSet} disabled={candidates.length === 0} data-testid="gen-button-save-set">
         {t('gen.tray.save')}
       </button>
       <button
@@ -390,6 +398,7 @@
         type="button"
         onclick={() => genCandidates.set([])}
         disabled={candidates.length === 0}
+        data-testid="gen-button-clear-tray"
       >
         {t('gen.tray.clear')}
       </button>
@@ -398,17 +407,18 @@
         type="button"
         onclick={() => void copyList()}
         disabled={candidates.length === 0}
+        data-testid="gen-button-copy-tray"
       >
         {t('gen.tray.copy')}
       </button>
     </div>
     {#if candidates.length > 0}
-      <p class="muted projected">
+      <p class="muted projected" data-testid="gen-tray-projected">
         {t('gen.tray.projected', { n: projectedChecks, zones: $selectedTlds.length })}
       </p>
     {/if}
     {#if candidates.length === 0}
-      <p class="muted">{t('gen.tray.empty')}</p>
+      <p class="muted" data-testid="gen-tray-empty">{t('gen.tray.empty')}</p>
     {:else}
       {#each candidateGroups as group (group.id)}
         <div class="group">
@@ -420,6 +430,7 @@
                 type="button"
                 title={t('gen.tray.remove')}
                 onclick={() => removeCandidate(cand.n)}
+                data-testid={`gen-tray-chip-${sanitizeId(cand.n)}`}
               >
                 {cand.n}
                 <span aria-hidden="true">×</span>
@@ -447,6 +458,7 @@
             type="button"
             class:active={activeThemeId === theme.id}
             onclick={() => (activeThemeId = theme.id)}
+            data-testid={`gen-theme-chip-${theme.id}`}
           >
             {t(theme.labelKey)}
           </button>
@@ -462,6 +474,7 @@
               title={word.hint ?? ''}
               onclick={() =>
                 hasCandidate(word.w) ? removeCandidate(word.w) : addCandidates([word.w], 'themes')}
+              data-testid={`gen-theme-word-${sanitizeId(word.w)}`}
             >
               {word.w}
             </button>
@@ -473,17 +486,18 @@
 
   <!-- Saved sets -->
   <details class="card sets-card">
-    <summary class="sets-summary">
+    <summary class="sets-summary" data-testid="gen-summary-sets">
       <span>{t('gen.themes.custom')}</span>
       <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-      <span class="controls" onclick={(e) => e.stopPropagation()}>
-        <button class="btn" type="button" onclick={exportSets}>{t('gen.themes.export')}</button>
+      <span class="controls" onclick={(e) => e.stopPropagation()} data-testid="gen-sets-controls">
+        <button class="btn" type="button" onclick={exportSets} data-testid="gen-button-export-sets">{t('gen.themes.export')}</button>
         <label class="btn file-btn">
           {t('gen.themes.import')}
           <input
             type="file"
             accept="application/json,.json"
             hidden
+            data-testid="gen-input-import-sets"
             onchange={(e) => {
               const file = e.currentTarget.files?.[0];
               if (file) void importSets(file);
@@ -505,10 +519,10 @@
             <span class="set-name-label">{set.name}</span>
             <span class="muted">{t('gen.output.count', { n: set.words.length })}</span>
             <span class="row-actions">
-              <button class="btn" type="button" onclick={() => loadSet(set)}>
+              <button class="btn" type="button" onclick={() => loadSet(set)} data-testid={`gen-set-load-${sanitizeId(set.name)}`}>
                 {t('gen.sets.load')}
               </button>
-              <button class="btn danger" type="button" onclick={() => deleteSet(set.id)}>
+              <button class="btn danger" type="button" onclick={() => deleteSet(set.id)} data-testid={`gen-set-delete-${sanitizeId(set.name)}`}>
                 {t('gen.themes.delete')}
               </button>
             </span>
@@ -519,7 +533,7 @@
   </details>
 
   {#if toast}
-    <div class="toast" role="status">{toast}</div>
+    <div class="toast" role="status" data-testid="gen-toast">{toast}</div>
   {/if}
 </section>
 

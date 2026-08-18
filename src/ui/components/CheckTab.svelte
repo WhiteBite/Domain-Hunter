@@ -130,10 +130,10 @@
         <span>{t('check.run.resume.body', { n: $resumePrompt.pending.length })}</span>
       </div>
       <div class="resume-actions">
-        <button class="btn primary" type="button" onclick={() => resumeAction.set('resume')}>
+        <button class="btn primary" type="button" onclick={() => resumeAction.set('resume')} data-testid="check-button-resume">
           {t('check.run.resume.yes')}
         </button>
-        <button class="btn ghost" type="button" onclick={() => resumeAction.set('discard')}>
+        <button class="btn ghost" type="button" onclick={() => resumeAction.set('discard')} data-testid="check-button-discard">
           {t('check.run.resume.no')}
         </button>
       </div>
@@ -141,13 +141,13 @@
   {/if}
 
   {#if showHint}
-    <div class="hint-strip" role="note">
+    <div class="hint-strip" role="note" data-testid="check-hint-strip">
       <ol class="hint-steps">
         <li>{t('check.hint.1')}</li>
         <li>{t('check.hint.2')}</li>
         <li>{t('check.hint.3')}</li>
       </ol>
-      <button class="hint-dismiss" type="button" onclick={dismissHint}>
+      <button class="hint-dismiss" type="button" onclick={dismissHint} data-testid="check-button-hint-dismiss">
         {t('check.hint.dismiss')}
       </button>
     </div>
@@ -171,6 +171,7 @@
         type="button"
         disabled={!hasResults}
         title={shareCopied ? t('results.share.copied') : `${t('results.share')} · ${t('check.share.run')}`}
+        data-testid="check-button-share"
       >
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <circle cx="4" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -186,6 +187,7 @@
         type="button"
         disabled={!hasResults}
         title={t('results.csv')}
+        data-testid="check-button-csv"
       >
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <path d="M8 2v8M5 7l3 3 3-3M3 13h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
