@@ -303,9 +303,9 @@ test.describe('Cross-cutting features', () => {
     // Decode for content assertions (TextDecoder strips the BOM — fine here)
     const content = new TextDecoder().decode(new Uint8Array(bytes));
 
-    // Header row
+    // Header row (translated — test runs in English locale)
     expect(content).toContain(
-      'domain,status,tld,priceFirstYear,priceRenewal,bestRegistrar,checkedAt',
+      'Domain,Status,TLD,First year,Renewal,Cheapest registrar,Checked at',
     );
 
     // Domain rows with correct statuses

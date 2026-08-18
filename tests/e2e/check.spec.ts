@@ -640,7 +640,8 @@ test.describe('Check tab', () => {
     await bootCheckTab(page);
     await page.locator('[data-testid="check-input-domains"]').fill('google.com');
     await page.locator('[data-testid="check-input-domains"]').press('Control+Enter');
-    await expect(page.locator('[data-testid="check-button-stop"]')).toBeVisible({ timeout: 10_000 });
+    // A fast CI run can finish before a "stop" button poll — assert the outcome instead.
+    await expect(row(page, 'google.com')).toBeVisible({ timeout: 15_000 });
   });
 
   // 24. empty CTA navigates to generators tab
