@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { registry, selectedTlds, settings, pricing } from '../store';
   import { bestEntry, formatPrice, tco3 } from '../../pricing/pricing';
   import { t } from '../../i18n';
@@ -8,6 +9,24 @@
 
   let search = $state('');
   let activePreset = $state<Preset | null>(null);
+  let health = $state<Record<string, { ok?: boolean }>>({});
+
+  onMount(() => {
+    // Zone health snapshot from the weekly CI job (present on Pages only).
+    fetch('./health.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (json && typeof json === 'object' && (json as { tlds?: unknown }).tlds) {
+          health = (json as { tlds: Record<string, { ok?: boolean }> }).tlds;
+        }
+      })
+      .catch(() => {});
+  });
+
+  function isUnstable(tld: string): boolean {
+    const h = health[tld];
+    return h != null && h.ok === false;
+  }
 
   const allTlds = $derived($registry.tlds);
 
@@ -125,9 +144,18 @@
         aria-selected={selected}
         onclick={() => toggle(cfg.tld)}
         type="button"
-        title={flags?.reputationNote ? t('check.tlds.spamNote') : undefined}
+        title={
+          flags?.reputationNote
+            ? t('check.tlds.spamNote')
+            : isUnstable(cfg.tld)
+              ? t('check.tlds.unstable')
+              : undefined
+        }
       >
         <span class="tld">.{cfg.tld}</span>
+        {#if isUnstable(cfg.tld)}
+          <span class="dot-unstable" aria-hidden="true"></span>
+        {/if}
         {#if price}
           <span class="price">{price}</span>
         {/if}
@@ -152,6 +180,11 @@
 
   <div class="selected-count" aria-live="polite">
     {t('check.tlds.selected', { n: $selectedTlds.length })}
+    {#if $selectedTlds.length > 0}
+      <button class="clear-sel" type="button" onclick={() => selectedTlds.set([])}>
+        {t('check.tlds.clearSel')}
+      </button>
+    {/if}
   </div>
 </div>
 
@@ -294,5 +327,26 @@
     font-size: var(--text-xs);
     color: var(--text-tertiary);
     font-weight: 500;
+  }
+  .selected-count {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .clear-sel {
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    padding: 0;
+  }
+  .dot-unstable {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    display: inline-block;
+    flex: none;
   }
 </style>

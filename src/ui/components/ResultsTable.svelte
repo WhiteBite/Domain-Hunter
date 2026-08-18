@@ -1,7 +1,7 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
-  import { results, settings, pricing, registry } from '../store';
+  import { results, settings, pricing, registry, runState } from '../store';
   import type { CheckResult, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
   import {
     bestEntry,
@@ -269,6 +269,18 @@
   // Cache writes go through the shared core cache module (dh:v1:cache).
 
   const hasResults = $derived($results.size > 0);
+
+  const availableTotal = $derived.by(() => {
+    let n = 0;
+    for (const r of $results.values()) {
+      if (r.status === 'available' || r.status === 'probably_available') n += 1;
+    }
+    return n;
+  });
+
+  function registrarName(id: string): string {
+    return registrars.find((r) => r.id === id)?.name ?? id;
+  }
 </script>
 
 {#if !hasResults}
@@ -293,6 +305,11 @@
       <span class="count" aria-live="polite">
         {t('results.showing', { shown: visible.length, total: sorted.length })}
       </span>
+      {#if $runState.phase === 'done' && filter === 'all' && availableTotal > 0}
+        <button class="filter suggest" type="button" onclick={() => (filter = 'available')}>
+          {t('results.showAvailable', { n: availableTotal })}
+        </button>
+      {/if}
     </div>
 
     <div class="table-wrap">
@@ -414,7 +431,14 @@
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={t('results.buy.aria', { domain: row.result.domain })}
-                      title={t('results.buy')}
+                      title={
+                        row.best && row.best.entry.reg != null
+                          ? t('results.buy.at', {
+                              registrar: registrarName(row.best.registrarId),
+                              price: formatPrice(row.best.entry.reg, get(settings)),
+                            })
+                          : t('results.buy')
+                      }
                     >
                       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     </a>
@@ -663,5 +687,25 @@
   .sentinel {
     height: 1px;
     width: 100%;
+  }
+  .table-wrap {
+    max-height: 72vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .table-wrap thead th {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: var(--bg-elevated);
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  .filter.suggest {
+    background: var(--green-soft);
+    border-color: var(--green);
+    color: var(--green);
   }
 </style>

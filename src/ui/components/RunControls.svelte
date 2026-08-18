@@ -9,6 +9,9 @@
     runState,
     results,
     pendingShareRun,
+    resumePrompt,
+    resumeAction,
+    startRequest,
   } from '../store';
   import type {
     CheckResult,
@@ -36,12 +39,14 @@
   let lastSnapshotDone = 0;
 
   let unsubShare: (() => void) | null = null;
+  let unsubResume: (() => void) | null = null;
+  let unsubStart: (() => void) | null = null;
 
   onMount(() => {
     const snap = readJson<RunSnapshot>(KEYS.run);
     if (snap && Array.isArray(snap.pending) && snap.pending.length > 0) {
       resumeSnapshot = snap;
-      showResume = true;
+      resumePrompt.set(snap);
     } else {
       // No interrupted run — honor a share link with run:true.
       unsubShare = pendingShareRun.subscribe((pending) => {
@@ -51,10 +56,26 @@
         }
       });
     }
+
+    unsubResume = resumeAction.subscribe((a) => {
+      if (a === 'resume') resume();
+      else if (a === 'discard') discardResume();
+      if (a) resumeAction.set(null);
+    });
+
+    let lastReq = 0;
+    unsubStart = startRequest.subscribe((n) => {
+      if (n !== lastReq) {
+        lastReq = n;
+        startFromInput();
+      }
+    });
   });
 
   onDestroy(() => {
     unsubShare?.();
+    unsubResume?.();
+    unsubStart?.();
     engine?.destroy();
     engine = null;
   });
@@ -172,6 +193,7 @@
       startedAt: Date.now(),
       elapsedMs: 0,
     });
+    requestAnimationFrame(() => document.getElementById('run-progress')?.focus());
 
     if (remaining.length === 0) {
       runState.update((rs) => ({ ...rs, phase: 'done', elapsedMs: 0 }));
@@ -211,39 +233,27 @@
     if (!resumeSnapshot) return;
     selectedTlds.set(resumeSnapshot.tlds);
     ignoreCache = resumeSnapshot.ignoreCache;
-    showResume = false;
+    resumePrompt.set(null);
     const snap = resumeSnapshot;
     resumeSnapshot = null;
     startRun(snap.pending, snap.tlds, snap.ignoreCache);
   }
 
   function discardResume() {
-    showResume = false;
+    resumePrompt.set(null);
     resumeSnapshot = null;
     removeKey(KEYS.run);
   }
 
   const isRunning = $derived($runState.phase === 'running');
+
+  const canStart = $derived.by(() => {
+    const names = normalizeDomainInput($checkInput).names;
+    return names.length > 0 && $selectedTlds.length > 0;
+  });
 </script>
 
 <div class="run-controls">
-  {#if showResume && resumeSnapshot}
-    <div class="resume-banner" role="alert">
-      <div class="resume-text">
-        <strong>{t('check.run.resume.title')}</strong>
-        <span>{t('check.run.resume.body', { n: resumeSnapshot.pending.length })}</span>
-      </div>
-      <div class="resume-actions">
-        <button class="btn primary" onclick={resume} type="button">
-          {t('check.run.resume.yes')}
-        </button>
-        <button class="btn ghost" onclick={discardResume} type="button">
-          {t('check.run.resume.no')}
-        </button>
-      </div>
-    </div>
-  {/if}
-
   <div class="controls-row">
     {#if isRunning}
       <button class="btn stop" onclick={stopRun} type="button">
@@ -253,7 +263,13 @@
         {t('check.run.stop')}
       </button>
     {:else}
-      <button class="btn primary" onclick={startFromInput} type="button">
+      <button
+        class="btn primary"
+        onclick={startFromInput}
+        type="button"
+        disabled={!canStart}
+        title={canStart ? undefined : t('check.start.disabled')}
+      >
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <path d="M5 3l8 5-8 5V3z" fill="currentColor" />
         </svg>

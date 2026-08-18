@@ -3,7 +3,7 @@
  * Components consume these; persistence helpers live in ui/settings.ts.
  */
 import { writable } from 'svelte/store';
-import type { CheckResult, PricingTable, Settings, TldRegistry } from '../types';
+import type { CheckResult, PricingTable, RunSnapshot, Settings, TldRegistry } from '../types';
 import { DEFAULT_SETTINGS } from '../types';
 import tldsJson from '../config/tlds.json';
 
@@ -57,3 +57,12 @@ export const activeTab = writable<TabId>('check');
 
 /** Set to true when a share link with run:true should auto-start the check. */
 export const pendingShareRun = writable<boolean>(false);
+
+/** Interrupted-run snapshot offered at the top of the Check tab. */
+export const resumePrompt = writable<RunSnapshot | null>(null);
+
+/** Decision from the resume banner, consumed by RunControls. */
+export const resumeAction = writable<'resume' | 'discard' | null>(null);
+
+/** Incremented to request a run start (Ctrl+Enter in the input). */
+export const startRequest = writable<number>(0);

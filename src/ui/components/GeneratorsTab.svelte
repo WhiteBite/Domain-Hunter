@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy } from 'svelte';
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
   import { activeTab, checkInput, registry, pendingShareRun } from '../store';
@@ -11,18 +11,33 @@
   import { themes } from '../../generators/themes';
 
   const TRAY_MAX = 1000;
+  const GEN_PREFS_KEY = 'dh:v1:genprefs';
 
   const DEFAULT_AFFIXES = [
     'app', 'pro', 'hq', 'hub', 'ai', 'io', 'get', 'use', 'my', 'go',
     'try', 'top', 'one', 'lab', 'kit', 'base', 'flow', 'forge', 'nest', 'peak',
   ];
 
+  interface GenPrefs {
+    keywords?: string;
+    tech?: { combinator: boolean; mutations: boolean; hacks: boolean; syllables: boolean };
+    affixes?: string;
+    mode?: CombinatorMode;
+    syllableCount?: number;
+  }
+  const savedPrefs = readJson<GenPrefs>(GEN_PREFS_KEY) ?? {};
+
   // idea
-  let keywords = $state('');
-  let tech = $state({ combinator: true, mutations: true, hacks: true, syllables: true });
-  let affixes = $state(DEFAULT_AFFIXES.join('\n'));
-  let mode = $state<CombinatorMode>('both');
-  let syllableCount = $state(30);
+  let keywords = $state(savedPrefs.keywords ?? '');
+  let tech = $state({
+    combinator: savedPrefs.tech?.combinator ?? true,
+    mutations: savedPrefs.tech?.mutations ?? true,
+    hacks: savedPrefs.tech?.hacks ?? true,
+    syllables: savedPrefs.tech?.syllables ?? true,
+  });
+  let affixes = $state(savedPrefs.affixes ?? DEFAULT_AFFIXES.join(', '));
+  let mode = $state<CombinatorMode>(savedPrefs.mode ?? 'both');
+  let syllableCount = $state(savedPrefs.syllableCount ?? 30);
 
   // combined candidate list — the single output of every technique
   type SrcId = 'combinator' | 'mutations' | 'hacks' | 'syllables' | 'themes' | 'sets';
@@ -71,6 +86,17 @@
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean);
+  }
+
+  function splitList(text: string): string[] {
+    return text
+      .split(/[\s,;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  function savePrefs(): void {
+    writeJson(GEN_PREFS_KEY, { keywords, tech, affixes, mode, syllableCount });
   }
 
   function kws(): string[] {
@@ -126,7 +152,7 @@
   function generateAll(): void {
     const words = kws();
     if (tech.combinator && words.length > 0) {
-      addCandidates(combinator(words, lines(affixes), mode).slice(0, TECH_CAP), 'combinator');
+      addCandidates(combinator(words, splitList(affixes), mode).slice(0, TECH_CAP), 'combinator');
     }
     if (tech.mutations && words.length > 0) {
       const muts: string[] = [];
@@ -143,6 +169,7 @@
       const count = Math.max(1, Math.min(200, syllableCount || 30));
       addCandidates(mixSyllables({ count, seed: Date.now() }), 'syllables');
     }
+    savePrefs();
   }
 
   // candidates actions
@@ -218,12 +245,27 @@
     { key: 'syllables', labelKey: 'gen.syllables.title' },
   ];
 
-  onMount(() => {
-    // Show value immediately: a deterministic sample of syllable names.
-    if (candidates.length === 0) {
-      candidates = mixSyllables({ count: 24, seed: 7 }).map((n) => ({ n, src: 'syllables' as SrcId }));
+  async function copyList(): Promise<void> {
+    const text = candidates.map((c) => c.n).join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(t('results.copied'));
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(t('results.copied'));
+      } catch {
+        // clipboard unavailable
+      }
+      document.body.removeChild(ta);
     }
-  });
+  }
 
   onDestroy(() => clearTimeout(toastTimer));
 </script>
@@ -291,7 +333,7 @@
           <button
             class="btn ghost"
             type="button"
-            onclick={() => (affixes = DEFAULT_AFFIXES.join('\n'))}
+            onclick={() => (affixes = DEFAULT_AFFIXES.join(', '))}
           >
             {t('gen.combinator.reset')}
           </button>
@@ -344,6 +386,14 @@
         disabled={candidates.length === 0}
       >
         {t('gen.tray.clear')}
+      </button>
+      <button
+        class="btn"
+        type="button"
+        onclick={() => void copyList()}
+        disabled={candidates.length === 0}
+      >
+        {t('gen.tray.copy')}
       </button>
     </div>
     {#if candidates.length === 0}

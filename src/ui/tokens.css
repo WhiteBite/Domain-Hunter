@@ -32,7 +32,7 @@
   --radius-full: 999px;
 
   /* layout */
-  --content-max: 1120px;
+  --content-max: 1280px;
 
   /* motion */
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);

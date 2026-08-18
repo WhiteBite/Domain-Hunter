@@ -86,6 +86,22 @@ export const en: Dict = {
   'results.rechecking': 'Re-checking…',
 
   'status.available': 'Available',
+  'app.title.html': 'Domain Hunter — free domain availability checker',
+  'a11y.skip': 'Skip to content',
+  'check.hint.body':
+    '1) Type names or generate them. 2) Pick zones. 3) Press “Check availability” — results with prices stream in instantly.',
+  'check.hint.dismiss': 'Got it',
+  'check.input.ctrlEnter': 'Ctrl+Enter — start the check',
+  'check.start.disabled': 'Enter names and select at least one zone',
+  'check.tlds.clearSel': 'Clear selection',
+  'check.tlds.unstable':
+    'This zone’s RDAP responded unstably during the last automated check',
+  'check.share.run': 'Shift+click — copy a link with auto-start',
+  'results.showAvailable': 'Show available ({n})',
+  'results.buy.at': 'Buy at {registrar} · {price}',
+  'gen.tray.copy': 'Copy list',
+  'settings.reset': 'Reset to defaults',
+  'settings.rate.invalid': 'Enter a positive number',
   'status.probably_available': 'Likely available',
   'status.taken': 'Taken',
   'status.unknown': 'Unknown',
@@ -131,7 +147,7 @@ export const en: Dict = {
 
   'gen.syllables.title': 'Syllable mixer',
   'gen.syllables.desc':
-    'Pronounceable made-up words from syllable banks, filtered by phonotactics and scored for euphony.',
+    'Invents short pronounceable made-up words (like Spotify or Kodak) for unique brand names.',
   'gen.syllables.count': 'How many',
 
   'gen.themes.title': 'Word themes',

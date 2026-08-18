@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { checkInput, selectedTlds } from '../store';
+  import { checkInput, selectedTlds, startRequest } from '../store';
   import { normalizeDomainInput } from '../../core/idn';
   import { t } from '../../i18n';
 
@@ -41,9 +41,15 @@
     spellcheck="false"
     autocomplete="off"
     aria-label={t('check.title')}
+    onkeydown={(e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        startRequest.update((n) => n + 1);
+      }
+    }}
   ></textarea>
   <div class="meta">
-    <span class="hint">{t('check.input.hint')}</span>
+    <span class="hint">{t('check.input.hint')} · {t('check.input.ctrlEnter')}</span>
     <div class="preview" aria-live="polite">
       {#if parsed.names.length > 0}
         <span class="count" class:warn={tooMany}>

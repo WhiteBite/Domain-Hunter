@@ -47,8 +47,13 @@
     settings.set(loadSettings());
     return watchSystemTheme(() => $settings.theme);
   });
+
+  $effect(() => {
+    document.title = t('app.title.html');
+  });
 </script>
 
+<a class="skip-link" href="#main-content">{t('a11y.skip')}</a>
 <div class="shell">
   <header class="header">
     <div class="header-inner">
@@ -104,7 +109,7 @@
     </nav>
   </header>
 
-  <main class="content">
+  <main class="content" id="main-content">
     {#if tab === 'check'}
       <CheckTab />
     {:else if tab === 'generators'}
@@ -125,6 +130,22 @@
 </div>
 
 <style>
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 100;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: var(--space-2) var(--space-4);
+    border-radius: 0 0 var(--radius-md) 0;
+    font-size: var(--text-sm);
+  }
+
+  .skip-link:focus {
+    left: 0;
+  }
+
   .shell {
     min-height: 100vh;
     display: flex;

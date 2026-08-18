@@ -10,6 +10,8 @@
     runState,
     registry,
     pendingShareRun,
+    resumePrompt,
+    resumeAction,
   } from '../store';
   import { loadPricing, freshnessLabel } from '../../pricing/pricing';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
@@ -23,12 +25,28 @@
   import EmptyState from './EmptyState.svelte';
 
   let shareCopied = $state(false);
+  let showHint = $state(false);
+
+  function dismissHint(): void {
+    showHint = false;
+    try {
+      localStorage.setItem('dh:v1:hint-dismissed', '1');
+    } catch {
+      // non-fatal
+    }
+  }
 
   onMount(() => {
     if (!get(pricing)) {
       loadPricing()
         .then((state) => pricing.set(state))
         .catch(() => {});
+    }
+
+    try {
+      if (!localStorage.getItem('dh:v1:hint-dismissed')) showHint = true;
+    } catch {
+      showHint = true;
     }
 
     // Share link support: pre-fill input/zones, optionally auto-run (SPEC §12).
@@ -83,14 +101,14 @@
     }
   }
 
-  async function handleShare() {
+  async function handleShare(e: MouseEvent) {
     const base = location.href.split('#')[0];
     const url =
       base +
       encodeShare({
         q: get(checkInput),
         tlds: get(selectedTlds),
-        run: false,
+        run: e.shiftKey,
       });
     const ok = await copyText(url);
     if (ok) {
@@ -101,6 +119,32 @@
 </script>
 
 <section class="check-tab" aria-busy={$runState.phase === 'running'}>
+  {#if showHint}
+    <div class="hint-strip" role="note">
+      <span>{t('check.hint.body')}</span>
+      <button class="hint-dismiss" type="button" onclick={dismissHint}>
+        {t('check.hint.dismiss')}
+      </button>
+    </div>
+  {/if}
+
+  {#if $resumePrompt}
+    <div class="resume-banner" role="alert">
+      <div class="resume-text">
+        <strong>{t('check.run.resume.title')}</strong>
+        <span>{t('check.run.resume.body', { n: $resumePrompt.pending.length })}</span>
+      </div>
+      <div class="resume-actions">
+        <button class="btn primary" type="button" onclick={() => resumeAction.set('resume')}>
+          {t('check.run.resume.yes')}
+        </button>
+        <button class="btn ghost" type="button" onclick={() => resumeAction.set('discard')}>
+          {t('check.run.resume.no')}
+        </button>
+      </div>
+    </div>
+  {/if}
+
   <header class="tab-header">
     <div class="header-text">
       <h2 class="title">{t('check.title')}</h2>
@@ -112,12 +156,13 @@
           {t(freshness.key, freshness.params)}
         </span>
       {/if}
+      <span class="freshness" title={t('settings.currency')}>{$settings.currency}</span>
       <button
         class="action"
-        onclick={handleShare}
+        onclick={(e) => handleShare(e)}
         type="button"
         disabled={!hasResults}
-        title={shareCopied ? t('results.share.copied') : t('results.share')}
+        title={shareCopied ? t('results.share.copied') : `${t('results.share')} · ${t('check.share.run')}`}
       >
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <circle cx="4" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.5" />
@@ -164,6 +209,88 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
+  }
+
+  .hint-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .hint-dismiss {
+    border: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    min-height: 32px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .resume-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
+    background: var(--amber-soft);
+    border-radius: var(--radius-md);
+  }
+
+  .resume-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--text-sm);
+  }
+
+  .resume-text strong {
+    color: var(--amber);
+    font-size: var(--text-sm);
+  }
+
+  .resume-text span {
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+  }
+
+  .resume-actions {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .resume-actions .btn {
+    min-height: 36px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .resume-actions .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .resume-actions .btn.ghost {
+    background: transparent;
+    color: var(--text-secondary);
   }
   .tab-header {
     display: flex;

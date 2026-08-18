@@ -8,6 +8,7 @@
 
   let savedToast = $state(false);
   let importError = $state('');
+  let rateError = $state('');
   let savedTimer: ReturnType<typeof setTimeout> | undefined;
 
   function flashSaved(): void {
@@ -22,8 +23,22 @@
   }
 
   function patchRate(currency: 'RUB' | 'EUR', value: number): void {
-    if (!Number.isFinite(value) || value <= 0) return;
+    if (!Number.isFinite(value) || value <= 0) {
+      rateError = t('settings.rate.invalid');
+      return;
+    }
+    rateError = '';
     settings.update((s) => ({ ...s, rates: { ...s.rates, [currency]: value } }));
+    flashSaved();
+  }
+
+  function resetDefaults(): void {
+    settings.set({
+      ...DEFAULT_SETTINGS,
+      rates: { ...DEFAULT_SETTINGS.rates },
+      defaultTlds: [...DEFAULT_SETTINGS.defaultTlds],
+    });
+    rateError = '';
     flashSaved();
   }
 
@@ -155,6 +170,9 @@
           />
         </label>
       </span>
+      {#if rateError}
+        <p class="error">{rateError}</p>
+      {/if}
     </div>
   </div>
 
@@ -218,6 +236,7 @@
         />
       </label>
       <button class="btn danger" onclick={clearData}>{t('settings.clear')}</button>
+      <button class="btn ghost" onclick={resetDefaults}>{t('settings.reset')}</button>
     </div>
     {#if importError}
       <p class="error">{importError}</p>

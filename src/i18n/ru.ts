@@ -87,6 +87,22 @@ export const ru: Dict = {
   'results.rechecking': 'Перепроверка…',
 
   'status.available': 'Свободен',
+  'app.title.html': 'Domain Hunter — проверка доступности доменов',
+  'a11y.skip': 'Перейти к содержимому',
+  'check.hint.body':
+    '1) Введите имена или сгенерируйте их. 2) Выберите зоны. 3) Нажмите «Проверить доступность» — результаты с ценами появятся сразу.',
+  'check.hint.dismiss': 'Понятно',
+  'check.input.ctrlEnter': 'Ctrl+Enter — запустить проверку',
+  'check.start.disabled': 'Введите имена и выберите хотя бы одну зону',
+  'check.tlds.clearSel': 'Сбросить выбор',
+  'check.tlds.unstable':
+    'RDAP этой зоны нестабильно отвечал при последней автопроверке',
+  'check.share.run': 'Shift+клик — скопировать ссылку с автозапуском',
+  'results.showAvailable': 'Показать свободные ({n})',
+  'results.buy.at': 'Купить у {registrar} · {price}',
+  'gen.tray.copy': 'Скопировать список',
+  'settings.reset': 'Сбросить по умолчанию',
+  'settings.rate.invalid': 'Введите положительное число',
   'status.probably_available': 'Вероятно свободен',
   'status.taken': 'Занят',
   'status.unknown': 'Неизвестно',
@@ -132,7 +148,7 @@ export const ru: Dict = {
 
   'gen.syllables.title': 'Мешалка слогов',
   'gen.syllables.desc':
-    'Произносимые неологизмы из слоговых банков: фонотактический фильтр и оценка благозвучия.',
+    'Придумывает короткие произносимые неологизмы (как Spotify или Kodak) — для уникальных имён.',
   'gen.syllables.count': 'Сколько',
 
   'gen.themes.title': 'Словарные темы',
