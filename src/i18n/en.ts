@@ -241,6 +241,14 @@ export const en: Dict = {
   'settings.githubToken': 'GitHub token (optional)',
   'settings.githubToken.hint':
     'Your own PAT or device-flow token. Stored only in this browser, sent only to api.github.com. Raises GitHub checks from 60 to 5,000/hour.',
+  'settings.gh.connect': 'Connect GitHub',
+  'settings.gh.disconnect': 'Disconnect',
+  'settings.gh.connected': 'Connected as {name}',
+  'settings.gh.code': 'Enter code {code} on GitHub:',
+  'settings.gh.open': 'open github.com/login/device',
+  'settings.gh.waiting': 'Waiting…',
+  'settings.gh.needsProxy':
+    'Device flow needs your CORS proxy worker (proxy field above). Without it, paste a PAT manually.',
   'settings.proxy.hint':
     'Optional. Your own Cloudflare Worker (see worker.js in the repo) for zones blocked from browsers. Empty = direct only.',
   'settings.data': 'Data',

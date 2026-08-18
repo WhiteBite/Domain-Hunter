@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
   import { settings } from '../store';
   import { clearAllData, KEYS, readJson, writeJson } from '../settings';
   import { DEFAULT_SETTINGS, type Settings } from '../../types';
+  import { githubLoginName, pollDeviceToken, startDeviceFlow } from '../../core/github-auth';
 
   let savedToast = $state(false);
   let importError = $state('');
@@ -40,6 +41,42 @@
     });
     rateError = '';
     flashSaved();
+  }
+
+  let ghUser = $state('');
+  let ghUserCode = $state('');
+  let ghVerifyUri = $state('https://github.com/login/device');
+  let ghBusy = $state(false);
+
+  onMount(() => {
+    const token = get(settings).githubToken;
+    if (token) void githubLoginName(token).then((n) => (ghUser = n ?? ''));
+  });
+
+  async function connectGithub(): Promise<void> {
+    const proxy = get(settings).proxyUrl;
+    if (!proxy || ghBusy) return;
+    ghBusy = true;
+    try {
+      const start = await startDeviceFlow(proxy);
+      ghUserCode = start.userCode;
+      ghVerifyUri = start.verificationUri;
+      const token = await pollDeviceToken(proxy, start);
+      ghUserCode = '';
+      if (token) {
+        patch('githubToken', token);
+        ghUser = (await githubLoginName(token)) ?? '';
+      }
+    } catch {
+      ghUserCode = '';
+    } finally {
+      ghBusy = false;
+    }
+  }
+
+  function disconnectGithub(): void {
+    ghUser = '';
+    patch('githubToken', '');
   }
 
   function download(filename: string, content: string): void {
@@ -238,16 +275,45 @@
       <div class="row-info">
         <label for="ghtoken">{t('settings.githubToken')}</label>
         <p class="hint">{t('settings.githubToken.hint')}</p>
+        {#if ghUserCode}
+          <p class="hint">
+            {t('settings.gh.code', { code: ghUserCode })}
+            <a href={ghVerifyUri} target="_blank" rel="noopener noreferrer">
+              {t('settings.gh.open')}
+            </a>
+          </p>
+        {/if}
       </div>
-      <input
-        id="ghtoken"
-        type="password"
-        autocomplete="off"
-        spellcheck="false"
-        placeholder="ghp_… / github_pat_…"
-        value={$settings.githubToken}
-        oninput={(e) => patch('githubToken', e.currentTarget.value.trim())}
-      />
+      {#if $settings.githubToken}
+        <div class="gh-box">
+          <span>{ghUser ? t('settings.gh.connected', { name: ghUser }) : '…'}</span>
+          <button class="btn" type="button" onclick={disconnectGithub}>
+            {t('settings.gh.disconnect')}
+          </button>
+        </div>
+      {:else}
+        <div class="gh-box">
+          <input
+            id="ghtoken"
+            type="password"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="ghp_… / github_pat_…"
+            oninput={(e) => patch('githubToken', e.currentTarget.value.trim())}
+          />
+          <button
+            class="btn"
+            type="button"
+            disabled={ghBusy || !$settings.proxyUrl}
+            onclick={() => void connectGithub()}
+          >
+            {ghBusy ? t('settings.gh.waiting') : t('settings.gh.connect')}
+          </button>
+        </div>
+        {#if !$settings.proxyUrl}
+          <p class="hint">{t('settings.gh.needsProxy')}</p>
+        {/if}
+      {/if}
     </div>
   </div>
 
@@ -430,6 +496,19 @@
     margin: 0;
     color: var(--red);
     font-size: var(--text-sm);
+  }
+
+  .gh-box {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    font-size: var(--text-sm);
+  }
+
+  .gh-box input {
+    width: 240px;
+    max-width: 100%;
   }
 
   .toast {

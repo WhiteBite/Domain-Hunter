@@ -243,6 +243,14 @@ export const ru: Dict = {
   'settings.githubToken': 'GitHub-токен (опционально)',
   'settings.githubToken.hint':
     'Ваш личный PAT или токен device-flow. Хранится только в этом браузере и отправляется только на api.github.com. Поднимает лимит проверок GitHub с 60 до 5000/час.',
+  'settings.gh.connect': 'Подключить GitHub',
+  'settings.gh.disconnect': 'Отключить',
+  'settings.gh.connected': 'Подключено как {name}',
+  'settings.gh.code': 'Введите код {code} на GitHub:',
+  'settings.gh.open': 'открыть github.com/login/device',
+  'settings.gh.waiting': 'Ждём…',
+  'settings.gh.needsProxy':
+    'Для device flow нужен ваш CORS-прокси (поле выше). Без него вставьте PAT вручную.',
   'settings.proxy.hint':
     'Необязательно. Ваш Cloudflare Worker (см. worker.js в репозитории) для зон, закрытых от браузера. Пусто — только прямые запросы.',
   'settings.data': 'Данные',

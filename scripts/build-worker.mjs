@@ -37,6 +37,9 @@ const TLD_MAP = ${JSON.stringify(map, null, 2)};
 
 const UA = 'domain-hunter-worker/2.0';
 
+// Public OAuth App client id for the device flow (set GH_CLIENT_ID when deploying).
+const GH_CLIENT_ID = process.env.GH_CLIENT_ID || '__GH_CLIENT_ID__';
+
 // Social handle checks (server-side, bypasses browser CORS blocks).
 const SOCIAL_URLS = {
   github: (n) => 'https://api.github.com/users/' + n,
@@ -63,6 +66,58 @@ export default {
   async fetch(request) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/^\\/+/, '');
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'access-control-allow-origin': '*',
+          'access-control-allow-methods': 'GET, POST, OPTIONS',
+          'access-control-allow-headers': 'content-type',
+          'access-control-max-age': '86400',
+        },
+      });
+    }
+
+    if (path === 'gh/device/code') {
+      const upstream = await fetch('https://github.com/login/device/code', {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json', 'user-agent': UA },
+        body: JSON.stringify({ client_id: GH_CLIENT_ID }),
+      });
+      return new Response(await upstream.text(), {
+        status: upstream.status,
+        headers: {
+          'content-type': 'application/json',
+          'access-control-allow-origin': '*',
+          'cache-control': 'no-store',
+        },
+      });
+    }
+
+    if (path === 'gh/device/token') {
+      const req = await request.json().catch(() => null);
+      if (!req || typeof req.device_code !== 'string') {
+        return json({ error: 'device_code required' }, 400);
+      }
+      const upstream = await fetch('https://github.com/login/oauth/access_token', {
+        method: 'POST',
+        headers: { accept: 'application/json', 'content-type': 'application/json', 'user-agent': UA },
+        body: JSON.stringify({
+          client_id: GH_CLIENT_ID,
+          device_code: req.device_code,
+          grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+        }),
+      });
+      return new Response(await upstream.text(), {
+        status: upstream.status,
+        headers: {
+          'content-type': 'application/json',
+          'access-control-allow-origin': '*',
+          'cache-control': 'no-store',
+        },
+      });
+    }
 
     if (!path) {
       return json({ usage: 'GET /{domain} | GET /social/{platform}/{name}' });
