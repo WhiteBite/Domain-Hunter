@@ -102,6 +102,8 @@ export const ru: Dict = {
   'results.showAvailable': 'Показать свободные ({n})',
   'results.buy.at': 'Купить у {registrar} · {price}',
   'gen.tray.copy': 'Скопировать список',
+  'gen.tray.projected':
+    'Имена без зоны раскроются по выбранным зонам ({zones}): ≈ {n} проверок.',
   'settings.reset': 'Сбросить по умолчанию',
   'settings.rate.invalid': 'Введите положительное число',
   'status.probably_available': 'Вероятно свободен',

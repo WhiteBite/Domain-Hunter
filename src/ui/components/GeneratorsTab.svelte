@@ -2,7 +2,7 @@
   import { onDestroy } from 'svelte';
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
-  import { activeTab, checkInput, registry, pendingShareRun, genCandidates } from '../store';
+  import { activeTab, checkInput, registry, pendingShareRun, genCandidates, selectedTlds } from '../store';
   import { KEYS, readJson, writeJson } from '../settings';
   import { combinator, type CombinatorMode } from '../../generators/combinator';
   import { mixSyllables } from '../../generators/syllables';
@@ -238,6 +238,13 @@
 
   const activeTheme = $derived(themes.find((th) => th.id === activeThemeId) ?? null);
 
+  const projectedChecks = $derived.by(() => {
+    const zones = $selectedTlds.length;
+    let n = 0;
+    for (const c of candidates) n += c.n.includes('.') ? 1 : zones;
+    return n;
+  });
+
   const techToggles: { key: keyof typeof tech; labelKey: string }[] = [
     { key: 'combinator', labelKey: 'gen.combinator.title' },
     { key: 'mutations', labelKey: 'gen.mutations.title' },
@@ -396,6 +403,11 @@
         {t('gen.tray.copy')}
       </button>
     </div>
+    {#if candidates.length > 0}
+      <p class="muted projected">
+        {t('gen.tray.projected', { n: projectedChecks, zones: $selectedTlds.length })}
+      </p>
+    {/if}
     {#if candidates.length === 0}
       <p class="muted">{t('gen.tray.empty')}</p>
     {:else}
@@ -906,6 +918,10 @@
     color: var(--text-tertiary);
     font-size: var(--text-sm);
     margin: 0;
+  }
+
+  .projected {
+    font-size: var(--text-xs);
   }
 
   .error {

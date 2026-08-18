@@ -101,6 +101,8 @@ export const en: Dict = {
   'results.showAvailable': 'Show available ({n})',
   'results.buy.at': 'Buy at {registrar} · {price}',
   'gen.tray.copy': 'Copy list',
+  'gen.tray.projected':
+    'Names without a zone expand across your {zones} selected zones: ≈ {n} checks.',
   'settings.reset': 'Reset to defaults',
   'settings.rate.invalid': 'Enter a positive number',
   'status.probably_available': 'Likely available',
