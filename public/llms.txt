@@ -29,6 +29,7 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 - How it checks: direct browser → registry RDAP calls; 200 = taken, 404 = available (with DoH corroboration for ccTLDs)
 - Scale: up to 3,000 names per run, up to 30,000 checks after TLD expansion, 147 curated TLD zones, 12 registrar buy links
 - Pricing data: live first-year + renewal prices (Porkbun, Cloudflare), coupons, 3-year TCO, promo-trap detection; USD/RUB/EUR
+- Workflow: favorites shortlist (star any domain), run history with one-click restore, results search and multi-select, share links, CSV export
 - Privacy: no analytics, no telemetry, no accounts; all state in browser localStorage
 - Distribution: one self-contained HTML file; works from file://, GitHub Pages, Cloudflare Pages, any static host
 

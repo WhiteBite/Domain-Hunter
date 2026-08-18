@@ -201,7 +201,8 @@ export interface Settings {
 
 Storage keys: `dh:v1:settings`, `dh:v1:cache` (map domain→{status,source,ts,tld}),
 `dh:v1:pricing` ({table, fetchedAt}), `dh:v1:bootstrap` ({json, fetchedAt}),
-`dh:v1:run` (resume snapshot), `dh:v1:wordsets` (user sets), `dh:v1:seen-share`.
+`dh:v1:run` (resume snapshot), `dh:v1:wordsets` (user sets), `dh:v1:seen-share`,
+`dh:v1:favorites` (starred domains/names), `dh:v1:history` (recent completed runs).
 
 ## 6. Zone registry (`src/config/tlds.json`)
 

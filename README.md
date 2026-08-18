@@ -23,8 +23,9 @@ Domain Hunter checks domain availability directly against registry **RDAP** endp
 - **Live prices and TCO** — first-year and renewal prices live from Porkbun and Cloudflare, plus a weekly harvest comparing up to five registrars (Dynadot, Spaceship, ValueDomain snapshots); coupons, promo-trap detection (renewal ≥ 5× first year), 3-year TCO sorting, and coverage-aware buy links to 13 registrars. Prices in USD, RUB, or EUR.
 - **Per-domain "where to buy"** — one click on an available domain shows a registry-premium warning (with the premium price) and the currently cheapest registrar with a direct buy link (public DigMyName API, no keys).
 - **Polite to registries** — per-infrastructure AIMD rate limiting (e.g. Google Registry's strict ~1 rps is honored), automatic backoff on HTTP 429 with `Retry-After`, and result caching in `localStorage`.
+- **Favorites and history** — star any domain (results, generator candidates, dropped lists) into a persistent shortlist with its own filter; recent runs are remembered and restore with one click. Results support search, multi-select and copy-selected.
 - **Share and export** — one-click share links (`#s=` encodes query + zones, auto-starts the run), Excel-compatible CSV export (BOM + quoting), copy/recheck per row.
-- **Private by design** — no analytics, no telemetry, no accounts. All state lives in your browser's `localStorage`. Bilingual UI (English/Russian), light and dark themes, mobile-friendly.
+- **Private by design** — no analytics, no telemetry, no accounts. All state lives in your browser's `localStorage`. Multilingual UI (English, Russian, Spanish, German, Portuguese), light and dark themes, mobile-friendly.
 
 ![Domain Hunter name generators in dark theme: combinator, syllable mixer, thematic word sets, TLD-hacks and mutations](docs/screenshot-en-generators.png)
 
