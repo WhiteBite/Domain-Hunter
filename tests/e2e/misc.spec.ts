@@ -1,0 +1,346 @@
+/**
+ * Misc E2E — covers the remaining manifest testids that don't belong to a
+ * single tab spec: skip link, footer link, input warnings, tooltip, results
+ * toolbar (filter-all / suggest / sort-status / sort-renew / sort-tco /
+ * showing count), generator sets-controls + tray-count badge, EUR rate input,
+ * GitHub device-flow verify link.
+ *
+ * Selectors: data-testid ONLY. All network mocked; zero leaks asserted.
+ */
+import { test, expect, type Page } from '@playwright/test';
+import { openApp, navigateToTab } from './helpers/setup';
+import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockRdap } from './helpers/mocks';
+import { DEFAULT_SETTINGS } from '../../src/types';
+import {
+  ianaBootstrap,
+  porkbunPricing,
+  cloudflarePricing,
+  seedPricingTable,
+} from './fixtures';
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': '*',
+};
+
+async function bootWithMixedResults(page: Page): Promise<void> {
+  await assertNoNetworkLeaks(page);
+  await mockAll(page, {
+    bootstrap: ianaBootstrap(),
+    porkbun: porkbunPricing().pricing,
+    cloudflare: cloudflarePricing(),
+  });
+  await mockRdap(page, [
+    {
+      domain: 'google.com',
+      response: {
+        status: 200,
+        body: { objectClassName: 'domain', ldhName: 'google.com', handle: 'google.com' },
+      },
+    },
+    { domain: 'zzqxtest1.com', response: { status: 404 } },
+  ]);
+  await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+  // Narrow to .com only, run two mixed-status checks, wait for completion.
+  await page.click('[data-testid="tld-button-clear"]');
+  await page.click('[data-testid="tld-chip-com"]');
+  await page.fill('[data-testid="check-input-domains"]', 'google.com\nzzqxtest1.com');
+  await page.click('[data-testid="check-button-start"]');
+  await expect(page.locator('[data-testid="results-row-google-com"]')).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(page.locator('[data-testid="results-row-zzqxtest1-com"]')).toBeVisible({
+    timeout: 15_000,
+  });
+  // Run completes: stop button disappears.
+  await expect(page.locator('[data-testid="check-button-stop"]')).toBeHidden({
+    timeout: 15_000,
+  });
+}
+
+function expectNoLeaks(page: Page): void {
+  expect(getLeakedRequests(page)).toEqual([]);
+}
+
+test.describe('Misc coverage', () => {
+  test('skip link points at main content and is focusable', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    const skip = page.locator('[data-testid="app-skip-link"]');
+    await expect(skip).toHaveAttribute('href', '#main-content');
+    await skip.focus();
+    const focused = await page.evaluate(
+      () => document.activeElement?.getAttribute('data-testid') ?? '',
+    );
+    expect(focused).toBe('app-skip-link');
+    expectNoLeaks(page);
+  });
+
+  test('footer GitHub link is external-safe', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    const link = page.locator('[data-testid="app-footer-github"]');
+    await expect(link).toHaveAttribute('href', /github\.com\/WhiteBite\/Domain-Hunter/);
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', /noopener/);
+    expectNoLeaks(page);
+  });
+
+  test('input preview shows invalid-count warning', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    // A line that cannot be normalized as a domain counts as invalid.
+    await page.fill('[data-testid="check-input-domains"]', 'goodname\n!!!bad line!!!');
+
+    await expect(page.locator('[data-testid="check-preview-invalid"]')).toBeVisible({
+      timeout: 10_000,
+    });
+    expectNoLeaks(page);
+  });
+
+  test('input preview shows too-many warning past the cap', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    // 3001 names > MAX_NAMES (3000) → warn span renders.
+    const names = Array.from({ length: 3001 }, (_, i) => `n${i}`).join('\n');
+    await page.fill('[data-testid="check-input-domains"]', names);
+
+    await expect(page.locator('[data-testid="check-preview-warn"]')).toBeVisible({
+      timeout: 10_000,
+    });
+    expectNoLeaks(page);
+  });
+
+  test('tooltip trigger shows the tooltip on hover', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    const trigger = page.locator('[data-testid="tooltip-trigger"]');
+    const inner = page.locator('[data-testid="tooltip-trigger-inner"]');
+    await expect(trigger).toBeVisible();
+    await expect(inner).toBeVisible();
+
+    await trigger.hover();
+    await expect(page.locator('[role="tooltip"]')).toBeVisible({ timeout: 5_000 });
+    expectNoLeaks(page);
+  });
+
+  test('results toolbar: filter-all restores rows, showing-count reflects them', async ({
+    page,
+  }) => {
+    await bootWithMixedResults(page);
+
+    // Filter to available → taken row hidden.
+    await page.click('[data-testid="results-filter-available"]');
+    await expect(page.locator('[data-testid="results-row-google-com"]')).toBeHidden();
+
+    // Filter back to all → both rows visible again.
+    await page.click('[data-testid="results-filter-all"]');
+    await expect(page.locator('[data-testid="results-row-google-com"]')).toBeVisible();
+    await expect(page.locator('[data-testid="results-row-zzqxtest1-com"]')).toBeVisible();
+
+    // Showing count displays "X of Y" numbers.
+    await expect(page.locator('[data-testid="results-showing-count"]')).toContainText(/\d+/);
+    expectNoLeaks(page);
+  });
+
+  test('suggest-available shortcut switches to the available filter', async ({ page }) => {
+    await bootWithMixedResults(page);
+
+    const suggest = page.locator('[data-testid="results-filter-suggest-available"]');
+    await expect(suggest).toBeVisible();
+    await suggest.click();
+
+    await expect(page.locator('[data-testid="results-row-zzqxtest1-com"]')).toBeVisible();
+    await expect(page.locator('[data-testid="results-row-google-com"]')).toBeHidden();
+    expectNoLeaks(page);
+  });
+
+  test('sort buttons set aria-sort on their column (status/renew/tco)', async ({ page }) => {
+    await bootWithMixedResults(page);
+
+    // Literal testids (the inventory meta-test greps specs for exact strings).
+    for (const testid of ['results-sort-status', 'results-sort-renew', 'results-sort-tco']) {
+      const btn = page.locator(`[data-testid="${testid}"]`);
+      const th = page.locator(`th:has([data-testid="${testid}"])`);
+      await btn.click();
+      await expect(th).toHaveAttribute('aria-sort', /ascending|descending/);
+    }
+    expectNoLeaks(page);
+  });
+
+  test('result row domain link and detail buy link render for available rows', async ({
+    page,
+  }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+      digmyname: [
+        {
+          domain: 'zzqxtest1.com',
+          result: {
+            premium: false,
+            likely_premium: false,
+            cheapest_registrar: { name: 'porkbun', reg_price_usd: 11.68 },
+            buy_url: 'https://porkbun.com/checkout/search?q=zzqxtest1.com',
+          },
+        },
+      ],
+    });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    await expect(page.locator('[data-testid="results-row-zzqxtest1-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    // Available row with pricing renders the domain as a registrar link.
+    await expect(page.locator('[data-testid^="results-row-link-"]').first()).toBeVisible({
+      timeout: 10_000,
+    });
+
+    // Detail row renders the DigMyName buy link.
+    await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
+    await expect(
+      page.locator('[data-testid^="results-row-detail-buy-"]').first(),
+    ).toBeVisible({ timeout: 10_000 });
+    expectNoLeaks(page);
+  });
+
+  test('gen-sets-controls is rendered in the sets summary', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+    await navigateToTab(page, 'generators');
+
+    await expect(page.locator('[data-testid="gen-sets-controls"]')).toBeVisible();
+    expectNoLeaks(page);
+  });
+
+  test('gen-tray-count badge shows the candidate count', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+    await navigateToTab(page, 'generators');
+
+    await page.locator('[data-testid="gen-input-keywords"]').fill('test');
+    await page.click('[data-testid="gen-button-generate"]');
+
+    const badge = page.locator('[data-testid="gen-tray-count"]');
+    await expect(badge).toBeVisible({ timeout: 10_000 });
+    expect(await badge.textContent()).toMatch(/\d+/);
+    expectNoLeaks(page);
+  });
+
+  test('EUR rate input persists a valid value', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+    await navigateToTab(page, 'settings');
+
+    const eur = page.locator('[data-testid="settings-input-rate-eur"]');
+    // onchange-driven: blur fires the change event that persists the value.
+    await eur.fill('90');
+    await eur.blur();
+
+    const stored = await page.evaluate(() => localStorage.getItem('dh:v1:settings'));
+    expect(stored).not.toBeNull();
+    expect((JSON.parse(stored as string) as { rates: { EUR: number } }).rates.EUR).toBe(90);
+    expectNoLeaks(page);
+  });
+
+  test('GitHub device flow shows the verify link with the flow URI', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    // Device-flow endpoints (api.github.com is on the leak allowlist).
+    await page.route('https://api.github.com/gh/device/code', async (route) => {
+      await route.fulfill({
+        status: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          device_code: 'dc1',
+          user_code: 'ABCD-EFGH',
+          verification_uri: 'https://github.com/login/device',
+          interval: 0,
+          expires_in: 60,
+        }),
+      });
+    });
+    await page.route('https://api.github.com/gh/device/token', async (route) => {
+      // Keep the flow pending (authorization_pending) so the verify link stays up.
+      await route.fulfill({
+        status: 400,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'authorization_pending' }),
+      });
+    });
+
+    await openApp(page, {
+      seed: {
+        'dh:v1:settings': { ...DEFAULT_SETTINGS, proxyUrl: 'https://api.github.com/' },
+        'dh:v1:pricing': seedPricingTable(),
+      },
+    });
+    await navigateToTab(page, 'settings');
+
+    await page.click('[data-testid="settings-button-github-connect"]');
+
+    const verify = page.locator('[data-testid="settings-link-github-verify"]');
+    await expect(verify).toBeVisible({ timeout: 10_000 });
+    await expect(verify).toHaveAttribute('href', 'https://github.com/login/device');
+    await expect(verify).toHaveAttribute('target', '_blank');
+    expectNoLeaks(page);
+  });
+});
