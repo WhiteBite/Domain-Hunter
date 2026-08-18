@@ -126,9 +126,12 @@ export interface RegistrarConfig {
 
 // ---- Settings (persisted at dh:v1:settings) ----
 
+/** Supported UI locales. Keep in sync with src/i18n/ dictionary files. */
+export type Locale = 'en' | 'ru' | 'es' | 'de' | 'pt';
+
 export interface Settings {
   theme: 'system' | 'light' | 'dark';
-  lang: 'en' | 'ru';
+  lang: Locale;
   currency: 'USD' | 'RUB' | 'EUR';
   /** Units per 1 USD. */
   rates: { RUB: number; EUR: number };
@@ -200,4 +203,21 @@ export interface RunSnapshot {
   tlds: string[];
   ignoreCache: boolean;
   ts: number;
+}
+
+// ---- History entry (dh:v1:history) ----
+
+export interface HistoryCounts {
+  total: number;
+  available: number;
+  taken: number;
+  problems: number;
+}
+
+export interface HistoryEntry {
+  ts: number;
+  /** Raw textarea content, trimmed and length-capped. */
+  query: string;
+  tlds: string[];
+  counts: HistoryCounts;
 }
