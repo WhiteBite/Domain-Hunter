@@ -234,6 +234,21 @@
         oninput={(e) => patch('proxyUrl', e.currentTarget.value)}
       />
     </div>
+    <div class="row">
+      <div class="row-info">
+        <label for="ghtoken">{t('settings.githubToken')}</label>
+        <p class="hint">{t('settings.githubToken.hint')}</p>
+      </div>
+      <input
+        id="ghtoken"
+        type="password"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="ghp_… / github_pat_…"
+        value={$settings.githubToken}
+        oninput={(e) => patch('githubToken', e.currentTarget.value.trim())}
+      />
+    </div>
   </div>
 
   <div class="card">

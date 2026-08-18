@@ -60,6 +60,7 @@ export async function checkPlatform(
   name: string,
   fetchImpl: typeof fetch = fetch,
   proxyUrl?: string,
+  githubToken?: string,
 ): Promise<SocialStatus> {
   const proxyBase = proxyUrl ? (proxyUrl.endsWith('/') ? proxyUrl : `${proxyUrl}/`) : null;
 
@@ -83,7 +84,16 @@ export async function checkPlatform(
   const cfg = LIVE[platform.id];
   if (!cfg) return 'unknown';
   try {
-    const res = await fetchImpl(cfg.url(name));
+    const init: RequestInit =
+      platform.id === 'github' && githubToken
+        ? {
+            headers: {
+              Authorization: `Bearer ${githubToken}`,
+              Accept: 'application/vnd.github+json',
+            },
+          }
+        : {};
+    const res = await fetchImpl(cfg.url(name), init);
     if (res.status === 200) return 'taken';
     if (res.status === 404) return 'free';
     // 403/429 = anonymous rate limit (GitHub: 60/h per IP) or other refusal.

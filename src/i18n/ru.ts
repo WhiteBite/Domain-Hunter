@@ -240,6 +240,9 @@ export const ru: Dict = {
   'settings.cacheTtl.hint':
     'Результаты проверки кэшируются локально, чтобы не дёргать реестры повторно.',
   'settings.proxy': 'URL резервного CORS-прокси',
+  'settings.githubToken': 'GitHub-токен (опционально)',
+  'settings.githubToken.hint':
+    'Ваш личный PAT или токен device-flow. Хранится только в этом браузере и отправляется только на api.github.com. Поднимает лимит проверок GitHub с 60 до 5000/час.',
   'settings.proxy.hint':
     'Необязательно. Ваш Cloudflare Worker (см. worker.js в репозитории) для зон, закрытых от браузера. Пусто — только прямые запросы.',
   'settings.data': 'Данные',

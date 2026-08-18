@@ -238,6 +238,9 @@ export const en: Dict = {
   'settings.cacheTtl': 'Cache lifetime, hours',
   'settings.cacheTtl.hint': 'Availability results are cached locally to avoid repeat queries.',
   'settings.proxy': 'Fallback CORS proxy URL',
+  'settings.githubToken': 'GitHub token (optional)',
+  'settings.githubToken.hint':
+    'Your own PAT or device-flow token. Stored only in this browser, sent only to api.github.com. Raises GitHub checks from 60 to 5,000/hour.',
   'settings.proxy.hint':
     'Optional. Your own Cloudflare Worker (see worker.js in the repo) for zones blocked from browsers. Empty = direct only.',
   'settings.data': 'Data',

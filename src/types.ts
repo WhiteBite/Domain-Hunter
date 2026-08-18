@@ -136,6 +136,8 @@ export interface Settings {
   concurrency: number;
   cacheTtlHours: number;
   proxyUrl: string;
+  /** Optional user-provided GitHub token (PAT/device flow), stored locally only. */
+  githubToken: string;
   defaultTlds: string[];
 }
 
@@ -147,6 +149,7 @@ export const DEFAULT_SETTINGS: Settings = {
   concurrency: 6,
   cacheTtlHours: 12,
   proxyUrl: '',
+  githubToken: '',
   defaultTlds: [
     'com',
     'net',

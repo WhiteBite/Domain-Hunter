@@ -135,6 +135,17 @@ describe('checkPlatform — proxy fallback', () => {
     expect(await checkPlatform(github, 'name', f, 'https://proxy.test')).toBe('free');
   });
 
+  it('github token is sent as Bearer header', async () => {
+    let seenAuth = '';
+    const f = (async (_url: string, init?: RequestInit) => {
+      const headers = (init?.headers ?? {}) as Record<string, string>;
+      seenAuth = headers.Authorization ?? '';
+      return jsonBody(200, {});
+    }) as unknown as typeof fetch;
+    await checkPlatform(github, 'name', f, undefined, 'tok123');
+    expect(seenAuth).toBe('Bearer tok123');
+  });
+
   it('proxy failure keeps unknown', async () => {
     const f = (async () => {
       throw new TypeError('proxy down');

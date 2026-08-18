@@ -39,7 +39,7 @@
     try {
       await Promise.all(
         PLATFORMS.map((p, i) =>
-          checkPlatform(p, n, fetch, get(settings).proxyUrl || undefined)
+          checkPlatform(p, n, fetch, get(settings).proxyUrl || undefined, get(settings).githubToken || undefined)
             .catch(() => 'unknown' as SocialStatus)
             .then((s) => {
               cards[i].status = s;
