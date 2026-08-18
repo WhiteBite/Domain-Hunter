@@ -45,6 +45,7 @@ export function parseShare(hash?: string): ParsedShare | null {
   if (!h || !h.startsWith('#s=')) return null;
   const url = h.slice(3);
   if (!url) return null;
+  if (url.length > 100_000) return null; // DoS guard for huge share payloads
 
   try {
     const base64 = url.replace(/-/g, '+').replace(/_/g, '/');

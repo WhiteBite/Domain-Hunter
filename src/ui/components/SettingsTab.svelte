@@ -84,7 +84,11 @@
             typeof ws.name === 'string' &&
             Array.isArray(ws.words)
           ) {
-            map.set(ws.id, ws as { id: string });
+            map.set(ws.id, {
+            id: ws.id,
+            name: ws.name,
+            words: (ws.words as unknown[]).filter((w): w is string => typeof w === 'string'),
+          });
           }
         }
         writeJson(KEYS.wordsets, [...map.values()]);

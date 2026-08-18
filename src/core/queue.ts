@@ -47,11 +47,23 @@ export async function runQueue(
     }
   };
 
+  let batch: CheckResult[] = [];
+  let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const flush = (): void => {
+    flushTimer = null;
+    if (batch.length === 0) return;
+    const results = batch;
+    batch = [];
+    emit({ type: 'batch', results });
+  };
+
   const recordResult = (result: CheckResult): void => {
     done += 1;
     if (result.status === 'available' || result.status === 'probably_available') available += 1;
     if (result.status === 'error') errors += 1;
-    emit({ type: 'result', result });
+    batch.push(result);
+    if (flushTimer == null) flushTimer = setTimeout(flush, 50);
     emitProgress();
   };
 
@@ -124,5 +136,6 @@ export async function runQueue(
       note: 'unknown TLD',
     });
   }
+  flush();
   emitProgress(true);
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import {
     results,
     pricing,
@@ -25,6 +25,7 @@
   import EmptyState from './EmptyState.svelte';
 
   let shareCopied = $state(false);
+  let shareTimer: ReturnType<typeof setTimeout> | undefined;
   let showHint = $state(false);
 
   function dismissHint(): void {
@@ -35,6 +36,8 @@
       // non-fatal
     }
   }
+
+  onDestroy(() => clearTimeout(shareTimer));
 
   onMount(() => {
     if (!get(pricing)) {
@@ -113,7 +116,8 @@
     const ok = await copyText(url);
     if (ok) {
       shareCopied = true;
-      setTimeout(() => (shareCopied = false), 1500);
+      clearTimeout(shareTimer);
+      shareTimer = setTimeout(() => (shareCopied = false), 1500);
     }
   }
 </script>

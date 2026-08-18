@@ -29,7 +29,7 @@ scope.onmessage = (ev: MessageEvent<EngineCommand>) => {
     scope.postMessage(event);
   };
 
-  const concurrency = (cmd.options as { concurrency?: number }).concurrency;
+  const concurrency = cmd.options.concurrency;
   const options: QueueOptions = { ...cmd.options, concurrency };
 
   void (async () => {

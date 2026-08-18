@@ -127,6 +127,36 @@
         }
         break;
       }
+      case 'batch': {
+        results.update((map) => {
+          const next = new Map(map);
+          for (const r of event.results) next.set(r.domain, r);
+          return next;
+        });
+        for (const r of event.results) {
+          cachePut(r.domain, {
+            status: r.status,
+            source: r.source,
+            ts: r.checkedAt,
+            tld: r.tld,
+          });
+          completedByEngine.add(r.domain);
+        }
+        {
+          const totalDone = cacheHitsCount + completedByEngine.size;
+          if (totalDone - lastSnapshotDone >= 25) {
+            lastSnapshotDone = totalDone;
+            const pending = engineCandidates.filter((c) => !completedByEngine.has(c));
+            writeJson(KEYS.run, {
+              pending,
+              tlds: get(selectedTlds),
+              ignoreCache,
+              ts: Date.now(),
+            } satisfies RunSnapshot);
+          }
+        }
+        break;
+      }
       case 'progress': {
         runState.update((rs) => ({
           ...rs,
@@ -160,6 +190,7 @@
   }
 
   function startRun(candidates: string[], tlds: string[], ignore: boolean) {
+    results.set(new Map());
     const settingsVal = get(settings);
     const registryVal = get(registry);
     const ttlMs = settingsVal.cacheTtlHours * 3_600_000;
@@ -227,8 +258,7 @@
       fetchTimeoutMs: 10000,
       maxRetries: 3,
     };
-    (options as EngineOptions & { concurrency?: number }).concurrency =
-      settingsVal.concurrency;
+    options.concurrency = settingsVal.concurrency;
     engine.start(remaining, options);
   }
 

@@ -99,7 +99,7 @@
       </div>
     </div>
     <nav class="tabs" role="tablist" aria-label={t('app.name')}>
-      {#each tabs as tabDef}
+      {#each tabs as tabDef (tabDef.id)}
         <button
           role="tab"
           class="tab"
@@ -113,7 +113,7 @@
     </nav>
   </header>
 
-  <main class="content" id="main-content">
+  <main class="content" id="main-content" tabindex="-1">
     {#if tab === 'check'}
       <CheckTab />
     {:else if tab === 'generators'}

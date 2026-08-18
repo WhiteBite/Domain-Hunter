@@ -12,7 +12,8 @@
   let health = $state<Record<string, { ok?: boolean }>>({});
 
   onMount(() => {
-    // Zone health snapshot from the weekly CI job (present on Pages only).
+    // health.json only exists on hosted builds; file:// fetches are CSP-blocked.
+    if (typeof location !== 'undefined' && location.protocol === 'file:') return;
     fetch('./health.json')
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
@@ -82,7 +83,7 @@
     if (!table) return null;
     const best = bestEntry(table, tld);
     if (!best || best.entry.reg == null) return null;
-    return formatPrice(best.entry.reg, get(settings));
+    return formatPrice(best.entry.reg, $settings);
   }
 
   function chipFlags(tld: string) {

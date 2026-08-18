@@ -36,15 +36,20 @@
       loading: true,
       profileUrl: p.profileUrl(n),
     }));
-    await Promise.all(
-      PLATFORMS.map((p, i) =>
-        checkPlatform(p, n, fetch, get(settings).proxyUrl || undefined).then((s) => {
-          cards[i].status = s;
-          cards[i].loading = false;
-        }),
-      ),
-    );
-    running = false;
+    try {
+      await Promise.all(
+        PLATFORMS.map((p, i) =>
+          checkPlatform(p, n, fetch, get(settings).proxyUrl || undefined)
+            .catch(() => 'unknown' as SocialStatus)
+            .then((s) => {
+              cards[i].status = s;
+              cards[i].loading = false;
+            }),
+        ),
+      );
+    } finally {
+      running = false;
+    }
   }
 
   function onKey(e: KeyboardEvent): void {
@@ -67,7 +72,7 @@
       spellcheck="false"
       aria-label={t('social.placeholder')}
     />
-    <button onclick={run} disabled={!valid || running}>
+    <button onclick={run} disabled={!valid || running} type="button">
       {t('social.check')}
     </button>
   </div>

@@ -184,7 +184,13 @@
   function saveSet(): void {
     if (candidates.length === 0) return;
     const name = newSetName.trim() || `${t('gen.themes.newSet')} ${wordSets.length + 1}`;
-    wordSets = [...wordSets, { id: crypto.randomUUID(), name, words: candidates.map((c) => c.n) }];
+    wordSets = [...wordSets, {
+      id: typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2),
+      name,
+      words: candidates.map((c) => c.n),
+    }];
     newSetName = '';
     writeJson(KEYS.wordsets, wordSets);
     showToast(t('settings.saved'));
@@ -442,7 +448,7 @@
       <p class="muted">{t('gen.output.empty')}</p>
     {:else}
       <div class="chips">
-        {#each themes as theme}
+        {#each themes as theme (theme.id)}
           <button
             class="chip cat"
             type="button"
@@ -455,7 +461,7 @@
       </div>
       {#if activeTheme}
         <div class="words">
-          {#each activeTheme.words as word}
+            {#each activeTheme.words as word (word.w)}
             <button
               class="word"
               type="button"

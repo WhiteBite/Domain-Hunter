@@ -89,10 +89,16 @@ function loadGenTray(): Candidate[] {
 }
 
 export const genCandidates = writable<Candidate[]>(loadGenTray());
+
+let trayWriteTimer: ReturnType<typeof setTimeout> | null = null;
 genCandidates.subscribe((value) => {
-  try {
-    localStorage.setItem(GEN_TRAY_KEY, JSON.stringify(value));
-  } catch {
-    // storage unavailable — non-fatal
-  }
+  if (trayWriteTimer != null) clearTimeout(trayWriteTimer);
+  trayWriteTimer = setTimeout(() => {
+    trayWriteTimer = null;
+    try {
+      localStorage.setItem(GEN_TRAY_KEY, JSON.stringify(value));
+    } catch {
+      // storage unavailable — non-fatal
+    }
+  }, 500);
 });

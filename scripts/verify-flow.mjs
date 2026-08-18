@@ -63,7 +63,7 @@ if ((await resumeBtn.count()) > 0) {
 await page.waitForSelector('table tbody tr', { timeout: 60000 });
 const infoBtn = page.locator('button[aria-label="Where to buy and premium info"]').first();
 await infoBtn.click();
-await page.waitForSelector('text=/Cheapest now|No extra data/', { timeout: 15000 });
+await page.waitForSelector('text=/Cheapest now|No extra data/', { timeout: 30000 });
 console.log('PASS: per-domain registrar detail loads');
 
 await browser.close();

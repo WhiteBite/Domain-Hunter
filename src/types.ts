@@ -67,6 +67,8 @@ export interface EngineOptions {
   proxyUrl?: string;
   fetchTimeoutMs?: number;
   maxRetries?: number;
+  /** Global max in-flight checks (user setting). */
+  concurrency?: number;
 }
 
 export type EngineCommand =
@@ -75,6 +77,7 @@ export type EngineCommand =
 
 export type EngineEvent =
   | { type: 'result'; result: CheckResult }
+  | { type: 'batch'; results: CheckResult[] }
   | { type: 'progress'; done: number; total: number; available: number; errors: number }
   | {
       type: 'finished';

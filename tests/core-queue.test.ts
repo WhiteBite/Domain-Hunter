@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { runQueue } from '../src/core/queue';
-import type { EngineEvent, TldRegistry } from '../src/types';
+import type { CheckResult, EngineEvent, TldRegistry } from '../src/types';
+
+function collectResults(events: EngineEvent[]): CheckResult[] {
+  const out: CheckResult[] = [];
+  for (const e of events) {
+    if (e.type === 'result') out.push(e.result);
+    else if (e.type === 'batch') out.push(...e.results);
+  }
+  return out;
+}
 
 const registry: TldRegistry = {
   infras: {
@@ -27,7 +36,7 @@ describe('runQueue', () => {
       (e) => events.push(e),
       controller.signal,
     );
-    const results = events.filter((e) => e.type === 'result');
+    const results = collectResults(events);
     expect(results).toHaveLength(3);
     const progress = events.filter((e) => e.type === 'progress');
     expect(progress.length).toBeGreaterThan(0);
@@ -50,9 +59,10 @@ describe('runQueue', () => {
       (e) => events.push(e),
       controller.signal,
     );
-    const result = events.find((e) => e.type === 'result');
-    expect(result?.type === 'result' && result.result.status).toBe('error');
-    expect(result?.type === 'result' && result.result.note).toBe('unknown TLD');
+    const results = collectResults(events);
+    const result = results[0];
+    expect(result?.status).toBe('error');
+    expect(result?.note).toBe('unknown TLD');
   });
 
   it('stops early on abort', async () => {
@@ -71,7 +81,7 @@ describe('runQueue', () => {
       (e) => events.push(e),
       controller.signal,
     );
-    const results = events.filter((e) => e.type === 'result');
+    const results = collectResults(events);
     expect(results.length).toBeLessThan(40);
   });
 });

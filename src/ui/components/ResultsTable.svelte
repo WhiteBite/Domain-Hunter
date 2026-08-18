@@ -50,7 +50,10 @@
       arr.push({
         result: r,
         best,
-        tco: table ? tco3(table, r.tld) : null,
+        tco:
+          best && best.entry.reg != null && best.entry.renew != null
+            ? best.entry.reg + 2 * best.entry.renew
+            : null,
         firstYear: best?.entry.reg ?? null,
         renewal: best?.entry.renew ?? null,
       });
@@ -244,7 +247,10 @@
           registrar: cheapest && typeof cheapest.name === 'string' ? cheapest.name : null,
           regPrice:
             cheapest && typeof cheapest.reg_price_usd === 'number' ? cheapest.reg_price_usd : null,
-          url: typeof r.buy_url === 'string' ? r.buy_url : null,
+          url:
+            typeof r.buy_url === 'string' && r.buy_url.startsWith('https://')
+              ? r.buy_url
+              : null,
         },
       };
     } catch {
@@ -297,32 +303,35 @@
     rechecking = next;
 
     const registryVal = get(registry);
-    const settingsVal = get(settings);
+    const settingsVal = $settings;
     const options: EngineOptions = {
       registry: registryVal,
       proxyUrl: settingsVal.proxyUrl || undefined,
       fetchTimeoutMs: 10000,
       maxRetries: 3,
     };
-    (options as EngineOptions & { concurrency?: number }).concurrency = 1;
+    options.concurrency = 1;
 
+    const applyResult = (r: CheckResult): void => {
+      results.update((map) => {
+        const next = new Map(map);
+        next.set(r.domain, r);
+        return next;
+      });
+      putCache(r.domain, {
+        status: r.status,
+        source: r.source,
+        ts: r.checkedAt,
+        tld: r.tld,
+      });
+    };
     const e: EngineHandle = createEngine((event) => {
-      if (event.type === 'result') {
-        results.update((map) => {
-          const next = new Map(map);
-          next.set(event.result.domain, event.result);
-          return next;
-        });
-        putCache(event.result.domain, {
-          status: event.result.status,
-          source: event.result.source,
-          ts: event.result.checkedAt,
-          tld: event.result.tld,
-        });
+      if (event.type === 'result' || event.type === 'batch') {
+        if (event.type === 'result') applyResult(event.result);
+        else for (const r of event.results) applyResult(r);
         const next2 = new Set(rechecking);
         next2.delete(domain);
         rechecking = next2;
-        e.destroy();
       } else if (event.type === 'finished') {
         e.destroy();
         const next2 = new Set(rechecking);
@@ -383,32 +392,32 @@
       <table>
         <thead>
           <tr>
-            <th>
-              <button class="sort-btn" onclick={() => toggleSort('name')} type="button" aria-sort={ariaSort('name')}>
+            <th aria-sort={ariaSort('name')}>
+              <button class="sort-btn" onclick={() => toggleSort('name')} type="button">
                 {t('results.sort.name')}
                 <span class="sort-arrow" class:visible={sortKey === 'name'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
-            <th>
-              <button class="sort-btn" onclick={() => toggleSort('status')} type="button" aria-sort={ariaSort('status')}>
+            <th aria-sort={ariaSort('status')}>
+              <button class="sort-btn" onclick={() => toggleSort('status')} type="button">
                 {t('results.col.status')}
                 <span class="sort-arrow" class:visible={sortKey === 'status'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
-            <th>
-              <button class="sort-btn" onclick={() => toggleSort('price')} type="button" aria-sort={ariaSort('price')}>
+            <th aria-sort={ariaSort('price')}>
+              <button class="sort-btn" onclick={() => toggleSort('price')} type="button">
                 {t('results.col.price')}
                 <span class="sort-arrow" class:visible={sortKey === 'price'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
-            <th>
-              <button class="sort-btn" onclick={() => toggleSort('renew')} type="button" aria-sort={ariaSort('renew')}>
+            <th aria-sort={ariaSort('renew')}>
+              <button class="sort-btn" onclick={() => toggleSort('renew')} type="button">
                 {t('results.col.renew')}
                 <span class="sort-arrow" class:visible={sortKey === 'renew'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
-            <th>
-              <button class="sort-btn" onclick={() => toggleSort('tco')} type="button" aria-sort={ariaSort('tco')} title={t('tooltip.tco')}>
+            <th aria-sort={ariaSort('tco')}>
+              <button class="sort-btn" onclick={() => toggleSort('tco')} type="button" title={t('tooltip.tco')}>
                 {t('results.col.tco')}
                 <span class="sort-arrow" class:visible={sortKey === 'tco'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
@@ -445,7 +454,7 @@
               <td class="price-cell">
                 <div class="price-stack">
                   <span class="price" style="color: {priceColor(row.firstYear)}">
-                    {formatPrice(row.firstYear, get(settings))}
+                    {formatPrice(row.firstYear, $settings)}
                   </span>
                   {#if promo}
                     <span class="chip-tag promo" title={t('tooltip.promoTrap')}>{t('price.promo')}</span>
@@ -455,16 +464,16 @@
                   {/if}
                   {#if coupon}
                     <span class="coupon">
-                      {t('price.coupon', { price: formatPrice(coupon.amount, get(settings)), code: coupon.code })}
+                      {t('price.coupon', { price: formatPrice(coupon.amount, $settings), code: coupon.code })}
                     </span>
                   {/if}
                 </div>
               </td>
               <td class="price-cell">
-                <span class="price-neutral">{formatPrice(row.renewal, get(settings))}</span>
+                <span class="price-neutral">{formatPrice(row.renewal, $settings)}</span>
               </td>
               <td class="price-cell">
-                <span class="price-neutral">{formatPrice(row.tco, get(settings))}</span>
+                <span class="price-neutral">{formatPrice(row.tco, $settings)}</span>
               </td>
               <td class="actions-cell">
                 <div class="actions">
@@ -514,7 +523,7 @@
                         row.best && row.best.entry.reg != null
                           ? t('results.buy.at', {
                               registrar: registrarName(row.best.registrarId),
-                              price: formatPrice(row.best.entry.reg, get(settings)),
+                              price: formatPrice(row.best.entry.reg, $settings),
                             })
                           : t('results.buy')
                       }
@@ -538,7 +547,10 @@
                       {#if d.premium || d.likely}
                         <span class="chip-tag trap">
                           {t('results.detail.premium', {
-                            price: d.price != null ? `$${d.price}` : '—',
+                            price:
+                              d.price != null
+                                ? formatPrice(Math.round(d.price * 100), $settings)
+                                : '—',
                           })}
                         </span>
                       {/if}
@@ -546,7 +558,10 @@
                         <span class="detail-cheap">
                           {t('results.detail.cheapest', {
                             registrar: d.registrar,
-                            price: d.regPrice != null ? `$${d.regPrice}` : '—',
+                            price:
+                              d.regPrice != null
+                                ? formatPrice(Math.round(d.regPrice * 100), $settings)
+                                : '—',
                           })}
                         </span>
                       {/if}
