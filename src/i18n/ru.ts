@@ -43,6 +43,8 @@ export const ru: Dict = {
   'check.run.start': 'Проверить доступность',
   'check.run.stop': 'Остановить',
   'check.run.ignoreCache': 'Игнорировать кэш',
+  'check.run.ignoreCache.tooltip':
+    'Запросить каждый домен у реестров заново, даже если свежий результат уже сохранён локально.',
   'check.run.resume.title': 'Продолжить прерванный запуск?',
   'check.run.resume.body': 'Предыдущий запуск прерван, осталось проверок: {n}.',
   'check.run.resume.yes': 'Продолжить',
@@ -141,7 +143,7 @@ export const ru: Dict = {
   'gen.combinator.title': 'Комбинатор',
   'gen.combinator.desc': 'Сочетайте ваши корни с приставками и суффиксами.',
   'gen.combinator.roots': 'Корни (по одному в строке)',
-  'gen.combinator.affixes': 'Аффиксы (по одному в строке)',
+  'gen.combinator.affixes': 'Аффиксы (через запятую или с новой строки)',
   'gen.combinator.mode': 'Режим',
   'gen.combinator.mode.prefix': 'Приставки',
   'gen.combinator.mode.suffix': 'Суффиксы',

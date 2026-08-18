@@ -562,6 +562,12 @@
     border-bottom: 1px solid var(--border);
     transition: background var(--dur) var(--ease);
   }
+  tbody tr:nth-child(even):not(.available) {
+    background: color-mix(in srgb, var(--bg-sunken) 55%, transparent);
+  }
+  tbody tr:nth-child(even):hover {
+    background: var(--bg-sunken);
+  }
   tbody tr:last-child {
     border-bottom: none;
   }
@@ -592,6 +598,21 @@
   td {
     padding: var(--space-2) var(--space-3);
     vertical-align: middle;
+  }
+
+  th:nth-child(3),
+  th:nth-child(4),
+  th:nth-child(5) {
+    text-align: right;
+  }
+
+  .price-cell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .price-stack {
+    align-items: flex-end;
   }
   td:first-child {
     padding-left: var(--space-3);

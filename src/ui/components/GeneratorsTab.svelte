@@ -591,6 +591,7 @@
 
   textarea,
   input[type='text'],
+  input[type='search'],
   input[type='number'],
   select {
     background: var(--bg);

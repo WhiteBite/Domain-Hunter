@@ -283,7 +283,9 @@
 
     <label class="checkbox">
       <input type="checkbox" bind:checked={ignoreCache} />
-      <span>{t('check.run.ignoreCache')}</span>
+      <Tooltip text={t('check.run.ignoreCache.tooltip')}>
+        <span>{t('check.run.ignoreCache')}</span>
+      </Tooltip>
     </label>
   </div>
 </div>

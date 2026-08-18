@@ -42,6 +42,8 @@ export const en: Dict = {
   'check.run.start': 'Check availability',
   'check.run.stop': 'Stop',
   'check.run.ignoreCache': 'Ignore cache',
+  'check.run.ignoreCache.tooltip':
+    'Re-query every domain from the registries even if a fresh result is already stored locally.',
   'check.run.resume.title': 'Resume interrupted run?',
   'check.run.resume.body': 'A previous run was interrupted with {n} checks left.',
   'check.run.resume.yes': 'Resume',
@@ -140,7 +142,7 @@ export const en: Dict = {
   'gen.combinator.title': 'Combinator',
   'gen.combinator.desc': 'Combine your roots with prefixes and suffixes.',
   'gen.combinator.roots': 'Roots (one per line)',
-  'gen.combinator.affixes': 'Affixes (one per line)',
+  'gen.combinator.affixes': 'Affixes (comma or newline separated)',
   'gen.combinator.mode': 'Mode',
   'gen.combinator.mode.prefix': 'Prefixes',
   'gen.combinator.mode.suffix': 'Suffixes',
