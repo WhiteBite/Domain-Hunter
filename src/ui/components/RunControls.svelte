@@ -25,6 +25,7 @@
   import { getFresh as cacheGetFresh, put as cachePut } from '../../core/cache';
   import { KEYS, readJson, writeJson, removeKey } from '../settings';
   import { t } from '../../i18n';
+  import Tooltip from './Tooltip.svelte';
 
   let ignoreCache = $state(false);
   let resumeSnapshot = $state<RunSnapshot | null>(null);
@@ -80,6 +81,20 @@
     unsubShare?.();
     unsubResume?.();
     unsubStart?.();
+    // Leaving the tab mid-run: persist a resume snapshot and settle the UI,
+    // otherwise the progress bar would spin forever with a dead engine.
+    if (get(runState).phase === 'running') {
+      const pending = engineCandidates.filter((c) => !completedByEngine.has(c));
+      if (pending.length > 0) {
+        writeJson(KEYS.run, {
+          pending,
+          tlds: get(selectedTlds),
+          ignoreCache,
+          ts: Date.now(),
+        } satisfies RunSnapshot);
+      }
+      runState.update((rs) => ({ ...rs, phase: 'done', elapsedMs: Date.now() - rs.startedAt }));
+    }
     engine?.destroy();
     engine = null;
   });

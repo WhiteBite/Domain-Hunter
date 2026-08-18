@@ -104,25 +104,89 @@ async function fetchCloudflare() {
   return normalizeCloudflare(json);
 }
 
+// ---- Best-effort extra sources (multi-registrar coverage) ----
+
+const KNOWN_REGS = ['spaceship', 'porkbun', 'cloudflare', 'valuedomain', 'dynadot'];
+
+/** regctl.sh snapshot: tld -> { registrarId: number | {registration,renewal,...} } */
+function normalizeRegctl(json) {
+  const tlds = {};
+  for (const [tld, raw] of Object.entries(json ?? {})) {
+    if (!raw || typeof raw !== 'object') continue;
+    const bucket = {};
+    for (const [reg, val] of Object.entries(raw)) {
+      if (!KNOWN_REGS.includes(reg)) continue;
+      if (typeof val === 'number') {
+        bucket[reg] = { reg: toCents(val), renew: toCents(val), transfer: null };
+      } else if (val && typeof val === 'object') {
+        bucket[reg] = {
+          reg: toCents(val.registration ?? val.reg),
+          renew: toCents(val.renewal ?? val.renew),
+          transfer: toCents(val.transfer),
+        };
+      }
+    }
+    if (Object.keys(bucket).length > 0) tlds[tld] = bucket;
+  }
+  if (Object.keys(tlds).length === 0) throw new Error('regctl: nothing parsed');
+  return { tlds, coupons: {} };
+}
+
+/** Dynadot GUEST API: XML <tld name="com" register="10.99" renew="10.99" .../> */
+function normalizeDynadotXml(xml) {
+  const tlds = {};
+  const re = /<tld\b[^>]*\bname="([^"]+)"[^>]*>/g;
+  let m;
+  while ((m = re.exec(xml)) !== null) {
+    const tag = m[0];
+    const tld = m[1];
+    const reg = /(?:register|registration)="([\d.]+)"/.exec(tag)?.[1];
+    const renew = /(?:renew|renewal)="([\d.]+)"/.exec(tag)?.[1];
+    if (reg == null && renew == null) continue;
+    tlds[tld] = {
+      dynadot: { reg: toCents(reg), renew: toCents(renew ?? reg), transfer: toCents(reg) },
+    };
+  }
+  if (Object.keys(tlds).length === 0) throw new Error('dynadot: no tld entries parsed');
+  return { tlds, coupons: {} };
+}
+
+async function fetchDynadot() {
+  const res = await fetchWithTimeout(
+    'https://www.dynadot.com/api3.xml?uid=GUEST&key=GUEST&command=tldPrices',
+  );
+  if (!res.ok) throw new Error(`dynadot ${res.status}`);
+  return normalizeDynadotXml(await res.text());
+}
+
+async function fetchRegctl() {
+  const res = await fetchWithTimeout('https://regctl.sh/prices.json');
+  if (!res.ok) throw new Error(`regctl ${res.status}`);
+  return normalizeRegctl(await res.json());
+}
+
 // ---- Main ----
 
 async function main() {
-  const results = await Promise.allSettled([fetchPorkbun(), fetchCloudflare()]);
+  const named = [
+    ['porkbun', fetchPorkbun],
+    ['cloudflare', fetchCloudflare],
+    ['dynadot', fetchDynadot],
+    ['regctl', fetchRegctl],
+  ];
+  const results = await Promise.allSettled(named.map(([, fn]) => fn()));
   const sources = [];
   const merged = { tlds: {}, coupons: {} };
 
-  if (results[0].status === 'fulfilled') {
-    sources.push('porkbun');
-    mergePricing(merged, results[0].value);
-  } else {
-    console.error('porkbun failed:', results[0].reason?.message ?? results[0].reason);
-  }
-  if (results[1].status === 'fulfilled') {
-    sources.push('cloudflare');
-    mergePricing(merged, results[1].value);
-  } else {
-    console.error('cloudflare failed:', results[1].reason?.message ?? results[1].reason);
-  }
+  results.forEach((result, i) => {
+    const name = named[i][0];
+    if (result.status === 'fulfilled') {
+      sources.push(name);
+      mergePricing(merged, result.value);
+    } else {
+      console.error(`${name} failed:`, result.reason?.message ?? result.reason);
+    }
+  });
 
   if (sources.length === 0) {
     console.error('ALL pricing sources failed');

@@ -103,6 +103,12 @@ export const ru: Dict = {
   'check.share.run': 'Shift+клик — скопировать ссылку с автозапуском',
   'results.showAvailable': 'Показать свободные ({n})',
   'results.buy.at': 'Купить у {registrar} · {price}',
+  'results.detail.aria': 'Где купить и информация о премиуме',
+  'results.detail.loading': 'Запрашиваем данные регистраторов…',
+  'results.detail.failed': 'По этому домену нет дополнительных данных.',
+  'results.detail.premium': 'Премиум реестра ≈ {price}',
+  'results.detail.cheapest': 'Сейчас дешевле всего: {registrar} · {price}',
+  'results.detail.buy': 'Купить',
   'gen.tray.copy': 'Скопировать список',
   'gen.tray.projected':
     'Имена без зоны раскроются по выбранным зонам ({zones}): ≈ {n} проверок.',

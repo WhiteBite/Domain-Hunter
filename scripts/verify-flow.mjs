@@ -52,5 +52,19 @@ const trayAfter = await page.locator('.tray-chip').count();
 if (trayAfter !== trayCount) throw new Error(`tray changed: ${trayAfter} != ${trayCount}`);
 console.log(`PASS: tray preserved across tabs (${trayAfter})`);
 
+// On-demand per-domain registrar detail (DigMyName) on an available row
+await page.getByRole('tab', { name: 'Check' }).click();
+// The run was interrupted by the tab switch; a resume snapshot must exist.
+const resumeBtn = page.getByRole('button', { name: 'Resume' });
+if ((await resumeBtn.count()) > 0) {
+  await resumeBtn.click();
+  console.log('PASS: interrupted run offered resume after tab switch');
+}
+await page.waitForSelector('table tbody tr', { timeout: 60000 });
+const infoBtn = page.locator('button[aria-label="Where to buy and premium info"]').first();
+await infoBtn.click();
+await page.waitForSelector('text=/Cheapest now|No extra data/', { timeout: 15000 });
+console.log('PASS: per-domain registrar detail loads');
+
 await browser.close();
 console.log('FLOW OK');

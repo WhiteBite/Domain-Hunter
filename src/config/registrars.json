@@ -70,5 +70,11 @@
     "name": "Beget",
     "searchUrl": "https://beget.com/en/domains",
     "affiliate": { "program": "none", "viable": false, "note": "No query-param deep-link." }
+  },
+  {
+    "id": "valuedomain",
+    "name": "ValueDomain",
+    "searchUrl": "https://www.value-domain.com/",
+    "affiliate": { "program": "none", "viable": false, "note": "Landing page only; appears in regctl price snapshots." }
   }
 ]

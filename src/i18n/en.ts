@@ -102,6 +102,12 @@ export const en: Dict = {
   'check.share.run': 'Shift+click — copy a link with auto-start',
   'results.showAvailable': 'Show available ({n})',
   'results.buy.at': 'Buy at {registrar} · {price}',
+  'results.detail.aria': 'Where to buy and premium info',
+  'results.detail.loading': 'Fetching registrar data…',
+  'results.detail.failed': 'No extra data available for this domain.',
+  'results.detail.premium': 'Registry premium ≈ {price}',
+  'results.detail.cheapest': 'Cheapest now: {registrar} · {price}',
+  'results.detail.buy': 'Buy',
   'gen.tray.copy': 'Copy list',
   'gen.tray.projected':
     'Names without a zone expand across your {zones} selected zones: ≈ {n} checks.',

@@ -162,10 +162,16 @@
   function registrarFor(tld: string): { registrar: RegistrarConfig | null; entry: PriceEntry | null } {
     const table = $pricing?.table ?? null;
     if (!table) return { registrar: null, entry: null };
-    const best = bestEntry(table, tld);
-    if (!best) return { registrar: null, entry: null };
-    const registrar = registrars.find((r) => r.id === best.registrarId) ?? null;
-    return { registrar, entry: best.entry };
+    const entries = table.tlds[tld];
+    if (!entries) return { registrar: null, entry: null };
+    // Coverage-aware: cheapest among registrars we can actually link to.
+    let best: { registrar: RegistrarConfig; entry: PriceEntry } | null = null;
+    for (const r of registrars) {
+      const e = entries[r.id];
+      if (!e || e.reg == null) continue;
+      if (!best || e.reg < (best.entry.reg ?? Infinity)) best = { registrar: r, entry: e };
+    }
+    return best ?? { registrar: null, entry: null };
   }
 
   function buyUrl(domain: string, tld: string): string | null {
@@ -186,6 +192,67 @@
     const table = $pricing?.table;
     if (!table) return null;
     return bestCoupon(table, tld);
+  }
+
+  // ---- On-demand per-domain detail (DigMyName: premium + cheapest registrar) ----
+
+  interface DigDetail {
+    loading?: boolean;
+    failed?: boolean;
+    premium?: boolean;
+    likely?: boolean;
+    price: number | null;
+    registrar: string | null;
+    regPrice: number | null;
+    url: string | null;
+  }
+
+  let detailFor = $state<string | null>(null);
+  let details = $state<Record<string, DigDetail>>({});
+
+  async function toggleDetail(domain: string): Promise<void> {
+    if (detailFor === domain) {
+      detailFor = null;
+      return;
+    }
+    detailFor = domain;
+    const cached = details[domain];
+    if (cached && !cached.failed) return;
+    details = {
+      ...details,
+      [domain]: { loading: true, price: null, registrar: null, regPrice: null, url: null },
+    };
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(
+        `https://api.digmyname.com/functions/v1/public-api/check?domain=${encodeURIComponent(domain)}`,
+        { signal: ctrl.signal },
+      );
+      clearTimeout(timer);
+      if (!res.ok) throw new Error(String(res.status));
+      const json = (await res.json()) as { result?: Record<string, unknown> };
+      const r = json.result;
+      if (!r) throw new Error('no result');
+      const cheapest = (r.cheapest_registrar ?? null) as Record<string, unknown> | null;
+      details = {
+        ...details,
+        [domain]: {
+          premium: r.premium === true,
+          likely: r.likely_premium === true,
+          price: typeof r.price_usd === 'number' ? r.price_usd : null,
+          registrar: cheapest && typeof cheapest.name === 'string' ? cheapest.name : null,
+          regPrice:
+            cheapest && typeof cheapest.reg_price_usd === 'number' ? cheapest.reg_price_usd : null,
+          url: typeof r.buy_url === 'string' ? r.buy_url : null,
+        },
+      };
+    } catch {
+      details = {
+        ...details,
+        [domain]: { failed: true, price: null, registrar: null, regPrice: null, url: null },
+      };
+    }
   }
 
   async function copyText(text: string): Promise<boolean> {
@@ -424,6 +491,18 @@
                   >
                     <svg class:spin={rechecking.has(row.result.domain)} viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v3h-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
                   </button>
+                  {#if isAvail}
+                    <button
+                      class="action-btn"
+                      class:active={detailFor === row.result.domain}
+                      onclick={() => void toggleDetail(row.result.domain)}
+                      type="button"
+                      aria-label={t('results.detail.aria')}
+                      title={t('results.detail.aria')}
+                    >
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 7.4v3.2M8 5.2v.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+                    </button>
+                  {/if}
                   {#if buy}
                     <a
                       class="action-btn buy-btn"
@@ -446,6 +525,41 @@
                 </div>
               </td>
             </tr>
+            {#if isAvail && detailFor === row.result.domain}
+              {@const d = details[row.result.domain]}
+              <tr class="detail-row">
+                <td colspan="6">
+                  {#if !d || d.loading}
+                    <span class="detail-muted">{t('results.detail.loading')}</span>
+                  {:else if d.failed}
+                    <span class="detail-muted">{t('results.detail.failed')}</span>
+                  {:else}
+                    <div class="detail-content">
+                      {#if d.premium || d.likely}
+                        <span class="chip-tag trap">
+                          {t('results.detail.premium', {
+                            price: d.price != null ? `$${d.price}` : '—',
+                          })}
+                        </span>
+                      {/if}
+                      {#if d.registrar}
+                        <span class="detail-cheap">
+                          {t('results.detail.cheapest', {
+                            registrar: d.registrar,
+                            price: d.regPrice != null ? `$${d.regPrice}` : '—',
+                          })}
+                        </span>
+                      {/if}
+                      {#if d.url}
+                        <a class="detail-buy" href={d.url} target="_blank" rel="noopener noreferrer">
+                          {t('results.detail.buy')}
+                        </a>
+                      {/if}
+                    </div>
+                  {/if}
+                </td>
+              </tr>
+            {/if}
           {/each}
         </tbody>
       </table>
@@ -644,6 +758,39 @@
     gap: 2px;
   }
   .price {
+    font-weight: 500;
+  }
+
+  .action-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .detail-row td {
+    background: var(--bg-sunken);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .detail-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    font-size: var(--text-xs);
+  }
+
+  .detail-muted {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+  }
+
+  .detail-cheap {
+    color: var(--text-secondary);
+  }
+
+  .detail-buy {
+    color: var(--accent);
     font-weight: 500;
   }
   .chip-tag {
