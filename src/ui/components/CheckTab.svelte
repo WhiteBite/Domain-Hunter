@@ -138,7 +138,11 @@
 
   {#if showHint}
     <div class="hint-strip" role="note">
-      <span>{t('check.hint.body')}</span>
+      <ol class="hint-steps">
+        <li>{t('check.hint.1')}</li>
+        <li>{t('check.hint.2')}</li>
+        <li>{t('check.hint.3')}</li>
+      </ol>
       <button class="hint-dismiss" type="button" onclick={dismissHint}>
         {t('check.hint.dismiss')}
       </button>
@@ -223,6 +227,14 @@
     border-radius: var(--radius-md);
     font-size: var(--text-sm);
     color: var(--text-secondary);
+  }
+
+  .hint-steps {
+    margin: 0;
+    padding-left: 1.2em;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .hint-dismiss {

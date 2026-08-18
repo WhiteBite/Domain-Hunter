@@ -2,7 +2,7 @@
   import { onDestroy } from 'svelte';
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
-  import { activeTab, checkInput, registry, pendingShareRun } from '../store';
+  import { activeTab, checkInput, registry, pendingShareRun, genCandidates } from '../store';
   import { KEYS, readJson, writeJson } from '../settings';
   import { combinator, type CombinatorMode } from '../../generators/combinator';
   import { mixSyllables } from '../../generators/syllables';
@@ -45,7 +45,7 @@
     n: string;
     src: SrcId;
   }
-  let candidates = $state<Cand[]>([]);
+  let candidates = $derived($genCandidates);
   let trayFilter = $state('');
   let traySort = $state<'added' | 'az'>('added');
 
@@ -118,12 +118,12 @@
       merged.push({ n, src });
       added += 1;
     }
-    candidates = merged;
+    genCandidates.set(merged);
     showToast(t('gen.output.added', { n: added }));
   }
 
   function removeCandidate(name: string): void {
-    candidates = candidates.filter((w) => w.n !== name);
+    genCandidates.update((list) => list.filter((w) => w.n !== name));
   }
 
   function hasCandidate(name: string): boolean {
@@ -382,7 +382,7 @@
       <button
         class="btn ghost"
         type="button"
-        onclick={() => (candidates = [])}
+        onclick={() => genCandidates.set([])}
         disabled={candidates.length === 0}
       >
         {t('gen.tray.clear')}

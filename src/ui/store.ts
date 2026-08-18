@@ -3,7 +3,14 @@
  * Components consume these; persistence helpers live in ui/settings.ts.
  */
 import { writable } from 'svelte/store';
-import type { CheckResult, PricingTable, RunSnapshot, Settings, TldRegistry } from '../types';
+import type {
+  Candidate,
+  CheckResult,
+  PricingTable,
+  RunSnapshot,
+  Settings,
+  TldRegistry,
+} from '../types';
 import { DEFAULT_SETTINGS } from '../types';
 import tldsJson from '../config/tlds.json';
 
@@ -66,3 +73,26 @@ export const resumeAction = writable<'resume' | 'discard' | null>(null);
 
 /** Incremented to request a run start (Ctrl+Enter in the input). */
 export const startRequest = writable<number>(0);
+
+// ---- Generator candidate tray (survives tab switches, persisted) ----
+
+const GEN_TRAY_KEY = 'dh:v1:gentray';
+
+function loadGenTray(): Candidate[] {
+  try {
+    const raw = localStorage.getItem(GEN_TRAY_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? (parsed as Candidate[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export const genCandidates = writable<Candidate[]>(loadGenTray());
+genCandidates.subscribe((value) => {
+  try {
+    localStorage.setItem(GEN_TRAY_KEY, JSON.stringify(value));
+  } catch {
+    // storage unavailable — non-fatal
+  }
+});

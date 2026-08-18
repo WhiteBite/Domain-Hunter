@@ -88,8 +88,9 @@ export const en: Dict = {
   'status.available': 'Available',
   'app.title.html': 'Domain Hunter — free domain availability checker',
   'a11y.skip': 'Skip to content',
-  'check.hint.body':
-    '1) Type names or generate them. 2) Pick zones. 3) Press “Check availability” — results with prices stream in instantly.',
+  'check.hint.1': 'Type names or generate them in Generators.',
+  'check.hint.2': 'Pick zones.',
+  'check.hint.3': 'Press “Check availability” — results with prices stream in instantly.',
   'check.hint.dismiss': 'Got it',
   'check.input.ctrlEnter': 'Ctrl+Enter — start the check',
   'check.start.disabled': 'Enter names and select at least one zone',

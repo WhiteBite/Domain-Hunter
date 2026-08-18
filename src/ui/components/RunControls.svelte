@@ -47,15 +47,19 @@
     if (snap && Array.isArray(snap.pending) && snap.pending.length > 0) {
       resumeSnapshot = snap;
       resumePrompt.set(snap);
-    } else {
-      // No interrupted run — honor a share link with run:true.
-      unsubShare = pendingShareRun.subscribe((pending) => {
-        if (pending && get(runState).phase === 'idle') {
-          pendingShareRun.set(false);
-          startFromInput();
-        }
-      });
     }
+
+    // Always listen: a fresh run request (share link run:true or
+    // "Check now" from Generators) supersedes the resume prompt.
+    unsubShare = pendingShareRun.subscribe((pending) => {
+      if (pending && get(runState).phase === 'idle') {
+        pendingShareRun.set(false);
+        resumeSnapshot = null;
+        resumePrompt.set(null);
+        removeKey(KEYS.run);
+        startFromInput();
+      }
+    });
 
     unsubResume = resumeAction.subscribe((a) => {
       if (a === 'resume') resume();

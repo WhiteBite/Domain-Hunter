@@ -163,6 +163,21 @@ export const DEFAULT_SETTINGS: Settings = {
   ],
 };
 
+// ---- Generator candidate tray (persists across tab switches) ----
+
+export type CandidateSource =
+  | 'combinator'
+  | 'mutations'
+  | 'hacks'
+  | 'syllables'
+  | 'themes'
+  | 'sets';
+
+export interface Candidate {
+  n: string;
+  src: CandidateSource;
+}
+
 // ---- Cache entry (dh:v1:cache) ----
 
 export interface CacheEntry {
