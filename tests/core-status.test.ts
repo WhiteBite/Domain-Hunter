@@ -65,7 +65,11 @@ describe('checkDomain status matrix', () => {
 
   it('404 + trust low + DNS NXDOMAIN → probably_available', async () => {
     const result = await checkDomain('a.test', tldLow, infraLow, {
-      fetchImpl: scriptFetch([() => jsonResponse(404), () => jsonResponse(200, { Status: 3 })]),
+      fetchImpl: scriptFetch([
+        () => jsonResponse(404),
+        () => jsonResponse(200, { Status: 3 }),
+        () => jsonResponse(404),
+      ]),
       sleep: noSleep,
     });
     expect(result.status).toBe('probably_available');
@@ -74,7 +78,11 @@ describe('checkDomain status matrix', () => {
 
   it('404 + trust low + DNS NOERROR → taken', async () => {
     const result = await checkDomain('a.test', tldLow, infraLow, {
-      fetchImpl: scriptFetch([() => jsonResponse(404), () => jsonResponse(200, { Status: 0 })]),
+      fetchImpl: scriptFetch([
+        () => jsonResponse(404),
+        () => jsonResponse(200, { Status: 0 }),
+        () => jsonResponse(404),
+      ]),
       sleep: noSleep,
     });
     expect(result.status).toBe('taken');
@@ -148,7 +156,9 @@ describe('checkDomain status matrix', () => {
         throwFetch,
         throwFetch,
         throwFetch,
+        () => jsonResponse(404),
         () => jsonResponse(200, { Status: 3 }),
+        () => jsonResponse(404),
       ]),
       sleep: noSleep,
     });
@@ -158,6 +168,7 @@ describe('checkDomain status matrix', () => {
   it('network failure + trust high + DoH NXDOMAIN → probably_available (corroboration)', async () => {
     const result = await checkDomain('a.test', tldHigh, infraHigh, {
       fetchImpl: scriptFetch([
+        throwFetch,
         throwFetch,
         throwFetch,
         throwFetch,
@@ -188,6 +199,99 @@ describe('checkDomain status matrix', () => {
     });
     expect(result.status).toBe('error');
     expect(result.note).toBe('timeout');
+  });
+});
+
+describe('Cloudflare aggregator fallback + cross-check', () => {
+  // (a) transport fallback: direct fetch throws → aggregator 404 + high trust → available
+  it('network failure + aggregator 404 + trust high → available (via cloudflare rdap)', async () => {
+    const result = await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([
+        throwFetch,
+        throwFetch,
+        throwFetch,
+        () => jsonResponse(404),
+      ]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('available');
+    expect(result.source).toBe('rdap');
+    expect(result.note).toBe('via cloudflare rdap');
+  });
+
+  // (b) low-trust cross-check: direct 404 + aggregator 200 + DoH NXDOMAIN → taken (contradiction wins)
+  it('404 + trust low + aggregator 200 + DoH NXDOMAIN → taken (contradiction)', async () => {
+    const result = await checkDomain('a.test', tldLow, infraLow, {
+      fetchImpl: scriptFetch([
+        () => jsonResponse(404),
+        () => jsonResponse(200, { Status: 3 }),
+        () => jsonResponse(200),
+      ]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('taken');
+    expect(result.source).toBe('cloudflare');
+    expect(result.note).toBe('registry 404 contradicted by cloudflare rdap');
+  });
+
+  // (c) low-trust cross-check: direct 404 + aggregator 404 + DoH NXDOMAIN → probably_available (unchanged)
+  it('404 + trust low + aggregator 404 + DoH NXDOMAIN → probably_available (unchanged)', async () => {
+    const result = await checkDomain('a.test', tldLow, infraLow, {
+      fetchImpl: scriptFetch([
+        () => jsonResponse(404),
+        () => jsonResponse(200, { Status: 3 }),
+        () => jsonResponse(404),
+      ]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('probably_available');
+    expect(result.source).toBe('doh');
+  });
+
+  // (d) aggregator unreachable → legacy DoH behavior unchanged (normal 404 path)
+  it('404 + trust low + aggregator unreachable + DoH NXDOMAIN → probably_available (legacy)', async () => {
+    const result = await checkDomain('a.test', tldLow, infraLow, {
+      fetchImpl: scriptFetch([
+        () => jsonResponse(404),
+        () => jsonResponse(200, { Status: 3 }),
+        throwFetch,
+      ]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('probably_available');
+    expect(result.source).toBe('doh');
+  });
+
+  // (d) aggregator unreachable → legacy DoH behavior unchanged (transport fallback path)
+  it('network failure + aggregator unreachable + trust high + DoH NXDOMAIN → probably_available (legacy)', async () => {
+    const result = await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([
+        throwFetch,
+        throwFetch,
+        throwFetch,
+        throwFetch,
+        () => jsonResponse(200, { Status: 3 }),
+      ]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('probably_available');
+    expect(result.source).toBe('doh');
+  });
+
+  // transport fallback: aggregator 200 → taken (source cloudflare)
+  it('network failure + aggregator 200 → taken (via cloudflare rdap)', async () => {
+    const result = await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([
+        throwFetch,
+        throwFetch,
+        throwFetch,
+        () => jsonResponse(200),
+      ]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('taken');
+    expect(result.source).toBe('cloudflare');
+    expect(result.note).toBe('via cloudflare rdap');
   });
 });
 

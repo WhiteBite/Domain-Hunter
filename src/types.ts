@@ -4,7 +4,7 @@
  */
 
 export type CheckStatus = 'available' | 'taken' | 'probably_available' | 'unknown' | 'error';
-export type ResultSource = 'rdap' | 'doh' | 'cache';
+export type ResultSource = 'rdap' | 'doh' | 'cache' | 'cloudflare';
 
 export interface InfraConfig {
   id: string;

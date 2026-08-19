@@ -18,6 +18,8 @@ export interface RdapOptions {
 
 const BACKOFF_STEPS_MS = [1000, 2000, 4000];
 const MAX_RETRY_AFTER_MS = 10_000;
+const CLOUDFLARE_RDAP_BASE = 'https://rdap.cloudflare.com/domain/';
+const AGGREGATOR_TIMEOUT_MS = 8_000;
 
 const defaultSleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -76,6 +78,46 @@ interface ProxyResponse {
   free?: boolean;
 }
 
+type AggregatorOutcome = 'taken' | 'free' | 'fallthrough';
+
+/**
+ * Query the Cloudflare RDAP aggregator (https://rdap.cloudflare.com/domain/{d}).
+ * Secondary registry-level source — fallback-only traffic, no retries, no
+ * separate limiter (global concurrency cap already limits politeness).
+ * 200 → taken, 404 → free (trust rules still apply via conclude404),
+ * 429/other/throw → fallthrough (caller keeps its existing path).
+ */
+async function queryCloudflareAggregator(
+  domain: string,
+  fetchImpl: typeof fetch,
+  onOutcome?: (kind: OutcomeKind) => void,
+  signal?: AbortSignal,
+): Promise<AggregatorOutcome> {
+  try {
+    const resp = await fetchWithTimeout(
+      CLOUDFLARE_RDAP_BASE + domain,
+      AGGREGATOR_TIMEOUT_MS,
+      fetchImpl,
+      signal,
+    );
+    if (resp.status === 200) {
+      onOutcome?.('ok');
+      return 'taken';
+    }
+    if (resp.status === 404) {
+      onOutcome?.('ok');
+      return 'free';
+    }
+    if (resp.status === 429) {
+      onOutcome?.('429');
+      return 'fallthrough';
+    }
+    return 'fallthrough';
+  } catch {
+    return 'fallthrough';
+  }
+}
+
 export async function checkDomain(
   domain: string,
   tldConfig: TldConfig,
@@ -110,7 +152,22 @@ export async function checkDomain(
         latencyMs: Date.now() - startedAt,
       };
     }
-    const doh = await queryNs(domain, fetchImpl);
+    // Low-trust: DoH NS probe + Cloudflare aggregator cross-check in parallel
+    // (no added latency). Aggregator 200 overrides DoH — a taken domain must
+    // never be reported free. Otherwise keep the DoH-based outcomes.
+    const [doh, cf] = await Promise.all([
+      queryNs(domain, fetchImpl),
+      queryCloudflareAggregator(domain, fetchImpl, opts.onOutcome, signal),
+    ]);
+    if (cf === 'taken') {
+      return {
+        ...base,
+        status: 'taken',
+        source: 'cloudflare',
+        note: 'registry 404 contradicted by cloudflare rdap',
+        latencyMs: Date.now() - startedAt,
+      };
+    }
     if (doh === 'nxdomain') {
       return {
         ...base,
@@ -161,6 +218,21 @@ export async function checkDomain(
       } catch {
         // proxy failed — fall through
       }
+    }
+    // Cloudflare aggregator fallback (transport-broken RDAP). 200 → taken,
+    // 404 → conclude404 (trust rules apply), anything else → DoH last resort.
+    const cf = await queryCloudflareAggregator(domain, fetchImpl, opts.onOutcome, signal);
+    if (cf === 'taken') {
+      return {
+        ...base,
+        status: 'taken',
+        source: 'cloudflare',
+        note: 'via cloudflare rdap',
+        latencyMs: Date.now() - startedAt,
+      };
+    }
+    if (cf === 'free') {
+      return conclude404('via cloudflare rdap');
     }
     // Last resort for ANY trust level: DNS corroboration. Keeps the tool
     // useful when RDAP is transport-broken (TLS resets, geo-blocks) while

@@ -43,7 +43,7 @@ const STRING_ALLOWLIST = new Set([
 ]);
 
 // ---------------------------------------------------------------------------
-// (b) Network allowlist — SPEC §13 hosts that may be contacted at runtime.
+// (b) Network allowlist — SPEC §1 hosts that may be contacted at runtime.
 //     Regexes are anchored to the host portion of the URL.
 // ---------------------------------------------------------------------------
 const NETWORK_ALLOWLIST = [
@@ -68,6 +68,8 @@ const NETWORK_ALLOWLIST = [
   // DNS-over-HTTPS
   /^cloudflare-dns\.com$/,
   /^dns\.google$/,
+  // Cloudflare RDAP aggregator (fallback + low-trust cross-check, SPEC §7)
+  /^rdap\.cloudflare\.com$/,
   // Pricing
   /^api\.porkbun\.com$/,
   /^cfdomainpricing\.com$/,
@@ -234,7 +236,7 @@ function checkNetworkHosts(file, src, violations) {
       violations.push({
         file: rel,
         kind: 'off-allowlist-host',
-        detail: `https://${host} — not in SPEC §13 network allowlist`,
+        detail: `https://${host} — not in SPEC §1 network allowlist`,
       });
     }
   }
