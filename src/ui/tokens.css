@@ -2,9 +2,19 @@
    Domain Hunter design tokens (SPEC §12).
    Light is default; [data-theme='dark'] overrides custom props.
    All component colors MUST reference these variables.
+
+   Elevation philosophy: darkness as native medium. Depth is built
+   from background luminance stepping (sunken < page < elevated <
+   overlay), semi-transparent white borders, an inset top
+   highlight, and tinted layered shadows — not from heavy drop
+   shadows. Every native control is themed; color-scheme follows
+   the active theme so UA chrome (scrollbars, form controls)
+   tracks the surface.
    ============================================================ */
 
 :root {
+  color-scheme: light;
+
   /* type */
   --font-sans:
     'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
@@ -33,75 +43,140 @@
 
   /* layout */
   --content-max: 1280px;
+  --content-max-wide: 1680px;
 
   /* motion */
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
   --dur: 160ms;
 
-  /* light palette */
-  --bg: #fafafa;
+  /* light palette — luminance stepping: sunken < page < overlay < elevated */
+  --bg: #f6f7f9;
   --bg-elevated: #ffffff;
-  --bg-sunken: #f2f3f5;
-  --border: #e4e6ea;
-  --border-strong: #cfd3da;
-  --text: #17181c;
-  --text-secondary: #5c616b;
-  --text-tertiary: #8a909b;
+  --bg-sunken: #eef0f4;
+  --bg-overlay: #fbfcfd;
 
-  --accent: #5b5bd6;
-  --accent-hover: #4a4ac4;
-  --accent-soft: #ecebfb;
+  /* borders — semi-transparent on the surface tone */
+  --border-subtle: rgba(16, 24, 40, 0.06);
+  --border: rgba(16, 24, 40, 0.10);
+  --border-strong: rgba(16, 24, 40, 0.16);
+
+  /* text — never pure black */
+  --text: #161b26;
+  --text-secondary: #3d4657;
+  --text-tertiary: #5d6675;
+  --text-quaternary: #8b93a1;
+
+  /* accent — single indigo */
+  --accent: #5e6ad2;
+  --accent-hover: #4d58c0;
+  --accent-pressed: #4d58c0;
+  --accent-soft: rgba(94, 106, 210, 0.10);
+  --accent-text: #4f5ac8;
   --on-accent: #ffffff;
 
-  --green: #1a9e4b;
-  --green-soft: #e2f5e9;
-  --amber: #b07d10;
-  --amber-soft: #fbf0d7;
-  --red: #d13c3c;
-  --red-soft: #fdeaea;
-  --neutral-soft: #eef0f2;
+  /* semantic — calibrated for light surfaces */
+  --green: #15803c;
+  --green-solid: #15803c;
+  --green-soft: rgba(21, 128, 60, 0.08);
+  --amber: #9a6a10;
+  --amber-soft: rgba(154, 106, 16, 0.10);
+  --red: #cf4444;
+  --red-soft: rgba(207, 68, 68, 0.10);
+  --neutral-soft: rgba(16, 24, 40, 0.06);
 
-  --price-cheap: #1a9e4b;
-  --price-mid: #b07d10;
-  --price-high: #d13c3c;
+  /* row tints — subtle status washes for table rows */
+  --row-tint-available: rgba(21, 128, 60, 0.04);
+  --row-tint-error: rgba(207, 68, 68, 0.04);
 
-  --shadow-sm: 0 1px 2px rgb(16 17 20 / 5%);
-  --shadow-md: 0 2px 8px rgb(16 17 20 / 8%), 0 1px 2px rgb(16 17 20 / 5%);
-  --shadow-lg: 0 8px 28px rgb(16 17 20 / 12%);
+  /* price-tier aliases */
+  --price-cheap: var(--green);
+  --price-mid: var(--amber);
+  --price-high: var(--red);
 
-  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  /* shadows — tinted, layered */
+  --shadow-sm: 0 1px 2px rgba(23, 32, 54, 0.06);
+  --shadow-md: 0 2px 8px rgba(23, 32, 54, 0.08), 0 1px 2px rgba(23, 32, 54, 0.06);
+  --shadow-lg: 0 8px 28px rgba(23, 32, 54, 0.12);
+  --shadow-1: 0 1px 2px rgba(23, 32, 54, 0.06);
+  --shadow-2: 0 6px 20px rgba(23, 32, 54, 0.10);
+  --shadow-pop: 0 0 0 1px rgba(23, 32, 54, 0.08), 0 8px 24px rgba(23, 32, 54, 0.12);
+
+  /* elevation: inset top highlight for lifted surfaces */
+  --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  /* scrollbars */
+  --scrollbar-thumb: rgba(16, 24, 40, 0.16);
+  --scrollbar-thumb-hover: rgba(16, 24, 40, 0.26);
+
+  /* focus — accent ring + soft glow */
+  --focus-ring: 0 0 0 2px rgba(94, 106, 210, 0.55), 0 0 12px rgba(94, 106, 210, 0.25);
 }
 
 [data-theme='dark'] {
-  --bg: #101114;
-  --bg-elevated: #17181c;
-  --bg-sunken: #0b0c0e;
-  --border: #26282e;
-  --border-strong: #34373f;
-  --text: #eceef1;
-  --text-secondary: #a2a8b3;
-  --text-tertiary: #6f7580;
+  color-scheme: dark;
 
-  --accent: #7c7cf0;
-  --accent-hover: #9090f4;
-  --accent-soft: #232343;
-  --on-accent: #101114;
+  /* dark palette — luminance stepping: sunken < page < elevated < overlay */
+  --bg: #0b0c0f;
+  --bg-elevated: #14161a;
+  --bg-sunken: #08090b;
+  --bg-overlay: #1a1d22;
 
-  --green: #3fc46f;
-  --green-soft: #12301d;
-  --amber: #d9a83f;
-  --amber-soft: #33270e;
-  --red: #e26060;
-  --red-soft: #391717;
-  --neutral-soft: #212329;
+  /* borders — semi-transparent white over dark surfaces */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
 
-  --price-cheap: #3fc46f;
-  --price-mid: #d9a83f;
-  --price-high: #e26060;
+  /* text — never pure white */
+  --text: #eef1f6;
+  --text-secondary: #c7cdd8;
+  --text-tertiary: #8a91a0;
+  --text-quaternary: #5f6673;
 
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
-  --shadow-md: 0 2px 8px rgb(0 0 0 / 40%), 0 1px 2px rgb(0 0 0 / 30%);
-  --shadow-lg: 0 8px 28px rgb(0 0 0 / 50%);
+  /* accent — single indigo, brighter hover for dark */
+  --accent: #5e6ad2;
+  --accent-hover: #7c86ff;
+  --accent-pressed: #4d58c0;
+  --accent-soft: rgba(94, 106, 210, 0.12);
+  --accent-text: #a3adff;
+  --on-accent: #ffffff;
+
+  /* semantic — calibrated for dark surfaces (desaturated-on-dark) */
+  --green: #6ee7a8;
+  --green-solid: #2fbf71;
+  --green-soft: rgba(47, 191, 113, 0.10);
+  --amber: #f5b453;
+  --amber-soft: rgba(245, 180, 83, 0.10);
+  --red: #f47070;
+  --red-soft: rgba(244, 112, 112, 0.10);
+  --neutral-soft: rgba(255, 255, 255, 0.06);
+
+  /* row tints — subtle status washes for table rows */
+  --row-tint-available: rgba(47, 191, 113, 0.05);
+  --row-tint-error: rgba(244, 112, 112, 0.05);
+
+  /* price-tier aliases */
+  --price-cheap: var(--green);
+  --price-mid: var(--amber);
+  --price-high: var(--red);
+
+  /* shadows — tinted black, deeper for dark */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+
+  /* elevation: inset top highlight for lifted surfaces */
+  --inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* scrollbars */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.16);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.26);
+
+  /* focus — same accent ring + soft glow */
+  --focus-ring: 0 0 0 2px rgba(94, 106, 210, 0.55), 0 0 12px rgba(94, 106, 210, 0.25);
 }
 
 /* ---- base ---- */
@@ -126,12 +201,26 @@ body {
   transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 button,
 input,
 select,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+/* Prevent white flashes on native form controls in dark mode */
+select,
+input,
+textarea {
+  background: var(--bg-elevated);
 }
 
 :focus-visible {
@@ -141,7 +230,7 @@ textarea {
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: none;
 }
 
@@ -150,7 +239,120 @@ a:hover {
 }
 
 ::selection {
-  background: var(--accent-soft);
+  background: rgba(94, 106, 210, 0.35);
+}
+
+/* ---- scrollbars ---- */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ---- native controls ---- */
+
+input[type='checkbox'],
+input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+input[type='checkbox'] {
+  border-radius: 4px;
+}
+
+input[type='radio'] {
+  border-radius: var(--radius-full);
+}
+
+input[type='checkbox']:hover,
+input[type='radio']:hover {
+  border-color: var(--accent);
+}
+
+input[type='checkbox']:focus-visible,
+input[type='radio']:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+input[type='checkbox']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-6' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+input[type='radio']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='3' fill='white'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* ---- utilities ---- */
+
+/* Apply to any numeric/price cell so digits align in a fixed-width column.
+   ResultsTable .price-cell already sets this; .nums extends the rule to
+   counts, statistics, elapsed time, and other numeric displays. */
+.nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- button base (global) ---- */
+
+/* Shared transition + active-state transform for every `.btn` element.
+   Component-scoped variants (`.btn.primary`, `.btn.ghost`, `.btn.stop`)
+   define their own colors/borders; this base only adds motion consistency
+   so the active `translateY(1px) scale(0.99)` press feedback is uniform. */
+.btn {
+  transition: background-color 140ms var(--ease), border-color 140ms var(--ease),
+    color 140ms var(--ease), transform 140ms var(--ease);
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+/* Ghost/subtle buttons need a visible hover surface (DESIGN.md §6). */
+.btn.ghost:hover {
+  background: var(--bg-overlay);
+}
+
+/* ---- row entrance animation (global keyframe; applied by ResultsTable) ---- */
+
+@keyframes dh-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

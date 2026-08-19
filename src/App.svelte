@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { locale, setLocaleFromBrowser, t } from './i18n';
+  import { locale, setLocaleFromBrowser, t, nextLocale } from './i18n';
   import { activeTab, settings, type TabId } from './ui/store';
   import { loadSettings, saveSettings } from './ui/settings';
   import { applyTheme, watchSystemTheme } from './ui/theme';
@@ -24,6 +24,11 @@
   let tab = $state<TabId>('check');
   activeTab.subscribe((value) => (tab = value));
 
+  // Work tabs (check/generators/drops) use the wider content cap so the
+  // two-pane workspace has room; text tabs (social/settings/about) stay narrow.
+  const wideTabs: ReadonlySet<TabId> = new Set(['check', 'generators', 'drops']);
+  let isWide = $derived(wideTabs.has(tab));
+
   const tabs: { id: TabId; labelKey: string }[] = [
     { id: 'check', labelKey: 'tab.check' },
     { id: 'generators', labelKey: 'tab.generators' },
@@ -43,7 +48,7 @@
   }
 
   function toggleLang() {
-    settings.update((s) => ({ ...s, lang: s.lang === 'en' ? 'ru' : 'en' }));
+    settings.update((s) => ({ ...s, lang: nextLocale(s.lang) }));
   }
 
   onMount(() => {
@@ -58,7 +63,7 @@
 </script>
 
 <a class="skip-link" href="#main-content" data-testid="app-skip-link">{t('a11y.skip')}</a>
-<div class="shell" data-testid="app-shell">
+<div class="shell" class:wide={isWide} data-testid="app-shell">
   <header class="header">
     <div class="header-inner">
       <div class="brand">
@@ -73,7 +78,7 @@
       </div>
       <div class="header-actions">
         <button class="icon-btn" onclick={toggleLang} aria-label={t('lang.label')} title={t('lang.label')} data-testid="app-lang-toggle">
-          {current.lang === 'en' ? 'RU' : 'EN'}
+          {nextLocale(current.lang).toUpperCase()}
         </button>
         <button class="icon-btn" onclick={toggleTheme} aria-label={t('theme.label')} title={t('theme.label')} data-testid="app-theme-toggle">
           <svg class="theme-icon icon-moon" viewBox="0 0 16 16" aria-hidden="true">
@@ -289,6 +294,13 @@
     max-width: var(--content-max);
     margin: 0 auto;
     padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+
+  /* Work tabs widen the content cap and align the header/tab bar to it. */
+  .shell.wide .header-inner,
+  .shell.wide .tabs,
+  .shell.wide .content {
+    max-width: var(--content-max-wide);
   }
 
   .footer {
