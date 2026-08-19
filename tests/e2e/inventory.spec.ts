@@ -64,11 +64,15 @@ async function collectInteractive(page: Page): Promise<{ tag: string; testid: st
 async function expandTransientUi(page: Page): Promise<void> {
   // Check tab: full TLD list + populated results table incl. a detail row.
   await navigateToTab(page, 'check');
+  // Open the TLD popover so its contained elements (presets, chips) are in the DOM.
+  await page.click('[data-testid="tld-picker-toggle"]');
   await page.click('[data-testid="tld-preset-all"]');
 
   // Narrow the run to exactly 2 checks: clear selection, keep only .com.
   await page.click('[data-testid="tld-button-clear"]');
   await page.click('[data-testid="tld-chip-com"]');
+  // Close popover so it doesn't intercept clicks on elements below it.
+  await page.click('[data-testid="tld-picker-toggle"]');
   await page.fill('[data-testid="check-input-domains"]', 'google.com\nzzqxtest1.com');
   await page.click('[data-testid="check-button-start"]');
   await expect(page.locator('[data-testid="results-row-google-com"]')).toBeVisible({
@@ -78,6 +82,7 @@ async function expandTransientUi(page: Page): Promise<void> {
     timeout: 15_000,
   });
   // Open the detail row of the available domain (renders the detail-buy link).
+  await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
   await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
   await expect(page.locator('[data-testid^="results-row-detail-buy-"]')).toBeVisible({
     timeout: 10_000,

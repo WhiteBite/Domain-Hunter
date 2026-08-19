@@ -116,7 +116,7 @@ test.describe('Cross-cutting features', () => {
     expectNoLeaks(page);
   });
 
-  test('language toggle RU→EN restores English', async ({ page }) => {
+  test('language toggle cycles through locales (EN→RU→ES)', async ({ page }) => {
     await setupCommonMocks(page);
     await openApp(page);
 
@@ -124,8 +124,8 @@ test.describe('Cross-cutting features', () => {
     await toggle.click(); // EN → RU
     await expect(toggle).toHaveAttribute('aria-label', 'Язык');
 
-    await toggle.click(); // RU → EN
-    await expect(toggle).toHaveAttribute('aria-label', 'Language');
+    await toggle.click(); // RU → ES
+    await expect(toggle).toHaveAttribute('aria-label', 'Idioma');
 
     expectNoLeaks(page);
   });
@@ -141,7 +141,8 @@ test.describe('Cross-cutting features', () => {
     // Input pre-filled with the encoded query
     await expect(page.locator('[data-testid="check-input-domains"]')).toHaveValue('zzqxtest1');
 
-    // TLD 'com' selected (chip has 'selected' class)
+    // TLD 'com' selected (chip has 'selected' class) — open popover to see chip.
+    await page.click('[data-testid="tld-picker-toggle"]');
     await expect(page.locator('[data-testid="tld-chip-com"]')).toHaveClass(/selected/);
 
     // Auto-run: result row appears without clicking start
@@ -160,7 +161,10 @@ test.describe('Cross-cutting features', () => {
 
     // Clear default TLD selection, then select only 'com'
     await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
     await page.click('[data-testid="tld-chip-com"]');
+    // Close popover so it doesn't intercept the start button click.
+    await page.click('[data-testid="tld-picker-toggle"]');
 
     // Fill input
     await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1');

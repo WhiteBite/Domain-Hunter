@@ -34,6 +34,7 @@ export const ALL_TESTIDS = [
   'check-button-csv', // CSV export button
   'check-hint-strip', // hint strip container (role=note)
   'check-panel-toggle', // left input panel collapse/expand toggle
+  'check-history-toggle', // history section collapsible toggle
   'history-clear', // clear history button
 
   // ---- DomainInput.svelte ----
@@ -45,6 +46,7 @@ export const ALL_TESTIDS = [
 
   // ---- EmptyState.svelte ----
   'check-button-empty-cta', // CTA button to generators tab
+  'check-button-example', // secondary button: fill check input with sample names
 
   // ---- RunControls.svelte ----
   'check-button-start', // start run button
@@ -65,6 +67,7 @@ export const ALL_TESTIDS = [
   'tld-preset-all', // "all" preset button
   'tld-button-clear', // clear selection button
   'tld-selected-count', // "N selected" live region
+  'tld-picker-toggle', // popover trigger button
 
   // ---- ResultsTable.svelte ----
   'results-filter-all', // filter: all
@@ -80,9 +83,8 @@ export const ALL_TESTIDS = [
   'results-sort-name', // sort by name
   'results-sort-status', // sort by status
   'results-sort-price', // sort by first-year price
-  'results-sort-renew', // sort by renewal price
-  'results-sort-tco', // sort by 3-year TCO
   'results-showing-count', // "showing X of Y" live region
+  'results-legend-toggle', // status legend popover trigger
 
   // ---- GeneratorsTab.svelte ----
   'gen-input-keywords', // keywords text input
@@ -107,6 +109,7 @@ export const ALL_TESTIDS = [
   'gen-tray-projected', // projected checks paragraph
   'gen-tray-empty', // empty-tray message
   'gen-toast', // transient toast (role=status)
+  'gen-button-tray-menu', // tray overflow menu trigger
 
   // ---- SettingsTab.svelte ----
   'settings-select-theme', // theme select
@@ -154,12 +157,15 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'results-row-detail-', // detail buttons: results-row-detail-{domain}
   'results-row-buy-', // buy links: results-row-buy-{domain}
   'results-row-detail-buy-', // detail buy links: results-row-detail-buy-{domain}
+  'results-row-menu-', // row overflow menu triggers: results-row-menu-{domain}
 
   // ---- GeneratorsTab.svelte ----
   'gen-toggle-', // tech toggle checkboxes: gen-toggle-{key} (combinator|mutations|hacks|syllables)
   'gen-tray-chip-', // tray chips: gen-tray-chip-{name}
   'gen-tray-fav-', // tray chip favorite stars: gen-tray-fav-{name}
+  'gen-tray-remove-', // tray chip remove buttons: gen-tray-remove-{name}
   'gen-more-', // tray section show more/less: gen-more-{section}
+  'gen-group-toggle-', // tray group collapse toggles: gen-group-toggle-{groupId}
   'gen-theme-chip-', // theme category chips: gen-theme-chip-{id}
   'gen-theme-word-', // theme word buttons: gen-theme-word-{word}
   'gen-set-load-', // saved set load buttons: gen-set-load-{name}

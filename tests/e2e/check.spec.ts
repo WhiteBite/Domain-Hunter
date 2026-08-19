@@ -275,6 +275,7 @@ test.describe('Check tab', () => {
     const count = async (): Promise<number> =>
       parseInt(((await countEl.textContent()) ?? '').match(/\d+/)?.[0] ?? '0', 10);
     const before = await count();
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
     const chip = page.locator('[data-testid="tld-chip-io"]');
     await chip.click();
     expect(await count()).not.toBe(before);
@@ -300,6 +301,7 @@ test.describe('Check tab', () => {
     const count = async (): Promise<number> =>
       parseInt(((await countEl.textContent()) ?? '').match(/\d+/)?.[0] ?? '0', 10);
 
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
     await page.locator('[data-testid="tld-preset-popular"]').click();
     expect(await count()).toBe(15);
 
@@ -314,6 +316,7 @@ test.describe('Check tab', () => {
   test('5. search filters TLD chips', async ({ page }) => {
     await setupBaseMocks(page);
     await bootCheckTab(page);
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
     await page.locator('[data-testid="tld-input-search"]').fill('com');
     await expect(page.locator('[data-testid="tld-chip-com"]')).toBeVisible();
     await expect(page.locator('[data-testid="tld-chip-xyz"]')).toBeHidden();
@@ -479,6 +482,7 @@ test.describe('Check tab', () => {
     await bootCheckTab(page);
     await runCheck(page, 'google.com');
     await expect(row(page, 'google.com')).toBeVisible();
+    await page.locator('[data-testid="results-row-menu-google-com"]').click();
     await page.locator('[data-testid="results-row-copy-google-com"]').click();
     expect(await readClipboard(page)).toContain('google.com');
   });
@@ -516,6 +520,7 @@ test.describe('Check tab', () => {
     await bootCheckTab(page);
     await runCheck(page, 'zzqxtest1.com');
     await expect(row(page, 'zzqxtest1.com').locator('[data-testid="status-badge-available"]')).toBeVisible();
+    await page.locator('[data-testid="results-row-menu-zzqxtest1-com"]').click();
     await page.locator('[data-testid="results-row-recheck-zzqxtest1-com"]').click();
     await expect(row(page, 'zzqxtest1.com').locator('[data-testid="status-badge-taken"]')).toBeVisible();
     expect(hits.get('zzqxtest1.com') ?? 0).toBeGreaterThanOrEqual(2);
@@ -559,6 +564,7 @@ test.describe('Check tab', () => {
     await runCheck(page, 'zzqxtest1.dev');
     await expect(row(page, 'zzqxtest1.dev')).toBeVisible();
     expect(digHits).toBe(0);
+    await page.locator('[data-testid="results-row-menu-zzqxtest1-dev"]').click();
     await page.locator('[data-testid="results-row-detail-zzqxtest1-dev"]').click();
     await expect.poll(async () => digHits).toBe(1);
   });
@@ -650,6 +656,44 @@ test.describe('Check tab', () => {
     await bootCheckTab(page);
     await page.locator('[data-testid="check-button-empty-cta"]').click();
     await expect(page.locator('[data-testid="gen-input-keywords"]')).toBeVisible();
+  });
+
+  // 24b. empty-state example button fills the check input
+  test('24b. empty-state example button fills the check input', async ({ page }) => {
+    await setupBaseMocks(page);
+    await bootCheckTab(page);
+    const input = page.locator('[data-testid="check-input-domains"]');
+    await expect(input).toHaveValue('');
+    await page.locator('[data-testid="check-button-example"]').click();
+    const value = await input.inputValue();
+    expect(value).toContain('midas');
+    expect(value).toContain('aurora');
+  });
+
+  // 24c. status legend opens and shows all five statuses
+  test('24c. status legend opens and shows 5 statuses', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com');
+    await expect(row(page, 'google.com')).toBeVisible();
+
+    const toggle = page.locator('[data-testid="results-legend-toggle"]');
+    await toggle.click();
+    // Legend popover lists all 5 statuses by name (en locale).
+    const legend = page.locator('.legend');
+    await expect(legend).toBeVisible();
+    const text = (await legend.textContent()) ?? '';
+    expect(text).toContain('Available');
+    expect(text).toContain('Likely available');
+    expect(text).toContain('Taken');
+    expect(text).toContain('Unknown');
+    expect(text).toContain('Error');
+    // 5 legend rows (one per status).
+    await expect(legend.locator('.legend-row')).toHaveCount(5);
+    // Close via Escape.
+    await page.keyboard.press('Escape');
+    await expect(legend).toBeHidden();
   });
 
   // 25. hint dismiss hides hint strip

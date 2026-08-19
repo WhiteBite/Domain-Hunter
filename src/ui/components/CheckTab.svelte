@@ -32,6 +32,7 @@
   let shareTimer: ReturnType<typeof setTimeout> | undefined;
   let showHint = $state(false);
   let collapsed = $state(false);
+  let historyOpen = $state(false);
   let prevPhase: RunPhase | null = null;
   let unsubRunState: (() => void) | undefined;
 
@@ -65,7 +66,8 @@
   }
 
   function restore(e: HistoryEntry): void {
-    checkInput.set(e.query);
+    if (e.input == null) return;
+    checkInput.set(e.input);
     selectedTlds.set([...e.tlds]);
     startRequest.update((n) => n + 1);
   }
@@ -118,6 +120,7 @@
           query: get(checkInput).trim().slice(0, 2000),
           tlds: [...get(selectedTlds)],
           counts: { total: r.size, available, taken, problems },
+          input: get(checkInput),
         });
       }
       prevPhase = state.phase;
@@ -192,10 +195,10 @@
 <section class="check-tab" aria-busy={$runState.phase === 'running'}>
   {#if $resumePrompt}
     <div class="resume-banner" role="alert">
-      <div class="resume-text">
+      <span class="resume-text">
         <strong>{t('check.run.resume.title')}</strong>
         <span>{t('check.run.resume.body', { n: $resumePrompt.pending.length })}</span>
-      </div>
+      </span>
       <div class="resume-actions">
         <button class="btn primary" type="button" onclick={() => resumeAction.set('resume')} data-testid="check-button-resume">
           {t('check.run.resume.yes')}
@@ -283,36 +286,66 @@
         <TldPicker />
         <RunControls />
         <section class="history-section">
-          <div class="history-head">
-            <h3 class="side-title">{t('check.history.title')}</h3>
-            {#if $history.length > 0}
-              <button class="hint-dismiss" type="button" data-testid="history-clear" onclick={clearHistory}>
-                {t('check.history.clear')}
+            <div class="history-head">
+              <button
+                class="history-toggle"
+                type="button"
+                onclick={() => (historyOpen = !historyOpen)}
+                aria-expanded={historyOpen}
+                data-testid="check-history-toggle"
+                aria-label={t('check.history.toggle.aria')}
+              >
+                <svg class="h-chev" class:rot={historyOpen} viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <h3 class="side-title">{t('check.history.title')}</h3>
+                {#if $history.length > 0}
+                  <span class="history-count nums">{$history.length}</span>
+                {/if}
               </button>
+              {#if $history.length > 0}
+                <button class="hint-dismiss" type="button" data-testid="history-clear" onclick={clearHistory}>
+                  {t('check.history.clear')}
+                </button>
+              {/if}
+            </div>
+            {#if historyOpen}
+              {#if $history.length === 0}
+                <p class="history-empty">{t('check.history.empty')}</p>
+              {:else}
+                <ul class="history-list">
+                  {#each $history as e, i}
+                    <li>
+                      {#if e.input != null}
+                        <button
+                          class="history-entry"
+                          type="button"
+                          data-testid={`history-entry-${i}`}
+                          title={t('check.history.restore')}
+                          aria-label={t('check.history.restore')}
+                          onclick={() => restore(e)}
+                        >
+                          <span class="h-time">{formatTime(e.ts)}</span>
+                          <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
+                          <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
+                        </button>
+                      {:else}
+                        <div
+                          class="history-entry static"
+                          data-testid={`history-entry-${i}`}
+                          aria-label={t('check.history.restore')}
+                        >
+                          <span class="h-time">{formatTime(e.ts)}</span>
+                          <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
+                          <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
+                        </div>
+                      {/if}
+                    </li>
+                  {/each}
+                </ul>
+              {/if}
             {/if}
-          </div>
-          {#if $history.length === 0}
-            <p class="history-empty">{t('check.history.empty')}</p>
-          {:else}
-            <ul class="history-list">
-              {#each $history as e, i}
-                <li>
-                  <button
-                    class="history-entry"
-                    type="button"
-                    data-testid={`history-entry-${i}`}
-                    title={t('check.history.restore')}
-                    onclick={() => restore(e)}
-                  >
-                    <span class="h-time">{formatTime(e.ts)}</span>
-                    <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
-                    <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
-                  </button>
-                </li>
-              {/each}
-            </ul>
-          {/if}
-        </section>
+          </section>
       {:else}
         <span class="panel-summary">{nameCount($checkInput)} × {$selectedTlds.length}</span>
       {/if}
@@ -375,7 +408,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-2) var(--space-4);
     border: 1px solid color-mix(in srgb, var(--amber) 30%, transparent);
     background: var(--amber-soft);
     border-radius: var(--radius-md);
@@ -383,8 +416,8 @@
 
   .resume-text {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: baseline;
+    gap: var(--space-2);
     font-size: var(--text-sm);
   }
 
@@ -498,7 +531,7 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: minmax(280px, 1fr) 2fr;
+    grid-template-columns: 340px minmax(0, 1fr);
     gap: var(--space-5);
     align-items: start;
   }
@@ -558,6 +591,36 @@
     justify-content: space-between;
     gap: var(--space-2);
   }
+  .history-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    font-size: var(--text-sm);
+  }
+  .history-toggle .h-chev {
+    width: 14px;
+    height: 14px;
+    color: var(--text-tertiary);
+    transition: transform var(--dur) var(--ease);
+  }
+  .history-toggle .h-chev.rot {
+    transform: rotate(180deg);
+  }
+  .history-count {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    background: var(--bg-sunken);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    font-weight: 400;
+  }
   .history-list {
     list-style: none;
     margin: 0;
@@ -586,6 +649,13 @@
     border-color: var(--border-strong);
     background: var(--bg-sunken);
   }
+  .history-entry.static {
+    cursor: default;
+  }
+  .history-entry.static:hover {
+    border-color: var(--border);
+    background: var(--bg-elevated);
+  }
   .history-entry .h-time {
     color: var(--text-tertiary);
   }
@@ -612,6 +682,11 @@
   @media (max-width: 860px) {
     .grid {
       grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 1100px) {
+    .description {
+      display: none;
     }
   }
 </style>

@@ -38,15 +38,15 @@
       <div class="fill" style="width: {pct}%"></div>
     </div>
     <div class="stats">
-      <span class="stat">{t('check.progress.checked', { done: $runState.done, total: $runState.total })}</span>
+      <span class="stat nums">{t('check.progress.checked', { done: $runState.done, total: $runState.total })}</span>
       <span class="sep" aria-hidden="true">·</span>
-      <span class="stat avail">{t('check.progress.available', { n: $runState.available })}</span>
+      <span class="stat avail nums">{t('check.progress.available', { n: $runState.available })}</span>
       {#if $runState.errors > 0}
         <span class="sep" aria-hidden="true">·</span>
-        <span class="stat err">{t('check.progress.errors', { n: $runState.errors })}</span>
+        <span class="stat err nums">{t('check.progress.errors', { n: $runState.errors })}</span>
       {/if}
       <span class="sep" aria-hidden="true">·</span>
-      <span class="stat time">{t('check.progress.elapsed', { s: elapsedSec })}</span>
+      <span class="stat time nums">{t('check.progress.elapsed', { s: elapsedSec })}</span>
     </div>
   </div>
 {/if}

@@ -228,7 +228,9 @@ test.describe('Favorites, search, multi-select, history, panel', () => {
     await runCheck(page, 'google.com');
     await expect(row(page, 'google.com')).toBeVisible();
 
-    // History entry appears after the run completes.
+    // History entry appears after the run completes (history is collapsed by
+    // default — expand it to reveal the entry).
+    await page.locator('[data-testid="check-history-toggle"]').click();
     const entry = page.locator('[data-testid="history-entry-0"]');
     await expect(entry).toBeVisible({ timeout: 10_000 });
 

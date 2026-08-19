@@ -220,4 +220,6 @@ export interface HistoryEntry {
   query: string;
   tlds: string[];
   counts: HistoryCounts;
+  /** Raw textarea content (untrimmed, up to 60000 chars). Omitted on legacy entries. */
+  input?: string;
 }

@@ -32,12 +32,17 @@ function isEntry(x: unknown): x is HistoryEntry {
   if (!Array.isArray(e.tlds) || !e.tlds.every((tld) => typeof tld === 'string')) return false;
   if (typeof c !== 'object' || c === null) return false;
   const counts = c as Record<string, unknown>;
-  return (
-    typeof counts.total === 'number' &&
-    typeof counts.available === 'number' &&
-    typeof counts.taken === 'number' &&
-    typeof counts.problems === 'number'
-  );
+  if (
+    typeof counts.total !== 'number' ||
+    typeof counts.available !== 'number' ||
+    typeof counts.taken !== 'number' ||
+    typeof counts.problems !== 'number'
+  ) {
+    return false;
+  }
+  // `input` is optional; if present it must be a string (legacy entries lack it).
+  if ('input' in e && e.input != null && typeof e.input !== 'string') return false;
+  return true;
 }
 
 function load(): HistoryEntry[] {
@@ -67,7 +72,13 @@ history.subscribe((value) => {
 });
 
 export function recordRun(entry: HistoryEntry): void {
-  history.update((list) => pushEntry(list, entry));
+  // Cap raw input at 60000 chars; longer inputs are omitted to keep
+  // localStorage entries bounded (legacy entries simply lack the field).
+  const capped: HistoryEntry =
+    entry.input != null && entry.input.length > 60000
+      ? { ...entry, input: undefined }
+      : entry;
+  history.update((list) => pushEntry(list, capped));
 }
 
 export function clearHistory(): void {

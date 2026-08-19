@@ -44,7 +44,9 @@ async function bootWithMixedResults(page: Page): Promise<void> {
 
   // Narrow to .com only, run two mixed-status checks, wait for completion.
   await page.click('[data-testid="tld-button-clear"]');
+  await page.click('[data-testid="tld-picker-toggle"]');
   await page.click('[data-testid="tld-chip-com"]');
+  await page.click('[data-testid="tld-picker-toggle"]');
   await page.fill('[data-testid="check-input-domains"]', 'google.com\nzzqxtest1.com');
   await page.click('[data-testid="check-button-start"]');
   await expect(page.locator('[data-testid="results-row-google-com"]')).toBeVisible({
@@ -186,11 +188,11 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
-  test('sort buttons set aria-sort on their column (status/renew/tco)', async ({ page }) => {
+  test('sort buttons set aria-sort on their column (name/status/price)', async ({ page }) => {
     await bootWithMixedResults(page);
 
     // Literal testids (the inventory meta-test greps specs for exact strings).
-    for (const testid of ['results-sort-status', 'results-sort-renew', 'results-sort-tco']) {
+    for (const testid of ['results-sort-name', 'results-sort-status', 'results-sort-price']) {
       const btn = page.locator(`[data-testid="${testid}"]`);
       const th = page.locator(`th:has([data-testid="${testid}"])`);
       await btn.click();
@@ -223,7 +225,9 @@ test.describe('Misc coverage', () => {
     await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
     await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
     await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
     await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
     await page.click('[data-testid="check-button-start"]');
     await expect(page.locator('[data-testid="results-row-zzqxtest1-com"]')).toBeVisible({
@@ -235,7 +239,8 @@ test.describe('Misc coverage', () => {
       timeout: 10_000,
     });
 
-    // Detail row renders the DigMyName buy link.
+    // Detail row renders the DigMyName buy link (open ⋯ menu first).
+    await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
     await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
     await expect(
       page.locator('[data-testid^="results-row-detail-buy-"]').first(),
