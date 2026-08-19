@@ -1057,10 +1057,12 @@
     gap: 0;
   }
 
+  /* Row anatomy: [★] [name] [len] …spacer… [×] — the length badge hugs
+     the name, the remove button is pinned right via margin-left: auto,
+     so wide viewports don't leave a dead middle. */
   .tray-row {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
     padding: var(--space-1) var(--space-2);
     min-height: 30px;
     border-radius: var(--radius-sm);
@@ -1092,8 +1094,9 @@
   }
 
   .row-name {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
+    margin-left: var(--space-2);
     font-family: var(--font-mono, ui-monospace, Consolas, monospace);
     font-size: var(--text-sm);
     color: var(--text);
@@ -1107,6 +1110,7 @@
     color: var(--text-tertiary);
     font-size: var(--text-xs);
     flex: none;
+    margin-left: var(--space-2);
   }
 
   .row-remove {
@@ -1117,6 +1121,7 @@
     padding: 0;
     display: inline-flex;
     flex: none;
+    margin-left: auto;
     border-radius: var(--radius-sm);
     transition: color var(--dur) var(--ease);
   }
