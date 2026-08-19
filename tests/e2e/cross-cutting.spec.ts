@@ -101,31 +101,58 @@ test.describe('Cross-cutting features', () => {
     expectNoLeaks(page);
   });
 
-  test('language toggle EN→RU changes aria-label', async ({ page }) => {
+  test('language menu EN→RU switches locale and closes', async ({ page }) => {
     await setupCommonMocks(page);
     await openApp(page);
 
     const toggle = page.locator('[data-testid="app-lang-toggle"]');
-    // EN: aria-label is t('lang.label') = 'Language' (from en.ts)
-    await expect(toggle).toHaveAttribute('aria-label', 'Language');
+    // EN: aria-label is t('app.language.aria') = 'Change language' (from en.ts)
+    await expect(toggle).toHaveAttribute('aria-label', 'Change language');
+    // Trigger shows the CURRENT locale code
+    await expect(toggle).toContainText('EN');
 
+    // Open the menu: all 5 locales listed with their native names
     await toggle.click();
-    // RU: aria-label is t('lang.label') = 'Язык' (from ru.ts)
-    await expect(toggle).toHaveAttribute('aria-label', 'Язык');
+    await expect(page.locator('[data-testid="app-lang-en"]')).toBeVisible();
+    await expect(page.locator('[data-testid="app-lang-ru"]')).toContainText('Русский');
+    await expect(page.locator('[data-testid="app-lang-es"]')).toContainText('Español');
+    await expect(page.locator('[data-testid="app-lang-de"]')).toContainText('Deutsch');
+    await expect(page.locator('[data-testid="app-lang-pt"]')).toContainText('Português');
+    // Current locale is marked
+    await expect(page.locator('[data-testid="app-lang-en"]')).toHaveAttribute('aria-current', 'true');
+
+    // Select RU
+    await page.click('[data-testid="app-lang-ru"]');
+
+    // RU: aria-label is t('app.language.aria') = 'Сменить язык' (from ru.ts)
+    await expect(toggle).toHaveAttribute('aria-label', 'Сменить язык');
+    await expect(toggle).toContainText('RU');
+    // Menu closes after selection
+    await expect(page.locator('[data-testid="app-lang-ru"]')).toBeHidden();
 
     expectNoLeaks(page);
   });
 
-  test('language toggle cycles through locales (EN→RU→ES)', async ({ page }) => {
+  test('language menu switches EN→ES directly (no cycling) and Escape closes', async ({ page }) => {
     await setupCommonMocks(page);
     await openApp(page);
 
     const toggle = page.locator('[data-testid="app-lang-toggle"]');
-    await toggle.click(); // EN → RU
-    await expect(toggle).toHaveAttribute('aria-label', 'Язык');
 
-    await toggle.click(); // RU → ES
-    await expect(toggle).toHaveAttribute('aria-label', 'Idioma');
+    // Escape closes the menu without changing the locale
+    await toggle.click();
+    await expect(page.locator('[data-testid="app-lang-es"]')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-testid="app-lang-es"]')).toBeHidden();
+    // Focus returns to the trigger
+    await expect(toggle).toBeFocused();
+    await expect(toggle).toHaveAttribute('aria-label', 'Change language');
+
+    // Direct jump to ES (would have taken 2 cycles with the old button)
+    await toggle.click();
+    await page.click('[data-testid="app-lang-es"]');
+    await expect(toggle).toHaveAttribute('aria-label', 'Cambiar idioma');
+    await expect(toggle).toContainText('ES');
 
     expectNoLeaks(page);
   });

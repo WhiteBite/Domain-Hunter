@@ -142,6 +142,7 @@ export const ALL_TESTIDS = [
 export const DYNAMIC_TESTID_PREFIXES = [
   // ---- App.svelte ----
   'app-tab-', // tab buttons: app-tab-{tabId} (check|generators|drops|social|settings|about)
+  'app-lang-', // language menu items: app-lang-{code} (en|ru|es|de|pt)
 
   // ---- TldPicker.svelte ----
   'tld-chip-', // TLD chips: tld-chip-{tld}

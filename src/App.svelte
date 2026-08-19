@@ -1,9 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { locale, setLocaleFromBrowser, t, nextLocale } from './i18n';
+  import { locale, setLocaleFromBrowser, t, LOCALES } from './i18n';
   import { activeTab, settings, type TabId } from './ui/store';
   import { loadSettings, saveSettings } from './ui/settings';
   import { applyTheme, watchSystemTheme } from './ui/theme';
+  import { clickOutside } from './ui/clickoutside';
+  import type { Locale } from './types';
   import './ui/tokens.css';
   import CheckTab from './ui/components/CheckTab.svelte';
   import GeneratorsTab from './ui/components/GeneratorsTab.svelte';
@@ -47,8 +49,31 @@
     settings.update((s) => ({ ...s, theme: isDark ? 'light' : 'dark' }));
   }
 
-  function toggleLang() {
-    settings.update((s) => ({ ...s, lang: nextLocale(s.lang) }));
+  // Language dropdown (replaces the old cycle-on-click button: with 5
+  // locales, cycling was painful — the menu lists all locales at once).
+  let langMenuOpen = $state(false);
+  let langToggleEl: HTMLButtonElement | null = $state(null);
+
+  function toggleLangMenu() {
+    langMenuOpen = !langMenuOpen;
+  }
+
+  function closeLangMenu(refocus: boolean) {
+    if (!langMenuOpen) return;
+    langMenuOpen = false;
+    if (refocus) langToggleEl?.focus();
+  }
+
+  function selectLang(code: Locale) {
+    settings.update((s) => ({ ...s, lang: code }));
+    closeLangMenu(true);
+  }
+
+  function onWindowKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape' && langMenuOpen) {
+      e.preventDefault();
+      closeLangMenu(true);
+    }
   }
 
   onMount(() => {
@@ -61,6 +86,8 @@
     document.title = t('app.title.html');
   });
 </script>
+
+<svelte:window onkeydown={onWindowKeydown} />
 
 <a class="skip-link" href="#main-content" data-testid="app-skip-link">{t('a11y.skip')}</a>
 <div class="shell" class:wide={isWide} data-testid="app-shell">
@@ -77,9 +104,47 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick={toggleLang} aria-label={t('lang.label')} title={t('lang.label')} data-testid="app-lang-toggle">
-          {nextLocale(current.lang).toUpperCase()}
-        </button>
+        <div class="lang-wrap" use:clickOutside={() => closeLangMenu(false)}>
+          <button
+            class="icon-btn"
+            class:active={langMenuOpen}
+            bind:this={langToggleEl}
+            onclick={toggleLangMenu}
+            aria-label={t('app.language.aria')}
+            title={t('app.language.aria')}
+            aria-haspopup="menu"
+            aria-expanded={langMenuOpen}
+            data-testid="app-lang-toggle"
+          >
+            <span class="lang-code">{current.lang.toUpperCase()}</span>
+            <svg class="lang-chevron" class:rot={langMenuOpen} viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          {#if langMenuOpen}
+            <div class="lang-menu" role="menu" aria-label={t('app.language.aria')}>
+              {#each LOCALES as loc (loc.code)}
+                <button
+                  class="lang-item"
+                  class:current={current.lang === loc.code}
+                  type="button"
+                  role="menuitem"
+                  aria-current={current.lang === loc.code ? 'true' : undefined}
+                  onclick={() => selectLang(loc.code)}
+                  data-testid={`app-lang-${loc.code}`}
+                >
+                  <span class="lang-check" aria-hidden="true">
+                    {#if current.lang === loc.code}
+                      <svg viewBox="0 0 16 16"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    {/if}
+                  </span>
+                  <span class="lang-native">{loc.nativeName}</span>
+                  <span class="lang-item-code nums">{loc.code.toUpperCase()}</span>
+                </button>
+              {/each}
+            </div>
+          {/if}
+        </div>
         <button class="icon-btn" onclick={toggleTheme} aria-label={t('theme.label')} title={t('theme.label')} data-testid="app-theme-toggle">
           <svg class="theme-icon icon-moon" viewBox="0 0 16 16" aria-hidden="true">
             <path
@@ -221,6 +286,10 @@
   }
 
   .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
     border: 1px solid var(--border);
     background: var(--bg-elevated);
     color: var(--text-secondary);
@@ -236,6 +305,101 @@
   .icon-btn:hover {
     background: var(--bg-sunken);
     color: var(--text);
+  }
+
+  .icon-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  /* Language dropdown — trigger + popover listing all locales. */
+  .lang-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .icon-btn .lang-code {
+    font-weight: 500;
+  }
+
+  .lang-chevron {
+    width: 12px;
+    height: 12px;
+    display: block;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .lang-chevron.rot {
+    transform: rotate(180deg);
+  }
+
+  .lang-menu {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    right: 0;
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border-radius: 8px;
+    box-shadow: var(--shadow-pop);
+    z-index: 100;
+  }
+
+  .lang-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    text-align: left;
+    min-height: 32px;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+
+  .lang-item:hover {
+    background: var(--bg-sunken);
+  }
+
+  .lang-item.current {
+    color: var(--accent);
+  }
+
+  .lang-check {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  .lang-check svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .lang-native {
+    flex: 1;
+  }
+
+  .lang-item-code {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+  }
+
+  .lang-item.current .lang-item-code {
+    color: var(--accent);
+    opacity: 0.8;
   }
 
   .theme-icon {

@@ -180,16 +180,16 @@ test.describe('Settings tab', () => {
     const langToggle = page.locator('[data-testid="app-lang-toggle"]');
     const select = page.locator('[data-testid="settings-select-lang"]');
 
-    // Default EN: aria-label is "Language" (from i18n en.ts lang.label)
-    expect(await langToggle.getAttribute('aria-label')).toBe('Language');
+    // Default EN: aria-label is "Change language" (from i18n en.ts app.language.aria)
+    expect(await langToggle.getAttribute('aria-label')).toBe('Change language');
 
-    // Switch to RU: aria-label becomes "Язык" (from i18n ru.ts lang.label)
+    // Switch to RU: aria-label becomes "Сменить язык" (from i18n ru.ts app.language.aria)
     await select.selectOption('ru');
-    expect(await langToggle.getAttribute('aria-label')).toBe('Язык');
+    expect(await langToggle.getAttribute('aria-label')).toBe('Сменить язык');
 
     // Switch back to EN
     await select.selectOption('en');
-    expect(await langToggle.getAttribute('aria-label')).toBe('Language');
+    expect(await langToggle.getAttribute('aria-label')).toBe('Change language');
   });
 
   // 3. Currency select → persists to localStorage
