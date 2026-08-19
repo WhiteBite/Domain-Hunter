@@ -44,9 +44,8 @@ export const en: Dict = {
   'check.description':
     'Enter names or full domains. A name without a zone is checked in every selected zone. Results stream in as registries respond.',
 
-  'check.input.placeholder':
-    'myapp\nmyapp.dev\nget myapp.io from text — URLs are cleaned automatically…',
-  'check.input.hint': 'One per line or in any text: URL prefixes and paths are stripped. Up to 3000 names per run.',
+  'check.input.placeholder': 'myapp\nmyapp.dev — pasted text & links are cleaned automatically…',
+  'check.input.hint': 'One per line or in any text — up to 3000 names per run.',
   'check.input.parsed': '{names} names × {zones} zones = {total} checks',
   'check.input.tooMany': 'Too many candidates (max {max}). Reduce the list or the zone selection.',
   'check.input.invalid': '{n} invalid entries were skipped',

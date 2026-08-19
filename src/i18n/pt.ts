@@ -44,9 +44,8 @@ export const pt: Dict = {
   'check.description':
     'Digite nomes ou domínios completos. Um nome sem zona é verificado em todas as zonas selecionadas. Os resultados aparecem conforme os registros respondem.',
 
-  'check.input.placeholder':
-    'meuapp\nmeuapp.dev\npegue meuapp.io de um texto — URLs são limpas automaticamente…',
-  'check.input.hint': 'Um por linha ou em qualquer texto: prefixos e caminhos de URL são removidos. Até 3000 nomes por execução.',
+  'check.input.placeholder': 'meuapp\nmeuapp.dev — texto e links colados são limpos sozinhos…',
+  'check.input.hint': 'Um por linha ou em qualquer texto — até 3000 nomes por execução.',
   'check.input.parsed': '{names} nomes × {zones} zonas = {total} verificações',
   'check.input.tooMany': 'Candidatos demais (máximo {max}). Reduza a lista ou a seleção de zonas.',
   'check.input.invalid': '{n} entradas inválidas foram ignoradas',

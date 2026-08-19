@@ -44,9 +44,8 @@ export const de: Dict = {
   'check.description':
     'Namen oder vollständige Domains eingeben. Ein Name ohne Zone wird in allen ausgewählten Zonen geprüft. Ergebnisse erscheinen, während die Registries antworten.',
 
-  'check.input.placeholder':
-    'meineapp\nmeineapp.dev\nhole meineapp.io aus Text — URLs werden automatisch bereinigt…',
-  'check.input.hint': 'Einer pro Zeile oder in beliebigem Text: URL-Präfixe und Pfade werden entfernt. Bis zu 3000 Namen pro Lauf.',
+  'check.input.placeholder': 'meineapp\nmeineapp.dev — eingefügter Text und Links werden bereinigt…',
+  'check.input.hint': 'Einer pro Zeile oder im Text — bis 3000 Namen pro Lauf.',
   'check.input.parsed': '{names} Namen × {zones} Zonen = {total} Prüfungen',
   'check.input.tooMany': 'Zu viele Kandidaten (maximal {max}). Reduziere die Liste oder die Zonenauswahl.',
   'check.input.invalid': '{n} ungültige Einträge wurden übersprungen',
