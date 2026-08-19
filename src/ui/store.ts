@@ -12,6 +12,7 @@ import type {
   TldRegistry,
 } from '../types';
 import { DEFAULT_SETTINGS } from '../types';
+import type { ExportRow } from './csv';
 import tldsJson from '../config/tlds.json';
 
 /** Results keyed by full domain. Replaced immutably on updates. */
@@ -73,6 +74,13 @@ export const resumeAction = writable<'resume' | 'discard' | null>(null);
 
 /** Incremented to request a run start (Ctrl+Enter in the input). */
 export const startRequest = writable<number>(0);
+
+/**
+ * Current filtered+sorted view of the results table, published by
+ * ResultsTable for the Check-tab export menu (CSV/TSV/Markdown copy).
+ * Empty when no results or ResultsTable is not mounted.
+ */
+export const exportRows = writable<ExportRow[]>([]);
 
 // ---- Generator candidate tray (survives tab switches, persisted) ----
 

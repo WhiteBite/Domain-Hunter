@@ -345,4 +345,13 @@ export const fr: Dict = {
     'Le registre a donné une réponse ambiguë — réessayez de vérifier plus tard.',
   'results.legend.error': 'Erreur réseau ou de registre — réessayez de vérifier.',
   'results.empty.example': 'Essayer un exemple',
+
+  'export.menu.aria': "Options d'exportation",
+  'export.copyCsv': 'Copier en CSV',
+  'export.copyMd': 'Copier en Markdown',
+  'export.copyTsv': 'Copier en TSV',
+  'results.available.menu.aria': 'Actions des domaines disponibles',
+  'results.available.copy': 'Copier la liste des disponibles',
+  'results.available.fav': 'Tout ajouter aux favoris',
+  'results.available.csv': 'Télécharger CSV des disponibles',
 };

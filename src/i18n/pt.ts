@@ -344,4 +344,13 @@ export const pt: Dict = {
     'O registro deu uma resposta ambígua — tente reverificar mais tarde.',
   'results.legend.error': 'Erro de rede ou do registro — tente reverificar.',
   'results.empty.example': 'Experimentar um exemplo',
+
+  'export.menu.aria': 'Opções de exportação',
+  'export.copyCsv': 'Copiar como CSV',
+  'export.copyMd': 'Copiar como Markdown',
+  'export.copyTsv': 'Copiar como TSV',
+  'results.available.menu.aria': 'Ações de domínios disponíveis',
+  'results.available.copy': 'Copiar lista de disponíveis',
+  'results.available.fav': 'Adicionar todos aos favoritos',
+  'results.available.csv': 'Baixar CSV de disponíveis',
 };

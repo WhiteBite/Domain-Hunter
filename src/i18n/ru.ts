@@ -345,4 +345,13 @@ export const ru: Dict = {
     'Реестр дал неоднозначный ответ — попробуйте перепроверить позже.',
   'results.legend.error': 'Ошибка сети или реестра — попробуйте перепроверить.',
   'results.empty.example': 'Попробовать пример',
+
+  'export.menu.aria': 'Параметры экспорта',
+  'export.copyCsv': 'Скопировать CSV',
+  'export.copyMd': 'Скопировать Markdown',
+  'export.copyTsv': 'Скопировать таблицу (TSV)',
+  'results.available.menu.aria': 'Действия со свободными доменами',
+  'results.available.copy': 'Скопировать список',
+  'results.available.fav': 'В избранное',
+  'results.available.csv': 'CSV по свободным',
 };

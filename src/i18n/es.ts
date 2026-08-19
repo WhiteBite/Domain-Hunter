@@ -344,4 +344,13 @@ export const es: Dict = {
     'El registro dio una respuesta ambigua — intenta recomprobar más tarde.',
   'results.legend.error': 'Error de red o del registro — intenta recomprobar.',
   'results.empty.example': 'Probar un ejemplo',
+
+  'export.menu.aria': 'Opciones de exportación',
+  'export.copyCsv': 'Copiar como CSV',
+  'export.copyMd': 'Copiar como Markdown',
+  'export.copyTsv': 'Copiar como TSV',
+  'results.available.menu.aria': 'Acciones de dominios disponibles',
+  'results.available.copy': 'Copiar lista de disponibles',
+  'results.available.fav': 'Añadir todos a favoritos',
+  'results.available.csv': 'Descargar CSV de disponibles',
 };

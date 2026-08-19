@@ -344,4 +344,13 @@ export const de: Dict = {
     'Die Registry gab eine mehrdeutige Antwort — versuche später erneut zu prüfen.',
   'results.legend.error': 'Netzwerk- oder Registry-Fehler — versuche erneut zu prüfen.',
   'results.empty.example': 'Beispiel ausprobieren',
+
+  'export.menu.aria': 'Export-Optionen',
+  'export.copyCsv': 'Als CSV kopieren',
+  'export.copyMd': 'Als Markdown kopieren',
+  'export.copyTsv': 'Als TSV kopieren',
+  'results.available.menu.aria': 'Aktionen für verfügbare Domains',
+  'results.available.copy': 'Verfügbare Liste kopieren',
+  'results.available.fav': 'Alle zu Favoriten hinzufügen',
+  'results.available.csv': 'Verfügbare als CSV herunterladen',
 };

@@ -344,4 +344,13 @@ export const zh: Dict = {
     '注册局返回了模棱两可的答复——请稍后重试。',
   'results.legend.error': '网络或注册局错误——请重试。',
   'results.empty.example': '试个示例',
+
+  'export.menu.aria': '导出选项',
+  'export.copyCsv': '复制为 CSV',
+  'export.copyMd': '复制为 Markdown',
+  'export.copyTsv': '复制为 TSV',
+  'results.available.menu.aria': '可注册域名操作',
+  'results.available.copy': '复制可注册列表',
+  'results.available.fav': '全部加入收藏',
+  'results.available.csv': '下载可注册 CSV',
 };

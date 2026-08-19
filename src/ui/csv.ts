@@ -86,3 +86,102 @@ export function downloadCsv(filename: string, csv: string): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// ---- Clipboard export formats (CSV / TSV / Markdown) ----
+
+/**
+ * 5-column row for clipboard exports: matches the visible table columns
+ * (Domain, Status, 1st year, Renewal, 3-year TCO). Prices are pre-formatted
+ * via formatPrice; null prices become empty strings (not '—') so pasting
+ * into spreadsheets yields empty cells, not literal em-dashes.
+ */
+export interface ExportRow {
+  domain: string;
+  status: string;
+  priceFirstYear: string;
+  priceRenewal: string;
+  priceTco: string;
+}
+
+/** Field order for the 5-column clipboard formats (matches ExportRow keys). */
+const EXPORT_FIELDS: readonly (keyof ExportRow)[] = [
+  'domain',
+  'status',
+  'priceFirstYear',
+  'priceRenewal',
+  'priceTco',
+];
+
+/**
+ * Convert check results to 5-column export rows with formatted prices.
+ * TCO = first year + 2× renewal at the cheapest registrar (matches the
+ * table's detail-row computation). Null prices → empty string.
+ */
+export function resultsToExportRows(
+  results: Map<string, CheckResult>,
+  table: PricingTable | null,
+  settings: Settings,
+): ExportRow[] {
+  const rows: ExportRow[] = [];
+  for (const result of results.values()) {
+    const best = table ? bestEntry(table, result.tld) : null;
+    const entry = best?.entry ?? null;
+    const reg = entry?.reg ?? null;
+    const renew = entry?.renew ?? null;
+    const tco = reg != null && renew != null ? reg + 2 * renew : null;
+    rows.push({
+      domain: result.domain,
+      status: result.status,
+      priceFirstYear: formatPriceOrEmpty(reg, settings),
+      priceRenewal: formatPriceOrEmpty(renew, settings),
+      priceTco: formatPriceOrEmpty(tco, settings),
+    });
+  }
+  return rows;
+}
+
+/** formatPrice but null → '' (empty cell) instead of '—'. */
+function formatPriceOrEmpty(cents: number | null, settings: Settings): string {
+  return cents == null ? '' : formatPrice(cents, settings);
+}
+
+/**
+ * Build a clipboard-friendly CSV string: header row + data rows, CRLF line
+ * endings, RFC 4180 quoting (reuses escapeCsvField). No BOM (unlike buildCsv
+ * which targets file download for Excel — clipboard paste does not want a
+ * BOM prefix).
+ */
+export function toCsv(rows: ExportRow[], headers: string[]): string {
+  const lines: string[] = [headers.join(',')];
+  for (const row of rows) {
+    lines.push(EXPORT_FIELDS.map((f) => escapeCsvField(row[f])).join(','));
+  }
+  return lines.join('\r\n') + '\r\n';
+}
+
+/**
+ * Build a TSV (tab-separated) string for pasting into Excel/Sheets/Notion.
+ * Tabs/newlines inside values are replaced with spaces to preserve the
+ * one-row-per-line invariant (TSV has no quoting mechanism). LF endings.
+ * No BOM.
+ */
+export function toTsv(rows: ExportRow[], headers: string[]): string {
+  const sanitize = (s: string): string => s.replace(/[\t\r\n]/g, ' ');
+  const lines: string[] = [headers.map(sanitize).join('\t')];
+  for (const row of rows) {
+    lines.push(EXPORT_FIELDS.map((f) => sanitize(row[f])).join('\t'));
+  }
+  return lines.join('\n') + '\n';
+}
+
+/**
+ * Build a Markdown table string. Pipes in values are escaped as `\|`,
+ * newlines as `<br>`. Header row + separator + data rows. No BOM.
+ */
+export function toMarkdown(rows: ExportRow[], headers: string[]): string {
+  const escape = (s: string): string => s.replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>');
+  const head = `| ${headers.map(escape).join(' | ')} |`;
+  const sep = `| ${headers.map(() => '---').join(' | ')} |`;
+  const body = rows.map((row) => `| ${EXPORT_FIELDS.map((f) => escape(row[f])).join(' | ')} |`);
+  return [head, sep, ...body].join('\n') + '\n';
+}

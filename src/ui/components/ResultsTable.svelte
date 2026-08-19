@@ -1,7 +1,7 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
-  import { results, settings, pricing, registry, runState } from '../store';
+  import { results, settings, pricing, registry, runState, exportRows } from '../store';
   import type { CheckResult, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
   import {
     bestEntry,
@@ -17,6 +17,7 @@
   import { t } from '../../i18n';
   import { favorites, toggleFavorite } from '../favorites';
   import { clickOutside } from '../clickoutside';
+  import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
 
@@ -45,11 +46,22 @@
   let legendOpen = $state(false);
   let legendTriggerEl: HTMLButtonElement | null = $state(null);
 
+  // Available-domains bulk actions popover (next to "Show available (N)").
+  let availMenuOpen = $state(false);
+  let availMenuTriggerEl: HTMLButtonElement | null = $state(null);
+  let availCopied = $state(false);
+  let availCopiedTimer: ReturnType<typeof setTimeout> | undefined;
+
   // Search input (focused by "/" shortcut).
   let searchEl: HTMLInputElement | null = $state(null);
 
   function onKeydown(e: KeyboardEvent): void {
     if (e.key === 'Escape') {
+      if (availMenuOpen) {
+        availMenuOpen = false;
+        availMenuTriggerEl?.focus();
+        return;
+      }
       if (legendOpen) {
         legendOpen = false;
         legendTriggerEl?.focus();
@@ -232,6 +244,21 @@
   onDestroy(() => {
     observer?.disconnect();
     if (rafId != null) cancelAnimationFrame(rafId);
+    if (availCopiedTimer != null) clearTimeout(availCopiedTimer);
+  });
+
+  // Publish the current filtered+sorted view to the exportRows store so the
+  // Check-tab export menu (CSV/TSV/Markdown copy) can access it.
+  $effect(() => {
+    const s = $settings;
+    const list = sorted.map((r) => ({
+      domain: r.result.domain,
+      status: r.result.status,
+      priceFirstYear: r.firstYear != null ? formatPrice(r.firstYear, s) : '',
+      priceRenewal: r.renewal != null ? formatPrice(r.renewal, s) : '',
+      priceTco: r.tco != null ? formatPrice(r.tco, s) : '',
+    }));
+    exportRows.set(list);
   });
 
   $effect(() => {
@@ -482,6 +509,56 @@
     return n;
   });
 
+  /** Domain names of available/probably_available results, sorted A–Z. */
+  const availableDomains = $derived.by(() => {
+    const list: string[] = [];
+    for (const r of $results.values()) {
+      if (r.status === 'available' || r.status === 'probably_available') list.push(r.domain);
+    }
+    list.sort((a, b) => a.localeCompare(b));
+    return list;
+  });
+
+  function flashAvailCopied(): void {
+    availCopied = true;
+    if (availCopiedTimer != null) clearTimeout(availCopiedTimer);
+    availCopiedTimer = setTimeout(() => {
+      availCopied = false;
+    }, 1500);
+  }
+
+  async function copyAvailableList(): Promise<void> {
+    await copyText(availableDomains.join('\n'));
+    flashAvailCopied();
+  }
+
+  function favAllAvailable(): void {
+    const next = new Set($favorites);
+    for (const d of availableDomains) next.add(d);
+    favorites.set(next);
+  }
+
+  function downloadAvailableCsv(): void {
+    const table = $pricing?.table ?? null;
+    const filtered = new Map<string, CheckResult>();
+    for (const [d, r] of $results) {
+      if (r.status === 'available' || r.status === 'probably_available') filtered.set(d, r);
+    }
+    const rows = resultsToCsvRows(filtered, table, $settings);
+    const headers = [
+      t('csv.domain'),
+      t('csv.status'),
+      t('csv.tld'),
+      t('csv.priceFirstYear'),
+      t('csv.priceRenewal'),
+      t('csv.bestRegistrar'),
+      t('csv.checkedAt'),
+    ];
+    const csv = buildCsv(rows, headers);
+    const date = new Date().toISOString().slice(0, 10);
+    downloadCsv(`domain-hunter-available-${date}.csv`, csv);
+  }
+
   function registrarName(id: string): string {
     return registrars.find((r) => r.id === id)?.name ?? id;
   }
@@ -571,6 +648,62 @@
         <button class="filter suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
           {t('results.showAvailable', { n: availableTotal })}
         </button>
+        <div
+          class="menu-wrap avail-menu-wrap"
+          use:clickOutside={availMenuOpen ? () => { availMenuOpen = false; } : undefined}
+        >
+          <button
+            class="action-btn avail-menu-toggle"
+            type="button"
+            bind:this={availMenuTriggerEl}
+            onclick={() => (availMenuOpen = !availMenuOpen)}
+            aria-haspopup="menu"
+            aria-expanded={availMenuOpen}
+            aria-label={t('results.available.menu.aria')}
+            title={t('results.available.menu.aria')}
+            data-testid="results-available-menu"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
+          </button>
+          {#if availMenuOpen}
+            <div class="menu" role="menu">
+              <button
+                class="menu-item"
+                role="menuitem"
+                type="button"
+                onclick={() => { void copyAvailableList(); }}
+                data-testid="results-available-copy"
+              >
+                {#if availCopied}
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                {:else}
+                  <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+                {/if}
+                {t('results.available.copy')}
+              </button>
+              <button
+                class="menu-item"
+                role="menuitem"
+                type="button"
+                onclick={() => { favAllAvailable(); availMenuOpen = false; }}
+                data-testid="results-available-fav"
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+                {t('results.available.fav')}
+              </button>
+              <button
+                class="menu-item"
+                role="menuitem"
+                type="button"
+                onclick={() => { downloadAvailableCsv(); availMenuOpen = false; }}
+                data-testid="results-available-csv"
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3M3 13h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                {t('results.available.csv')}
+              </button>
+            </div>
+          {/if}
+        </div>
       {/if}
     </div>
 

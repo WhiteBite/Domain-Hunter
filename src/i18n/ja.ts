@@ -344,4 +344,13 @@ export const ja: Dict = {
     'レジストリが曖昧な応答を返しました — 後で再チェックしてください。',
   'results.legend.error': 'ネットワークまたはレジストリのエラーです — 再チェックしてください。',
   'results.empty.example': '例を試す',
+
+  'export.menu.aria': 'エクスポート オプション',
+  'export.copyCsv': 'CSV としてコピー',
+  'export.copyMd': 'Markdown としてコピー',
+  'export.copyTsv': 'TSV としてコピー',
+  'results.available.menu.aria': '取得可能ドメインのアクション',
+  'results.available.copy': '取得可能リストをコピー',
+  'results.available.fav': 'すべてお気に入りに追加',
+  'results.available.csv': '取得可能な CSV をダウンロード',
 };

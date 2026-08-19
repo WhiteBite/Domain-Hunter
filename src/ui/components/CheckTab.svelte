@@ -13,14 +13,16 @@
     resumePrompt,
     resumeAction,
     startRequest,
+    exportRows,
     type RunPhase,
   } from '../store';
   import { history, recordRun, clearHistory } from '../history';
   import type { HistoryEntry } from '../../types';
   import { loadPricing, freshnessLabel } from '../../pricing/pricing';
-  import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
+  import { resultsToCsvRows, buildCsv, downloadCsv, toCsv, toTsv, toMarkdown } from '../csv';
   import { encodeShare, parseShare, clearShare } from '../share';
   import { t } from '../../i18n';
+  import { clickOutside } from '../clickoutside';
   import DomainInput from './DomainInput.svelte';
   import TldPicker from './TldPicker.svelte';
   import RunControls from './RunControls.svelte';
@@ -35,6 +37,12 @@
   let historyOpen = $state(false);
   let prevPhase: RunPhase | null = null;
   let unsubRunState: (() => void) | undefined;
+
+  // Export menu popover (CSV / Markdown / TSV copy to clipboard).
+  let exportMenuOpen = $state(false);
+  let exportMenuTriggerEl: HTMLButtonElement | null = $state(null);
+  let exportCopiedKey = $state<'csv' | 'md' | 'tsv' | null>(null);
+  let exportCopiedTimer: ReturnType<typeof setTimeout> | undefined;
 
   function dismissHint(): void {
     showHint = false;
@@ -72,12 +80,22 @@
     startRequest.update((n) => n + 1);
   }
 
+  function onKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Escape' && exportMenuOpen) {
+      exportMenuOpen = false;
+      exportMenuTriggerEl?.focus();
+    }
+  }
+
   onDestroy(() => {
     clearTimeout(shareTimer);
+    if (exportCopiedTimer != null) clearTimeout(exportCopiedTimer);
+    document.removeEventListener('keydown', onKeydown);
     unsubRunState?.();
   });
 
   onMount(() => {
+    document.addEventListener('keydown', onKeydown);
     if (!get(pricing)) {
       loadPricing()
         .then((state) => pricing.set(state))
@@ -190,6 +208,39 @@
       shareTimer = setTimeout(() => (shareCopied = false), 1500);
     }
   }
+
+  function exportHeaders(): string[] {
+    return [
+      t('csv.domain'),
+      t('csv.status'),
+      t('results.col.price'),
+      t('price.renewal'),
+      t('price.tco'),
+    ];
+  }
+
+  function flashExportCopied(key: 'csv' | 'md' | 'tsv'): void {
+    exportCopiedKey = key;
+    if (exportCopiedTimer != null) clearTimeout(exportCopiedTimer);
+    exportCopiedTimer = setTimeout(() => {
+      exportCopiedKey = null;
+    }, 1500);
+  }
+
+  async function copyAsCsv(): Promise<void> {
+    const ok = await copyText(toCsv(get(exportRows), exportHeaders()));
+    if (ok) flashExportCopied('csv');
+  }
+
+  async function copyAsMd(): Promise<void> {
+    const ok = await copyText(toMarkdown(get(exportRows), exportHeaders()));
+    if (ok) flashExportCopied('md');
+  }
+
+  async function copyAsTsv(): Promise<void> {
+    const ok = await copyText(toTsv(get(exportRows), exportHeaders()));
+    if (ok) flashExportCopied('tsv');
+  }
 </script>
 
 <section class="check-tab" aria-busy={$runState.phase === 'running'}>
@@ -264,6 +315,71 @@
         </svg>
         <span>{t('results.csv')}</span>
       </button>
+      <div
+        class="export-menu-wrap"
+        use:clickOutside={exportMenuOpen ? () => { exportMenuOpen = false; } : undefined}
+      >
+        <button
+          class="action icon-only"
+          onclick={() => (exportMenuOpen = !exportMenuOpen)}
+          type="button"
+          disabled={!hasResults}
+          bind:this={exportMenuTriggerEl}
+          aria-haspopup="menu"
+          aria-expanded={exportMenuOpen}
+          aria-label={t('export.menu.aria')}
+          title={t('export.menu.aria')}
+          data-testid="check-button-export-menu"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
+        </button>
+        {#if exportMenuOpen}
+          <div class="export-menu" role="menu">
+            <button
+              class="menu-item"
+              role="menuitem"
+              type="button"
+              onclick={() => { void copyAsCsv(); }}
+              data-testid="check-export-copy-csv"
+            >
+              {#if exportCopiedKey === 'csv'}
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              {:else}
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+              {/if}
+              {t('export.copyCsv')}
+            </button>
+            <button
+              class="menu-item"
+              role="menuitem"
+              type="button"
+              onclick={() => { void copyAsMd(); }}
+              data-testid="check-export-copy-md"
+            >
+              {#if exportCopiedKey === 'md'}
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              {:else}
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h2v8H2zM6 4h2l2 4 2-4h2v8h-2V7l-2 4-2-4v5H6z" fill="currentColor" /></svg>
+              {/if}
+              {t('export.copyMd')}
+            </button>
+            <button
+              class="menu-item"
+              role="menuitem"
+              type="button"
+              onclick={() => { void copyAsTsv(); }}
+              data-testid="check-export-copy-tsv"
+            >
+              {#if exportCopiedKey === 'tsv'}
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              {:else}
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12M6 4v8M10 4v8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+              {/if}
+              {t('export.copyTsv')}
+            </button>
+          </div>
+        {/if}
+      </div>
     </div>
   </header>
 
@@ -530,6 +646,53 @@
   .action svg {
     width: 14px;
     height: 14px;
+  }
+  .action.icon-only {
+    padding: 0;
+    width: 36px;
+    justify-content: center;
+  }
+  .export-menu-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+  .export-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-1);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-pop);
+    z-index: 60;
+    min-width: 180px;
+  }
+  .menu-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    text-align: left;
+    min-height: 32px;
+    transition: background var(--dur) var(--ease);
+  }
+  .menu-item:hover {
+    background: var(--bg-sunken);
+  }
+  .menu-item svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
   }
   .grid {
     display: grid;

@@ -344,4 +344,13 @@ export const en: Dict = {
     'The registry gave an ambiguous answer — try re-checking later.',
   'results.legend.error': 'Network or registry error — try re-checking.',
   'results.empty.example': 'Try an example',
+
+  'export.menu.aria': 'Export options',
+  'export.copyCsv': 'Copy as CSV',
+  'export.copyMd': 'Copy as Markdown',
+  'export.copyTsv': 'Copy as TSV',
+  'results.available.menu.aria': 'Available domains actions',
+  'results.available.copy': 'Copy available list',
+  'results.available.fav': 'Add all to favorites',
+  'results.available.csv': 'Download available CSV',
 };
