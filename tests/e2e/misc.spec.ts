@@ -259,6 +259,15 @@ test.describe('Misc coverage', () => {
     await expect(registrarsBlock).toBeVisible();
     await expect(registrarsBlock).toContainText('Porkbun');
     await expect(registrarsBlock).toContainText('Cloudflare Registrar');
+
+    // Quotes are buy links: deep link when the template supports {domain},
+    // landing page otherwise (Cloudflare has no public deep link).
+    await expect(
+      page.locator('[data-testid="results-row-registrar-zzqxtest1-com-porkbun"]'),
+    ).toHaveAttribute('href', /porkbun\.com\/checkout\/search\?q=zzqxtest1\.com/);
+    await expect(
+      page.locator('[data-testid="results-row-registrar-zzqxtest1-com-cloudflare"]'),
+    ).toHaveAttribute('href', 'https://domains.cloudflare.com/');
     expectNoLeaks(page);
   });
 

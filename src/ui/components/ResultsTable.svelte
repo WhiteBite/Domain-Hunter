@@ -270,14 +270,18 @@
   }
 
   interface RegistrarQuote {
+    id: string;
     name: string;
     reg: number;
     renew: number | null;
+    url: string;
   }
 
   /** Known-registrar quotes for a zone from the pricing store, sorted by
-   *  registration price asc (renewal as tie-breaker). Unknown ids skipped. */
-  function registrarQuotes(tld: string): RegistrarQuote[] {
+   *  registration price asc (renewal as tie-breaker). Unknown ids skipped.
+   *  Each quote carries a buy/search link (deep link when the registrar's
+   *  template supports '{domain}', landing page otherwise). */
+  function registrarQuotes(tld: string, domain: string): RegistrarQuote[] {
     const table = $pricing?.table ?? null;
     if (!table) return [];
     const entries = table.tlds[tld];
@@ -286,7 +290,15 @@
     for (const r of registrars) {
       const e = entries[r.id];
       if (!e || e.reg == null) continue;
-      list.push({ name: r.name, reg: e.reg, renew: e.renew });
+      list.push({
+        id: r.id,
+        name: r.name,
+        reg: e.reg,
+        renew: e.renew,
+        url: r.searchUrl.includes('{domain}')
+          ? r.searchUrl.replace('{domain}', encodeURIComponent(domain))
+          : r.searchUrl,
+      });
     }
     list.sort((a, b) => a.reg - b.reg || (a.renew ?? Infinity) - (b.renew ?? Infinity));
     return list;
@@ -617,7 +629,7 @@
             {@const isFav = $favorites.has(row.result.domain)}
             {@const sid = sanitizeId(row.result.domain)}
             {@const isExpanded = detailFor === row.result.domain}
-            {@const quotes = registrarQuotes(row.result.tld)}
+            {@const quotes = registrarQuotes(row.result.tld, row.result.domain)}
             <tr class="row-in" class:available={isAvail} class:error={isErr} data-testid={`results-row-${sid}`}>
               <td class="select-cell">
                 <input
@@ -797,10 +809,17 @@
                         <span class="detail-label">{t('results.detail.registrars')}</span>
                         <span class="detail-reg-list nums">
                           {#each quotes.slice(0, 4) as quote, i}
-                            <span class="detail-reg-item" class:cheapest={i === 0}>
+                            <a
+                              class="detail-reg-item"
+                              class:cheapest={i === 0}
+                              href={quote.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              data-testid={`results-row-registrar-${sid}-${quote.id}`}
+                            >
                               {#if i === 0}<span class="detail-reg-dot" aria-hidden="true"></span>{/if}
                               {quote.name} — {formatPrice(quote.reg, $settings)} / {formatPrice(quote.renew, $settings)}
-                            </span>
+                            </a>
                           {/each}
                           {#if quotes.length > 4}
                             <span
@@ -1157,6 +1176,14 @@
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
+    color: inherit;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: color var(--dur) var(--ease);
+  }
+  .detail-reg-item:hover {
+    color: var(--accent-text);
+    text-decoration: underline;
   }
   .detail-reg-item.cheapest {
     color: var(--text);
