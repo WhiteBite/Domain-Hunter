@@ -1,6 +1,6 @@
 # Domain Hunter — массовая проверка доменов и генератор имён
 
-[English](README.md) | **Русский**
+[English](README.md) | **Русский** | [中文](README.zh.md) | [日本語](README.ja.md) | [Français](README.fr.md)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-gold.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/WhiteBite/Domain-Hunter?style=social)](https://github.com/WhiteBite/Domain-Hunter/stargazers)

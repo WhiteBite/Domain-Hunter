@@ -9,7 +9,32 @@ import wholesale from '../config/wholesale.json';
 import type { Coupon, PriceEntry, PricingTable, Settings } from '../types';
 import type { PricingState } from '../ui/store';
 
-const SNAPSHOT = snapshot as unknown as PricingTable;
+// The snapshot stores registrar prices as compact [reg, renew, transfer]
+// arrays (~3× smaller on disk/bundle); expand back to PriceEntry objects here.
+type CompactReg = [number | null, number | null, number | null];
+interface CompactSnapshot {
+  generatedAt: string;
+  sources: string[];
+  tlds: Record<string, Record<string, CompactReg>>;
+  coupons: PricingTable['coupons'];
+}
+const rawSnap = snapshot as unknown as CompactSnapshot;
+const SNAPSHOT: PricingTable = {
+  generatedAt: rawSnap.generatedAt,
+  sources: rawSnap.sources,
+  coupons: rawSnap.coupons,
+  tlds: Object.fromEntries(
+    Object.entries(rawSnap.tlds).map(([tld, regs]) => [
+      tld,
+      Object.fromEntries(
+        Object.entries(regs).map(([rid, [reg, renew, transfer]]) => [
+          rid,
+          { reg, renew, transfer } satisfies PriceEntry,
+        ]),
+      ),
+    ]),
+  ),
+};
 const FLOORS = (wholesale as { floors: Record<string, number> }).floors;
 
 const PRICING_KEY = 'dh:v1:pricing';

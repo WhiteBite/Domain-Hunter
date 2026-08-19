@@ -348,15 +348,29 @@ async function main() {
     process.exit(1);
   }
 
+  // Compact on-disk format: registrar prices as [reg, renew, transfer] arrays
+  // (~3× smaller than objects); pricing.ts expands them back at load.
+  const compactTlds = Object.fromEntries(
+    Object.entries(merged.tlds).map(([tld, regs]) => [
+      tld,
+      Object.fromEntries(
+        Object.entries(regs).map(([rid, e]) => [
+          rid,
+          [e.reg ?? null, e.renew ?? null, e.transfer ?? null],
+        ]),
+      ),
+    ]),
+  );
+
   // Snapshot file always carries sources: ['snapshot'] — it IS the baseline.
   const table = {
     generatedAt: new Date().toISOString(),
     sources: ['snapshot'],
-    tlds: merged.tlds,
+    tlds: compactTlds,
     coupons: merged.coupons,
   };
 
-  await writeFile(SNAPSHOT_PATH, JSON.stringify(table, null, 2) + '\n', 'utf8');
+  await writeFile(SNAPSHOT_PATH, JSON.stringify(table) + '\n', 'utf8');
 
   const tldCount = Object.keys(merged.tlds).length;
   const couponCount = Object.keys(merged.coupons).length;

@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { locale, setLocaleFromBrowser, t, LOCALES } from './i18n';
+  import { locale, t, LOCALES, detectLocale } from './i18n';
   import { activeTab, settings, type TabId } from './ui/store';
-  import { loadSettings, saveSettings } from './ui/settings';
+  import { KEYS, loadSettings, saveSettings } from './ui/settings';
   import { applyTheme, watchSystemTheme } from './ui/theme';
   import { clickOutside } from './ui/clickoutside';
-  import type { Locale } from './types';
+  import type { Locale, Settings } from './types';
+  import Flag from './ui/components/Flag.svelte';
   import './ui/tokens.css';
   import CheckTab from './ui/components/CheckTab.svelte';
   import GeneratorsTab from './ui/components/GeneratorsTab.svelte';
@@ -14,7 +15,21 @@
   import SettingsTab from './ui/components/SettingsTab.svelte';
   import AboutTab from './ui/components/AboutTab.svelte';
 
-  settings.set(loadSettings());
+  // First visit (no saved settings): honor the browser language. Afterwards
+  // the stored preference wins, so a manual choice is never overridden.
+  function loadInitialSettings(): Settings {
+    const s = loadSettings();
+    let hadSaved = false;
+    try {
+      hadSaved = localStorage.getItem(KEYS.settings) !== null;
+    } catch {
+      hadSaved = true;
+    }
+    if (!hadSaved) s.lang = detectLocale();
+    return s;
+  }
+
+  settings.set(loadInitialSettings());
   let current = $state($settings);
   settings.subscribe((value) => {
     current = value;
@@ -77,8 +92,6 @@
   }
 
   onMount(() => {
-    setLocaleFromBrowser();
-    settings.set(loadSettings());
     return watchSystemTheme(() => $settings.theme);
   });
 
@@ -116,6 +129,7 @@
             aria-expanded={langMenuOpen}
             data-testid="app-lang-toggle"
           >
+            <Flag code={current.lang} size={18} />
             <span class="lang-code">{current.lang.toUpperCase()}</span>
             <svg class="lang-chevron" class:rot={langMenuOpen} viewBox="0 0 16 16" aria-hidden="true">
               <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -138,6 +152,7 @@
                       <svg viewBox="0 0 16 16"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     {/if}
                   </span>
+                  <Flag code={loc.code} size={18} />
                   <span class="lang-native">{loc.nativeName}</span>
                   <span class="lang-item-code nums">{loc.code.toUpperCase()}</span>
                 </button>

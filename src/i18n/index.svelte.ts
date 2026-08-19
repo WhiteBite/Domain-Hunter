@@ -13,11 +13,14 @@ import { ru } from './ru';
 import { es } from './es';
 import { de } from './de';
 import { pt } from './pt';
+import { zh } from './zh';
+import { ja } from './ja';
+import { fr } from './fr';
 
 export type Dict = Record<string, string>;
 export type { Locale };
 
-const dicts: Record<Locale, Dict> = { en, ru, es, de, pt };
+const dicts: Record<Locale, Dict> = { en, ru, es, de, pt, zh, ja, fr };
 
 let current: Locale = $state('en');
 

@@ -47,7 +47,8 @@ function fail(check, detail) {
  */
 function parseDict(source) {
   const entries = new Map();
-  const keyRe = /'([a-zA-Z0-9._]+)'\s*:/g;
+  // Keys may be single- OR double-quoted (en.ts mixes both styles).
+  const keyRe = /['"]([a-zA-Z0-9._]+)['"]\s*:/g;
   const positions = [];
   let m;
   while ((m = keyRe.exec(source)) !== null) {
@@ -70,12 +71,12 @@ function placeholders(valueBlock) {
   return out.sort();
 }
 
-/** Extract the set of single-quoted string literals from a value block (to detect empties). */
+/** Extract the set of quoted string literals (single or double) from a value block (to detect empties). */
 function stringLiterals(valueBlock) {
   const out = [];
-  const re = /'((?:[^'\\]|\\.)*)'/g;
+  const re = /'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"/g;
   let m;
-  while ((m = re.exec(valueBlock)) !== null) out.push(m[1]);
+  while ((m = re.exec(valueBlock)) !== null) out.push(m[1] ?? m[2] ?? '');
   return out;
 }
 

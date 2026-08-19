@@ -265,7 +265,7 @@ async function main() {
     const empty = {
       generatedAt: new Date().toISOString(),
       source: 'whoisfreaks',
-      domains: [],
+      list: [],
     };
     try {
       await writeFile(SNAPSHOT_PATH, JSON.stringify(empty, null, 2) + '\n', 'utf8');
@@ -278,14 +278,15 @@ async function main() {
   }
 
   const domains = parseDomains(csvText, tldSet);
+  // Compact, order-preserving format: "label tld" strings (~3× smaller than objects).
   const snapshot = {
     generatedAt: new Date().toISOString(),
     source: 'whoisfreaks',
-    domains,
+    list: domains.map((x) => `${x.d} ${x.tld}`),
   };
 
   try {
-    await writeFile(SNAPSHOT_PATH, JSON.stringify(snapshot, null, 2) + '\n', 'utf8');
+    await writeFile(SNAPSHOT_PATH, JSON.stringify(snapshot) + '\n', 'utf8');
   } catch (writeErr) {
     console.error(`failed to write snapshot: ${writeErr.message}`);
     process.exit(1);

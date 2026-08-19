@@ -24,6 +24,9 @@ export const LOCALES: readonly LocaleInfo[] = [
   { code: 'es', nativeName: 'Español', englishName: 'Spanish' },
   { code: 'de', nativeName: 'Deutsch', englishName: 'German' },
   { code: 'pt', nativeName: 'Português', englishName: 'Portuguese' },
+  { code: 'zh', nativeName: '中文', englishName: 'Chinese' },
+  { code: 'ja', nativeName: '日本語', englishName: 'Japanese' },
+  { code: 'fr', nativeName: 'Français', englishName: 'French' },
 ] as const;
 
 /** Lookup a locale's metadata by code. Returns undefined for unknown codes. */

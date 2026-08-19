@@ -4,10 +4,13 @@ import { ru } from '../src/i18n/ru';
 import { es } from '../src/i18n/es';
 import { de } from '../src/i18n/de';
 import { pt } from '../src/i18n/pt';
+import { zh } from '../src/i18n/zh';
+import { ja } from '../src/i18n/ja';
+import { fr } from '../src/i18n/fr';
 import type { Dict } from '../src/i18n';
 
 /** All non-reference locales, keyed by code for readable failure messages. */
-const LOCALES: Record<string, Dict> = { ru, es, de, pt };
+const LOCALES: Record<string, Dict> = { ru, es, de, pt, zh, ja, fr };
 
 const enKeys = Object.keys(en).sort();
 

@@ -11,11 +11,15 @@
   interface Snapshot {
     generatedAt: string;
     source: string;
-    domains: { d: string; tld: string }[];
+    /** Compact "label tld" strings (order-preserving, ~3× smaller than objects). */
+    list: string[];
   }
 
   const data = snapshot as unknown as Snapshot;
-  const allDomains: DroppedDomain[] = data.domains;
+  const allDomains: DroppedDomain[] = data.list.map((s) => {
+    const i = s.lastIndexOf(' ');
+    return { d: s.slice(0, i), tld: s.slice(i + 1) };
+  });
 
   // ---- TLD filter options: top 20 by count + 'all' ----
   const tldCounts = new Map<string, number>();
