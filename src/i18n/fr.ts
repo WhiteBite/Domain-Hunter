@@ -149,6 +149,8 @@ export const fr: Dict = {
   'results.detail.premium': 'Premium du registre ≈ {price}',
   'results.detail.cheapest': 'Le moins cher maintenant : {registrar} · {price}',
   'results.detail.buy': 'Acheter',
+'results.detail.registrars': 'Prix par bureau d’enregistrement',
+'results.detail.registrars.more': '+{n} de plus',
   'gen.tray.copy': 'Copier la liste',
   'gen.tray.projected':
     'Les noms sans zone s’étendent sur vos {zones} zones sélectionnées : ≈ {n} vérifications.',
@@ -300,7 +302,9 @@ export const fr: Dict = {
   'tooltip.rdap': 'RDAP est le remplaçant moderne de WHOIS, géré par les registres de domaines.',
   'tooltip.cache': 'Les vérifications répétées pendant le TTL réutilisent les résultats stockés.',
   'tooltip.tco': 'Bureau d’enregistrement le moins cher : première année + deux renouvellements.',
-  'tooltip.promoTrap': 'Le renouvellement est 5× ou plus au-dessus du prix de la première année.',
+  'tooltip.promoTrap': 'Piège promotionnel : première année {first}, renouvellement {renew} ({times}×) — à partir de l\'année 2, vous payez le prix de renouvellement.',
+  'tooltip.promo': 'En dessous du prix de gros du registre — presque certainement une promo de première année ; vérifiez le prix de renouvellement.',
+  'tooltip.registrars': 'Prix en direct : Porkbun et Cloudflare (au coût) ; autres bureaux d’enregistrement issus des instantanés hebdomadaires. Triés par prix de première année.',
   'tooltip.premium':
     'Les mots courts ou du dictionnaire dans cette zone sont souvent vendus à des prix premium par le registre.',
 
