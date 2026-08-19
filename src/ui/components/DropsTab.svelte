@@ -4,6 +4,7 @@
   import { activeTab, checkInput, pendingShareRun } from '../store';
   import { favorites, toggleFavorite } from '../favorites';
   import { filterDrops, type DroppedDomain } from '../../core/dropped';
+  import Tooltip from './Tooltip.svelte';
   // Static snapshot shipped with the build (SPEC §17 — dropped-domains feed).
   import snapshot from '../../config/dropped.snapshot.json';
 
@@ -119,7 +120,7 @@
         <option value={opt.tld}>.{opt.tld} ({opt.n})</option>
       {/each}
     </select>
-    <span class="count" aria-live="polite">{t('drops.count', { n: filtered.length })}</span>
+    <span class="count nums" aria-live="polite">{t('drops.count', { n: filtered.length })}</span>
     <span class="snapshot">{t('drops.snapshot', { date: snapshotDate })}</span>
     <button
       class="btn primary"
@@ -137,34 +138,52 @@
   {:else}
     <ul class="grid" role="list">
       {#each visible as dom (dom.d + '.' + dom.tld)}
+        {@const fullName = dom.d + '.' + dom.tld}
+        {@const sid = sanitizeId(fullName)}
         <li class="row">
-          <span class="domain" aria-label={dom.d + '.' + dom.tld}>{dom.d}<span class="tld">.{dom.tld}</span></span>
+          <span class="domain" aria-label={fullName}>{dom.d}<span class="tld">.{dom.tld}</span></span>
           <span class="row-actions">
             <button
-              class="btn ghost sm fav"
-              class:active={$favorites.has(dom.d + '.' + dom.tld)}
+              class="icon-btn fav"
+              class:active={$favorites.has(fullName)}
               type="button"
-              onclick={() => toggleFavorite(dom.d + '.' + dom.tld)}
-              aria-label={$favorites.has(dom.d + '.' + dom.tld) ? t('results.fav.remove') : t('results.fav.add')}
-              title={$favorites.has(dom.d + '.' + dom.tld) ? t('results.fav.remove') : t('results.fav.add')}
-              data-testid={`drops-row-fav-${sanitizeId(dom.d + '.' + dom.tld)}`}
+              onclick={() => toggleFavorite(fullName)}
+              aria-label={$favorites.has(fullName) ? t('results.fav.remove') : t('results.fav.add')}
+              title={$favorites.has(fullName) ? t('results.fav.remove') : t('results.fav.add')}
+              data-testid={`drops-row-fav-${sid}`}
             >
               <svg viewBox="0 0 16 16" aria-hidden="true">
                 <path
                   d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"
-                  fill={$favorites.has(dom.d + '.' + dom.tld) ? 'currentColor' : 'none'}
+                  fill={$favorites.has(fullName) ? 'currentColor' : 'none'}
                   stroke="currentColor"
                   stroke-width="1"
                   stroke-linejoin="round"
                 />
               </svg>
             </button>
-            <button class="btn ghost sm" type="button" onclick={() => copyDomain(dom)} data-testid={`drops-row-copy-${sanitizeId(dom.d + '.' + dom.tld)}`}>
-              {t('results.copy')}
-            </button>
-            <button class="btn sm" type="button" onclick={() => addOne(dom)} data-testid={`drops-row-add-${sanitizeId(dom.d + '.' + dom.tld)}`}>
-              {t('drops.add')}
-            </button>
+            <Tooltip text={t('drops.copy.aria', { domain: fullName })}>
+              <button
+                class="icon-btn"
+                type="button"
+                onclick={() => void copyDomain(dom)}
+                aria-label={t('drops.copy.aria', { domain: fullName })}
+                data-testid={`drops-row-copy-${sid}`}
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+              </button>
+            </Tooltip>
+            <Tooltip text={t('drops.add.aria', { domain: fullName })}>
+              <button
+                class="icon-btn primary"
+                type="button"
+                onclick={() => addOne(dom)}
+                aria-label={t('drops.add.aria', { domain: fullName })}
+                data-testid={`drops-row-add-${sid}`}
+              >
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+              </button>
+            </Tooltip>
           </span>
         </li>
       {/each}
@@ -186,7 +205,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    max-width: 1120px;
   }
 
   h2 {
@@ -268,31 +286,12 @@
     background: var(--accent-hover);
   }
 
-  .btn.ghost {
-    background: transparent;
-  }
-
-  .btn.sm {
-    min-height: 32px;
-    padding: 0 var(--space-3);
-    font-size: var(--text-xs);
-  }
-
-  .btn.fav.active {
-    color: var(--accent);
-  }
-
-  .btn.fav svg {
-    width: 15px;
-    height: 15px;
-  }
-
   .grid {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--space-1);
   }
 
@@ -306,6 +305,7 @@
     border-radius: var(--radius-sm);
     background: var(--bg-elevated);
     min-width: 0;
+    min-height: 40px;
   }
 
   .row:hover {
@@ -315,10 +315,10 @@
   .domain {
     font-family: var(--font-mono, ui-monospace, Consolas, monospace);
     font-size: var(--text-sm);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     min-width: 0;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
   }
 
   .tld {
@@ -329,6 +329,51 @@
     display: flex;
     gap: var(--space-1);
     flex: none;
+    align-items: center;
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--dur) var(--ease);
+    padding: 0;
+  }
+
+  .icon-btn:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+    background: var(--bg-sunken);
+  }
+
+  .icon-btn.fav.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .icon-btn.primary {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+    background: var(--accent-soft);
+  }
+
+  .icon-btn.primary:hover {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .icon-btn svg {
+    width: 15px;
+    height: 15px;
   }
 
   .muted {
