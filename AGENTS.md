@@ -49,7 +49,7 @@ scripts/                # CI helpers (price harvest, zone health, worker build)
 - **Zones are data, not code.** Adding/changing a TLD means editing `src/config/tlds.json` only.
 - **Never guess availability.** Honor the three-state model in SPEC §7 (`available` / `probably_available` / `unknown`); DoH-only results never yield bare `available`. A wrong "available" is worse than "unknown".
 - **Be polite to registries.** Per-infra rate profiles, AIMD backoff, honor `Retry-After`, global concurrency cap. Google Registry ≈1 rps is strict.
-- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com. No CDNs, no webfonts from network, no analytics.
+- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com, Cloudflare RDAP aggregator (`rdap.cloudflare.com/domain/{domain}`). No CDNs, no webfonts from network, no analytics.
 - **Security.** Registry-derived text is escaped; external links use `target="_blank" rel="noopener noreferrer"`; keep the CSP meta in `index.html` intact.
 - **Pricing unit is USD cents** internally; display converts via `settings.rates`.
 - **Storage keys** are versioned: `dh:v1:*` (see SPEC §5). Migrate, don't silently break.

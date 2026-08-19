@@ -14,7 +14,8 @@ disagree, SPEC wins unless the SPEC is factually impossible.
 1. Works when opened from `file://` (single self-contained `dist/index.html`).
 2. Works under a sub-path (`https://user.github.io/Domain-Hunter/`) — all paths relative (`base: './'`).
 3. Zero runtime requests to anything except: RDAP endpoints, IANA bootstrap, DoH endpoints,
-   Porkbun pricing API, cfdomainpricing.com. No CDNs, no fonts from network, no analytics.
+   Porkbun pricing API, cfdomainpricing.com, Cloudflare RDAP aggregator
+   (`rdap.cloudflare.com/domain/{domain}`). No CDNs, no fonts from network, no analytics.
 4. Polite to registries: per-infra rate profiles (§8), AIMD backoff, global concurrency cap.
 5. Never guess availability: three-state model (§7). Wrong "available" is worse than "unknown".
 6. All registry-derived text is escaped; external links `target="_blank" rel="noopener noreferrer"`.
@@ -253,6 +254,18 @@ Curated always wins on conflict.
 
 DoH: primary `https://cloudflare-dns.com/dns-query?name={d}&type=NS` (`Accept: application/dns-json`),
 fallback `https://dns.google/resolve?name={d}&type=NS`. DoH-only results never yield bare `available`.
+
+**Cloudflare RDAP aggregator** (`rdap.cloudflare.com/domain/{domain}`) is a secondary
+registry-level source used in two places, both honest per the three-state model:
+(1) **Transport fallback** — when the primary RDAP fetch fails transport-level (after the
+optional proxy, before the DoH last resort), the aggregator is queried once (8s timeout, no
+retries). HTTP 200 → `taken` (source `cloudflare`); HTTP 404 → `conclude404` (trust rules
+still apply); anything else → fall through to DoH unchanged.
+(2) **Low-trust cross-check** — in `conclude404` for low-trust zones, the aggregator is
+queried in parallel with the DoH NS probe (no added latency). If the aggregator returns
+HTTP 200, the result is `taken` (source `cloudflare`, note "registry 404 contradicted by
+cloudflare rdap") overriding the DoH outcome — a taken domain must never be reported free.
+Otherwise the DoH-based outcomes stand exactly as before.
 
 UI badges: available (green), probably_available (green outline + tooltip), taken (neutral),
 unknown (amber), error (red). Filters: all / available (includes probably) / taken / problems.
