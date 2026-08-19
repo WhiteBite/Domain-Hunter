@@ -10,9 +10,11 @@
   import { mutate } from '../../generators/mutations';
   import { themes } from '../../generators/themes';
   import { favorites, toggleFavorite } from '../favorites';
+  import { clickOutside } from '../clickoutside';
 
   const TRAY_MAX = 1000;
   const GEN_PREFS_KEY = 'dh:v1:genprefs';
+  const ROWS_PER_GROUP = 50;
 
   const DEFAULT_AFFIXES = [
     'app', 'pro', 'hq', 'hub', 'ai', 'io', 'get', 'use', 'my', 'go',
@@ -50,6 +52,8 @@
   let trayFilter = $state('');
   let traySort = $state<'added' | 'az'>('added');
   let expanded = $state<Record<string, boolean>>({});
+  let groupCollapsed = $state<Record<string, boolean>>({});
+  let menuOpen = $state(false);
 
   const GROUP_ORDER: SrcId[] = ['combinator', 'mutations', 'hacks', 'syllables', 'themes', 'sets'];
   const GROUP_LABEL: Record<SrcId, string> = {
@@ -286,86 +290,179 @@
   <h2>{t('gen.title')}</h2>
   <p class="desc">{t('gen.idea.desc')}</p>
 
-  <!-- Idea → generate -->
-  <div class="card">
-    <h3 class="card-title">{t('gen.idea.title')}</h3>
-    <div class="idea-grid">
-      <label class="grow">
-        {t('gen.idea.keywords')}
-        <input
-          type="text"
-          bind:value={keywords}
-          placeholder={t('gen.idea.keywords.placeholder')}
-          data-testid="gen-input-keywords"
-          onkeydown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              generateAll();
-            }
-          }}
-        />
-      </label>
-      <button class="btn primary big" type="button" onclick={generateAll} data-testid="gen-button-generate">
-        {t('gen.generate.all')}
-      </button>
-    </div>
-
-    <div class="techs" role="group" aria-label={t('gen.idea.techniques')}>
-      {#each techToggles as toggle}
-        <label class="tech" class:active={tech[toggle.key]} title={t(toggle.descKey)}>
-          <input type="checkbox" bind:checked={tech[toggle.key]} data-testid={`gen-toggle-${toggle.key}`} />
-          <span>{t(toggle.labelKey)}</span>
-        </label>
-      {/each}
-    </div>
-
-    {#if kws().length === 0}
-      <p class="hint-line">{t('gen.idea.hint')}</p>
-    {/if}
-
-    <details class="params">
-      <summary data-testid="gen-summary-params">{t('gen.params')}</summary>
-      <div class="params-body">
-        <label>
-          {t('gen.combinator.affixes')}
-          <textarea rows="3" bind:value={affixes} data-testid="gen-textarea-affixes"></textarea>
-        </label>
-        <div class="params-row">
-          <label class="inline">
-            {t('gen.combinator.mode')}
-            <select bind:value={mode} data-testid="gen-select-mode">
-              <option value="prefix">{t('gen.combinator.mode.prefix')}</option>
-              <option value="suffix">{t('gen.combinator.mode.suffix')}</option>
-              <option value="both">{t('gen.combinator.mode.both')}</option>
-            </select>
+  <div class="grid">
+    <!-- LEFT RAIL: idea card, theme browser, saved wordsets -->
+    <div class="rail">
+      <!-- Idea → generate -->
+      <div class="card">
+        <h3 class="card-title">{t('gen.idea.title')}</h3>
+        <div class="idea-grid">
+          <label class="grow">
+            {t('gen.idea.keywords')}
+            <input
+              type="text"
+              bind:value={keywords}
+              placeholder={t('gen.idea.keywords.placeholder')}
+              data-testid="gen-input-keywords"
+              onkeydown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  generateAll();
+                }
+              }}
+            />
           </label>
-          <label class="inline">
-            {t('gen.syllables.count')}
-            <input type="number" min="1" max="200" bind:value={syllableCount} data-testid="gen-input-syllable-count" />
-          </label>
-          <button
-            class="btn ghost"
-            type="button"
-            onclick={() => (affixes = DEFAULT_AFFIXES.join(', '))}
-            data-testid="gen-button-affixes-reset"
-          >
-            {t('gen.combinator.reset')}
+          <button class="btn primary big" type="button" onclick={generateAll} data-testid="gen-button-generate">
+            {t('gen.generate.all')}
           </button>
         </div>
-      </div>
-    </details>
-  </div>
 
-  <!-- Combined candidates -->
-  <div class="card">
-    <header class="tray-head">
-      <h3>
-        {t('gen.tray.title')}
-        {#if candidates.length > 0}
-          <span class="count-badge" aria-live="polite" data-testid="gen-tray-count">{candidates.length}</span>
+        <div class="techs" role="group" aria-label={t('gen.idea.techniques')}>
+          {#each techToggles as toggle}
+            <label class="tech" class:active={tech[toggle.key]} title={t(toggle.descKey)}>
+              <input type="checkbox" bind:checked={tech[toggle.key]} data-testid={`gen-toggle-${toggle.key}`} />
+              <span>{t(toggle.labelKey)}</span>
+            </label>
+          {/each}
+        </div>
+
+        {#if kws().length === 0}
+          <p class="hint-line">{t('gen.idea.hint')}</p>
         {/if}
-      </h3>
-      <div class="controls">
+
+        <details class="params">
+          <summary data-testid="gen-summary-params">{t('gen.params')}</summary>
+          <div class="params-body">
+            <label>
+              {t('gen.combinator.affixes')}
+              <textarea rows="3" bind:value={affixes} data-testid="gen-textarea-affixes"></textarea>
+            </label>
+            <div class="params-row">
+              <label class="inline">
+                {t('gen.combinator.mode')}
+                <select bind:value={mode} data-testid="gen-select-mode">
+                  <option value="prefix">{t('gen.combinator.mode.prefix')}</option>
+                  <option value="suffix">{t('gen.combinator.mode.suffix')}</option>
+                  <option value="both">{t('gen.combinator.mode.both')}</option>
+                </select>
+              </label>
+              <label class="inline">
+                {t('gen.syllables.count')}
+                <input type="number" min="1" max="200" bind:value={syllableCount} data-testid="gen-input-syllable-count" />
+              </label>
+              <button
+                class="btn ghost"
+                type="button"
+                onclick={() => (affixes = DEFAULT_AFFIXES.join(', '))}
+                data-testid="gen-button-affixes-reset"
+              >
+                {t('gen.combinator.reset')}
+              </button>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Browse theme words -->
+      <div class="card">
+        <header>
+          <h3>{t('gen.themes.title')}</h3>
+          <p>{t('gen.themes.desc')}</p>
+        </header>
+        {#if themes.length === 0}
+          <p class="muted">{t('gen.output.empty')}</p>
+        {:else}
+          <div class="chips">
+            {#each themes as theme (theme.id)}
+              <button
+                class="chip cat"
+                type="button"
+                class:active={activeThemeId === theme.id}
+                onclick={() => (activeThemeId = theme.id)}
+                data-testid={`gen-theme-chip-${theme.id}`}
+              >
+                {t(theme.labelKey)}
+              </button>
+            {/each}
+          </div>
+          {#if activeTheme}
+            <div class="words">
+              {#each activeTheme.words as word (word.w)}
+                <button
+                  class="word"
+                  type="button"
+                  class:selected={hasCandidate(word.w)}
+                  title={word.hint ?? ''}
+                  onclick={() =>
+                    hasCandidate(word.w) ? removeCandidate(word.w) : addCandidates([word.w], 'themes')}
+                  data-testid={`gen-theme-word-${sanitizeId(word.w)}`}
+                >
+                  {word.w}
+                </button>
+              {/each}
+            </div>
+          {/if}
+        {/if}
+      </div>
+
+      <!-- Saved sets -->
+      <details class="card sets-card">
+        <summary class="sets-summary" data-testid="gen-summary-sets">
+          <span>{t('gen.themes.custom')}</span>
+          <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+          <span class="controls" onclick={(e) => e.stopPropagation()} data-testid="gen-sets-controls">
+            <button class="btn" type="button" onclick={exportSets} data-testid="gen-button-export-sets">{t('gen.themes.export')}</button>
+            <label class="btn file-btn">
+              {t('gen.themes.import')}
+              <input
+                type="file"
+                accept="application/json,.json"
+                hidden
+                data-testid="gen-input-import-sets"
+                onchange={(e) => {
+                  const file = e.currentTarget.files?.[0];
+                  if (file) void importSets(file);
+                  e.currentTarget.value = '';
+                }}
+              />
+            </label>
+          </span>
+        </summary>
+        {#if importError}
+          <p class="error">{importError}</p>
+        {/if}
+        {#if wordSets.length === 0}
+          <p class="muted">{t('gen.wordsets.empty')}</p>
+        {:else}
+          <ul class="set-list">
+            {#each wordSets as set}
+              <li class="set-row">
+                <span class="set-name-label">{set.name}</span>
+                <span class="muted">{t('gen.output.count', { n: set.words.length })}</span>
+                <span class="row-actions">
+                  <button class="btn" type="button" onclick={() => loadSet(set)} data-testid={`gen-set-load-${sanitizeId(set.name)}`}>
+                    {t('gen.sets.load')}
+                  </button>
+                  <button class="btn danger" type="button" onclick={() => deleteSet(set.id)} data-testid={`gen-set-delete-${sanitizeId(set.name)}`}>
+                    {t('gen.themes.delete')}
+                  </button>
+                </span>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </details>
+    </div>
+
+    <!-- RIGHT: candidates tray -->
+    <div class="card tray">
+      <div class="toolbar">
+        {#if candidates.length > 0}
+          <span class="count-badge nums" aria-live="polite" data-testid="gen-tray-count">{candidates.length}</span>
+          <span class="projected" data-testid="gen-tray-projected">
+            {t('gen.tray.projected', { n: projectedChecks, zones: $selectedTlds.length })}
+          </span>
+        {/if}
         <input
           class="filter"
           type="search"
@@ -381,189 +478,136 @@
         <button class="btn primary" type="button" onclick={checkNow} disabled={candidates.length === 0} data-testid="gen-button-check-now">
           {t('gen.output.check')}
         </button>
-      </div>
-    </header>
-    <div class="controls">
-      <input
-        class="set-name"
-        type="text"
-        bind:value={newSetName}
-        placeholder={t('gen.themes.newSet')}
-        aria-label={t('gen.tray.save')}
-        data-testid="gen-input-set-name"
-      />
-      <button class="btn" type="button" onclick={saveSet} disabled={candidates.length === 0} data-testid="gen-button-save-set">
-        {t('gen.tray.save')}
-      </button>
-      <button
-        class="btn ghost"
-        type="button"
-        onclick={() => genCandidates.set([])}
-        disabled={candidates.length === 0}
-        data-testid="gen-button-clear-tray"
-      >
-        {t('gen.tray.clear')}
-      </button>
-      <button
-        class="btn"
-        type="button"
-        onclick={() => void copyList()}
-        disabled={candidates.length === 0}
-        data-testid="gen-button-copy-tray"
-      >
-        {t('gen.tray.copy')}
-      </button>
-    </div>
-    {#if candidates.length > 0}
-      <p class="muted projected" data-testid="gen-tray-projected">
-        {t('gen.tray.projected', { n: projectedChecks, zones: $selectedTlds.length })}
-      </p>
-    {/if}
-    {#if candidates.length === 0}
-      <p class="muted" data-testid="gen-tray-empty">{t('gen.tray.empty')}</p>
-    {:else}
-      {#each candidateGroups as group (group.id)}
-        <div class="group">
-          <span class="group-label">{t(GROUP_LABEL[group.id])}</span>
-          <div class="tray-words">
-            {#each (expanded[group.id] ? group.items : group.items.slice(0, 100)) as cand (cand.n)}
-              <span class="tray-chip-wrap">
-                <button
-                  class="chip-fav"
-                  class:active={$favorites.has(cand.n)}
-                  type="button"
-                  onclick={(ev) => { ev.stopPropagation(); toggleFavorite(cand.n); }}
-                  aria-label={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
-                  title={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
-                  data-testid={`gen-tray-fav-${sanitizeId(cand.n)}`}
-                >
-                  <svg viewBox="0 0 16 16" aria-hidden="true">
-                    <path
-                      d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"
-                      fill={$favorites.has(cand.n) ? 'currentColor' : 'none'}
-                      stroke="currentColor"
-                      stroke-width="1"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
+        <div
+          class="menu-wrap"
+          use:clickOutside={() => { if (menuOpen) menuOpen = false; }}
+        >
+          <button
+            class="action-btn"
+            class:active={menuOpen}
+            type="button"
+            onclick={() => (menuOpen = !menuOpen)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-label={t('gen.tray.menu.aria')}
+            title={t('gen.tray.menu.aria')}
+            data-testid="gen-button-tray-menu"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
+          </button>
+          {#if menuOpen}
+            <div class="menu" role="menu" aria-label={t('gen.tray.menu.aria')}>
+              <div class="menu-row">
+                <input
+                  class="set-name"
+                  type="text"
+                  bind:value={newSetName}
+                  placeholder={t('gen.themes.newSet')}
+                  aria-label={t('gen.tray.save')}
+                  data-testid="gen-input-set-name"
+                />
+                <button class="btn primary sm" type="button" onclick={saveSet} disabled={candidates.length === 0} data-testid="gen-button-save-set">
+                  {t('gen.tray.save')}
                 </button>
-                <button
-                  class="tray-chip"
-                  type="button"
-                  title={t('gen.tray.remove')}
-                  onclick={() => removeCandidate(cand.n)}
-                  data-testid={`gen-tray-chip-${sanitizeId(cand.n)}`}
-                >
-                  {cand.n}
-                  <span aria-hidden="true">×</span>
-                </button>
-              </span>
-            {/each}
-          </div>
-          {#if group.items.length > 100}
-            <button
-              class="btn ghost"
-              type="button"
-              onclick={() => (expanded[group.id] = !expanded[group.id])}
-              data-testid={`gen-more-${sanitizeId(group.id)}`}
-            >
-              {expanded[group.id] ? t('gen.tray.less') : t('gen.tray.more', { n: group.items.length - 100 })}
-            </button>
+              </div>
+              <button
+                class="menu-item"
+                type="button"
+                role="menuitem"
+                onclick={() => genCandidates.set([])}
+                disabled={candidates.length === 0}
+                data-testid="gen-button-clear-tray"
+              >
+                {t('gen.tray.clear')}
+              </button>
+              <button
+                class="menu-item"
+                type="button"
+                role="menuitem"
+                onclick={() => void copyList()}
+                disabled={candidates.length === 0}
+                data-testid="gen-button-copy-tray"
+              >
+                {t('gen.tray.copy')}
+              </button>
+            </div>
           {/if}
         </div>
-      {/each}
-    {/if}
-  </div>
-
-  <!-- Browse theme words -->
-  <div class="card">
-    <header>
-      <h3>{t('gen.themes.title')}</h3>
-      <p>{t('gen.themes.desc')}</p>
-    </header>
-    {#if themes.length === 0}
-      <p class="muted">{t('gen.output.empty')}</p>
-    {:else}
-      <div class="chips">
-        {#each themes as theme (theme.id)}
-          <button
-            class="chip cat"
-            type="button"
-            class:active={activeThemeId === theme.id}
-            onclick={() => (activeThemeId = theme.id)}
-            data-testid={`gen-theme-chip-${theme.id}`}
-          >
-            {t(theme.labelKey)}
-          </button>
-        {/each}
       </div>
-      {#if activeTheme}
-        <div class="words">
-            {#each activeTheme.words as word (word.w)}
-            <button
-              class="word"
-              type="button"
-              class:selected={hasCandidate(word.w)}
-              title={word.hint ?? ''}
-              onclick={() =>
-                hasCandidate(word.w) ? removeCandidate(word.w) : addCandidates([word.w], 'themes')}
-              data-testid={`gen-theme-word-${sanitizeId(word.w)}`}
-            >
-              {word.w}
-            </button>
+
+      {#if candidates.length === 0}
+        <p class="muted empty" data-testid="gen-tray-empty">{t('gen.tray.empty')}</p>
+      {:else}
+        <div class="tray-list">
+          {#each candidateGroups as group (group.id)}
+            <div class="group">
+              <button
+                class="group-toggle"
+                type="button"
+                onclick={() => (groupCollapsed[group.id] = !groupCollapsed[group.id])}
+                aria-expanded={!groupCollapsed[group.id]}
+                aria-label={t('gen.group.collapse.aria')}
+                data-testid={`gen-group-toggle-${sanitizeId(group.id)}`}
+              >
+                <svg class="gchevron" class:rot={!groupCollapsed[group.id]} viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <span class="group-label">{t(GROUP_LABEL[group.id])}</span>
+                <span class="group-count nums">{group.items.length}</span>
+              </button>
+              {#if !groupCollapsed[group.id]}
+                <div class="group-rows">
+                  {#each (expanded[group.id] ? group.items : group.items.slice(0, ROWS_PER_GROUP)) as cand (cand.n)}
+                    <div class="tray-row" data-testid={`gen-tray-chip-${sanitizeId(cand.n)}`}>
+                      <button
+                        class="row-fav"
+                        class:active={$favorites.has(cand.n)}
+                        type="button"
+                        onclick={(ev) => { ev.stopPropagation(); toggleFavorite(cand.n); }}
+                        aria-label={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
+                        title={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
+                        data-testid={`gen-tray-fav-${sanitizeId(cand.n)}`}
+                      >
+                        <svg viewBox="0 0 16 16" aria-hidden="true">
+                          <path
+                            d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"
+                            fill={$favorites.has(cand.n) ? 'currentColor' : 'none'}
+                            stroke="currentColor"
+                            stroke-width="1"
+                            stroke-linejoin="round"
+                          />
+                        </svg>
+                      </button>
+                      <span class="row-name">{cand.n}</span>
+                      <span class="row-len nums">{cand.n.length}</span>
+                      <button
+                        class="row-remove"
+                        type="button"
+                        onclick={(ev) => { ev.stopPropagation(); removeCandidate(cand.n); }}
+                        aria-label={t('gen.tray.remove')}
+                        title={t('gen.tray.remove')}
+                        data-testid={`gen-tray-remove-${sanitizeId(cand.n)}`}
+                      >
+                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+                      </button>
+                    </div>
+                  {/each}
+                  {#if group.items.length > ROWS_PER_GROUP}
+                    <button
+                      class="show-more"
+                      type="button"
+                      onclick={() => (expanded[group.id] = !expanded[group.id])}
+                      data-testid={`gen-more-${sanitizeId(group.id)}`}
+                    >
+                      {expanded[group.id] ? t('gen.tray.less') : t('gen.tray.more', { n: group.items.length - ROWS_PER_GROUP })}
+                    </button>
+                  {/if}
+                </div>
+              {/if}
+            </div>
           {/each}
         </div>
       {/if}
-    {/if}
+    </div>
   </div>
-
-  <!-- Saved sets -->
-  <details class="card sets-card">
-    <summary class="sets-summary" data-testid="gen-summary-sets">
-      <span>{t('gen.themes.custom')}</span>
-      <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-      <span class="controls" onclick={(e) => e.stopPropagation()} data-testid="gen-sets-controls">
-        <button class="btn" type="button" onclick={exportSets} data-testid="gen-button-export-sets">{t('gen.themes.export')}</button>
-        <label class="btn file-btn">
-          {t('gen.themes.import')}
-          <input
-            type="file"
-            accept="application/json,.json"
-            hidden
-            data-testid="gen-input-import-sets"
-            onchange={(e) => {
-              const file = e.currentTarget.files?.[0];
-              if (file) void importSets(file);
-              e.currentTarget.value = '';
-            }}
-          />
-        </label>
-      </span>
-    </summary>
-    {#if importError}
-      <p class="error">{importError}</p>
-    {/if}
-    {#if wordSets.length === 0}
-      <p class="muted">{t('gen.wordsets.empty')}</p>
-    {:else}
-      <ul class="set-list">
-        {#each wordSets as set}
-          <li class="set-row">
-            <span class="set-name-label">{set.name}</span>
-            <span class="muted">{t('gen.output.count', { n: set.words.length })}</span>
-            <span class="row-actions">
-              <button class="btn" type="button" onclick={() => loadSet(set)} data-testid={`gen-set-load-${sanitizeId(set.name)}`}>
-                {t('gen.sets.load')}
-              </button>
-              <button class="btn danger" type="button" onclick={() => deleteSet(set.id)} data-testid={`gen-set-delete-${sanitizeId(set.name)}`}>
-                {t('gen.themes.delete')}
-              </button>
-            </span>
-          </li>
-        {/each}
-      </ul>
-    {/if}
-  </details>
 
   {#if toast}
     <div class="toast" role="status" data-testid="gen-toast">{toast}</div>
@@ -575,7 +619,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    max-width: 1120px;
   }
 
   h2 {
@@ -586,6 +629,26 @@
   .desc {
     margin: 0;
     color: var(--text-secondary);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 380px minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  @media (max-width: 980px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
   }
 
   .card {
@@ -625,7 +688,7 @@
 
   .grow {
     flex: 1;
-    min-width: 220px;
+    min-width: 180px;
   }
 
   label {
@@ -698,6 +761,12 @@
 
   .btn.ghost {
     background: transparent;
+  }
+
+  .btn.sm {
+    min-height: 32px;
+    padding: 0 var(--space-3);
+    font-size: var(--text-xs);
   }
 
   .btn.danger {
@@ -779,20 +848,17 @@
     max-width: 140px;
   }
 
-  .tray-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  /* ---- Tray (right column) ---- */
+
+  .tray {
     gap: var(--space-3);
-    flex-wrap: wrap;
   }
 
-  .tray-head h3 {
-    margin: 0;
-    font-size: var(--text-base);
+  .toolbar {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+    flex-wrap: wrap;
   }
 
   .count-badge {
@@ -802,25 +868,144 @@
     padding: 0 var(--space-2);
     font-size: var(--text-xs);
     font-weight: 600;
-  }
-
-  .controls {
-    display: flex;
+    min-height: 24px;
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
-    flex-wrap: wrap;
   }
 
-  .set-name {
-    max-width: 180px;
+  .projected {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
   }
 
   .filter {
-    max-width: 180px;
+    flex: 1;
+    min-width: 120px;
+    max-width: 200px;
   }
 
   .sort {
-    max-width: 150px;
+    max-width: 140px;
+  }
+
+  /* ⋯ overflow menu */
+  .menu-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--dur) var(--ease);
+  }
+
+  .action-btn:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+    background: var(--bg-sunken);
+  }
+
+  .action-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .action-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    z-index: 50;
+    min-width: 220px;
+  }
+
+  .menu-row {
+    display: flex;
+    gap: var(--space-1);
+    align-items: center;
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-1);
+  }
+
+  .menu-row .set-name {
+    flex: 1;
+    min-width: 0;
+    min-height: 32px;
+    padding: 0 var(--space-2);
+    font-size: var(--text-xs);
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    background: transparent;
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    text-align: left;
+    min-height: 32px;
+    transition: background var(--dur) var(--ease);
+  }
+
+  .menu-item:hover:not(:disabled) {
+    background: var(--bg-sunken);
+  }
+
+  .menu-item:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* ---- Tray list (dense rows) ---- */
+
+  .tray-list {
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-right: var(--space-1);
+  }
+
+  .tray-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .tray-list::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-full);
+  }
+
+  .tray-list::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   .group {
@@ -829,67 +1014,138 @@
     gap: var(--space-1);
   }
 
-  .group-label {
+  .group-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
     font-size: var(--text-xs);
-    color: var(--text-tertiary);
+    font-weight: 600;
+    cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-  }
-
-  .tray-words {
-    display: flex;
-    gap: var(--space-1);
-    flex-wrap: wrap;
-    max-height: 320px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) transparent;
-  }
-
-  .tray-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    border: 1px solid var(--border);
-    background: var(--bg-sunken);
-    color: var(--text);
+    transition: color var(--dur) var(--ease);
     border-radius: var(--radius-sm);
-    padding: var(--space-1) var(--space-2);
-    font-size: var(--text-xs);
-    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
-    cursor: pointer;
-    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
   }
 
-  .tray-chip:hover {
-    border-color: var(--red);
-    color: var(--red);
+  .group-toggle:hover {
+    color: var(--text);
   }
 
-  .tray-chip-wrap {
-    display: inline-flex;
+  .group-toggle .gchevron {
+    width: 12px;
+    height: 12px;
+    transition: transform var(--dur) var(--ease);
+    transform: rotate(-90deg);
+  }
+
+  .group-toggle .gchevron.rot {
+    transform: rotate(0deg);
+  }
+
+  .group-count {
+    color: var(--text-tertiary);
+    font-weight: 400;
+  }
+
+  .group-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tray-row {
+    display: flex;
     align-items: center;
-    gap: var(--space-1);
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    min-height: 30px;
+    border-radius: var(--radius-sm);
+    transition: background var(--dur) var(--ease);
   }
 
-  .chip-fav {
+  .tray-row:hover {
+    background: var(--bg-sunken);
+  }
+
+  .row-fav {
     border: none;
     background: none;
     color: var(--text-tertiary);
     cursor: pointer;
-    padding: 0 2px;
+    padding: 0;
     display: inline-flex;
+    flex: none;
   }
 
-  .chip-fav:hover,
-  .chip-fav.active {
+  .row-fav:hover,
+  .row-fav.active {
     color: var(--accent);
   }
 
-  .chip-fav svg {
-    width: 12px;
-    height: 12px;
+  .row-fav svg {
+    width: 13px;
+    height: 13px;
   }
+
+  .row-name {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    font-size: var(--text-sm);
+    color: var(--text);
+    user-select: text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .row-len {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    flex: none;
+  }
+
+  .row-remove {
+    border: none;
+    background: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    flex: none;
+    border-radius: var(--radius-sm);
+    transition: color var(--dur) var(--ease);
+  }
+
+  .row-remove:hover {
+    color: var(--red);
+  }
+
+  .row-remove svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .show-more {
+    align-self: flex-start;
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    padding: var(--space-1) var(--space-2);
+    min-height: 28px;
+  }
+
+  .show-more:hover {
+    text-decoration: underline;
+  }
+
+  /* ---- Theme browser ---- */
 
   .chips {
     display: flex;
@@ -947,6 +1203,8 @@
     color: var(--accent);
   }
 
+  /* ---- Saved sets ---- */
+
   .sets-card {
     gap: var(--space-3);
   }
@@ -993,8 +1251,9 @@
     margin: 0;
   }
 
-  .projected {
-    font-size: var(--text-xs);
+  .empty {
+    padding: var(--space-5) 0;
+    text-align: center;
   }
 
   .error {

@@ -52,11 +52,21 @@ async function openParamsPanel(page: Page): Promise<void> {
 }
 
 async function openSetsPanel(page: Page): Promise<void> {
+  // Close the tray ⋯ menu if open (its pointerdown handler can interfere).
+  const menuBtn = page.locator('[data-testid="gen-button-tray-menu"]');
+  if (await menuBtn.isVisible()) {
+    const expanded = await menuBtn.getAttribute('aria-expanded');
+    if (expanded === 'true') {
+      await menuBtn.click();
+    }
+  }
   // Export/import buttons live INSIDE the <summary> (always visible), so the
   // panel's open state must be checked via the <details open> attribute.
   const details = page.locator('details:has([data-testid="gen-summary-sets"])');
   if ((await details.getAttribute('open')) === null) {
-    await page.click('[data-testid="gen-summary-sets"]');
+    // Click near the left edge of the summary to avoid the controls span
+    // (which has stopPropagation and would prevent toggling).
+    await page.locator('[data-testid="gen-summary-sets"]').click({ position: { x: 10, y: 10 } });
     await details.waitFor({ state: 'visible' });
     await expect(details).toHaveAttribute('open', '');
   }
@@ -65,6 +75,7 @@ async function openSetsPanel(page: Page): Promise<void> {
 async function clearTray(page: Page): Promise<void> {
   const count = await page.locator('[data-testid^="gen-tray-chip-"]').count();
   if (count > 0) {
+    await openTrayMenu(page);
     await page.click('[data-testid="gen-button-clear-tray"]');
   }
   await expect(page.locator('[data-testid="gen-tray-empty"]')).toBeVisible();
@@ -75,11 +86,21 @@ async function generate(page: Page, keywords: string): Promise<void> {
   await page.click('[data-testid="gen-button-generate"]');
 }
 
-/** Tray chip names in DOM order (chip text minus the trailing '×' glyph). */
+/** Open the tray ⋯ overflow menu so secondary actions are in the DOM. */
+async function openTrayMenu(page: Page): Promise<void> {
+  const btn = page.locator('[data-testid="gen-button-tray-menu"]');
+  if (!(await btn.isVisible())) return; // menu not available (empty tray)
+  const menu = page.locator('[data-testid="gen-button-save-set"]');
+  if (await menu.isVisible()) return;
+  await btn.click();
+  await expect(menu).toBeVisible();
+}
+
+/** Tray candidate names in DOM order (reads the .row-name span text). */
 async function chipNames(page: Page): Promise<string[]> {
   return page
-    .locator('[data-testid^="gen-tray-chip-"]')
-    .evaluateAll((els) => els.map((el) => (el.textContent ?? '').replace(/×$/u, '').trim()));
+    .locator('[data-testid^="gen-tray-chip-"] .row-name')
+    .evaluateAll((els) => els.map((el) => (el.textContent ?? '').trim()));
 }
 
 function expectNoLeaks(page: Page): void {
@@ -243,7 +264,7 @@ test.describe('Generators tab', () => {
     expectNoLeaks(page);
   });
 
-  test('clicking a tray chip removes it', async ({ page }) => {
+  test('clicking a tray chip remove button removes it', async ({ page }) => {
     await boot(page);
     await openParamsPanel(page);
     await page.locator('[data-testid="gen-textarea-affixes"]').fill('app');
@@ -252,7 +273,7 @@ test.describe('Generators tab', () => {
     const chip = page.locator('[data-testid="gen-tray-chip-apptest"]');
     await expect(chip).toBeVisible();
 
-    await chip.click();
+    await page.click('[data-testid="gen-tray-remove-apptest"]');
 
     await expect(chip).toBeHidden();
     expectNoLeaks(page);
@@ -266,6 +287,7 @@ test.describe('Generators tab', () => {
     await generate(page, 'test');
     await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
 
+    await openTrayMenu(page);
     await page.click('[data-testid="gen-button-clear-tray"]');
 
     await expect(page.locator('[data-testid="gen-tray-empty"]')).toBeVisible();
@@ -281,6 +303,7 @@ test.describe('Generators tab', () => {
     await generate(page, 'test');
     await expect(page.locator('[data-testid="gen-tray-chip-apptest"]')).toBeVisible();
 
+    await openTrayMenu(page);
     await page.click('[data-testid="gen-button-copy-tray"]');
 
     const clip = await readClipboard(page);
@@ -318,6 +341,7 @@ test.describe('Generators tab', () => {
     await generate(page, 'test');
     await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
 
+    await openTrayMenu(page);
     await page.locator('[data-testid="gen-input-set-name"]').fill('alphaset');
     await page.click('[data-testid="gen-button-save-set"]');
 
@@ -334,6 +358,7 @@ test.describe('Generators tab', () => {
     await setTechniques(page, { combinator: true });
     await generate(page, 'test');
     await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
+    await openTrayMenu(page);
     await page.locator('[data-testid="gen-input-set-name"]').fill('alphaset');
     await page.click('[data-testid="gen-button-save-set"]');
     await clearTray(page);
@@ -354,6 +379,7 @@ test.describe('Generators tab', () => {
     await setTechniques(page, { combinator: true });
     await generate(page, 'test');
     await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
+    await openTrayMenu(page);
     await page.locator('[data-testid="gen-input-set-name"]').fill('alphaset');
     await page.click('[data-testid="gen-button-save-set"]');
     await openSetsPanel(page);
@@ -372,6 +398,7 @@ test.describe('Generators tab', () => {
     await setTechniques(page, { combinator: true });
     await generate(page, 'test');
     await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
+    await openTrayMenu(page);
     await page.locator('[data-testid="gen-input-set-name"]').fill('alphaset');
     await page.click('[data-testid="gen-button-save-set"]');
     await openSetsPanel(page);
@@ -464,12 +491,32 @@ test.describe('Generators tab', () => {
     await setTechniques(page, { combinator: true });
     await generate(page, 'test');
     await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
+    await openTrayMenu(page);
     await page.locator('[data-testid="gen-input-set-name"]').fill('alphaset');
 
     await page.click('[data-testid="gen-button-save-set"]');
 
     // Toast auto-dismisses (~1.8s) — assert it appears promptly.
     await expect(page.locator('[data-testid="gen-toast"]')).toBeVisible({ timeout: 1_500 });
+    expectNoLeaks(page);
+  });
+
+  test('group collapse toggle hides and shows rows', async ({ page }) => {
+    await boot(page);
+    await openParamsPanel(page);
+    await page.locator('[data-testid="gen-textarea-affixes"]').fill('app');
+    await setTechniques(page, { combinator: true });
+    await generate(page, 'test');
+    await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
+
+    const toggle = page.locator('[data-testid="gen-group-toggle-combinator"]');
+    await expect(toggle).toBeVisible();
+    // Collapse: rows disappear.
+    await toggle.click();
+    await expect(page.locator('[data-testid="gen-group-toggle-combinator"]')).toHaveAttribute('aria-expanded', 'false');
+    // Expand: rows reappear.
+    await toggle.click();
+    await expect(page.locator('[data-testid="gen-group-toggle-combinator"]')).toHaveAttribute('aria-expanded', 'true');
     expectNoLeaks(page);
   });
 });
