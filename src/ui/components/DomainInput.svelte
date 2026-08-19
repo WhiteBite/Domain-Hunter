@@ -82,17 +82,22 @@
   }
   .input {
     width: 100%;
-    min-height: 96px;
-    padding: var(--space-3);
+    min-height: 128px;
+    padding: 12px 14px;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--bg-elevated);
     color: var(--text);
     font-size: var(--text-sm);
-    font-family: var(--font-sans);
-    line-height: 1.6;
+    font-family: var(--font-mono, ui-monospace, 'Cascadia Code', Consolas, monospace);
+    line-height: 1.7;
+    caret-color: var(--accent);
     resize: vertical;
     transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+  .input::placeholder {
+    color: var(--text-quaternary);
+    font-family: var(--font-sans);
   }
   .input:hover {
     border-color: var(--border-strong);
