@@ -301,7 +301,9 @@ export const ja: Dict = {
   'tooltip.rdap': 'RDAP はドメインレジストリが運用する、WHOIS の現代版代替です。',
   'tooltip.cache': 'TTL 内の再チェックは保存された結果を再利用します。',
   'tooltip.tco': '最安値レジストラ: 初年度 + 2 回の更新。',
-  'tooltip.promoTrap': '更新料が初年度価格の 5 倍以上です。',
+  'tooltip.promoTrap': 'プロモート罠: 初年度 {first}、更新 {renew} ({times}×) — 2 年目以降は更新料を支払います。',
+  'tooltip.promo': 'レジストリの卸値を下回る — ほぼ間違いなく初年度プロモーションです; 更新料を確認してください。',
+  'tooltip.registrars': 'ライブ価格: Porkbun と Cloudflare (原価); 他のレジストラは週次スナップショット由来。初年度価格でソート済み。',
   'tooltip.premium':
     'このゾーンの短い単語や辞書語はレジストリからプレミアム価格で販売されることがよくあります。',
 

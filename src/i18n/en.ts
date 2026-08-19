@@ -301,7 +301,9 @@ export const en: Dict = {
   'tooltip.rdap': 'RDAP is the modern replacement for WHOIS, run by domain registries.',
   'tooltip.cache': 'Repeated checks within the TTL reuse stored results.',
   'tooltip.tco': 'Cheapest registrar: first year + two renewals.',
-  'tooltip.promoTrap': 'Renewal is 5× or more above the first-year price.',
+  'tooltip.promoTrap': 'Promo trap: first year {first}, renewal {renew} ({times}×) — from year 2 you pay the renewal price.',
+  'tooltip.promo': 'Below the registry wholesale floor — almost certainly a first-year promo; check the renewal price.',
+  'tooltip.registrars': 'Live prices: Porkbun and Cloudflare (at-cost); other registrars from weekly snapshots. Sorted by first-year price.',
   'tooltip.premium':
     'Short or dictionary words in this zone are often sold at premium prices by the registry.',
 

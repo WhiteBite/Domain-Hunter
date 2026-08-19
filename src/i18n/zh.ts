@@ -301,7 +301,9 @@ export const zh: Dict = {
   'tooltip.rdap': 'RDAP 是由域名注册局运行的、WHOIS 的现代替代方案。',
   'tooltip.cache': 'TTL 内的重复查询会复用已存储的结果。',
   'tooltip.tco': '最低价注册商：首年 + 两次续费。',
-  'tooltip.promoTrap': '续费价格为首年价格的 5 倍或以上。',
+  'tooltip.promoTrap': '促销陷阱：首年 {first}，续费 {renew}（{times}×）——从第 2 年起支付续费价格。',
+  'tooltip.promo': '低于注册局批发底价——几乎肯定是首年促销；请检查续费价格。',
+  'tooltip.registrars': '实时价格：Porkbun 和 Cloudflare（成本价）；其他注册商来自每周快照。按首年价格排序。',
   'tooltip.premium':
     '该区域中的短词或词典词常被注册局以溢价出售。',
 

@@ -301,7 +301,9 @@ export const pt: Dict = {
   'tooltip.rdap': 'RDAP é o substituto moderno do WHOIS, operado pelos registros de domínios.',
   'tooltip.cache': 'Verificações repetidas dentro do TTL reutilizam resultados armazenados.',
   'tooltip.tco': 'Registrador mais barato: primeiro ano + duas renovações.',
-  'tooltip.promoTrap': 'A renovação é 5× ou mais acima do preço do primeiro ano.',
+  'tooltip.promoTrap': 'Armadilha promocional: primeiro ano {first}, renovação {renew} ({times}×) — a partir do ano 2 você paga o preço de renovação.',
+  'tooltip.promo': 'Abaixo do preço atacadista do registro — quase certamente uma promo de primeiro ano; verifique o preço de renovação.',
+  'tooltip.registrars': 'Preços ao vivo: Porkbun e Cloudflare (custo); outros registradores a partir de snapshots semanais. Ordenados por preço do primeiro ano.',
   'tooltip.premium':
     'Palavras curtas ou de dicionário nesta zona são frequentemente vendidas a preços premium pelo registro.',
 

@@ -18,6 +18,7 @@
   import { favorites, toggleFavorite } from '../favorites';
   import { clickOutside } from '../clickoutside';
   import StatusBadge from './StatusBadge.svelte';
+  import Tooltip from './Tooltip.svelte';
 
   import registrarsJson from '../../config/registrars.json';
 
@@ -670,10 +671,19 @@
                     {formatPrice(row.firstYear, $settings)}
                   </span>
                   {#if promo}
-                    <span class="chip-tag promo" title={t('tooltip.promoTrap')}>{t('price.promo')}</span>
+                    <Tooltip text={t('tooltip.promo')}>
+                      <span class="chip-tag promo">{t('price.promo')}</span>
+                    </Tooltip>
                   {/if}
-                  {#if trap}
-                    <span class="chip-tag trap" title={t('tooltip.promoTrap')}>{t('price.promoTrap')}</span>
+                  {#if trap && row.best}
+                    {@const reg = row.best.entry.reg ?? 0}
+                    {@const renew = row.best.entry.renew ?? 0}
+                    {@const first = formatPrice(reg, $settings)}
+                    {@const renewal = formatPrice(renew, $settings)}
+                    {@const times = reg > 0 ? Math.round(renew / reg) : 0}
+                    <Tooltip text={t('tooltip.promoTrap', { first, renew: renewal, times })}>
+                      <span class="chip-tag trap">{t('price.promoTrap')}</span>
+                    </Tooltip>
                   {/if}
                   {#if coupon}
                     <span class="coupon">
@@ -806,7 +816,9 @@
                     {/if}
                     {#if quotes.length >= 2}
                       <div class="detail-cell detail-registrars" data-testid={`results-row-registrars-${sid}`}>
-                        <span class="detail-label">{t('results.detail.registrars')}</span>
+                        <Tooltip text={t('tooltip.registrars')}>
+                          <span class="detail-label">{t('results.detail.registrars')}</span>
+                        </Tooltip>
                         <span class="detail-reg-list nums">
                           {#each quotes.slice(0, 4) as quote, i}
                             <a
