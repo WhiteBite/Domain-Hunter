@@ -269,18 +269,20 @@
 
   <div class="grid" class:collapsed>
     <div class="col-left">
-      <button
-        class="panel-toggle"
-        type="button"
-        data-testid="check-panel-toggle"
-        aria-label={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
-        title={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
-        onclick={() => (collapsed = !collapsed)}
-      >
-        <svg viewBox="0 0 16 16" aria-hidden="true" class={collapsed ? 'rot' : ''}>
-          <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
+      <div class="rail-top">
+        <button
+          class="panel-toggle"
+          type="button"
+          data-testid="check-panel-toggle"
+          aria-label={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
+          title={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
+          onclick={() => (collapsed = !collapsed)}
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" class={collapsed ? 'rot' : ''}>
+            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
       {#if !collapsed}
         <DomainInput />
         <TldPicker />
@@ -549,22 +551,29 @@
   .grid.collapsed {
     grid-template-columns: auto 1fr;
   }
+  /* Top strip of the left rail: hosts the collapse toggle as an
+     intentional right-aligned panel control (ghost icon button). */
+  .rail-top {
+    display: flex;
+    justify-content: flex-end;
+    min-height: 28px;
+  }
   .panel-toggle {
-    align-self: flex-start;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
     border-radius: var(--radius-sm);
-    color: var(--text-secondary);
+    color: var(--text-tertiary);
     cursor: pointer;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
   }
   .panel-toggle:hover {
-    border-color: var(--border-strong);
-    color: var(--text);
+    background: var(--bg-overlay);
+    color: var(--text-secondary);
   }
   .panel-toggle svg {
     width: 14px;

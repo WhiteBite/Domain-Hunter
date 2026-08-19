@@ -210,6 +210,19 @@
       <span class="trigger-count nums" data-testid="tld-selected-count" aria-live="polite">{$selectedTlds.length}</span>
     </button>
 
+    {#if $selectedTlds.length > 0}
+      <button
+        class="clear-sel"
+        type="button"
+        onclick={() => selectedTlds.set([])}
+        data-testid="tld-button-clear"
+      >
+        {t('check.tlds.clearSel')}
+      </button>
+    {/if}
+  </div>
+
+  {#if $selectedTlds.length > 0}
     <div class="tld-pills">
       {#each summaryPills as tld (tld)}
         <button
@@ -227,18 +240,7 @@
         <span class="tld-more nums">+{summaryOverflow}</span>
       {/if}
     </div>
-
-    {#if $selectedTlds.length > 0}
-      <button
-        class="clear-sel"
-        type="button"
-        onclick={() => selectedTlds.set([])}
-        data-testid="tld-button-clear"
-      >
-        {t('check.tlds.clearSel')}
-      </button>
-    {/if}
-  </div>
+  {/if}
 
   {#if popoverOpen}
     <div class="popover" id="tld-popover" role="listbox" aria-label={t('check.tlds.title')} bind:this={popoverEl}>
@@ -520,13 +522,12 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
   }
 
+  /* Row 1: trigger left, clear-selection pinned right. */
   .tld-summary {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     gap: var(--space-2);
   }
 
@@ -576,11 +577,12 @@
     background: color-mix(in srgb, var(--accent-soft) 60%, transparent);
   }
 
+  /* Row 2: full-width wrap of removable pills, own block below row 1. */
   .tld-pills {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1);
-    flex: 1;
+    margin-top: var(--space-2);
     min-width: 0;
   }
   .tld-pill {
@@ -626,6 +628,7 @@
     cursor: pointer;
     padding: 0;
     min-height: 24px;
+    margin-left: auto;
   }
 
   .popover {
