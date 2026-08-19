@@ -99,6 +99,8 @@ const ZONE_ALLOWLIST_FILES = new Set([
   'src/generators/mutations.ts',             // mutation suffixes ('io', 'ify', …) — not zones
   'src/generators/syllables.ts',             // onset/rime phoneme clusters — not zones
   'src/ui/csv.ts',                           // CSV column names ('domain', 'status', …) — not zones
+  'src/i18n/locales.ts',                     // locale codes ('en', 'ru', 'es', …) — not zones
+  'src/ui/components/ResultsTable.svelte',   // status legend literals ('available', 'taken', …) — statuses, not zones
 ]);
 
 // ---------------------------------------------------------------------------

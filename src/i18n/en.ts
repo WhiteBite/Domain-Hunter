@@ -318,4 +318,26 @@ export const en: Dict = {
   'csv.priceRenewal': 'Renewal',
   'csv.bestRegistrar': 'Cheapest registrar',
   'csv.checkedAt': 'Checked at',
+
+  'check.history.toggle.aria': 'Toggle history',
+  'tld.picker.aria': 'Select zones',
+  'tld.group.all': 'All zones',
+  'results.row.menu.aria': 'Row actions',
+  'results.detail.label': 'Details',
+
+  "gen.tray.menu.aria": "More actions",
+  "gen.group.collapse.aria": "Toggle group",
+  "drops.copy.aria": "Copy {domain}",
+  "drops.add.aria": "Send {domain} to check",
+
+  'results.legend.aria': 'Status legend',
+  'results.legend.available':
+    'Registry RDAP confirmed the domain is not registered.',
+  'results.legend.probably_available':
+    'DNS suggests the domain is free, but the registry did not confirm — verify before buying.',
+  'results.legend.taken': 'The domain is registered (RDAP returned a record).',
+  'results.legend.unknown':
+    'The registry gave an ambiguous answer — try re-checking later.',
+  'results.legend.error': 'Network or registry error — try re-checking.',
+  'results.empty.example': 'Try an example',
 };

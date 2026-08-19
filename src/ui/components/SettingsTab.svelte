@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
   import { get } from 'svelte/store';
-  import { t } from '../../i18n';
+  import { t, LOCALES } from '../../i18n';
   import { settings } from '../store';
   import { clearAllData, KEYS, readJson, writeJson } from '../settings';
   import { DEFAULT_SETTINGS, type Settings } from '../../types';
@@ -177,8 +177,9 @@
         onchange={(e) => patch('lang', e.currentTarget.value as Settings['lang'])}
         data-testid="settings-select-lang"
       >
-        <option value="en">English</option>
-        <option value="ru">Русский</option>
+        {#each LOCALES as loc (loc.code)}
+          <option value={loc.code}>{loc.nativeName}</option>
+        {/each}
       </select>
     </div>
     <div class="row">

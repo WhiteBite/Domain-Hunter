@@ -320,4 +320,26 @@ export const ru: Dict = {
   'csv.priceRenewal': 'Продление',
   'csv.bestRegistrar': 'Самый дешёвый регистратор',
   'csv.checkedAt': 'Проверено',
+
+  'check.history.toggle.aria': 'Показать/скрыть историю',
+  'tld.picker.aria': 'Выбрать зоны',
+  'tld.group.all': 'Все зоны',
+  'results.row.menu.aria': 'Действия со строкой',
+  'results.detail.label': 'Подробнее',
+
+  "gen.tray.menu.aria": "Ещё действия",
+  "gen.group.collapse.aria": "Свернуть/развернуть группу",
+  "drops.copy.aria": "Копировать {domain}",
+  "drops.add.aria": "Отправить {domain} на проверку",
+
+  'results.legend.aria': 'Легенда статусов',
+  'results.legend.available':
+    'Реестр RDAP подтвердил, что домен не зарегистрирован.',
+  'results.legend.probably_available':
+    'DNS указывает, что домен свободен, но реестр не подтвердил — проверьте у регистратора.',
+  'results.legend.taken': 'Домен зарегистрирован (RDAP вернул запись).',
+  'results.legend.unknown':
+    'Реестр дал неоднозначный ответ — попробуйте перепроверить позже.',
+  'results.legend.error': 'Ошибка сети или реестра — попробуйте перепроверить.',
+  'results.empty.example': 'Попробовать пример',
 };

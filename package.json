@@ -16,7 +16,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "lint": "eslint . && node scripts/lint-hardcode.mjs",
+    "lint": "eslint . && node scripts/lint-hardcode.mjs && node scripts/check-i18n.mjs",
     "prepare": "husky",
     "smoke": "node scripts/smoke.mjs",
     "build:worker": "node scripts/build-worker.mjs"
