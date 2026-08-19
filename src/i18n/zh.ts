@@ -148,6 +148,8 @@ export const zh: Dict = {
   'results.detail.premium': '注册局溢价 ≈ {price}',
   'results.detail.cheapest': '当前最低价：{registrar} · {price}',
   'results.detail.buy': '购买',
+'results.detail.registrars': '按注册商价格',
+'results.detail.registrars.more': '+{n} 个更多',
   'gen.tray.copy': '复制列表',
   'gen.tray.projected':
     '不带区域的名称会在你选的 {zones} 个区域中展开：约 {n} 次查询。',

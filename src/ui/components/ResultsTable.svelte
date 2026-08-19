@@ -269,6 +269,29 @@
     return best ?? { registrar: null, entry: null };
   }
 
+  interface RegistrarQuote {
+    name: string;
+    reg: number;
+    renew: number | null;
+  }
+
+  /** Known-registrar quotes for a zone from the pricing store, sorted by
+   *  registration price asc (renewal as tie-breaker). Unknown ids skipped. */
+  function registrarQuotes(tld: string): RegistrarQuote[] {
+    const table = $pricing?.table ?? null;
+    if (!table) return [];
+    const entries = table.tlds[tld];
+    if (!entries) return [];
+    const list: RegistrarQuote[] = [];
+    for (const r of registrars) {
+      const e = entries[r.id];
+      if (!e || e.reg == null) continue;
+      list.push({ name: r.name, reg: e.reg, renew: e.renew });
+    }
+    list.sort((a, b) => a.reg - b.reg || (a.renew ?? Infinity) - (b.renew ?? Infinity));
+    return list;
+  }
+
   function buyUrl(domain: string, tld: string): string | null {
     const { registrar } = registrarFor(tld);
     if (!registrar) return null;
@@ -594,6 +617,7 @@
             {@const isFav = $favorites.has(row.result.domain)}
             {@const sid = sanitizeId(row.result.domain)}
             {@const isExpanded = detailFor === row.result.domain}
+            {@const quotes = registrarQuotes(row.result.tld)}
             <tr class="row-in" class:available={isAvail} class:error={isErr} data-testid={`results-row-${sid}`}>
               <td class="select-cell">
                 <input
@@ -747,7 +771,12 @@
             </tr>
             {#if isExpanded}
               {@const d = details[row.result.domain]}
-              <tr class="detail-row" data-testid={`results-row-expanded-${sid}`}>
+              <tr
+                class="detail-row"
+                class:is-available={isAvail}
+                class:is-error={isErr}
+                data-testid={`results-row-expanded-${sid}`}
+              >
                 <td colspan="5">
                   <div class="detail-grid">
                     <div class="detail-cell">
@@ -761,6 +790,27 @@
                     {#if row.result.note}
                       <div class="detail-cell detail-note">
                         {row.result.note}
+                      </div>
+                    {/if}
+                    {#if quotes.length >= 2}
+                      <div class="detail-cell detail-registrars" data-testid={`results-row-registrars-${sid}`}>
+                        <span class="detail-label">{t('results.detail.registrars')}</span>
+                        <span class="detail-reg-list nums">
+                          {#each quotes.slice(0, 4) as quote, i}
+                            <span class="detail-reg-item" class:cheapest={i === 0}>
+                              {#if i === 0}<span class="detail-reg-dot" aria-hidden="true"></span>{/if}
+                              {quote.name} — {formatPrice(quote.reg, $settings)} / {formatPrice(quote.renew, $settings)}
+                            </span>
+                          {/each}
+                          {#if quotes.length > 4}
+                            <span
+                              class="detail-reg-more"
+                              title={`${t('results.detail.registrars')}: ${quotes.length}`}
+                            >
+                              {t('results.detail.registrars.more', { n: quotes.length - 4 })}
+                            </span>
+                          {/if}
+                        </span>
                       </div>
                     {/if}
                     {#if !d || d.loading}
@@ -1040,6 +1090,15 @@
   .detail-row td {
     background: var(--bg-sunken);
     padding: var(--space-3) var(--space-3);
+    box-shadow: inset 2px 0 0 var(--border-strong);
+  }
+  .detail-row.is-available td {
+    background: var(--row-tint-available);
+    box-shadow: inset 2px 0 0 var(--green-solid);
+  }
+  .detail-row.is-error td {
+    background: var(--row-tint-error);
+    box-shadow: inset 2px 0 0 var(--red);
   }
 
   .detail-grid {
@@ -1048,6 +1107,9 @@
     gap: var(--space-4);
     flex-wrap: wrap;
     font-size: var(--text-xs);
+    /* Align under the Name column: skip the checkbox column
+       (space-3 padding + 14px checkbox + space-3 padding). */
+    padding-left: calc(14px + 2 * var(--space-3));
   }
 
   .detail-cell {
@@ -1082,9 +1144,50 @@
     color: var(--text-secondary);
   }
 
-  .detail-buy {
-    color: var(--accent);
+  .detail-registrars {
+    flex-basis: 100%;
+  }
+  .detail-reg-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px var(--space-3);
+    color: var(--text-secondary);
+  }
+  .detail-reg-item {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+  .detail-reg-item.cheapest {
+    color: var(--text);
     font-weight: 500;
+  }
+  .detail-reg-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green-solid);
+    margin-right: var(--space-1);
+  }
+  .detail-reg-more {
+    color: var(--text-tertiary);
+  }
+
+  .detail-buy {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--accent-text);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--dur) var(--ease);
+  }
+  .detail-buy:hover {
+    background: var(--bg-overlay);
+    text-decoration: none;
   }
   .chip-tag {
     display: inline-block;

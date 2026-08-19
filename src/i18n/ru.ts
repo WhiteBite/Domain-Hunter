@@ -148,6 +148,8 @@ export const ru: Dict = {
   'results.detail.premium': 'Премиум реестра ≈ {price}',
   'results.detail.cheapest': 'Сейчас дешевле всего: {registrar} · {price}',
   'results.detail.buy': 'Купить',
+'results.detail.registrars': 'Цены по регистраторам',
+'results.detail.registrars.more': '+ещё {n}',
   'gen.tray.copy': 'Скопировать список',
   'gen.tray.projected':
     'Имена без зоны раскроются по выбранным зонам ({zones}): ≈ {n} проверок.',

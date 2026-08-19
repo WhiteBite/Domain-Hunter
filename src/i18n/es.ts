@@ -148,6 +148,8 @@ export const es: Dict = {
   'results.detail.premium': 'Premium del registro ≈ {price}',
   'results.detail.cheapest': 'Más barato ahora: {registrar} · {price}',
   'results.detail.buy': 'Comprar',
+'results.detail.registrars': 'Precios por registrador',
+'results.detail.registrars.more': '+{n} más',
   'gen.tray.copy': 'Copiar lista',
   'gen.tray.projected':
     'Los nombres sin zona se expanden por tus {zones} zonas seleccionadas: ≈ {n} comprobaciones.',

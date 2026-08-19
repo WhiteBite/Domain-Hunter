@@ -245,6 +245,20 @@ test.describe('Misc coverage', () => {
     await expect(
       page.locator('[data-testid^="results-row-detail-buy-"]').first(),
     ).toBeVisible({ timeout: 10_000 });
+
+    // Expanded detail row carries the parent row status class.
+    const expanded = page.locator('[data-testid="results-row-expanded-zzqxtest1-com"]');
+    await expect(expanded).toBeVisible();
+    await expect(expanded).toHaveClass(/is-available/);
+
+    // Registrar comparison renders from the offline pricing store
+    // (.com has 2 registrars in the fixture: Porkbun + Cloudflare).
+    const registrarsBlock = page.locator(
+      '[data-testid="results-row-registrars-zzqxtest1-com"]',
+    );
+    await expect(registrarsBlock).toBeVisible();
+    await expect(registrarsBlock).toContainText('Porkbun');
+    await expect(registrarsBlock).toContainText('Cloudflare Registrar');
     expectNoLeaks(page);
   });
 

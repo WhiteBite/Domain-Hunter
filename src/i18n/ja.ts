@@ -148,6 +148,8 @@ export const ja: Dict = {
   'results.detail.premium': 'レジストリプレミアム ≈ {price}',
   'results.detail.cheapest': '現在最安値: {registrar} · {price}',
   'results.detail.buy': '購入',
+'results.detail.registrars': 'レジストラ別価格',
+'results.detail.registrars.more': '+{n} 件',
   'gen.tray.copy': 'リストをコピー',
   'gen.tray.projected':
     'ゾーンのない名前は選択した {zones} ゾーンに展開されます: 約 {n} 件のチェック。',
