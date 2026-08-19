@@ -244,6 +244,23 @@ export async function mockCloudflare(
   });
 }
 
+// ---- mockCloudflareRdap ----
+
+/**
+ * Route the Cloudflare RDAP aggregator (https://rdap.cloudflare.com/domain/...).
+ * Returns 404 by default so low-trust cross-checks stay deterministic: the
+ * aggregator agrees with the registry 404, and the DoH-based outcome stands.
+ * Registered automatically by mockAll() — no per-test setup needed.
+ */
+export async function mockCloudflareRdap(page: Page): Promise<void> {
+  await page.route(/https:\/\/rdap\.cloudflare\.com\/domain\//, async (route: Route) => {
+    await route.fulfill({
+      status: 404,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/rdap+json' },
+    });
+  });
+}
+
 // ---- mockDigMyName ----
 
 export interface DigMyNameRule {
@@ -310,6 +327,7 @@ export interface MockAllOpts {
 /** Register all specified mocks in one call. Skip any endpoint not in opts. */
 export async function mockAll(page: Page, opts: MockAllOpts): Promise<void> {
   if (opts.rdap) await mockRdap(page, opts.rdap);
+  await mockCloudflareRdap(page);
   if (opts.doh) await mockDoh(page, opts.doh);
   if (opts.bootstrap !== undefined) await mockBootstrap(page, opts.bootstrap);
   if (opts.porkbun !== undefined) await mockPorkbun(page, opts.porkbun);
@@ -353,6 +371,9 @@ function buildAllowlist(): RegExp[] {
 
   // Cloudflare pricing
   patterns.push(/^https:\/\/cfdomainpricing\.com\/prices\.json/);
+
+  // Cloudflare RDAP aggregator (secondary registry-level source, SPEC §7)
+  patterns.push(/^https:\/\/rdap\.cloudflare\.com\/domain\//);
 
   // DigMyName
   patterns.push(/^https:\/\/api\.digmyname\.com\/functions\/v1\/public-api\/check/);
