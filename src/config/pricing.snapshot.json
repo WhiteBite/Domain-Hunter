@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-18T23:25:23.010Z",
+  "generatedAt": "2026-08-19T01:25:10.230Z",
   "sources": [
     "snapshot"
   ],
@@ -112,23 +112,23 @@
     },
     "co.gg": {
       "porkbun": {
-        "reg": 4053,
-        "renew": 4053,
-        "transfer": 4053
+        "reg": 4060,
+        "renew": 4060,
+        "transfer": 4060
       }
     },
     "net.gg": {
       "porkbun": {
-        "reg": 4053,
-        "renew": 4053,
-        "transfer": 4053
+        "reg": 4060,
+        "renew": 4060,
+        "transfer": 4060
       }
     },
     "org.gg": {
       "porkbun": {
         "reg": 3635,
-        "renew": 4053,
-        "transfer": 4053
+        "renew": 4060,
+        "transfer": 4060
       }
     },
     "je": {
@@ -140,23 +140,23 @@
     },
     "co.je": {
       "porkbun": {
-        "reg": 4053,
-        "renew": 4053,
-        "transfer": 4053
+        "reg": 4060,
+        "renew": 4060,
+        "transfer": 4060
       }
     },
     "net.je": {
       "porkbun": {
-        "reg": 4053,
-        "renew": 4053,
-        "transfer": 4053
+        "reg": 4060,
+        "renew": 4060,
+        "transfer": 4060
       }
     },
     "org.je": {
       "porkbun": {
         "reg": 3635,
-        "renew": 4053,
-        "transfer": 4053
+        "renew": 4060,
+        "transfer": 4060
       }
     },
     "0z": {
@@ -8117,15 +8117,15 @@
     },
     "org.au": {
       "porkbun": {
-        "reg": 1200,
-        "renew": 1200,
+        "reg": 1202,
+        "renew": 1202,
         "transfer": 0
       }
     },
     "id.au": {
       "porkbun": {
-        "reg": 1200,
-        "renew": 1200,
+        "reg": 1202,
+        "renew": 1202,
         "transfer": 0
       }
     },
@@ -8146,8 +8146,8 @@
     "ca": {
       "porkbun": {
         "reg": 888,
-        "renew": 917,
-        "transfer": 897
+        "renew": 918,
+        "transfer": 898
       },
       "cloudflare": {
         "reg": 919,
@@ -8185,9 +8185,9 @@
     },
     "kyoto": {
       "porkbun": {
-        "reg": 4152,
-        "renew": 4152,
-        "transfer": 4152
+        "reg": 4145,
+        "renew": 4145,
+        "transfer": 4145
       }
     },
     "tokyo": {
