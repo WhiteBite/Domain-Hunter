@@ -32,6 +32,10 @@ export const ALL_TESTIDS = [
   'check-button-hint-dismiss', // hint strip dismiss button
   'check-button-share', // share button
   'check-button-csv', // CSV export button
+  'check-button-export-menu', // export options menu trigger (⋯)
+  'check-export-copy-csv', // export menu: copy as CSV
+  'check-export-copy-md', // export menu: copy as Markdown
+  'check-export-copy-tsv', // export menu: copy as TSV
   'check-hint-strip', // hint strip container (role=note)
   'check-panel-toggle', // left input panel collapse/expand toggle
   'check-history-toggle', // history section collapsible toggle
@@ -85,6 +89,10 @@ export const ALL_TESTIDS = [
   'results-sort-price', // sort by first-year price
   'results-showing-count', // "showing X of Y" live region
   'results-legend-toggle', // status legend popover trigger
+  'results-available-menu', // available-domains bulk actions menu trigger (⋯)
+  'results-available-copy', // available menu: copy available list
+  'results-available-fav', // available menu: add all to favorites
+  'results-available-csv', // available menu: download available CSV
 
   // ---- GeneratorsTab.svelte ----
   'gen-input-keywords', // keywords text input

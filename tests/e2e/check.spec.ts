@@ -22,6 +22,7 @@
  *      navigation test.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { openApp, grantClipboard, readClipboard } from './helpers/setup';
 import {
   ERROR_DOMAIN,
@@ -716,5 +717,111 @@ test.describe('Check tab', () => {
     await expect(row(page, 'google.com')).toBeVisible();
     await expect(page.locator('[data-testid="check-button-share"]')).toBeEnabled();
     await expect(page.locator('[data-testid="check-button-csv"]')).toBeEnabled();
+  });
+
+  // 27. export menu: copy as Markdown puts a table on the clipboard
+  test('27. export menu copy-md puts a Markdown table on the clipboard', async ({ page, context }) => {
+    await grantClipboard(context);
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com\nzzqxtest1.com');
+    await expect(row(page, 'google.com')).toBeVisible();
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+
+    await page.locator('[data-testid="check-button-export-menu"]').click();
+    await page.locator('[data-testid="check-export-copy-md"]').click();
+    const clip = await readClipboard(page);
+    expect(clip).toContain('| Domain');
+    expect(clip).toContain('| --- |');
+    expect(clip).toContain('zzqxtest1.com');
+  });
+
+  // 27b. export menu: copy as CSV and TSV put tabular data on the clipboard
+  test('27b. export menu copy-csv and copy-tsv put data on the clipboard', async ({ page, context }) => {
+    await grantClipboard(context);
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com\nzzqxtest1.com');
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+
+    await page.locator('[data-testid="check-button-export-menu"]').click();
+
+    // Copy as CSV — header joined by commas, no BOM, no markdown pipes.
+    await page.locator('[data-testid="check-export-copy-csv"]').click();
+    const csvClip = await readClipboard(page);
+    expect(csvClip).toContain('Domain,Status');
+    expect(csvClip).toContain('zzqxtest1.com');
+    expect(csvClip.charCodeAt(0)).not.toBe(0xfeff);
+
+    // Copy as TSV — header joined by tabs.
+    await page.locator('[data-testid="check-export-copy-tsv"]').click();
+    const tsvClip = await readClipboard(page);
+    expect(tsvClip).toContain('Domain\tStatus');
+    expect(tsvClip).toContain('zzqxtest1.com');
+  });
+
+  // 28. available menu: copy puts the available domain list on the clipboard
+  test('28. available menu copy puts the available list on the clipboard', async ({ page, context }) => {
+    await grantClipboard(context);
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com\nzzqxtest1.com');
+    await expect(row(page, 'google.com')).toBeVisible();
+
+    // The available menu appears only when the run is done and there are available domains.
+    const availMenu = page.locator('[data-testid="results-available-menu"]');
+    await expect(availMenu).toBeVisible({ timeout: 10_000 });
+    await availMenu.click();
+    await page.locator('[data-testid="results-available-copy"]').click();
+    const clip = await readClipboard(page);
+    expect(clip).toContain('zzqxtest1.com');
+    // Taken domain is not in the available list.
+    expect(clip).not.toContain('google.com');
+  });
+
+  // 29. available menu: fav adds all available domains to favorites
+  test('29. available menu fav adds all available to favorites', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com\nzzqxtest1.com');
+    await expect(row(page, 'google.com')).toBeVisible();
+
+    const availMenu = page.locator('[data-testid="results-available-menu"]');
+    await expect(availMenu).toBeVisible({ timeout: 10_000 });
+    await availMenu.click();
+    await page.locator('[data-testid="results-available-fav"]').click();
+
+    // Switch to favorites filter — the available domain should appear.
+    await page.locator('[data-testid="results-filter-favorites"]').click();
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+    // Taken domain was not favorited.
+    await expect(row(page, 'google.com')).toBeHidden();
+  });
+
+  // 29b. available menu: csv downloads a file containing only available rows
+  test('29b. available menu csv downloads an available-only CSV file', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com\nzzqxtest1.com');
+    await expect(row(page, 'google.com')).toBeVisible();
+
+    const availMenu = page.locator('[data-testid="results-available-menu"]');
+    await expect(availMenu).toBeVisible({ timeout: 10_000 });
+    await availMenu.click();
+    const downloadPromise = page.waitForEvent('download');
+    await page.locator('[data-testid="results-available-csv"]').click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toContain('available');
+    const path = await download.path();
+    expect(path).not.toBeNull();
+    const content = readFileSync(path!, 'utf8');
+    expect(content).toContain('zzqxtest1.com');
+    // Taken domain is not in the available-only CSV.
+    expect(content).not.toContain('google.com');
   });
 });
