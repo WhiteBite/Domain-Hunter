@@ -36,6 +36,7 @@ export const en: Dict = {
   'theme.dark': 'Dark',
   'theme.system': 'System',
   'lang.label': 'Language',
+  'app.language.aria': 'Change language',
   'lang.ru_label': 'RU',
   'lang.en_label': 'EN',
 

@@ -36,6 +36,7 @@ export const pt: Dict = {
   'theme.dark': 'Escuro',
   'theme.system': 'Sistema',
   'lang.label': 'Idioma',
+  'app.language.aria': 'Alterar idioma',
   'lang.ru_label': 'RU',
   'lang.en_label': 'EN',
 
