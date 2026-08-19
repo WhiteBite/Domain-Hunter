@@ -38,7 +38,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
 
-      - run: npx playwright install chromium --with-deps
+      # System libs for Chromium ship in the ubuntu-latest image; --with-deps
+      # only adds an uncached apt-get that hangs on slow mirrors (~90s+ best case).
+      - run: npx playwright install chromium
       - run: npx playwright test
 
       - uses: actions/upload-artifact@v4

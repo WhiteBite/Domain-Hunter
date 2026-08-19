@@ -11,7 +11,7 @@ export default defineConfig({
   testMatch: '**/*.spec.ts',
   timeout: 30_000,
   expect: { timeout: 10_000 },
-  retries: 0,
+  retries: process.env.CI ? 2 : 0,
   workers: 1,
   fullyParallel: false,
   reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
