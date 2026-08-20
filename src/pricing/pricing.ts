@@ -319,6 +319,26 @@ export function bestCoupon(table: PricingTable, tld: string): Coupon | null {
   return coupons[0] ?? null;
 }
 
+/**
+ * Registrar IDs present in the merged table, ordered by coverage (number of
+ * zones with a non-null reg price) descending, capped at maxColumns.
+ * Used by the Prices tab to pick which registrar columns to display.
+ */
+export function matrixColumns(table: PricingTable, maxColumns = 6): string[] {
+  const coverage = new Map<string, number>();
+  for (const regs of Object.values(table.tlds)) {
+    for (const [rid, entry] of Object.entries(regs)) {
+      if (entry.reg != null) {
+        coverage.set(rid, (coverage.get(rid) ?? 0) + 1);
+      }
+    }
+  }
+  return [...coverage.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, maxColumns)
+    .map(([rid]) => rid);
+}
+
 const CURRENCY_SYMBOL: Record<Settings['currency'], string> = {
   USD: '$',
   RUB: '₽',
