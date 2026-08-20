@@ -1,6 +1,6 @@
 # Domain Hunter
 
-> Free, open-source bulk domain availability checker and name generator that runs 100% in the browser: direct RDAP checks against 140+ TLD registries, five name generators, live registrar prices with 3-year TCO, CSV export. No servers, no API keys, no tracking. MIT licensed. Built with Svelte 5 + TypeScript + Vite (single-file build).
+> Free, open-source bulk domain availability checker and name generator that runs 100% in the browser: direct RDAP checks against 148 TLD registries, five name generators, live registrar prices with 3-year TCO, CSV/TSV/Markdown export. No servers, no API keys, no tracking. MIT licensed. Built with Svelte 5 + TypeScript + Vite (single-file build).
 
 Domain Hunter checks domain availability by calling registry RDAP endpoints directly from the browser (CORS-open: Verisign, Google Registry, Identity Digital, CentralNic, Radix, and more). It never guesses availability: high-trust gTLD 404s report `available`, low-trust ccTLDs are corroborated via DNS-over-HTTPS and report `probably_available`. Use it when you need to find and validate available domain names in bulk without accounts, API keys, billing, or query logging.
 
@@ -27,9 +27,9 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 
 - What it is: bulk domain availability checker + domain name generator, free and open-source (MIT)
 - How it checks: direct browser → registry RDAP calls; 200 = taken, 404 = available (with DoH corroboration for ccTLDs)
-- Scale: up to 3,000 names per run, up to 30,000 checks after TLD expansion, 147 curated TLD zones, 12 registrar buy links
-- Pricing data: live first-year + renewal prices (Porkbun, Cloudflare), coupons, 3-year TCO, promo-trap detection; USD/RUB/EUR
-- Workflow: favorites shortlist (star any domain), run history with one-click restore, results search and multi-select, share links, CSV export
+- Scale: up to 3,000 names per run, up to 30,000 checks after TLD expansion, 148 curated TLD zones, 18 registry infrastructures
+- Pricing data: live first-year + renewal prices (Porkbun, Cloudflare), weekly snapshots from Dynadot, Spaceship, ValueDomain, reg.ru, Beget; coupons, 3-year TCO, promo-trap detection; USD/RUB/EUR
+- Workflow: favorites shortlist (star any domain), watchlist (silent re-check on load with freed/taken badges), run history with one-click restore, results search and multi-select, bulk available actions, share links, CSV/TSV/Markdown export
 - Privacy: no analytics, no telemetry, no accounts; all state in browser localStorage
 - Distribution: one self-contained HTML file; works from file://, GitHub Pages, Cloudflare Pages, any static host
 
