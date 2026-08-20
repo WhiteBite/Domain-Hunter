@@ -31,6 +31,7 @@
   let resumeSnapshot = $state<RunSnapshot | null>(null);
   let engine: EngineHandle | null = null;
   let engineCandidates: string[] = [];
+  let allCandidates: string[] = [];
   let completedByEngine: Set<string> = new Set();
   let cacheHitsCount = 0;
   let cacheAvailable = 0;
@@ -46,6 +47,60 @@
     if (snap && Array.isArray(snap.pending) && snap.pending.length > 0) {
       resumeSnapshot = snap;
       resumePrompt.set(snap);
+    }
+
+    // Lastrun restore (lowest priority: resume prompt > pendingShareRun > lastrun).
+    // Runs only when there's no resume prompt, no share-link hash, and results
+    // are empty. Share-link runs override via the pendingShareRun subscription
+    // (which clears results and starts a fresh run). Cache-only — no network.
+    if (
+      !resumeSnapshot &&
+      !window.location.hash.startsWith('#s=') &&
+      get(results).size === 0
+    ) {
+      const lastrun = readJson<{
+        input: string;
+        tlds: string[];
+        candidates: string[];
+        ts: number;
+      }>(KEYS.lastrun);
+      if (lastrun && Array.isArray(lastrun.candidates) && lastrun.candidates.length > 0) {
+        checkInput.set(lastrun.input);
+        selectedTlds.set(lastrun.tlds);
+        const settingsVal = get(settings);
+        const ttlMs = settingsVal.cacheTtlHours * 3_600_000;
+        const hits: CheckResult[] = [];
+        for (const c of lastrun.candidates) {
+          const entry = cacheGetFresh(c, ttlMs);
+          if (entry) {
+            hits.push({
+              domain: c,
+              tld: entry.tld,
+              status: entry.status,
+              source: 'cache',
+              checkedAt: entry.ts,
+            });
+          }
+        }
+        if (hits.length > 0) {
+          const map = new Map<string, CheckResult>();
+          for (const r of hits) map.set(r.domain, r);
+          results.set(map);
+          const available = hits.filter(
+            (r) => r.status === 'available' || r.status === 'probably_available',
+          ).length;
+          const errors = hits.filter((r) => r.status === 'error').length;
+          runState.set({
+            phase: 'done',
+            done: hits.length,
+            total: lastrun.candidates.length,
+            available,
+            errors,
+            startedAt: lastrun.ts,
+            elapsedMs: 0,
+          });
+        }
+      }
     }
 
     // Always listen: a fresh run request (share link run:true, Generators
@@ -177,6 +232,16 @@
           elapsedMs: Date.now() - rs.startedAt,
         }));
         removeKey(KEYS.run);
+        // Persist lastrun snapshot for restore on next visit (cache-only).
+        const lastrunCandidates = allCandidates.slice(0, 3000);
+        if (lastrunCandidates.length > 0) {
+          writeJson(KEYS.lastrun, {
+            input: get(checkInput),
+            tlds: get(selectedTlds),
+            candidates: lastrunCandidates,
+            ts: Date.now(),
+          });
+        }
         engine?.destroy();
         engine = null;
         break;
@@ -225,6 +290,7 @@
     }
 
     engineCandidates = remaining;
+    allCandidates = candidates;
     completedByEngine = new Set();
     cacheHitsCount = cacheHits.length;
     cacheAvailable = cacheHits.filter(

@@ -862,4 +862,52 @@ test.describe('Check tab', () => {
     await expect(menu).toBeHidden();
     expect(await focusedTestid()).toBe('results-row-menu-google-com');
   });
+
+  // 31. lastrun restore: results restored after reload (cache-only, no network)
+  test('31. lastrun restore: results restored after reload', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com');
+    await expect(row(page, 'google.com')).toBeVisible();
+    // Wait for the run to finish (start button reappears after 'finished')
+    // and the debounced cache write + synchronous lastrun write to land.
+    await expect(page.locator('[data-testid="check-button-start"]')).toBeVisible({ timeout: 10_000 });
+    await page.waitForFunction(
+      () =>
+        localStorage.getItem('dh:v1:cache') !== null &&
+        localStorage.getItem('dh:v1:lastrun') !== null,
+      { timeout: 5000 },
+    );
+
+    // Read the cache and lastrun that the run persisted.
+    const cacheRaw = await page.evaluate(() => localStorage.getItem('dh:v1:cache'));
+    const lastrunRaw = await page.evaluate(() => localStorage.getItem('dh:v1:lastrun'));
+
+    // Reload: openApp's init script clears dh:* keys on every navigation,
+    // so re-seed with the original data plus the cache and lastrun.
+    await openApp(page, {
+      seed: {
+        'dh:v1:pricing': seedPricingTable(),
+        'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
+        'dh:v1:cache': JSON.parse(cacheRaw!),
+        'dh:v1:lastrun': JSON.parse(lastrunRaw!),
+      },
+    });
+    await page.waitForSelector('[data-testid="check-input-domains"]', {
+      state: 'visible',
+      timeout: 10_000,
+    });
+
+    // Without clicking check, the results table shows the row again.
+    await expect(row(page, 'google.com')).toBeVisible();
+    // The textarea still contains the input.
+    const input = await page.locator('[data-testid="check-input-domains"]').inputValue();
+    expect(input).toContain('google.com');
+    // The runState line shows done count.
+    const progress = page.locator('[data-testid="check-bar-progress"]');
+    await expect(progress).toBeVisible();
+    const progressText = (await progress.textContent()) ?? '';
+    expect(progressText).toMatch(/Checked \d+ of \d+/);
+  });
 });

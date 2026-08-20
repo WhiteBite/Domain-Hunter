@@ -142,13 +142,13 @@ test.describe('Prices tab', () => {
       timeout: 15_000,
     });
 
-    // The price cell carries the Porkbun monogram with a title naming
-    // the registrar whose quote is displayed.
+    // The price cell carries the registrar badge with a title naming
+    // the registrar whose quote is displayed. When a favicon is available
+    // (REGISTRAR_ICONS) the badge is an <img>; otherwise a monogram <span>.
     const badge = page.locator(
       '[data-testid="results-row-zzqxtest2-dev"] .price-cell .reg-badge',
     );
     await expect(badge).toBeVisible({ timeout: 10_000 });
-    await expect(badge).toHaveText('PB');
     const title = await badge.getAttribute('title');
     expect(title).toContain('Porkbun');
   });

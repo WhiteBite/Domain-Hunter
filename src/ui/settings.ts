@@ -10,6 +10,7 @@ export const KEYS = {
   pricing: 'dh:v1:pricing',
   bootstrap: 'dh:v1:bootstrap',
   run: 'dh:v1:run',
+  lastrun: 'dh:v1:lastrun',
   wordsets: 'dh:v1:wordsets',
   watch: 'dh:v1:watch',
 } as const;
