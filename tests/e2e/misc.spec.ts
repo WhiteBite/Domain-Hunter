@@ -339,6 +339,61 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
+  test('premium override: row price cell shows premium price with standard struck through', async ({
+    page,
+  }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+      digmyname: [
+        {
+          domain: 'zzqxtest1.com',
+          result: {
+            premium: true,
+            likely_premium: false,
+            price_usd: 348,
+            cheapest_registrar: { name: 'porkbun', reg_price_usd: 11.68 },
+            buy_url: 'https://porkbun.com/checkout/search?q=zzqxtest1.com',
+          },
+        },
+      ],
+    });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    await expect(page.locator('[data-testid="results-row-zzqxtest1-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    // Before opening details, the row shows the standard cheapest price
+    // ($10.44 cloudflare) and no strike-through.
+    const priceCell = page.locator('[data-testid="results-row-zzqxtest1-com"] .price-cell');
+    await expect(priceCell).toContainText('$10.44');
+    await expect(priceCell.locator('.price-strike')).toHaveCount(0);
+
+    // Open details (triggers the on-demand DigMyName premium check).
+    await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
+    await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
+
+    // After the premium check resolves, the row price cell shows the
+    // premium override ($348) with the standard price ($10.44) struck
+    // through, plus a premium chip-tag.
+    await expect(priceCell).toContainText('$348', { timeout: 10_000 });
+    await expect(priceCell.locator('.price-strike')).toBeVisible();
+    await expect(priceCell.locator('.price-strike')).toContainText('$10.44');
+    await expect(priceCell.locator('.chip-tag.trap')).toBeVisible();
+
+    expectNoLeaks(page);
+  });
+
   test('gen-sets-controls is rendered in the sets summary', async ({ page }) => {
     await assertNoNetworkLeaks(page);
     await mockAll(page, {

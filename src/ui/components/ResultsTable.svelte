@@ -20,6 +20,7 @@
   import { clickOutside } from '../clickoutside';
   import { trapFocus } from '../focustrap';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
+  import { registrarMonogram } from '../registrar-badge';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
 
@@ -125,6 +126,9 @@
     best: { registrarId: string; entry: PriceEntry } | null;
     tco: number | null;
     firstYear: number | null;
+    /** Original standard first-year price (non-null only when a premium
+     *  override is active, for struck-through display). */
+    standardFirstYear: number | null;
     renewal: number | null;
   }
 
@@ -133,14 +137,18 @@
     const arr: RowData[] = [];
     for (const r of $results.values()) {
       const best = table ? bestEntry(table, r.tld) : null;
+      const override = premiumOverrides[r.domain] ?? null;
+      const stdFirstYear = best?.entry.reg ?? null;
+      const stdTco =
+        best && best.entry.reg != null && best.entry.renew != null
+          ? best.entry.reg + 2 * best.entry.renew
+          : null;
       arr.push({
         result: r,
         best,
-        tco:
-          best && best.entry.reg != null && best.entry.renew != null
-            ? best.entry.reg + 2 * best.entry.renew
-            : null,
-        firstYear: best?.entry.reg ?? null,
+        tco: override ?? stdTco,
+        firstYear: override ?? stdFirstYear,
+        standardFirstYear: override != null ? stdFirstYear : null,
         renewal: best?.entry.renew ?? null,
       });
     }
@@ -309,13 +317,23 @@
     if (!table) return { registrar: null, entry: null };
     const entries = table.tlds[tld];
     if (!entries) return { registrar: null, entry: null };
+    // Prefer the cheapest registrar whose searchUrl supports a {domain}
+    // deep link; only fall back to a landing-only registrar when no
+    // deep-link registrar has a quote for the zone.
     let best: { registrar: RegistrarConfig; entry: PriceEntry } | null = null;
+    let fallback: { registrar: RegistrarConfig; entry: PriceEntry } | null = null;
     for (const r of registrars) {
       const e = entries[r.id];
       if (!e || e.reg == null) continue;
-      if (!best || e.reg < (best.entry.reg ?? Infinity)) best = { registrar: r, entry: e };
+      const hasDeepLink = r.searchUrl.includes('{domain}');
+      const candidate = { registrar: r, entry: e };
+      if (hasDeepLink) {
+        if (!best || e.reg < (best.entry.reg ?? Infinity)) best = candidate;
+      } else {
+        if (!fallback || e.reg < (fallback.entry.reg ?? Infinity)) fallback = candidate;
+      }
     }
-    return best ?? { registrar: null, entry: null };
+    return best ?? fallback ?? { registrar: null, entry: null };
   }
 
   interface RegistrarQuote {
@@ -324,12 +342,14 @@
     reg: number;
     renew: number | null;
     url: string;
+    hasDeepLink: boolean;
   }
 
   /** Known-registrar quotes for a zone from the pricing store, sorted by
    *  registration price asc (renewal as tie-breaker). Unknown ids skipped.
    *  Each quote carries a buy/search link (deep link when the registrar's
-   *  template supports '{domain}', landing page otherwise). */
+   *  template supports '{domain}', landing page otherwise) and a
+   *  hasDeepLink flag for the no-deeplink tooltip. */
   function registrarQuotes(tld: string, domain: string): RegistrarQuote[] {
     const table = $pricing?.table ?? null;
     if (!table) return [];
@@ -339,24 +359,20 @@
     for (const r of registrars) {
       const e = entries[r.id];
       if (!e || e.reg == null) continue;
+      const hasDeepLink = r.searchUrl.includes('{domain}');
       list.push({
         id: r.id,
         name: r.name,
         reg: e.reg,
         renew: e.renew,
-        url: r.searchUrl.includes('{domain}')
+        hasDeepLink,
+        url: hasDeepLink
           ? r.searchUrl.replace('{domain}', encodeURIComponent(domain))
           : r.searchUrl,
       });
     }
     list.sort((a, b) => a.reg - b.reg || (a.renew ?? Infinity) - (b.renew ?? Infinity));
     return list;
-  }
-
-  function buyUrl(domain: string, tld: string): string | null {
-    const { registrar } = registrarFor(tld);
-    if (!registrar) return null;
-    return registrar.searchUrl.replace('{domain}', encodeURIComponent(domain));
   }
 
   function priceColor(cents: number | null): string {
@@ -389,6 +405,12 @@
   let detailFor = $state<string | null>(null);
   let details = $state<Record<string, DigDetail>>({});
 
+  /** Per-domain premium price override (USD cents) from the on-demand
+   *  DigMyName check. When present, the row price cell shows this instead
+   *  of the standard first-year price, with the standard price struck
+   *  through. Sorting by price/tco also uses this value. */
+  let premiumOverrides = $state<Record<string, number>>({});
+
   async function toggleDetail(domain: string): Promise<void> {
     if (detailFor === domain) {
       detailFor = null;
@@ -416,12 +438,22 @@
       const r = json.result;
       if (!r) throw new Error('no result');
       const cheapest = (r.cheapest_registrar ?? null) as Record<string, unknown> | null;
+      const isPremium = r.premium === true || r.likely_premium === true;
+      const priceUsd = typeof r.price_usd === 'number' ? r.price_usd : null;
+      // Store a per-domain override so the row price cell and detail chip
+      // both reflect the registry premium price (single source).
+      if (isPremium && priceUsd != null) {
+        premiumOverrides = {
+          ...premiumOverrides,
+          [domain]: Math.round(priceUsd * 100),
+        };
+      }
       details = {
         ...details,
         [domain]: {
           premium: r.premium === true,
           likely: r.likely_premium === true,
-          price: typeof r.price_usd === 'number' ? r.price_usd : null,
+          price: priceUsd,
           registrar: cheapest && typeof cheapest.name === 'string' ? cheapest.name : null,
           regPrice:
             cheapest && typeof cheapest.reg_price_usd === 'number' ? cheapest.reg_price_usd : null,
@@ -589,6 +621,16 @@
 
   function registrarName(id: string): string {
     return registrars.find((r) => r.id === id)?.name ?? id;
+  }
+
+  /** Title for the registrar source badge: full name plus the price source.
+   *  Live fetches list their registrar id in table.sources; every other
+   *  entry comes from the bundled snapshot baseline. */
+  function registrarBadgeTitle(id: string): string {
+    const name = registrarName(id);
+    const sources = $pricing?.table.sources ?? [];
+    if (sources.length === 0) return name;
+    return `${name} · ${sources.includes(id) ? 'live' : 'snapshot'}`;
   }
 
   function sanitizeId(s: string): string {
@@ -797,7 +839,13 @@
           {#each visible as row (row.result.domain)}
             {@const isAvail = row.result.status === 'available' || row.result.status === 'probably_available'}
             {@const isErr = row.result.status === 'error'}
-            {@const buy = buyUrl(row.result.domain, row.result.tld)}
+            {@const buyInfo = registrarFor(row.result.tld)}
+            {@const buy = buyInfo.registrar
+              ? buyInfo.registrar.searchUrl.includes('{domain}')
+                ? buyInfo.registrar.searchUrl.replace('{domain}', encodeURIComponent(row.result.domain))
+                : buyInfo.registrar.searchUrl
+              : null}
+            {@const buyHasDeepLink = buyInfo.registrar?.searchUrl.includes('{domain}') ?? false}
             {@const coupon = couponFor(row.result.tld)}
             {@const trap = row.best ? isPromoTrap(row.best.entry) : false}
             {@const promo = row.firstYear != null && isBelowFloor(row.result.tld, row.firstYear)}
@@ -827,7 +875,7 @@
                     href={buy}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={t('results.domain.aria', { domain: row.result.domain, registrar: registrarFor(row.result.tld).registrar?.name ?? '' })}
+                    aria-label={t('results.domain.aria', { domain: row.result.domain, registrar: buyInfo.registrar?.name ?? '' })}
                     data-testid={`results-row-link-${sid}`}
                   >
                     {row.result.domain}
@@ -849,9 +897,29 @@
               </td>
               <td class="price-cell nums">
                 <div class="price-stack">
-                  <span class="price" style="color: {priceColor(row.firstYear)}">
-                    {formatPrice(row.firstYear, $settings)}
+                  {#if row.standardFirstYear != null}
+                    <span class="price-strike">{formatPrice(row.standardFirstYear, $settings)}</span>
+                  {/if}
+                  <span class="price-line">
+                    <span class="price" style="color: {priceColor(row.firstYear)}">
+                      {formatPrice(row.firstYear, $settings)}
+                    </span>
+                    {#if row.standardFirstYear == null && row.best}
+                      {@const mono = registrarMonogram(row.best.registrarId)}
+                      {@const badgeTitle = registrarBadgeTitle(row.best.registrarId)}
+                      <span
+                        class="reg-badge"
+                        style="--reg-hue: {mono.hue}"
+                        title={badgeTitle}
+                        aria-label={badgeTitle}
+                      >{mono.short}</span>
+                    {/if}
                   </span>
+                  {#if row.standardFirstYear != null}
+                    <Tooltip text={t('results.detail.premium', { price: formatPrice(row.firstYear, $settings) })}>
+                      <span class="chip-tag trap">{t('price.premium')}</span>
+                    </Tooltip>
+                  {/if}
                   {#if promo}
                     <Tooltip text={t('tooltip.promo')}>
                       <span class="chip-tag promo">{t('price.promo')}</span>
@@ -892,24 +960,39 @@
                     {/if}
                   </button>
                   {#if buy}
-                    <a
-                      class="action-btn buy-btn"
-                      href={buy}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={t('results.buy.aria', { domain: row.result.domain })}
-                      title={
-                        row.best && row.best.entry.reg != null
-                          ? t('results.buy.at', {
-                              registrar: registrarName(row.best.registrarId),
-                              price: formatPrice(row.best.entry.reg, $settings),
-                            })
-                          : t('results.buy')
-                      }
-                      data-testid={`results-row-buy-${sid}`}
-                    >
-                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                    </a>
+                    {#if buyHasDeepLink}
+                      <a
+                        class="action-btn buy-btn"
+                        href={buy}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={t('results.buy.aria', { domain: row.result.domain })}
+                        title={
+                          buyInfo.entry?.reg != null
+                            ? t('results.buy.at', {
+                                registrar: buyInfo.registrar?.name ?? '',
+                                price: formatPrice(buyInfo.entry.reg, $settings),
+                              })
+                            : t('results.buy')
+                        }
+                        data-testid={`results-row-buy-${sid}`}
+                      >
+                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                      </a>
+                    {:else}
+                      <Tooltip text={t('registrar.noDeeplink', { registrar: buyInfo.registrar?.name ?? '' })}>
+                        <a
+                          class="action-btn buy-btn"
+                          href={buy}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={t('results.buy.aria', { domain: row.result.domain })}
+                          data-testid={`results-row-buy-${sid}`}
+                        >
+                          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        </a>
+                      </Tooltip>
+                    {/if}
                   {:else}
                     <!-- Invisible placeholder keeps the action-cluster geometry
                          identical on rows without a buy link (star x-position
@@ -1012,9 +1095,11 @@
                             <a
                               class="detail-reg-item"
                               class:cheapest={i === 0}
+                              class:no-deeplink={!quote.hasDeepLink}
                               href={quote.url}
                               target="_blank"
                               rel="noopener noreferrer"
+                              title={quote.hasDeepLink ? undefined : t('registrar.noDeeplink', { registrar: quote.name })}
                               data-testid={`results-row-registrar-${sid}-${quote.id}`}
                             >
                               {#if i === 0}<span class="detail-reg-dot" aria-hidden="true"></span>{/if}
@@ -1042,8 +1127,8 @@
                           <span class="chip-tag trap">
                             {t('results.detail.premium', {
                               price:
-                                d.price != null
-                                  ? formatPrice(Math.round(d.price * 100), $settings)
+                                premiumOverrides[row.result.domain] != null
+                                  ? formatPrice(premiumOverrides[row.result.domain], $settings)
                                   : '—',
                             })}
                           </span>
@@ -1296,8 +1381,19 @@
   .status-cell {
     white-space: nowrap;
   }
+  .price-line {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
   .price {
     font-weight: 500;
+  }
+  .price-strike {
+    color: var(--text-tertiary);
+    text-decoration: line-through;
+    font-size: var(--text-xs);
+    font-weight: 400;
   }
 
   .action-btn.active {
@@ -1388,6 +1484,10 @@
   .detail-reg-item.cheapest {
     color: var(--text);
     font-weight: 500;
+  }
+  .detail-reg-item.no-deeplink {
+    opacity: 0.8;
+    text-decoration: underline dotted;
   }
   .detail-reg-dot {
     width: 6px;
