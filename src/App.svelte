@@ -14,6 +14,7 @@
   import CheckTab from './ui/components/CheckTab.svelte';
   import GeneratorsTab from './ui/components/GeneratorsTab.svelte';
   import DropsTab from './ui/components/DropsTab.svelte';
+  import PricesTab from './ui/components/PricesTab.svelte';
   import SocialTab from './ui/components/SocialTab.svelte';
   import SettingsTab from './ui/components/SettingsTab.svelte';
   import AboutTab from './ui/components/AboutTab.svelte';
@@ -46,13 +47,14 @@
 
   // Work tabs (check/generators/drops) use the wider content cap so the
   // two-pane workspace has room; text tabs (social/settings/about) stay narrow.
-  const wideTabs: ReadonlySet<TabId> = new Set(['check', 'generators', 'drops']);
+  const wideTabs: ReadonlySet<TabId> = new Set(['check', 'generators', 'drops', 'prices']);
   let isWide = $derived(wideTabs.has(tab));
 
   const tabs: { id: TabId; labelKey: string }[] = [
     { id: 'check', labelKey: 'tab.check' },
     { id: 'generators', labelKey: 'tab.generators' },
     { id: 'drops', labelKey: 'tab.drops' },
+    { id: 'prices', labelKey: 'tab.prices' },
     { id: 'social', labelKey: 'tab.social' },
     { id: 'settings', labelKey: 'tab.settings' },
     { id: 'about', labelKey: 'tab.about' },
@@ -222,6 +224,8 @@
       <GeneratorsTab />
     {:else if tab === 'drops'}
       <DropsTab />
+    {:else if tab === 'prices'}
+      <PricesTab />
     {:else if tab === 'social'}
       <SocialTab />
     {:else if tab === 'settings'}

@@ -7,6 +7,7 @@ export const ja: Dict = {
   'tab.check': 'チェック',
   'tab.generators': 'ジェネレーター',
   'tab.drops': '削除ドメイン',
+  'tab.prices': '価格',
   'tab.social': 'ソーシャル',
   'tab.settings': '設定',
   'tab.about': '概要',
@@ -360,4 +361,18 @@ export const ja: Dict = {
   'watch.badge.freed': '解放',
   'watch.badge.taken': '取得済',
   'watch.banner.dismiss': 'ウォッチリスト通知を閉じる',
+
+  'prices.title': 'ドメイン価格',
+  'prices.desc':
+    'レジストラごとの初年登録価格。ソース：ライブ Porkbun + Cloudflare 実費 + 週次スナップショット。価格は通貨設定で変換されない限り初年 USD です。',
+  'prices.search': 'ゾーンを絞り込み…',
+  'prices.sort.reg': '初年が最安',
+  'prices.sort.renew': '更新が最安',
+  'prices.sort.alpha': 'アルファベット順',
+  'prices.export': 'CSV エクスポート',
+  'prices.moreRegs': 'データにあと {n} 件のレジストラ',
+  'prices.min.title': '最安: {registrar}',
+  'prices.empty': '価格データがまだ読み込まれていません。',
+  'prices.more': 'もっと表示（{n}）',
+  'prices.less': '表示を減らす',
 };

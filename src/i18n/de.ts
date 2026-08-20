@@ -7,6 +7,7 @@ export const de: Dict = {
   'tab.check': 'Prüfen',
   'tab.generators': 'Generatoren',
   'tab.drops': 'Dropdomains',
+  'tab.prices': 'Preise',
   'tab.social': 'Social Media',
   'tab.settings': 'Einstellungen',
   'tab.about': 'Über',
@@ -360,4 +361,18 @@ export const de: Dict = {
   'watch.badge.freed': 'frei',
   'watch.badge.taken': 'belegt',
   'watch.banner.dismiss': 'Watchlist-Hinweis schließen',
+
+  'prices.title': 'Domain-Preise',
+  'prices.desc':
+    'Erstjahres-Registrierungspreise je Registrar. Quellen: Live Porkbun + Cloudflare at-cost + wöchentliche Snapshots. Preise sind Erstjahres-USD, sofern nicht durch deine Währungseinstellung umgerechnet.',
+  'prices.search': 'Zonen filtern…',
+  'prices.sort.reg': 'Günstigstes erstes Jahr',
+  'prices.sort.renew': 'Günstigste Verlängerung',
+  'prices.sort.alpha': 'Alphabetisch',
+  'prices.export': 'CSV exportieren',
+  'prices.moreRegs': '+{n} weitere Registrar in Daten',
+  'prices.min.title': 'Günstigster: {registrar}',
+  'prices.empty': 'Noch keine Preisdaten geladen.',
+  'prices.more': 'Mehr anzeigen ({n})',
+  'prices.less': 'Weniger anzeigen',
 };

@@ -60,7 +60,7 @@ export const checkInput = writable<string>('');
 export const selectedTlds = writable<string[]>([...DEFAULT_SETTINGS.defaultTlds]);
 
 /** Active tab id. */
-export type TabId = 'check' | 'generators' | 'drops' | 'social' | 'settings' | 'about';
+export type TabId = 'check' | 'generators' | 'drops' | 'prices' | 'social' | 'settings' | 'about';
 export const activeTab = writable<TabId>('check');
 
 /** Set to true when a share link with run:true should auto-start the check. */

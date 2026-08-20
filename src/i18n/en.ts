@@ -7,6 +7,7 @@ export const en: Dict = {
   'tab.check': 'Check',
   'tab.generators': 'Generators',
   'tab.drops': 'Dropped',
+  'tab.prices': 'Prices',
   'tab.social': 'Social',
   'tab.settings': 'Settings',
   'tab.about': 'About',
@@ -360,4 +361,18 @@ export const en: Dict = {
   'watch.badge.freed': 'freed',
   'watch.badge.taken': 'taken',
   'watch.banner.dismiss': 'Dismiss watchlist banner',
+
+  'prices.title': 'Domain prices',
+  'prices.desc':
+    'First-year registration prices across registrars. Sources: live Porkbun + Cloudflare at-cost + weekly snapshots. Prices are first-year USD unless converted by your currency setting.',
+  'prices.search': 'Filter zones…',
+  'prices.sort.reg': 'Cheapest first year',
+  'prices.sort.renew': 'Cheapest renewal',
+  'prices.sort.alpha': 'Alphabetical',
+  'prices.export': 'Export CSV',
+  'prices.moreRegs': '+{n} more registrars in data',
+  'prices.min.title': 'Cheapest: {registrar}',
+  'prices.empty': 'No pricing data loaded yet.',
+  'prices.more': 'Show more ({n})',
+  'prices.less': 'Show less',
 };

@@ -7,6 +7,7 @@ export const zh: Dict = {
   'tab.check': '查询',
   'tab.generators': '生成器',
   'tab.drops': '过期删除',
+  'tab.prices': '价格',
   'tab.social': '社交',
   'tab.settings': '设置',
   'tab.about': '关于',
@@ -360,4 +361,18 @@ export const zh: Dict = {
   'watch.badge.freed': '已释放',
   'watch.badge.taken': '已注册',
   'watch.banner.dismiss': '关闭关注列表通知',
+
+  'prices.title': '域名价格',
+  'prices.desc':
+    '各注册商的首年注册价格。来源：实时 Porkbun + Cloudflare 成本价 + 每周快照。价格为首年美元，除非按你的货币设置换算。',
+  'prices.search': '过滤区域…',
+  'prices.sort.reg': '首年最便宜',
+  'prices.sort.renew': '续费最便宜',
+  'prices.sort.alpha': '按字母顺序',
+  'prices.export': '导出 CSV',
+  'prices.moreRegs': '数据中还有 +{n} 个注册商',
+  'prices.min.title': '最便宜：{registrar}',
+  'prices.empty': '尚未加载价格数据。',
+  'prices.more': '显示更多（{n}）',
+  'prices.less': '显示更少',
 };

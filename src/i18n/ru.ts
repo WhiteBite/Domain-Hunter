@@ -7,6 +7,7 @@ export const ru: Dict = {
   'tab.check': 'Проверка',
   'tab.generators': 'Генераторы',
   'tab.drops': 'Дропы',
+  'tab.prices': 'Цены',
   'tab.social': 'Соцсети',
   'tab.settings': 'Настройки',
   'tab.about': 'О проекте',
@@ -361,4 +362,18 @@ export const ru: Dict = {
   'watch.badge.freed': 'свободен',
   'watch.badge.taken': 'занят',
   'watch.banner.dismiss': 'Закрыть уведомление списка',
+
+  'prices.title': 'Цены на домены',
+  'prices.desc':
+    'Цены регистрации первого года по регистраторам. Источники: live Porkbun + Cloudflare по себестоимости + еженедельные снапшоты. Цены в USD первого года, если не конвертируются настройкой валюты.',
+  'prices.search': 'Фильтр зон…',
+  'prices.sort.reg': 'Дешевле первый год',
+  'prices.sort.renew': 'Дешевле продление',
+  'prices.sort.alpha': 'По алфавиту',
+  'prices.export': 'Экспорт CSV',
+  'prices.moreRegs': '+{n} ещё регистраторов в данных',
+  'prices.min.title': 'Дешевле: {registrar}',
+  'prices.empty': 'Данные о ценах ещё не загружены.',
+  'prices.more': 'Показать ещё ({n})',
+  'prices.less': 'Показать меньше',
 };

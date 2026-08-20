@@ -7,6 +7,7 @@ export const fr: Dict = {
   'tab.check': 'Vérifier',
   'tab.generators': 'Générateurs',
   'tab.drops': 'Expirés',
+  'tab.prices': 'Prix',
   'tab.social': 'Social',
   'tab.settings': 'Paramètres',
   'tab.about': 'À propos',
@@ -361,4 +362,18 @@ export const fr: Dict = {
   'watch.badge.freed': 'libre',
   'watch.badge.taken': 'pris',
   'watch.banner.dismiss': 'Fermer la notification de liste',
+
+  'prices.title': 'Prix des domaines',
+  'prices.desc':
+    'Prix d’inscription de première année par registraire. Sources : Porkbun en direct + Cloudflare à prix coûtant + instantanés hebdomadaires. Les prix sont en USD première année sauf conversion par votre paramètre de devise.',
+  'prices.search': 'Filtrer les zones…',
+  'prices.sort.reg': 'Moins cher première année',
+  'prices.sort.renew': 'Moins cher renouvellement',
+  'prices.sort.alpha': 'Alphabétique',
+  'prices.export': 'Exporter CSV',
+  'prices.moreRegs': '+{n} registraires de plus dans les données',
+  'prices.min.title': 'Moins cher : {registrar}',
+  'prices.empty': 'Aucune donnée de prix chargée pour le moment.',
+  'prices.more': 'Afficher plus ({n})',
+  'prices.less': 'Afficher moins',
 };
