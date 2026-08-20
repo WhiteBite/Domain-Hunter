@@ -17,15 +17,15 @@ Domain Hunter 直接对接注册局 **RDAP** 端点（Verisign、Google Registry
 ## 功能特性
 
 - **批量可注册性查询** — 粘贴最多 3,000 个名称；跨所选 TLD 展开后每次最多 30,000 次查询，实时流入可排序的表格。中断的查询可恢复。
-- **140+ 精选 TLD 区域** — `com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` 等 120+ 个区域，覆盖 17 个注册局基础设施。额外区域通过实时 IANA RDAP 引导自动发现。
+- **148 个精选 TLD 区域** — `com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` 等 120+ 个区域，覆盖 18 个注册局基础设施。额外区域通过实时 IANA RDAP 引导自动发现。
 - **诚实的三态结果** — `available`（可注册）/ `probably_available`（可能可注册）/ `unknown`（未知）。对于低信任度的 ccTLD，在判定为可注册前，会用 DNS-over-HTTPS（Cloudflare + Google DNS）交叉验证 404 响应。Domain Hunter 绝不猜测。
 - **五种名称生成器** — 词根 × 前后缀组合器、可发音度评分的音节混合器（基于 CMUdict）、精选主题词集、TLD 技巧（`family` → `fami.ly`）和词汇变形（`midas` → `mydas`、`midaz`、`midaso`）。候选名称收集在持久候选栏中，跨标签页切换不丢失，并在运行前显示预计查询次数。
-- **实时价格与 TCO** — 首年与续费价格实时来自 Porkbun 和 Cloudflare，外加每周采集对比最多五个注册商（Dynadot、Spaceship、ValueDomain 快照）；优惠码、促销陷阱检测（续费 ≥ 5× 首年）、三年 TCO 排序，以及覆盖感知的购买链接至 13 个注册商。价格支持 USD、RUB 或 EUR。
+- **实时价格与 TCO** — 首年与续费价格实时来自 Porkbun 和 Cloudflare，外加每周采集对比最多五个注册商（Dynadot、Spaceship、ValueDomain 快照）；优惠码、促销陷阱检测（续费 ≥ 5× 首年）、三年 TCO 排序，以及覆盖感知的购买链接至 42 个注册商。价格支持 USD、RUB 或 EUR。
 - **逐域名的"去哪买"** — 点击一个可注册域名，显示注册局溢价警告（含溢价价格）和当前最低价注册商及直购链接（公开 DigMyName API，无需密钥）。
 - **对注册局礼貌** — 按基础设施分别 AIMD 限速（例如 Google Registry 严格的 ~1 rps 会被遵守），HTTP 429 时自动退避并遵守 `Retry-After`，结果缓存在 `localStorage` 中。
 - **收藏与历史** — 给任意域名（结果、生成器候选、过期列表）加星标，存入持久收藏夹并带独立筛选；最近的查询会被记住，一键即可恢复。结果支持搜索、多选和复制所选。
 - **分享与导出** — 一键分享链接（`#s=` 编码查询 + 区域，自动开始查询）、Excel 兼容的 CSV 导出（BOM + 引号包裹）、逐行复制/重新查询。
-- **隐私优先设计** — 无分析、无遥测、无账号。所有状态都保存在浏览器的 `localStorage` 中。多语言界面（英语、俄语、西班牙语、德语、葡萄牙语、中文），浅色与深色主题，移动端友好。
+- **隐私优先设计** — 无分析、无遥测、无账号。所有状态都保存在浏览器的 `localStorage` 中。多语言界面（英语、俄语、西班牙语、德语、葡萄牙语、中文、日语、法语），浅色与深色主题，移动端友好。
 
 ![Domain Hunter 名称生成器深色主题：组合器、音节混合器、主题词集、TLD 技巧和变形](docs/screenshot-en-generators.png)
 
@@ -66,7 +66,7 @@ npm run dev       # Vite 开发服务器
 
 ## 支持的区域
 
-147 个精选区域，按注册局基础设施分组：Verisign（`com net cc tv`）、Google Registry（`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`）、Identity Digital（`io ai me sh ac pro info live world email studio agency` 等 70+ 个）、CentralNic（`xyz lol icu cyou bond sbs cfd art` 等 30+ 个）、Radix（`tech site online fun space store website press host`）、Uniregistry（`cloud link top win bid loan men`），以及隐式 ccTLD 端点（`de co us uk nl fr ch ru so ly`）。实时 IANA 引导自动添加新授权的 gTLD。
+148 个精选区域，按注册局基础设施分组：Verisign（`com net cc tv`）、Google Registry（`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`）、Identity Digital（`io ai me sh ac pro info live world email studio agency` 等 54 个）、CentralNic（`xyz lol icu cyou bond sbs cfd art` 等 21 个）、Radix（`tech site online fun space store website press host`）、Uniregistry（`cloud link top win bid loan men`），以及隐式 ccTLD 端点（`de co us uk nl fr ch ru so ly pl`）和 NASK 波兰（`pl`）。实时 IANA 引导自动添加新授权的 gTLD。
 
 缺少某个区域？这是数据驱动的——只需在 `src/config/tlds.json` 中添加一条记录，无需改代码。
 
@@ -75,7 +75,7 @@ npm run dev       # Vite 开发服务器
 | | Domain Hunter | 注册商搜索框 | `whois` 命令行 | 付费 API（WhoisXML、DomainTools） |
 |---|---|---|---|---|
 | 价格 | 免费，MIT | 免费（锁定单一注册商） | 免费 | 约 $19/月起 |
-| 批量查询 | 3,000 个名称 × 140+ TLD | 一次一个 | 需编写脚本 | 支持，按量计费 |
+| 批量查询 | 3,000 个名称 × 148 TLD | 一次一个 | 需编写脚本 | 支持，按量计费 |
 | 服务器 / API 密钥 | **无需——浏览器中运行** | 不适用 | 本地安装 | API 密钥 + 计费 |
 | 名称生成器 | 内置 5 种 | 基础建议 | 无 | 无 |
 | 实时价格 + 三年 TCO | 对比 12 个注册商 | 仅自家价格 | 无 | 额外收费 |

@@ -18,7 +18,7 @@ Domain Hunter calls registry **RDAP** endpoints directly from the browser (Veris
 
 Paste up to 3,000 domain names, pick the TLDs you care about, and hit start. Results stream live into a sortable table with status badges, pricing columns, and per-domain buy links. Interrupted runs can be resumed later.
 
-- **148 curated TLD zones** across 18 registry infrastructures (`com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` and more). New gTLDs are discovered automatically via the live IANA RDAP bootstrap.
+- **148 curated TLD zones** across 18 registry infrastructures (`com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` and more). New gTLDs are discovered automatically via the live IANA RDAP bootstrap. Results stream live into a sortable table with status badges, pricing columns, and per-domain buy links. Interrupted runs can be resumed later. Run history with one-click restore keeps your last search ready after reload.
 - **Honest three-state results** — `available`, `probably_available`, or `unknown`. For low-trust ccTLDs a 404 is corroborated with DNS-over-HTTPS (Cloudflare + Google DNS) before anything is called available. Domain Hunter never guesses.
 - **Cloudflare RDAP aggregator fallback** — when the primary RDAP fetch fails, `rdap.cloudflare.com/domain/{domain}` is queried once as a transport fallback and as a contradiction cross-check for low-trust zones. A taken domain must never be reported free.
 - **Polite to registries** — per-infrastructure AIMD rate limiting (Google Registry's strict ~1 rps is honored), automatic backoff on HTTP 429 with `Retry-After`, and result caching in `localStorage`.
@@ -58,6 +58,10 @@ The **Social tab** checks username availability across major platforms (Twitter/
 - **Bulk actions for available domains** — copy the list of all available domains, favorite them all at once, or export an available-only CSV
 - **Share links** — `#s=` encodes query + zones and auto-starts the run on open
 - **Favorites with watchlist** — star any domain into a persistent shortlist; freed/taken badges appear on reload
+- **Run history** — recent completed runs are saved locally; click to restore the full search (query, zones, results) in one tap
+- **Last-search restore** — after a page reload the app restores your previous input and zone selection so you can resume instantly
+- **Social checks with GitHub token** — the Social tab supports optional GitHub device-flow authentication for higher-rate username lookups
+- **Registrar favicon badges** — price cells show registrar logos alongside prices for quick visual scanning
 
 ## Keyboard shortcuts
 
@@ -121,7 +125,7 @@ Step-by-step articles published alongside the app:
 
 ## Supported zones
 
-148 curated zones grouped by registry infrastructure: Verisign (`com net cc tv`), Google Registry (`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`), Identity Digital (`io ai me sh ac pro info live world email studio agency` and 70+ more), CentralNic (`xyz lol icu cyou bond sbs cfd art` and 30+ more), Radix (`tech site online fun space store website press host uno pw`), Uniregistry (`cloud link top win bid loan men`), stealth ccTLD endpoints (`de co us uk nl fr ch ru so ly pl`), and NASK Poland (`pl`). The live IANA bootstrap adds newly delegated gTLDs automatically.
+148 curated zones grouped by registry infrastructure: Verisign (`com net cc tv`), Google Registry (`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`), Identity Digital (`io ai me sh ac pro info live world email studio agency` and 54 more), CentralNic (`xyz lol icu cyou bond sbs cfd art` and 21 more), Radix (`tech site online fun space store website press host uno pw`), Uniregistry (`cloud link top win bid loan men`), stealth ccTLD endpoints (`de co us uk nl fr ch ru so ly pl`), and NASK Poland (`pl`). The live IANA bootstrap adds newly delegated gTLDs automatically.
 
 Missing a zone? It is data-driven — adding an entry to `src/config/tlds.json` is enough, no code changes needed.
 

@@ -58,6 +58,10 @@ Domain Hunter обращается к **RDAP**-эндпоинтам реестр
 - **Массовые действия для свободных доменов** — скопировать список всех свободных, добавить все в избранное одним кликом, экспортировать CSV только свободных
 - **Ссылки шаринга** — `#s=` кодирует запрос + зоны и автостартует проверку при открытии
 - **Избранное с наблюдением** — отметьте домен звездой; при перезагрузке появляются бейджи освобождения или занятия
+- **История запусков** — недавние завершённые проверки сохраняются локально; клик восстанавливает весь поиск (запрос, зоны, результаты) в одно нажатие
+- **Восстановление последнего поиска** — после перезагрузки страницы приложение возвращает ваш предыдущий ввод и выбор зон, чтобы можно было продолжить мгновенно
+- **Проверка соцсетей с GitHub-токеном** — вкладка Social поддерживает опциональную аутентификацию через GitHub device-flow для более частых проверок никнеймов
+- **Бейджи с фавиконками регистраторов** — ячейки цен показывают логотипы регистраторов рядом с ценами для быстрого визуального сканирования
 
 ## Горячие клавиши
 
@@ -121,7 +125,7 @@ npm run dev       # dev-сервер Vite для разработки
 
 ## Поддерживаемые зоны
 
-148 курируемых зон по инфраструктурам: Verisign (`com net cc tv`), Google Registry (`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`), Identity Digital (`io ai me sh ac pro info live world email studio agency` и 70+ других), CentralNic (`xyz lol icu cyou bond sbs cfd art` и 30+), Radix (`tech site online fun space store website press host uno pw`), Uniregistry (`cloud link top win bid loan men`), выделенные ccTLD-эндпоинты (`de co us uk nl fr ch ru so ly pl`) и NASK Польша (`pl`). Живой IANA-бутстрап добавляет новые gTLD автоматически.
+148 курируемых зон по инфраструктурам: Verisign (`com net cc tv`), Google Registry (`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`), Identity Digital (`io ai me sh ac pro info live world email studio agency` и 54 других), CentralNic (`xyz lol icu cyou bond sbs cfd art` и 21 больше), Radix (`tech site online fun space store website press host uno pw`), Uniregistry (`cloud link top win bid loan men`), выделенные ccTLD-эндпоинты (`de co us uk nl fr ch ru so ly pl`) и NASK Польша (`pl`). Живой IANA-бутстрап добавляет новые gTLD автоматически.
 
 Нужна зона, которой нет? Всё data-driven — достаточно добавить запись в `src/config/tlds.json`, код трогать не нужно.
 
