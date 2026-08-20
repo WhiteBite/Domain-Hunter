@@ -5,6 +5,7 @@
   import { t } from '../../i18n';
   import { get } from 'svelte/store';
   import { clickOutside } from '../clickoutside';
+  import { trapFocus } from '../focustrap';
 
   type Preset = 'popular' | 'cheapest' | 'all';
 
@@ -13,6 +14,7 @@
   let health = $state<Record<string, { ok?: boolean }>>({});
   let popoverOpen = $state(false);
   let popoverEl: HTMLDivElement | null = $state(null);
+  let triggerEl: HTMLButtonElement | null = $state(null);
 
   // Collapsible group open states (all open by default so every chip is
   // reachable without expanding — the popover's own scroll contains the list).
@@ -61,6 +63,8 @@
   function onKeydown(e: KeyboardEvent): void {
     if (e.key === 'Escape' && popoverOpen) {
       closePopover();
+      // Focus is trapped inside the open popover; return it to the trigger.
+      triggerEl?.focus();
     }
   }
 
@@ -196,6 +200,7 @@
       class="tld-trigger"
       class:active={popoverOpen}
       type="button"
+      bind:this={triggerEl}
       onclick={togglePopover}
       aria-expanded={popoverOpen}
       aria-haspopup="listbox"
@@ -243,7 +248,7 @@
   {/if}
 
   {#if popoverOpen}
-    <div class="popover" id="tld-popover" role="listbox" aria-label={t('check.tlds.title')} bind:this={popoverEl}>
+    <div class="popover" id="tld-popover" role="listbox" aria-label={t('check.tlds.title')} bind:this={popoverEl} use:trapFocus>
       <input
         class="search"
         type="search"

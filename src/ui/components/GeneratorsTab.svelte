@@ -11,6 +11,7 @@
   import { themes } from '../../generators/themes';
   import { favorites, toggleFavorite } from '../favorites';
   import { clickOutside } from '../clickoutside';
+  import { trapFocus } from '../focustrap';
 
   const TRAY_MAX = 1000;
   const GEN_PREFS_KEY = 'dh:v1:genprefs';
@@ -80,6 +81,17 @@
 
   let toast = $state('');
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+  // Tray ⋯ menu: Escape closes and returns focus to the trigger (required for
+  // keyboard users now that focus is trapped inside the open menu).
+  let trayMenuTriggerEl: HTMLButtonElement | null = $state(null);
+
+  function onWindowKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Escape' && menuOpen) {
+      menuOpen = false;
+      trayMenuTriggerEl?.focus();
+    }
+  }
 
   function showToast(message: string): void {
     toast = message;
@@ -286,6 +298,8 @@
   }
 </script>
 
+<svelte:window onkeydown={onWindowKeydown} />
+
 <section class="generators">
   <h2>{t('gen.title')}</h2>
   <p class="desc">{t('gen.idea.desc')}</p>
@@ -486,6 +500,7 @@
             class="action-btn"
             class:active={menuOpen}
             type="button"
+            bind:this={trayMenuTriggerEl}
             onclick={() => (menuOpen = !menuOpen)}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
@@ -496,7 +511,7 @@
             <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
           </button>
           {#if menuOpen}
-            <div class="menu" role="menu" aria-label={t('gen.tray.menu.aria')}>
+            <div class="menu" role="menu" aria-label={t('gen.tray.menu.aria')} use:trapFocus>
               <div class="menu-row">
                 <input
                   class="set-name"
@@ -1267,18 +1282,29 @@
     font-size: var(--text-sm);
   }
 
+  /* Bottom-right so the toast never overlaps the centered footer.
+     Entrance animation is transform/opacity only (GPU-composited; the global
+     reduced-motion rule collapses it). */
   .toast {
     position: fixed;
-    bottom: var(--space-5);
-    left: 50%;
-    transform: translateX(-50%);
+    right: var(--space-4);
+    bottom: var(--space-4);
+    max-width: 360px;
     background: var(--bg-elevated);
     color: var(--text);
     border: 1px solid var(--border);
     border-radius: var(--radius-full);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-pop);
     padding: var(--space-2) var(--space-5);
     font-size: var(--text-sm);
     z-index: 200;
+    animation: gen-toast-in var(--dur) var(--ease);
+  }
+
+  @keyframes gen-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
   }
 </style>

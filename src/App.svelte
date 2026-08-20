@@ -6,6 +6,7 @@
   import { KEYS, loadSettings, saveSettings } from './ui/settings';
   import { applyTheme, watchSystemTheme } from './ui/theme';
   import { clickOutside } from './ui/clickoutside';
+  import { trapFocus } from './ui/focustrap';
   import { favorites } from './ui/favorites';
   import { refreshWatchlist } from './ui/watchlist';
   import type { Locale, Settings } from './types';
@@ -153,7 +154,7 @@
             </svg>
           </button>
           {#if langMenuOpen}
-            <div class="lang-menu" role="menu" aria-label={t('app.language.aria')}>
+            <div class="lang-menu" role="menu" aria-label={t('app.language.aria')} use:trapFocus>
               {#each LOCALES as loc (loc.code)}
                 <button
                   class="lang-item"

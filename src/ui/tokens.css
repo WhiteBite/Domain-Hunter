@@ -361,5 +361,8 @@ input[type='radio']:checked {
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    /* Infinite loops (watch-refresh spin, toast entrance) must not keep
+       iterating at a collapsed duration. */
+    animation-iteration-count: 1 !important;
   }
 }

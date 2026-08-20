@@ -25,6 +25,7 @@
   import { encodeShare, parseShare, clearShare } from '../share';
   import { t } from '../../i18n';
   import { clickOutside } from '../clickoutside';
+  import { trapFocus } from '../focustrap';
   import DomainInput from './DomainInput.svelte';
   import TldPicker from './TldPicker.svelte';
   import RunControls from './RunControls.svelte';
@@ -365,7 +366,7 @@
           <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
         </button>
         {#if exportMenuOpen}
-          <div class="export-menu" role="menu">
+          <div class="export-menu" role="menu" use:trapFocus>
             <button
               class="menu-item"
               role="menuitem"

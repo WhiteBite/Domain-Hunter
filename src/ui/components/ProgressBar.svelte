@@ -37,7 +37,7 @@
     <div class="bar" role="progressbar" aria-valuenow={$runState.done} aria-valuemin="0" aria-valuemax={$runState.total}>
       <div class="fill" style="width: {pct}%"></div>
     </div>
-    <div class="stats">
+    <div class="stats" aria-live="polite">
       <span class="stat nums">{t('check.progress.checked', { done: $runState.done, total: $runState.total })}</span>
       <span class="sep" aria-hidden="true">·</span>
       <span class="stat avail nums">{t('check.progress.available', { n: $runState.available })}</span>

@@ -18,6 +18,7 @@
   import { favorites, toggleFavorite } from '../favorites';
   import { watchChanges, watchRunning, refreshWatchlist, classifyChange } from '../watchlist';
   import { clickOutside } from '../clickoutside';
+  import { trapFocus } from '../focustrap';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
@@ -93,7 +94,10 @@
     document.removeEventListener('keydown', onKeydown);
   });
 
-  function toggleMenu(domain: string): void {
+  function toggleMenu(domain: string, triggerEl: HTMLButtonElement): void {
+    // Capture the clicked trigger: bind:this inside the {#each} would leave the
+    // variable pointing at the last rendered row, breaking Escape focus-return.
+    menuTriggerEl = triggerEl;
     menuFor = menuFor === domain ? null : domain;
   }
 
@@ -660,7 +664,7 @@
           <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 7.4v3.2M8 5.2v.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
         </button>
         {#if legendOpen}
-          <div class="legend" role="dialog" aria-label={t('results.legend.aria')}>
+          <div class="legend" role="dialog" aria-label={t('results.legend.aria')} use:trapFocus>
             {#each legendItems as item}
               <div class="legend-row">
                 <span class="legend-dot {item.variant}" aria-hidden="true"></span>
@@ -703,7 +707,7 @@
             <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
           </button>
           {#if availMenuOpen}
-            <div class="menu" role="menu">
+            <div class="menu" role="menu" use:trapFocus>
               <button
                 class="menu-item"
                 role="menuitem"
@@ -906,6 +910,13 @@
                     >
                       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     </a>
+                  {:else}
+                    <!-- Invisible placeholder keeps the action-cluster geometry
+                         identical on rows without a buy link (star x-position
+                         must not shift between rows). -->
+                    <span class="action-btn buy-placeholder" aria-hidden="true" tabindex="-1">
+                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </span>
                   {/if}
                   <div
                     class="menu-wrap"
@@ -914,9 +925,8 @@
                     <button
                       class="action-btn"
                       class:active={menuFor === row.result.domain}
-                      onclick={() => toggleMenu(row.result.domain)}
+                      onclick={(e) => toggleMenu(row.result.domain, e.currentTarget)}
                       type="button"
-                      bind:this={menuTriggerEl}
                       aria-haspopup="menu"
                       aria-expanded={menuFor === row.result.domain}
                       aria-label={t('results.row.menu.aria')}
@@ -926,7 +936,7 @@
                       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
                     </button>
                     {#if menuFor === row.result.domain}
-                      <div class="menu" role="menu">
+                      <div class="menu" role="menu" use:trapFocus>
                         <button
                           class="menu-item"
                           role="menuitem"
@@ -1507,6 +1517,9 @@
     color: var(--accent);
     border-color: color-mix(in srgb, var(--accent) 30%, transparent);
     background: var(--accent-soft);
+  }
+  .buy-placeholder {
+    visibility: hidden;
   }
   .buy-btn:hover {
     color: var(--on-accent);
