@@ -21,6 +21,7 @@
   import { trapFocus } from '../focustrap';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
+  import { REGISTRAR_ICONS } from '../registrar-icons';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
 
@@ -905,14 +906,26 @@
                       {formatPrice(row.firstYear, $settings)}
                     </span>
                     {#if row.standardFirstYear == null && row.best}
-                      {@const mono = registrarMonogram(row.best.registrarId)}
-                      {@const badgeTitle = registrarBadgeTitle(row.best.registrarId)}
-                      <span
-                        class="reg-badge"
-                        style="--reg-hue: {mono.hue}"
-                        title={badgeTitle}
-                        aria-label={badgeTitle}
-                      >{mono.short}</span>
+                      {@const rid = row.best.registrarId}
+                      {@const icon = REGISTRAR_ICONS[rid]}
+                      {@const mono = registrarMonogram(rid)}
+                      {@const badgeTitle = registrarBadgeTitle(rid)}
+                      {#if icon}
+                        <img
+                          src={icon}
+                          alt=""
+                          class="reg-badge reg-img"
+                          title={badgeTitle}
+                          aria-label={badgeTitle}
+                        />
+                      {:else}
+                        <span
+                          class="reg-badge"
+                          style="--reg-hue: {mono.hue}"
+                          title={badgeTitle}
+                          aria-label={badgeTitle}
+                        >{mono.short}</span>
+                      {/if}
                     {/if}
                   </span>
                   {#if row.standardFirstYear != null}

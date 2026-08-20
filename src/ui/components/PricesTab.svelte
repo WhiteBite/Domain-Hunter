@@ -4,6 +4,7 @@
   import { bestEntry, formatPrice, isPromoTrap, matrixColumns } from '../../pricing/pricing';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
+  import { REGISTRAR_ICONS } from '../registrar-icons';
   import type { PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
   import registrarsJson from '../../config/registrars.json';
 
@@ -176,12 +177,17 @@
           <tr>
             <th class="zone-col">{t('csv.tld')}</th>
             {#each columns as rid (rid)}
+              {@const icon = REGISTRAR_ICONS[rid]}
               {@const mono = registrarMonogram(rid)}
               {@const name = registrarName.get(rid) ?? rid}
               <th class="price-col">
                 <span class="price-col-head">
-                  <span class="reg-badge" style="--reg-hue: {mono.hue}" title={name} aria-label={name}
-                    >{mono.short}</span>
+                  {#if icon}
+                    <img src={icon} alt="" class="reg-badge reg-img" title={name} aria-label={name} />
+                  {:else}
+                    <span class="reg-badge" style="--reg-hue: {mono.hue}" title={name} aria-label={name}
+                      >{mono.short}</span>
+                  {/if}
                   {name}
                 </span>
               </th>

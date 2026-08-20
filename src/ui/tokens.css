@@ -354,6 +354,15 @@ input[type='radio']:checked {
   background: hsl(var(--reg-hue, 220) 45% 55% / 0.18);
 }
 
+/* Registrar favicon image (when REGISTRAR_ICONS has a data URI for the
+   registrar id). Stacks on .reg-badge for sizing/shape; adds object-fit
+   for cover and a subtle ring to frame transparent favicons on either
+   theme. Data URIs only — CSP-safe, zero runtime network. */
+.reg-badge.reg-img {
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--border);
+}
+
 /* ---- button base (global) ---- */
 
 /* Shared transition + active-state transform for every `.btn` element.
