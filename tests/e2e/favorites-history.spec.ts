@@ -15,6 +15,7 @@ import {
   seedPricingTable,
   ianaBootstrap,
   rdapTaken,
+  rdapFree,
   type RdapMockResponse,
 } from './fixtures';
 
@@ -321,5 +322,69 @@ test.describe('Generator tray and drops favorites', () => {
     await expect(star).toHaveClass(/active/);
     await star.click();
     await expect(star).not.toHaveClass(/active/);
+  });
+});
+
+test.describe('Watchlist — silent re-check of favorited domains', () => {
+  test.afterEach(async () => {
+    expect(leaked).toEqual([]);
+  });
+
+  async function boot(page: Page): Promise<void> {
+    await openApp(page, {
+      seed: {
+        'dh:v1:pricing': seedPricingTable(),
+        'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
+        'dh:v1:favorites': ['zzqxwatch.com'],
+        'dh:v1:watch': { 'zzqxwatch.com': { status: 'taken', ts: Date.now() } },
+      },
+    });
+    await page.waitForSelector('[data-testid="check-input-domains"]', {
+      state: 'visible',
+      timeout: 10_000,
+    });
+  }
+
+  test('detects a freed domain, shows banner + badge, dismiss hides banner', async ({ page }) => {
+    await assertNoLeaks(page);
+    await mockBootstrap(page, ianaBootstrap());
+    await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+    // zzqxwatch.com → 404 (high-trust .com → available)
+    await mockRdap(page, [{ domain: 'zzqxwatch.com', response: rdapFree() }]);
+    await boot(page);
+
+    // Watch banner appears with freed count 1.
+    const banner = page.locator('[data-testid="check-watch-banner"]');
+    await expect(banner).toBeVisible({ timeout: 15_000 });
+    expect(await banner.textContent()).toContain('1');
+
+    // "Show favorites" button switches the results filter to favorites.
+    await page.locator('[data-testid="check-watch-show"]').click();
+    await expect(row(page, 'zzqxwatch.com')).toBeVisible({ timeout: 10_000 });
+
+    // Watch badge appears next to the domain.
+    const badge = page.locator(`[data-testid="results-watch-${sanitizeDomain('zzqxwatch.com')}"]`);
+    await expect(badge).toBeVisible();
+
+    // Dismiss hides the banner.
+    await page.locator('[data-testid="check-watch-dismiss"]').click();
+    await expect(banner).toBeHidden();
+  });
+
+  test('refresh button is visible and enabled after initial watchlist run', async ({ page }) => {
+    await assertNoLeaks(page);
+    await mockBootstrap(page, ianaBootstrap());
+    await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+    await mockRdap(page, [{ domain: 'zzqxwatch.com', response: rdapFree() }]);
+    await boot(page);
+
+    // Wait for the initial watchlist run to finish (banner appears).
+    const banner = page.locator('[data-testid="check-watch-banner"]');
+    await expect(banner).toBeVisible({ timeout: 15_000 });
+
+    // The refresh button exists in the results toolbar and is enabled.
+    const refresh = page.locator('[data-testid="results-watch-refresh"]');
+    await expect(refresh).toBeVisible();
+    await expect(refresh).not.toBeDisabled();
   });
 });

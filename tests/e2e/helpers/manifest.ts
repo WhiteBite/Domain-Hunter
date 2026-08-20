@@ -40,6 +40,9 @@ export const ALL_TESTIDS = [
   'check-panel-toggle', // left input panel collapse/expand toggle
   'check-history-toggle', // history section collapsible toggle
   'history-clear', // clear history button
+  'check-watch-banner', // watchlist status-flip banner
+  'check-watch-dismiss', // watch banner dismiss button
+  'check-watch-show', // watch banner "show favorites" button
 
   // ---- DomainInput.svelte ----
   'check-input-domains', // domain textarea
@@ -93,6 +96,7 @@ export const ALL_TESTIDS = [
   'results-available-copy', // available menu: copy available list
   'results-available-fav', // available menu: add all to favorites
   'results-available-csv', // available menu: download available CSV
+  'results-watch-refresh', // watchlist refresh button (next to favorites filter)
 
   // ---- GeneratorsTab.svelte ----
   'gen-input-keywords', // keywords text input
@@ -170,6 +174,7 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'results-row-registrars-', // registrar price comparison cells: results-row-registrars-{domain}
   'results-row-registrar-', // per-registrar buy links inside the comparison: results-row-registrar-{domain}-{registrarId}
   'results-row-menu-', // row overflow menu triggers: results-row-menu-{domain}
+  'results-watch-', // watch status chips: results-watch-{domain}
 
   // ---- GeneratorsTab.svelte ----
   'gen-toggle-', // tech toggle checkboxes: gen-toggle-{key} (combinator|mutations|hacks|syllables)
