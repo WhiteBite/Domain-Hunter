@@ -3,6 +3,7 @@
   import { pricing, registry, settings } from '../store';
   import { bestEntry, formatPrice, isPromoTrap, matrixColumns } from '../../pricing/pricing';
   import { downloadCsv } from '../csv';
+  import { registrarMonogram } from '../registrar-badge';
   import type { PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
   import registrarsJson from '../../config/registrars.json';
 
@@ -175,7 +176,15 @@
           <tr>
             <th class="zone-col">{t('csv.tld')}</th>
             {#each columns as rid (rid)}
-              <th class="price-col">{registrarName.get(rid) ?? rid}</th>
+              {@const mono = registrarMonogram(rid)}
+              {@const name = registrarName.get(rid) ?? rid}
+              <th class="price-col">
+                <span class="price-col-head">
+                  <span class="reg-badge" style="--reg-hue: {mono.hue}" title={name} aria-label={name}
+                    >{mono.short}</span>
+                  {name}
+                </span>
+              </th>
             {/each}
           </tr>
         </thead>
@@ -357,6 +366,12 @@
 
   .price-col {
     text-align: right;
+  }
+
+  .price-col-head {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
   }
 
   tbody tr {

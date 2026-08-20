@@ -327,6 +327,33 @@ input[type='radio']:checked {
   font-variant-numeric: tabular-nums;
 }
 
+/* Registrar source monogram (ResultsTable price cell, PricesTab matrix
+   header). The hue is set per element via --reg-hue from
+   registrarMonogram() (src/ui/registrar-badge.ts): ~15% alpha tint of
+   hsl(hue 45% 45%) as background, same hue for the text. Dark theme
+   brightens both for readability on dark surfaces. */
+.reg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: var(--radius-full);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: hsl(var(--reg-hue, 220) 45% 45%);
+  background: hsl(var(--reg-hue, 220) 45% 45% / 0.15);
+  user-select: none;
+}
+
+[data-theme='dark'] .reg-badge {
+  color: hsl(var(--reg-hue, 220) 55% 72%);
+  background: hsl(var(--reg-hue, 220) 45% 55% / 0.18);
+}
+
 /* ---- button base (global) ---- */
 
 /* Shared transition + active-state transform for every `.btn` element.
