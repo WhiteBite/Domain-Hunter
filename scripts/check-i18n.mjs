@@ -14,12 +14,13 @@
  *  (5) Type sync  — types.ts `Locale` union == discovered locale codes.
  *  (6) Registry   — locales.ts LOCALES codes == discovered locale codes.
  *  (7) Core wire  — index.svelte.ts imports + dicts keys == discovered codes.
+ *  (8) Unused keys — every reference key appears as a quoted literal in src/.
  *
  * Exit code 1 on any violation (blocks commit / CI), 0 when clean.
  */
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, sep, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -77,6 +78,20 @@ function stringLiterals(valueBlock) {
   const re = /'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"/g;
   let m;
   while ((m = re.exec(valueBlock)) !== null) out.push(m[1] ?? m[2] ?? '');
+  return out;
+}
+
+/** Recursively list all .ts and .svelte files under a directory. */
+function listSrcFiles(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...listSrcFiles(full));
+    } else if (entry.name.endsWith('.ts') || entry.name.endsWith('.svelte')) {
+      out.push(full);
+    }
+  }
   return out;
 }
 
@@ -218,6 +233,42 @@ if (existsSync(corePath)) {
   }
 } else {
   fail('core-wire', 'src/i18n/index.svelte.ts not found');
+}
+
+// ---------------------------------------------------------------------------
+// (8) Unused-key check — every reference key must appear as a quoted string
+// literal somewhere in src/ (excluding the i18n dict files themselves).
+// Keys that are legitimately constructed dynamically (no literal in source)
+// can be added to UNUSED_KEY_ALLOWLIST below.
+// ---------------------------------------------------------------------------
+
+/** Keys exempt from the unused check because they are constructed dynamically
+ *  (e.g. via template literals) and don't appear as quoted literals in src/.
+ *  Keep this list as small as possible — every entry is a maintenance risk. */
+const UNUSED_KEY_ALLOWLIST = new Set([
+  // No dynamic keys currently — all keys are used as string literals.
+]);
+
+{
+  const srcRoot = join(root, 'src');
+  const srcFiles = listSrcFiles(srcRoot).filter(
+    (f) => !f.includes(`${sep}i18n${sep}`) || NON_LOCALE_FILES.has(basename(f)),
+  );
+  const srcContent = srcFiles.map((f) => readFileSync(f, 'utf8')).join('\n');
+
+  const unused = [];
+  for (const key of refKeys) {
+    if (UNUSED_KEY_ALLOWLIST.has(key)) continue;
+    const singleQuoted = `'${key}'`;
+    const doubleQuoted = `"${key}"`;
+    if (!srcContent.includes(singleQuoted) && !srcContent.includes(doubleQuoted)) {
+      unused.push(key);
+    }
+  }
+
+  if (unused.length > 0) {
+    fail('unused-key', `${unused.length} key(s) in '${REFERENCE}' have no usage in src/: ${listKeys(unused)}`);
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -103,6 +103,7 @@ const ZONE_ALLOWLIST_FILES = new Set([
   'src/ui/csv.ts',                           // CSV column names ('domain', 'status', …) — not zones
   'src/i18n/locales.ts',                     // locale codes ('en', 'ru', 'es', …) — not zones
   'src/ui/components/ResultsTable.svelte',   // status legend literals ('available', 'taken', …) — statuses, not zones
+  'src/ui/components/LegendPopover.svelte',   // status legend variants ('available', 'probably', …) — statuses, not zones
 ]);
 
 // ---------------------------------------------------------------------------
