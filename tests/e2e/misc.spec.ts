@@ -195,6 +195,10 @@ test.describe('Misc coverage', () => {
     });
     const chip = page.locator('[data-testid="tooltip-trigger-inner"]:has(.chip-tag.trap)');
     await expect(chip).toBeVisible();
+    // The trap chip itself is focusable (keyboard/touch tooltip path).
+    await expect(
+      page.locator('[data-testid="results-chip-trap-zzqxtest1zzqx2-xyz"]'),
+    ).toBeVisible();
 
     // Hover via mouse.move (locator.hover() would auto-scroll the table).
     const chipBox = await chip.boundingBox();
@@ -213,15 +217,53 @@ test.describe('Misc coverage', () => {
     const overflowPx = await tip.evaluate((el) => el.scrollWidth - el.clientWidth);
     expect(overflowPx).toBeLessThanOrEqual(1);
 
-    // Keyboard focus shows the same clamped tooltip (focusin path).
+    // Keyboard focus shows the same clamped tooltip (focus-visible path).
     await page.mouse.move(0, 0);
     await expect(tip).toBeHidden();
     await chip.focus();
+    // Programmatic focus may not match :focus-visible after mouse activity;
+    // Tab moves keyboard focus onto the focusable chip itself, which must
+    // open the tooltip.
+    await page.keyboard.press('Tab');
     await expect(tip).toBeVisible({ timeout: 5_000 });
     const focusBox = await tip.boundingBox();
     expect(focusBox).not.toBeNull();
     expect(focusBox!.x).toBeGreaterThanOrEqual(0);
     expect(focusBox!.x + focusBox!.width).toBeLessThanOrEqual(450);
+    expectNoLeaks(page);
+  });
+
+  test('promo chip below the wholesale floor shows and opens its tooltip', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await mockRdap(page, [{ domain: 'zzqxpromo.com', response: { status: 404 } }]);
+    // .com cheapest reg (999¢) below the $10.26 wholesale floor → promo chip.
+    const promoSeed = seedPricingTable();
+    promoSeed.table.tlds.com = {
+      porkbun: { reg: 999, renew: 1168, transfer: 1168 },
+      cloudflare: { reg: 1044, renew: 1044, transfer: null },
+    };
+    await openApp(page, { seed: { 'dh:v1:pricing': promoSeed } });
+
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxpromo.com');
+    await page.click('[data-testid="check-button-start"]');
+    await expect(page.locator('[data-testid="results-row-zzqxpromo-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const promo = page.locator('[data-testid="results-chip-promo-zzqxpromo-com"]');
+    await expect(promo).toBeVisible();
+    // Hovering the chip opens the promo tooltip.
+    await promo.hover();
+    await expect(page.locator('[role="tooltip"]')).toBeVisible({ timeout: 5_000 });
     expectNoLeaks(page);
   });
 
@@ -384,12 +426,15 @@ test.describe('Misc coverage', () => {
     await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
 
     // After the premium check resolves, the row price cell shows the
-    // premium override ($348) with the standard price ($10.44) struck
-    // through, plus a premium chip-tag.
-    await expect(priceCell).toContainText('$348', { timeout: 10_000 });
+    // premium override ($348.00) with the standard price ($10.44) struck
+    // through, plus an amber premium chip-tag.
+    await expect(priceCell).toContainText('$348.00', { timeout: 10_000 });
     await expect(priceCell.locator('.price-strike')).toBeVisible();
     await expect(priceCell.locator('.price-strike')).toContainText('$10.44');
-    await expect(priceCell.locator('.chip-tag.trap')).toBeVisible();
+    await expect(priceCell.locator('.chip-tag.premium')).toBeVisible();
+    await expect(
+      priceCell.locator('[data-testid="results-chip-premium-zzqxtest1-com"]'),
+    ).toBeVisible();
 
     expectNoLeaks(page);
   });

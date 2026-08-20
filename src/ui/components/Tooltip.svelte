@@ -38,6 +38,13 @@
   function onKeydown(e: KeyboardEvent): void {
     if (e.key === 'Escape') visible = false;
   }
+
+  // Show on keyboard focus only (:focus-visible). Mouse users get the bubble
+  // via hover; a mouse click focusing the trigger must not pin it open.
+  function onFocusIn(e: FocusEvent): void {
+    const el = e.target instanceof Element ? e.target : null;
+    visible = el ? el.matches(':focus-visible') : true;
+  }
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions a11y_no_noninteractive_tabindex -->
@@ -45,7 +52,7 @@
   class="tip-wrap"
   onmouseenter={() => (visible = true)}
   onmouseleave={() => (visible = false)}
-  onfocusin={() => (visible = true)}
+  onfocusin={onFocusIn}
   onfocusout={() => (visible = false)}
   onkeydown={onKeydown}
   data-testid="tooltip-trigger"

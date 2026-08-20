@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { get } from 'svelte/store';
-  import { t } from '../../i18n';
+  import { t, locale } from '../../i18n';
   import { activeTab, checkInput, registry, pendingShareRun, genCandidates, selectedTlds } from '../store';
   import { KEYS, readJson, writeJson } from '../settings';
   import { combinator, type CombinatorMode } from '../../generators/combinator';
@@ -474,7 +474,7 @@
         {#if candidates.length > 0}
           <span class="count-badge nums" aria-live="polite" data-testid="gen-tray-count">{candidates.length}</span>
           <span class="projected" data-testid="gen-tray-projected">
-            {t('gen.tray.projected', { n: projectedChecks, zones: $selectedTlds.length })}
+            {t('gen.tray.projected', { n: projectedChecks.toLocaleString($locale), zones: $selectedTlds.length })}
           </span>
         {/if}
         <input
@@ -1074,7 +1074,8 @@
 
   /* Row anatomy: [★] [name] [len] …spacer… [×] — the length badge hugs
      the name, the remove button is pinned right via margin-left: auto,
-     so wide viewports don't leave a dead middle. */
+     so wide viewports don't leave a dead middle. Capped at 900px in the
+     single-column layout so the × button stays reachable. */
   .tray-row {
     display: flex;
     align-items: center;
@@ -1082,6 +1083,22 @@
     min-height: 30px;
     border-radius: var(--radius-sm);
     transition: background var(--dur) var(--ease);
+    max-width: 900px;
+  }
+
+  /* Ultra-wide: two tray columns kill the dead air (rows stay as-is). */
+  @media (min-width: 1800px) {
+    .group-rows {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-3);
+    }
+    .group-rows .show-more {
+      grid-column: 1 / -1;
+    }
+    .tray-row {
+      max-width: none;
+    }
   }
 
   .tray-row:hover {

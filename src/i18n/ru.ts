@@ -378,4 +378,7 @@ export const ru: Dict = {
   'prices.empty': 'Данные о ценах ещё не загружены.',
   'prices.more': 'Показать ещё ({n})',
   'prices.less': 'Показать меньше',
+  'prices.hideUnpriced': 'Скрыть зоны без цен',
+  'prices.hideUnpriced.aria':
+    'Скрыть зоны без цены регистрации в видимых столбцах регистраторов',
 };

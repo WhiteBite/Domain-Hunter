@@ -377,4 +377,7 @@ export const pt: Dict = {
   'prices.empty': 'Ainda não há dados de preços carregados.',
   'prices.more': 'Mostrar mais ({n})',
   'prices.less': 'Mostrar menos',
+  'prices.hideUnpriced': 'Ocultar zonas sem preço',
+  'prices.hideUnpriced.aria':
+    'Ocultar zonas sem preço de registro nas colunas de registradores visíveis',
 };

@@ -377,4 +377,7 @@ export const de: Dict = {
   'prices.empty': 'Noch keine Preisdaten geladen.',
   'prices.more': 'Mehr anzeigen ({n})',
   'prices.less': 'Weniger anzeigen',
+  'prices.hideUnpriced': 'Zonen ohne Preise ausblenden',
+  'prices.hideUnpriced.aria':
+    'Zonen ohne Registrierungspreis in den sichtbaren Registrar-Spalten ausblenden',
 };

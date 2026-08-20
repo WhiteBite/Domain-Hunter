@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from '../../i18n';
   import { pricing, registry, settings } from '../store';
-  import { bestEntry, formatPrice, isPromoTrap, matrixColumns } from '../../pricing/pricing';
+  import { bestEntry, formatPrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
@@ -16,6 +16,7 @@
   let query = $state('');
   let sortMode = $state<SortMode>('reg');
   let visibleCount = $state(100);
+  let hideUnpriced = $state(false);
 
   const table = $derived($pricing?.table ?? null);
 
@@ -29,8 +30,15 @@
 
   const filteredZones = $derived.by(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return allZones;
-    return allZones.filter((tld) => tld.includes(q));
+    let zones = allZones;
+    if (q) zones = zones.filter((tld) => tld.includes(q));
+    if (hideUnpriced && table) {
+      // Drop zones with no registration price anywhere in the visible column set.
+      zones = zones.filter((tld) =>
+        columns.some((rid) => table.tlds[tld]?.[rid]?.reg != null),
+      );
+    }
+    return zones;
   });
 
   const sortedZones = $derived.by(() => {
@@ -158,6 +166,18 @@
       <option value="alpha">{t('prices.sort.alpha')}</option>
     </select>
     <button
+      class="btn"
+      class:active={hideUnpriced}
+      type="button"
+      onclick={() => (hideUnpriced = !hideUnpriced)}
+      aria-pressed={hideUnpriced}
+      aria-label={t('prices.hideUnpriced.aria')}
+      title={t('prices.hideUnpriced.aria')}
+      data-testid="prices-toggle-unpriced"
+    >
+      {t('prices.hideUnpriced')}
+    </button>
+    <button
       class="btn primary"
       type="button"
       onclick={exportCsv}
@@ -192,6 +212,8 @@
                 </span>
               </th>
             {/each}
+            <th class="price-col best-col">{t('price.renewal')}</th>
+            <th class="price-col best-col">{t('price.tco')}</th>
           </tr>
         </thead>
         <tbody>
@@ -213,6 +235,12 @@
                   {entry?.reg != null ? formatPrice(entry.reg, $settings) : '—'}
                 </td>
               {/each}
+              <td class="price-cell nums best-cell">
+                {best?.entry.renew != null ? formatPrice(best.entry.renew, $settings) : '—'}
+              </td>
+              <td class="price-cell nums best-cell">
+                {formatPrice(tco3(table, tld), $settings)}
+              </td>
             </tr>
           {/each}
         </tbody>
@@ -306,6 +334,19 @@
 
   .btn.primary:hover:not(:disabled) {
     background: var(--accent-hover);
+  }
+
+  .btn.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Cheapest-registrar columns (renewal / 3y TCO) are set off from the
+     registrar matrix by a leading divider. */
+  .best-col,
+  .best-cell {
+    border-left: 1px solid var(--border);
   }
 
   .table-wrap {

@@ -550,4 +550,31 @@
     font-size: var(--text-sm);
     z-index: 200;
   }
+
+  /* Wide: appearance + engine stack in the left column, data on the right —
+     no dead right half. */
+  @media (min-width: 1200px) {
+    .settings {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'title title'
+        'appearance data'
+        'engine data';
+      align-items: start;
+      max-width: none;
+    }
+    .settings h2 {
+      grid-area: title;
+    }
+    .settings > div:nth-of-type(1) {
+      grid-area: appearance;
+    }
+    .settings > div:nth-of-type(2) {
+      grid-area: engine;
+    }
+    .settings > div:nth-of-type(3) {
+      grid-area: data;
+    }
+  }
 </style>

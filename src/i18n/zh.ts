@@ -377,4 +377,6 @@ export const zh: Dict = {
   'prices.empty': '尚未加载价格数据。',
   'prices.more': '显示更多（{n}）',
   'prices.less': '显示更少',
+  'prices.hideUnpriced': '隐藏无价格区域',
+  'prices.hideUnpriced.aria': '隐藏可见注册商列中没有注册价格的区域',
 };

@@ -2,7 +2,7 @@
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
   import { results, settings, pricing, registry, runState, exportRows, requestFavoritesView } from '../store';
-  import type { CheckResult, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
+  import type { CheckResult, CheckStatus, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
   import {
     bestEntry,
     formatPrice,
@@ -39,6 +39,11 @@
   let visibleCount = $state(100);
   let copied = $state<Set<string>>(new Set());
   let rechecking = $state<Set<string>>(new Set());
+  // Active per-row recheck engine handles. Tracked so unmount mid-recheck
+  // can terminate them (otherwise the workers leak until 'finished'). Capped
+  // at MAX_RECHECKS concurrent rechecks to stay polite to registries.
+  let recheckEngines = new Set<EngineHandle>();
+  const MAX_RECHECKS = 3;
   let query = $state('');
   let selected = $state<Set<string>>(new Set());
 
@@ -259,6 +264,10 @@
     observer?.disconnect();
     if (rafId != null) cancelAnimationFrame(rafId);
     if (availCopiedTimer != null) clearTimeout(availCopiedTimer);
+    // Terminate any recheck engines still in flight so unmounting the table
+    // (e.g. switching tabs) does not leak workers or keep hitting registries.
+    for (const e of recheckEngines) e.destroy();
+    recheckEngines.clear();
   });
 
   // Publish the current filtered+sorted view to the exportRows store so the
@@ -509,6 +518,9 @@
   }
 
   function recheck(domain: string) {
+    // Cap concurrent rechecks: ignore clicks beyond the limit so a burst of
+    // recheck clicks cannot spawn many parallel engines hammering registries.
+    if (rechecking.size >= MAX_RECHECKS) return;
     const next = new Set(rechecking);
     next.add(domain);
     rechecking = next;
@@ -545,11 +557,13 @@
         rechecking = next2;
       } else if (event.type === 'finished') {
         e.destroy();
+        recheckEngines.delete(e);
         const next2 = new Set(rechecking);
         next2.delete(domain);
         rechecking = next2;
       }
     });
+    recheckEngines.add(e);
     e.start([domain], options);
   }
 
@@ -729,6 +743,8 @@
         </button>
       {/if}
       {#if $runState.phase === 'done' && filter === 'all' && availableTotal > 0}
+        <!-- Keep "Show available (N)" and its ⋯ menu on one line, right-aligned. -->
+        <div class="nowrap-group">
         <button class="filter suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
           {t('results.showAvailable', { n: availableTotal })}
         </button>
@@ -787,6 +803,7 @@
               </button>
             </div>
           {/if}
+        </div>
         </div>
       {/if}
     </div>
@@ -884,6 +901,9 @@
                 {:else}
                   <span class="domain-text">{row.result.domain}</span>
                 {/if}
+              </td>
+              <td class="status-cell">
+                <StatusBadge status={row.result.status} size="sm" />
                 {#if watchByDomain.has(row.result.domain)}
                   {@const wkind = watchByDomain.get(row.result.domain)}
                   {#if wkind === 'freed'}
@@ -893,16 +913,16 @@
                   {/if}
                 {/if}
               </td>
-              <td class="status-cell">
-                <StatusBadge status={row.result.status} size="sm" />
-              </td>
               <td class="price-cell nums">
                 <div class="price-stack">
                   {#if row.standardFirstYear != null}
                     <span class="price-strike">{formatPrice(row.standardFirstYear, $settings)}</span>
                   {/if}
                   <span class="price-line">
-                    <span class="price" style="color: {priceColor(row.firstYear)}">
+                    <span
+                      class="price"
+                      style="color: {row.standardFirstYear != null ? 'var(--amber)' : priceColor(row.firstYear)}"
+                    >
                       {formatPrice(row.firstYear, $settings)}
                     </span>
                     {#if row.standardFirstYear == null && row.best}
@@ -930,12 +950,14 @@
                   </span>
                   {#if row.standardFirstYear != null}
                     <Tooltip text={t('results.detail.premium', { price: formatPrice(row.firstYear, $settings) })}>
-                      <span class="chip-tag trap">{t('price.premium')}</span>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag premium" tabindex="0" data-testid={`results-chip-premium-${sid}`}>{t('price.premium')}</span>
                     </Tooltip>
                   {/if}
                   {#if promo}
                     <Tooltip text={t('tooltip.promo')}>
-                      <span class="chip-tag promo">{t('price.promo')}</span>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag promo" tabindex="0" data-testid={`results-chip-promo-${sid}`}>{t('price.promo')}</span>
                     </Tooltip>
                   {/if}
                   {#if trap && row.best}
@@ -945,7 +967,8 @@
                     {@const renewal = formatPrice(renew, $settings)}
                     {@const times = reg > 0 ? Math.round(renew / reg) : 0}
                     <Tooltip text={t('tooltip.promoTrap', { first, renew: renewal, times })}>
-                      <span class="chip-tag trap">{t('price.promoTrap')}</span>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag trap" tabindex="0" data-testid={`results-chip-trap-${sid}`}>{t('price.promoTrap')}</span>
                     </Tooltip>
                   {/if}
                   {#if coupon}
@@ -1052,7 +1075,7 @@
                           role="menuitem"
                           type="button"
                           onclick={() => { recheck(row.result.domain); menuFor = null; }}
-                          disabled={rechecking.has(row.result.domain)}
+                          disabled={rechecking.has(row.result.domain) || rechecking.size >= MAX_RECHECKS}
                           data-testid={`results-row-recheck-${sid}`}
                         >
                           <svg class:spin={rechecking.has(row.result.domain)} viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v3h-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -1137,7 +1160,7 @@
                     {:else}
                       {#if d.premium || d.likely}
                         <div class="detail-cell">
-                          <span class="chip-tag trap">
+                          <span class="chip-tag premium">
                             {t('results.detail.premium', {
                               price:
                                 premiumOverrides[row.result.domain] != null
@@ -1201,6 +1224,19 @@
     display: flex;
     gap: var(--space-1);
     flex-wrap: wrap;
+  }
+  /* Keep the watch-refresh button on the filter-pill row: when the pills
+     wrap, it right-aligns on their row instead of orphaning on its own. */
+  .filters :global(.tip-wrap) {
+    margin-left: auto;
+  }
+  /* "Show available (N)" + its ⋯ menu never split across lines. */
+  .nowrap-group {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
   }
   .filter {
     padding: var(--space-1) var(--space-3);
@@ -1344,22 +1380,143 @@
   tr.error:hover {
     background: color-mix(in srgb, var(--row-tint-error) 60%, var(--bg-sunken));
   }
+  /* ---- Mobile: rows become stacked cards (no horizontal-scroll clipping).
+     Card backgrounds are OPAQUE (row tint mixed over --bg-elevated via
+     color-mix) so nothing bleeds through. ---- */
   @media (max-width: 700px) {
-    .domain-cell {
-      position: sticky;
-      left: 0;
-      z-index: 2;
+    thead {
+      display: none;
+    }
+    table {
+      display: block;
+      min-width: 0;
+    }
+    tbody {
+      display: block;
+      padding: var(--space-2);
+    }
+    tbody tr.row-in {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) minmax(0, max-content);
+      grid-template-areas:
+        'select domain price'
+        'select status price'
+        'actions actions actions';
+      column-gap: var(--space-2);
+      row-gap: var(--space-1);
+      padding: var(--space-2) var(--space-3);
+      margin-bottom: var(--space-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       background: var(--bg-elevated);
-      box-shadow: 1px 0 0 var(--border);
+      box-shadow: var(--shadow-sm);
     }
-    tr.available .domain-cell {
-      background: var(--row-tint-available);
+    tbody tr.row-in:last-child {
+      border-bottom: 1px solid var(--border);
     }
-    tr.error .domain-cell {
-      background: var(--row-tint-error);
+    tbody tr.row-in:hover {
+      background: color-mix(in srgb, var(--bg-sunken) 70%, var(--bg-elevated));
     }
-    tbody tr:hover .domain-cell {
+    tbody tr.row-in:nth-child(even):not(.available):not(.error):not(.detail-row) {
+      background: color-mix(in srgb, var(--bg-sunken) 55%, var(--bg-elevated));
+    }
+    tbody tr.row-in.available {
+      background: color-mix(in srgb, var(--green-solid) 5%, var(--bg-elevated));
+      box-shadow: var(--shadow-sm), inset 2px 0 0 var(--green-solid);
+    }
+    tbody tr.row-in.available:hover {
+      background: color-mix(in srgb, var(--green-solid) 9%, var(--bg-elevated));
+    }
+    tbody tr.row-in.error {
+      background: color-mix(in srgb, var(--red) 5%, var(--bg-elevated));
+      box-shadow: var(--shadow-sm), inset 2px 0 0 var(--red);
+    }
+    tbody tr.row-in.error:hover {
+      background: color-mix(in srgb, var(--red) 9%, var(--bg-elevated));
+    }
+    tbody tr.row-in > td {
+      padding: 0;
+      background: transparent;
+    }
+    td.select-cell {
+      grid-area: select;
+      align-self: start;
+      padding-top: 2px;
+    }
+    td.domain-cell {
+      grid-area: domain;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    /* Domain names scan faster in mono (DESIGN.md §3 mono rule). */
+    .domain-link,
+    .domain-text {
+      font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    }
+    td.status-cell {
+      grid-area: status;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      white-space: normal;
+    }
+    td.price-cell {
+      grid-area: price;
+      align-self: start;
+      white-space: normal;
+    }
+    td.actions-cell {
+      grid-area: actions;
+      display: flex;
+      justify-content: flex-end;
+      padding-top: var(--space-1);
+    }
+
+    /* Expanded detail: single-column stack, full-width Buy. Merges with the
+       card above it into one visual unit. */
+    tbody tr.row-in:has(+ tr.detail-row) {
+      margin-bottom: 0;
+      border-bottom: none;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    tr.detail-row {
+      display: block;
+      margin: 0 0 var(--space-2);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
       background: var(--bg-sunken);
+    }
+    tr.detail-row.is-available {
+      background: color-mix(in srgb, var(--green-solid) 5%, var(--bg-sunken));
+      box-shadow: inset 2px 0 0 var(--green-solid);
+    }
+    tr.detail-row.is-error {
+      background: color-mix(in srgb, var(--red) 5%, var(--bg-sunken));
+      box-shadow: inset 2px 0 0 var(--red);
+    }
+    tr.detail-row td {
+      display: block;
+      padding: var(--space-3);
+      background: transparent;
+      box-shadow: none;
+    }
+    tr.detail-row.is-available td,
+    tr.detail-row.is-error td {
+      background: transparent;
+    }
+    .detail-grid {
+      flex-direction: column;
+      align-items: stretch;
+      padding-left: 0;
+      max-width: none;
+      gap: var(--space-2);
+    }
+    .detail-buy {
+      width: 100%;
+      justify-content: center;
     }
   }
   td {
@@ -1438,6 +1595,8 @@
     /* Align under the Name column: skip the checkbox column
        (space-3 padding + 14px checkbox + space-3 padding). */
     padding-left: calc(14px + 2 * var(--space-3));
+    /* Compact single-row flow at wide widths — no dead right half. */
+    max-width: 1200px;
   }
 
   .detail-cell {
@@ -1472,9 +1631,6 @@
     color: var(--text-secondary);
   }
 
-  .detail-registrars {
-    flex-basis: 100%;
-  }
   .detail-reg-list {
     display: flex;
     flex-wrap: wrap;
@@ -1514,7 +1670,6 @@
   }
 
   .detail-buy {
-    margin-left: auto;
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
@@ -1545,6 +1700,11 @@
   .chip-tag.trap {
     background: var(--red-soft);
     color: var(--red);
+  }
+  /* Premium is a warning-tier signal, not an error — amber, not red. */
+  .chip-tag.premium {
+    background: var(--amber-soft);
+    color: var(--amber);
   }
   .chip-tag.watch-freed {
     background: var(--green-soft);
@@ -1587,8 +1747,18 @@
     animation-duration: 1.5s;
   }
   .coupon {
+    display: inline-block;
     font-size: 11px;
     color: var(--text-tertiary);
+    /* Long coupon codes ellipsize instead of overflowing the cell at any width. */
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  :global([data-theme='dark']) .coupon {
+    color: var(--text-secondary);
   }
   .actions-cell {
     text-align: right;

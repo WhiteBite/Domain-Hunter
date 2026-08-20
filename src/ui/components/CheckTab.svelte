@@ -125,9 +125,11 @@
       if (shared.q || shared.run) pendingShareRun.set(true);
     }
 
-    // Record completed runs into history (SPEC §5 dh:v1:history).
+    // Record completed runs into history (SPEC §5 dh:v1:history). Aborted
+    // runs (unmount/stop mid-run) are marked aborted:true and skipped so a
+    // half-finished run never pollutes history.
     unsubRunState = runState.subscribe((state) => {
-      if (prevPhase === 'running' && state.phase === 'done') {
+      if (prevPhase === 'running' && state.phase === 'done' && !state.aborted) {
         const r = get(results);
         let available = 0;
         let taken = 0;
@@ -697,9 +699,10 @@
   }
   .freshness {
     font-size: var(--text-xs);
-    color: var(--text-tertiary);
+    /* Meta chips need a step more presence: secondary text + strong border. */
+    color: var(--text-secondary);
     padding: var(--space-1) var(--space-2);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     border-radius: var(--radius-full);
     background: var(--bg-elevated);
     white-space: nowrap;

@@ -377,4 +377,6 @@ export const ja: Dict = {
   'prices.empty': '価格データがまだ読み込まれていません。',
   'prices.more': 'もっと表示（{n}）',
   'prices.less': '表示を減らす',
+  'prices.hideUnpriced': '価格なしゾーンを非表示',
+  'prices.hideUnpriced.aria': '表示中のレジストラ列に登録価格がないゾーンを非表示にします',
 };

@@ -321,6 +321,8 @@
               {/if}
               {#if price}
                 <span class="price nums">{price}</span>
+              {:else}
+                <span class="price price-none" aria-hidden="true">—</span>
               {/if}
               {#if flags?.experimental}
                 <span class="flag experimental" title={t('check.tlds.experimental')}>{t('check.tlds.experimental')}</span>
@@ -379,6 +381,8 @@
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
+                    {:else}
+                      <span class="price price-none" aria-hidden="true">—</span>
                     {/if}
                     {#if flags?.experimental}
                       <span class="flag experimental" title={t('check.tlds.experimental')}>{t('check.tlds.experimental')}</span>
@@ -440,6 +444,8 @@
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
+                    {:else}
+                      <span class="price price-none" aria-hidden="true">—</span>
                     {/if}
                     {#if flags?.experimental}
                       <span class="flag experimental" title={t('check.tlds.experimental')}>{t('check.tlds.experimental')}</span>
@@ -501,6 +507,8 @@
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
+                    {:else}
+                      <span class="price price-none" aria-hidden="true">—</span>
                     {/if}
                     {#if flags?.experimental}
                       <span class="flag experimental" title={t('check.tlds.experimental')}>{t('check.tlds.experimental')}</span>
@@ -810,17 +818,17 @@
     color: var(--text-tertiary);
     margin-left: auto;
   }
-  /* When a row has no price, push the first flag to the right edge so
-     badges align with priced rows. Subsequent flags stay adjacent. */
-  .zone-row:not(:has(.price)) .flag {
-    margin-left: auto;
-  }
-  .zone-row:not(:has(.price)) .flag ~ .flag {
-    margin-left: 0;
+  /* Zones without pricing data show a muted dash instead of a blank right side. */
+  .zone-row .price.price-none {
+    color: var(--text-quaternary);
   }
   .zone-row.selected .price {
     color: var(--accent);
     opacity: 0.8;
+  }
+  .zone-row.selected .price.price-none {
+    color: var(--text-quaternary);
+    opacity: 1;
   }
   .flag {
     font-size: 10px;

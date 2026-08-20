@@ -56,9 +56,10 @@ test.describe('Prices tab', () => {
       timeout: 10_000,
     });
 
-    // Column headers include both registrars from the seed fixture.
+    // Column headers include both registrars from the seed fixture plus the
+    // cheapest-registrar Renewal and 3-year TCO columns.
     const headers = page.locator('thead th');
-    await expect(headers).toHaveCount(3); // Zone + Porkbun + Cloudflare
+    await expect(headers).toHaveCount(5); // Zone + Porkbun + Cloudflare + Renewal + TCO
     await expect(headers.nth(1)).toContainText('Porkbun');
     await expect(headers.nth(2)).toContainText('Cloudflare');
 
@@ -95,6 +96,29 @@ test.describe('Prices tab', () => {
     await page.selectOption('[data-testid="prices-sort"]', 'alpha');
     const firstRowAlpha = page.locator('tbody tr').first();
     await expect(firstRowAlpha).toHaveAttribute('data-testid', 'prices-row-ac');
+  });
+
+  test('hide-unpriced toggle filters zones without registrar prices', async ({ page }) => {
+    await gotoPrices(page);
+    await expect(page.locator('[data-testid="prices-row-com"]')).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const toggle = page.locator('[data-testid="prices-toggle-unpriced"]');
+    // Default OFF: every curated zone renders, priced or not.
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    const rowsBefore = await page.locator('[data-testid^="prices-row-"]').count();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    // Zones with no reg price in the visible column set disappear.
+    await expect
+      .poll(async () => page.locator('[data-testid^="prices-row-"]').count(), {
+        timeout: 5_000,
+      })
+      .toBeLessThan(rowsBefore);
+    // Priced zones stay.
+    await expect(page.locator('[data-testid="prices-row-com"]')).toBeVisible();
   });
 
   test('export button triggers a CSV download', async ({ page }) => {

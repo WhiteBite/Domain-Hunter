@@ -153,6 +153,7 @@ export const ALL_TESTIDS = [
   // ---- PricesTab.svelte ----
   'prices-search', // zone filter search input
   'prices-sort', // sort mode select
+  'prices-toggle-unpriced', // hide-unpriced-zones toggle button
   'prices-export-csv', // CSV export button
   'prices-more', // show-more button
 ] as const;
@@ -181,6 +182,9 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'results-row-registrar-', // per-registrar buy links inside the comparison: results-row-registrar-{domain}-{registrarId}
   'results-row-menu-', // row overflow menu triggers: results-row-menu-{domain}
   'results-watch-', // watch status chips: results-watch-{domain}
+  'results-chip-premium-', // focusable premium chips: results-chip-premium-{domain}
+  'results-chip-promo-', // focusable promo chips: results-chip-promo-{domain}
+  'results-chip-trap-', // focusable promo-trap chips: results-chip-trap-{domain}
 
   // ---- GeneratorsTab.svelte ----
   'gen-toggle-', // tech toggle checkboxes: gen-toggle-{key} (combinator|mutations|hacks|syllables)

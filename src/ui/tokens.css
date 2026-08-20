@@ -60,11 +60,12 @@
   --border: rgba(16, 24, 40, 0.10);
   --border-strong: rgba(16, 24, 40, 0.16);
 
-  /* text — never pure black */
+  /* text — never pure black. --text-quaternary keeps ≥4.5:1 contrast on
+     the sunken light surface (#eef0f4) so muted text stays readable. */
   --text: #161b26;
   --text-secondary: #3d4657;
   --text-tertiary: #5d6675;
-  --text-quaternary: #8b93a1;
+  --text-quaternary: #656d7b;
 
   /* accent — single indigo */
   --accent: #5e6ad2;
@@ -130,7 +131,7 @@
   --text: #eef1f6;
   --text-secondary: #c7cdd8;
   --text-tertiary: #8a91a0;
-  --text-quaternary: #5f6673;
+  --text-quaternary: #7a8190;
 
   /* accent — single indigo, brighter hover for dark */
   --accent: #5e6ad2;
@@ -189,6 +190,8 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Anchor/programmatic scrolls land below the sticky header. */
+  scroll-padding-top: 96px;
 }
 
 body {
