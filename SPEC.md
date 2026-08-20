@@ -210,7 +210,8 @@ Storage keys: `dh:v1:settings`, `dh:v1:cache` (map domain→{status,source,ts,tl
 `dh:v1:pricing` ({table, fetchedAt}), `dh:v1:bootstrap` ({json, fetchedAt}),
 `dh:v1:run` (resume snapshot), `dh:v1:lastrun` ({input, tlds, candidates, ts} —
 last completed run restored on next visit from cache, no network),
-`dh:v1:wordsets` (user sets), `dh:v1:favorites` (starred domains/names),
+`dh:v1:wordsets` (user sets), `dh:v1:genprefs` (generator technique/param preferences),
+`dh:v1:favorites` (starred domains/names),
 `dh:v1:history` (recent completed runs with query/zones/counts for one-click restore),
 `dh:v1:watch` (Record<domain, {status: CheckStatus, ts: number}> — watchlist
 baseline for detecting status flips of favorited domains on app load),
