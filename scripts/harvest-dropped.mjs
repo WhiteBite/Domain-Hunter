@@ -19,10 +19,10 @@
  *       is written so the UI has the data shape).
  *   1 — write error.
  */
-import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { fetchWithTimeout, readJson, writeJson } from './lib/http.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = join(__dirname, '..', 'src', 'config', 'dropped.snapshot.json');
@@ -34,18 +34,9 @@ const BRANCH = 'main'; // raw.githubusercontent.com default branch
 
 // ---- HTTP ----
 
-async function fetchWithTimeout(url, opts = {}, timeoutMs = FETCH_TIMEOUT_MS) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...opts, signal: ctrl.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function getJson(url) {
   const res = await fetchWithTimeout(url, {
+    timeoutMs: FETCH_TIMEOUT_MS,
     headers: { accept: 'application/vnd.github+json' },
   });
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
@@ -55,8 +46,7 @@ async function getJson(url) {
 // ---- TLD allowlist ----
 
 async function loadTldSet() {
-  const raw = await readFile(TLDS_PATH, 'utf8');
-  const parsed = JSON.parse(raw);
+  const parsed = await readJson(TLDS_PATH);
   /** @type {Set<string>} */
   const set = new Set();
   for (const entry of parsed.tlds ?? []) {
@@ -132,7 +122,7 @@ async function probeRecentDates(days) {
     const name = `${yyyy}-${mm}-${dd}-free-dropped-domains.csv`;
     const url = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${name}`;
     try {
-      const res = await fetchWithTimeout(url, { method: 'HEAD' });
+      const res = await fetchWithTimeout(url, { method: 'HEAD', timeoutMs: FETCH_TIMEOUT_MS });
       if (res.ok) return { name, path: name };
     } catch {
       // network blip or 404 — try next date
@@ -164,7 +154,7 @@ async function discoverViaContentsApi() {
 
 async function fetchCsvText(picked) {
   const rawUrl = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${picked.path}`;
-  const res = await fetchWithTimeout(rawUrl);
+  const res = await fetchWithTimeout(rawUrl, { timeoutMs: FETCH_TIMEOUT_MS });
   if (!res.ok) throw new Error(`raw ${rawUrl} -> ${res.status}`);
   return res.text();
 }
@@ -268,7 +258,7 @@ async function main() {
       list: [],
     };
     try {
-      await writeFile(SNAPSHOT_PATH, JSON.stringify(empty, null, 2) + '\n', 'utf8');
+      await writeJson(SNAPSHOT_PATH, empty, 2);
       console.warn('wrote empty snapshot (source unreachable, no prior snapshot)');
       return;
     } catch (writeErr) {
@@ -286,7 +276,7 @@ async function main() {
   };
 
   try {
-    await writeFile(SNAPSHOT_PATH, JSON.stringify(snapshot) + '\n', 'utf8');
+    await writeJson(SNAPSHOT_PATH, snapshot);
   } catch (writeErr) {
     console.error(`failed to write snapshot: ${writeErr.message}`);
     process.exit(1);

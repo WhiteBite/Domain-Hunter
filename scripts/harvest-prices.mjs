@@ -11,17 +11,17 @@
  * src/pricing/pricing.ts exactly. Exit 0 on partial failure; exit 1 only
  * if ALL sources fail.
  */
-import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { fetchWithTimeout, UA, writeJson } from './lib/http.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = join(__dirname, '..', 'src', 'config', 'pricing.snapshot.json');
 const FETCH_TIMEOUT_MS = 15_000;
-const UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
-const REGRU_RUB_TO_USD = 97; // 97 RUB = 1 USD
-const BEGET_EUR_TO_USD = 1.08; // 1 EUR = 1.08 USD
+const REGRU_RUB_TO_USD = 97; // fallback: 97 RUB = 1 USD
+const BEGET_EUR_TO_USD = 1.08; // fallback: 1 EUR = 1.08 USD
+let regruRubToUsd = REGRU_RUB_TO_USD;
+let begetEurToUsd = BEGET_EUR_TO_USD;
 
 const apiOnly = process.argv.includes('--api-only');
 
@@ -82,20 +82,36 @@ function mergePricing(target, src) {
   }
 }
 
-// ---- Fetch ----
+// ---- FX rates ----
 
-async function fetchWithTimeout(url, opts = {}, timeoutMs = FETCH_TIMEOUT_MS) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+/**
+ * Fetch live USD→RUB and USD→EUR rates from open.er-api.com (no key, 5s
+ * timeout). On ANY failure, fall back to the hardcoded constants and warn.
+ * Returns { regruRubToUsd, begetEurToUsd }.
+ */
+async function fetchFxRates() {
   try {
-    return await fetch(url, { ...opts, signal: ctrl.signal });
-  } finally {
-    clearTimeout(timer);
+    const res = await fetchWithTimeout('https://open.er-api.com/v6/latest/USD', { timeoutMs: 5_000 });
+    if (!res.ok) throw new Error(`er-api HTTP ${res.status}`);
+    const json = await res.json();
+    const rub = json?.rates?.RUB;
+    const eur = json?.rates?.EUR;
+    if (typeof rub !== 'number' || !Number.isFinite(rub) || rub <= 0) throw new Error('er-api: invalid RUB rate');
+    if (typeof eur !== 'number' || !Number.isFinite(eur) || eur <= 0) throw new Error('er-api: invalid EUR rate');
+    return { regruRubToUsd: rub, begetEurToUsd: 1 / eur };
+  } catch (err) {
+    console.warn(
+      `FX rates: using fallback constants (${REGRU_RUB_TO_USD} RUB/USD, ${BEGET_EUR_TO_USD} USD/EUR) — ${err.message}`,
+    );
+    return { regruRubToUsd: REGRU_RUB_TO_USD, begetEurToUsd: BEGET_EUR_TO_USD };
   }
 }
 
+// ---- Fetch ----
+
 async function fetchPorkbun() {
   const res = await fetchWithTimeout('https://api.porkbun.com/api/json/v3/pricing/get', {
+    timeoutMs: FETCH_TIMEOUT_MS,
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: '{}',
@@ -107,7 +123,7 @@ async function fetchPorkbun() {
 }
 
 async function fetchCloudflare() {
-  const res = await fetchWithTimeout('https://cfdomainpricing.com/prices.json');
+  const res = await fetchWithTimeout('https://cfdomainpricing.com/prices.json', { timeoutMs: FETCH_TIMEOUT_MS });
   if (!res.ok) throw new Error(`cloudflare ${res.status}`);
   const json = await res.json();
   if (!json || typeof json !== 'object') throw new Error('cloudflare bad response');
@@ -150,8 +166,8 @@ export function normalizeRegru(html) {
       if (!tlds[tld]) {
         tlds[tld] = {
           regru: {
-            reg: toCents(price / REGRU_RUB_TO_USD),
-            renew: toCents(oldPrice / REGRU_RUB_TO_USD),
+            reg: toCents(price / regruRubToUsd),
+            renew: toCents(oldPrice / regruRubToUsd),
             transfer: null,
           },
         };
@@ -181,8 +197,8 @@ export function normalizeBeget(html) {
       if (!tlds[tld]) {
         tlds[tld] = {
           beget: {
-            reg: toCents(reg * BEGET_EUR_TO_USD),
-            renew: toCents(renew * BEGET_EUR_TO_USD),
+            reg: toCents(reg * begetEurToUsd),
+            renew: toCents(renew * begetEurToUsd),
             transfer: null,
           },
         };
@@ -277,6 +293,7 @@ function normalizeRegctl(json) {
 
 async function fetchRegru() {
   const res = await fetchWithTimeout('https://www.reg.ru/domain/new/prices/', {
+    timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
   });
   if (!res.ok) throw new Error(`regru ${res.status}`);
@@ -285,6 +302,7 @@ async function fetchRegru() {
 
 async function fetchBeget() {
   const res = await fetchWithTimeout('https://beget.com/en/domains/zone', {
+    timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
   });
   if (!res.ok) throw new Error(`beget ${res.status}`);
@@ -293,6 +311,7 @@ async function fetchBeget() {
 
 async function fetchDynadot() {
   const res = await fetchWithTimeout('https://www.dynadot.com/domain/prices', {
+    timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
   });
   if (!res.ok) throw new Error(`dynadot ${res.status}`);
@@ -301,6 +320,7 @@ async function fetchDynadot() {
 
 async function fetchSpaceship() {
   const res = await fetchWithTimeout('https://www.spaceship.com/domains/', {
+    timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
   });
   if (!res.ok) throw new Error(`spaceship ${res.status}`);
@@ -308,7 +328,7 @@ async function fetchSpaceship() {
 }
 
 async function fetchRegctl() {
-  const res = await fetchWithTimeout('https://regctl.sh/prices.json');
+  const res = await fetchWithTimeout('https://regctl.sh/prices.json', { timeoutMs: FETCH_TIMEOUT_MS });
   if (!res.ok) throw new Error(`regctl ${res.status}`);
   return normalizeRegctl(await res.json());
 }
@@ -316,6 +336,10 @@ async function fetchRegctl() {
 // ---- Main ----
 
 async function main() {
+  const fx = await fetchFxRates();
+  regruRubToUsd = fx.regruRubToUsd;
+  begetEurToUsd = fx.begetEurToUsd;
+
   const apiSources = [
     ['porkbun', fetchPorkbun],
     ['cloudflare', fetchCloudflare],
@@ -370,7 +394,7 @@ async function main() {
     coupons: merged.coupons,
   };
 
-  await writeFile(SNAPSHOT_PATH, JSON.stringify(table) + '\n', 'utf8');
+  await writeJson(SNAPSHOT_PATH, table);
 
   const tldCount = Object.keys(merged.tlds).length;
   const couponCount = Object.keys(merged.coupons).length;

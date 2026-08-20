@@ -5,9 +5,9 @@
  * Records {http, cors, ok, ms, ts} per TLD. Concurrency 4, timeout 8s.
  * Writes repo-root health.json. Always exits 0 (failures visible in the file).
  */
-import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { fetchWithTimeout, readJson, writeJson } from './lib/http.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TLDS_PATH = join(__dirname, '..', 'src', 'config', 'tlds.json');
@@ -32,14 +32,7 @@ async function checkTld(tld, infra) {
   const url = base + domain;
   const start = Date.now();
   try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
-    let res;
-    try {
-      res = await fetch(url, { signal: ctrl.signal, redirect: 'manual' });
-    } finally {
-      clearTimeout(timer);
-    }
+    const res = await fetchWithTimeout(url, { timeoutMs: TIMEOUT_MS, redirect: 'manual' });
     const ms = Date.now() - start;
     const http = res.status;
     const corsHeader = res.headers.get('access-control-allow-origin');
@@ -67,8 +60,7 @@ async function runWithConcurrency(items, fn, concurrency) {
 }
 
 async function main() {
-  const raw = await readFile(TLDS_PATH, 'utf8');
-  const registry = JSON.parse(raw);
+  const registry = await readJson(TLDS_PATH);
   const infras = registry.infras;
   const tldConfigs = registry.tlds;
 
@@ -88,7 +80,7 @@ async function main() {
     tlds,
   };
 
-  await writeFile(HEALTH_PATH, JSON.stringify(health, null, 2) + '\n', 'utf8');
+  await writeJson(HEALTH_PATH, health, 2);
 
   const okCount = Object.values(tlds).filter((t) => t.ok).length;
   const totalCount = Object.keys(tlds).length;

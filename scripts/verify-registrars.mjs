@@ -1,11 +1,7 @@
 /** Verify registrar searchUrl templates: one polite request each. */
-import { readFile } from 'node:fs/promises';
+import { fetchWithTimeout, UA, readJson } from './lib/http.mjs';
 
-const UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
-const registrars = JSON.parse(
-  await readFile(new URL('../src/config/registrars.json', import.meta.url), 'utf8'),
-);
+const registrars = await readJson(new URL('../src/config/registrars.json', import.meta.url));
 
 const bad = [];
 for (const r of registrars) {
@@ -15,14 +11,11 @@ for (const r of registrars) {
   }
   const url = r.searchUrl.replace('{domain}', 'example.com');
   try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 10000);
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
+      timeoutMs: 10_000,
       redirect: 'follow',
       headers: { 'user-agent': UA, accept: 'text/html' },
-      signal: ctrl.signal,
     });
-    clearTimeout(t);
     console.log(`${res.status}  ${r.id}`);
     if (res.status === 404) bad.push(r.id);
   } catch (e) {
