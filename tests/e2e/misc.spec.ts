@@ -157,6 +157,74 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
+  test('promo-trap tooltip wraps and stays within the viewport near the right edge', async ({
+    page,
+  }) => {
+    // Narrow viewport + long domain: the column sum (~567px) exceeds the
+    // ~418px wrapper, so at scrollLeft=0 the price cell hugs the wrapper's
+    // right edge — a centered 320px bubble over the trap chip WOULD cross the
+    // viewport edge (~120px overflow) without horizontal clamping.
+    await page.setViewportSize({ width: 450, height: 800 });
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    // .xyz fixture pricing is a promo trap ($2.04 first year, $12.98 renewal).
+    await mockRdap(page, [{ domain: 'zzqxtest1zzqx2.xyz', response: { status: 404 } }]);
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    // Narrow the run to .xyz only.
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-xyz"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1zzqx2.xyz');
+    await page.click('[data-testid="check-button-start"]');
+    await expect(page.locator('[data-testid="results-row-zzqxtest1zzqx2-xyz"]')).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.locator('[data-testid="check-button-stop"]')).toBeHidden({
+      timeout: 15_000,
+    });
+
+    // The price cell sits at the right edge of the visible wrapper.
+    await page.evaluate(() => {
+      document.querySelector('.table-wrap')!.scrollLeft = 0;
+    });
+    const chip = page.locator('[data-testid="tooltip-trigger-inner"]:has(.chip-tag.trap)');
+    await expect(chip).toBeVisible();
+
+    // Hover via mouse.move (locator.hover() would auto-scroll the table).
+    const chipBox = await chip.boundingBox();
+    expect(chipBox).not.toBeNull();
+    await page.mouse.move(chipBox!.x + chipBox!.width / 2, chipBox!.y + chipBox!.height / 2);
+    const tip = page.locator('[role="tooltip"]');
+    await expect(tip).toBeVisible({ timeout: 5_000 });
+
+    // The bubble's bounding box stays fully within the viewport width.
+    const box = await tip.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(450);
+
+    // The long parametrized text wraps inside the bubble (no single-line spill).
+    const overflowPx = await tip.evaluate((el) => el.scrollWidth - el.clientWidth);
+    expect(overflowPx).toBeLessThanOrEqual(1);
+
+    // Keyboard focus shows the same clamped tooltip (focusin path).
+    await page.mouse.move(0, 0);
+    await expect(tip).toBeHidden();
+    await chip.focus();
+    await expect(tip).toBeVisible({ timeout: 5_000 });
+    const focusBox = await tip.boundingBox();
+    expect(focusBox).not.toBeNull();
+    expect(focusBox!.x).toBeGreaterThanOrEqual(0);
+    expect(focusBox!.x + focusBox!.width).toBeLessThanOrEqual(450);
+    expectNoLeaks(page);
+  });
+
   test('results toolbar: filter-all restores rows, showing-count reflects them', async ({
     page,
   }) => {

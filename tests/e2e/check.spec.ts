@@ -824,4 +824,42 @@ test.describe('Check tab', () => {
     // Taken domain is not in the available-only CSV.
     expect(content).not.toContain('google.com');
   });
+
+  // 30. row overflow menu traps focus; Escape returns focus to the trigger
+  test('30. row overflow menu traps focus and Escape returns focus to trigger', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com');
+    await expect(row(page, 'google.com')).toBeVisible();
+
+    const focusedTestid = (): Promise<string> =>
+      page.evaluate(() => document.activeElement?.getAttribute('data-testid') ?? '');
+
+    await page.locator('[data-testid="results-row-menu-google-com"]').click();
+    const menu = page.locator(
+      '.menu-wrap:has([data-testid="results-row-menu-google-com"]) .menu',
+    );
+    await expect(menu).toBeVisible();
+
+    // Opening the menu moves focus inside it (first item = copy).
+    await expect.poll(focusedTestid).toBe('results-row-copy-google-com');
+
+    // Tab cycles within the menu: copy -> recheck -> detail -> wrap to copy.
+    await page.keyboard.press('Tab');
+    expect(await focusedTestid()).toBe('results-row-recheck-google-com');
+    await page.keyboard.press('Tab');
+    expect(await focusedTestid()).toBe('results-row-detail-google-com');
+    await page.keyboard.press('Tab');
+    expect(await focusedTestid()).toBe('results-row-copy-google-com');
+
+    // Shift+Tab wraps backwards.
+    await page.keyboard.press('Shift+Tab');
+    expect(await focusedTestid()).toBe('results-row-detail-google-com');
+
+    // Escape closes the menu and returns focus to the trigger button.
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+    expect(await focusedTestid()).toBe('results-row-menu-google-com');
+  });
 });
