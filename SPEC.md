@@ -14,8 +14,11 @@ disagree, SPEC wins unless the SPEC is factually impossible.
 1. Works when opened from `file://` (single self-contained `dist/index.html`).
 2. Works under a sub-path (`https://user.github.io/Domain-Hunter/`) — all paths relative (`base: './'`).
 3. Zero runtime requests to anything except: RDAP endpoints, IANA bootstrap, DoH endpoints,
-   Porkbun pricing API, cfdomainpricing.com, Cloudflare RDAP aggregator
-   (`rdap.cloudflare.com/domain/{domain}`). No CDNs, no fonts from network, no analytics.
+    Porkbun pricing API, cfdomainpricing.com, Cloudflare RDAP aggregator
+    (`rdap.cloudflare.com/domain/{domain}`), `api.digmyname.com` (per-domain premium/buy data,
+    user-initiated on-demand clicks), `api.github.com` and `github.com` (Social tab GitHub device-flow
+    authentication and username lookups), `www.tiktok.com` (Social tab oEmbed lookup).
+    No CDNs, no fonts from network, no analytics.
 4. Polite to registries: per-infra rate profiles (§8), AIMD backoff, global concurrency cap.
 5. Never guess availability: three-state model (§7). Wrong "available" is worse than "unknown".
 6. All registry-derived text is escaped; external links `target="_blank" rel="noopener noreferrer"`.
@@ -112,7 +115,7 @@ Domain-Hunter/
 
 ```ts
 export type CheckStatus = 'available' | 'taken' | 'probably_available' | 'unknown' | 'error';
-export type ResultSource = 'rdap' | 'doh' | 'cache';
+export type ResultSource = 'rdap' | 'doh' | 'cache' | 'cloudflare';
 
 export interface InfraConfig {
   id: string;                    // 'verisign' | 'google' | 'identity-digital' | ...
@@ -164,10 +167,12 @@ export interface EngineOptions {
   proxyUrl?: string;             // optional CORS proxy base
   fetchTimeoutMs?: number;       // default 10000
   maxRetries?: number;           // default 3
+  concurrency?: number;          // global max in-flight checks (user setting)
 }
 
 export type EngineEvent =
   | { type: 'result'; result: CheckResult }
+  | { type: 'batch'; results: CheckResult[] }
   | { type: 'progress'; done: number; total: number; available: number; errors: number }
   | { type: 'finished'; done: number; total: number; available: number; errors: number; aborted: boolean }
   | { type: 'log'; level: 'info' | 'warn'; message: string };
@@ -190,12 +195,13 @@ export interface RegistrarConfig {
 // ---- Settings (dh:v1:settings) ----
 export interface Settings {
   theme: 'system' | 'light' | 'dark';
-  lang: 'en' | 'ru';
+  lang: 'en' | 'ru' | 'es' | 'de' | 'pt' | 'zh' | 'ja' | 'fr';
   currency: 'USD' | 'RUB' | 'EUR';
   rates: { RUB: number; EUR: number };        // per 1 USD
   concurrency: number;           // global, default 6
   cacheTtlHours: number;         // default 12
   proxyUrl: string;              // default ''
+  githubToken: string;           // optional GitHub PAT/device flow token for Social checks
   defaultTlds: string[];         // default selection
 }
 ```
@@ -204,10 +210,14 @@ Storage keys: `dh:v1:settings`, `dh:v1:cache` (map domain→{status,source,ts,tl
 `dh:v1:pricing` ({table, fetchedAt}), `dh:v1:bootstrap` ({json, fetchedAt}),
 `dh:v1:run` (resume snapshot), `dh:v1:lastrun` ({input, tlds, candidates, ts} —
 last completed run restored on next visit from cache, no network),
-`dh:v1:wordsets` (user sets), `dh:v1:seen-share`,
-`dh:v1:favorites` (starred domains/names), `dh:v1:history` (recent completed runs),
+`dh:v1:wordsets` (user sets), `dh:v1:favorites` (starred domains/names),
+`dh:v1:history` (recent completed runs with query/zones/counts for one-click restore),
 `dh:v1:watch` (Record<domain, {status: CheckStatus, ts: number}> — watchlist
-baseline for detecting status flips of favorited domains on app load).
+baseline for detecting status flips of favorited domains on app load),
+`dh:v1:watch-changes` (Record<domain, {status: CheckStatus, ts: number}> —
+detected status-flip events for the watchlist UI),
+`dh:v1:gentray` (generator candidate tray, survives tab switches),
+`dh:v1:hint-dismissed` (boolean flag for dismissing the hint banner).
 
 ## 6. Zone registry (`src/config/tlds.json`)
 
@@ -327,9 +337,8 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 
 ## 11. i18n
 
-- `t(key)` / `t(key, {n})` with `{n}` interpolation; flat dot-keys; en.ts and ru.ts MUST have
-  identical key sets (test enforces parity).
-- Locale persists; default from `navigator.language` (ru* → ru, else en); switcher in header.
+- `t(key)` / `t(key, {n})` with `{n}` interpolation; flat dot-keys; all 8 locales (en ru es de pt zh ja fr) MUST have identical key sets (test enforces parity).
+- Locale persists; default from `detectLocale()` which tries exact match then base-language match (`pt-br` → `pt`, `de-at` → `de`) then falls back to `en`; switcher in header.
 - ALL user-visible strings through i18n, including tooltips, aria-labels, empty states, errors.
 
 ## 12. UX requirements
@@ -349,7 +358,7 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
   share link button (copies `#s=` URL); empty state explains what to do.
 - Tooltips explain every non-obvious block (product for non-technical users too).
 - Mobile: single column, chips wrap, table scrolls horizontally, tap targets ≥40px.
-- Share link: `#s=` + base64url(JSON {q, tlds, run}); on load with `run:true` auto-starts.
+- Share link: `#s=` + base64url(JSON {q, tlds, run}); on load with `run:true` or when the decoded object contains a `q` field, the app auto-starts the check immediately (matching README behavior).
 
 ## 13. Security & privacy
 
@@ -387,12 +396,13 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 
 ## 16. Out of scope for v2 (roadmap v2.1+)
 
-Expired/dropped domains feed (WhoisFreaks daily CSV), social-handle checks, aftermarket search,
-custom domain (CNAME), more registrars in price matrix (keys required), affiliate link activation
-(config already affiliate-ready: Porkbun Ambassador + Dynadot Ambassador first).
+Aftermarket domain search, custom domain (CNAME), more registrars in price matrix (keys required),
+affiliate link activation (config already affiliate-ready: Porkbun Ambassador + Dynadot Ambassador first).
 
 ## 17. Post-spec evolutions (implemented after §1–16)
 
+- **Drops tab**: scans expired/dropped domains via a bundled snapshot and reports those still available at standard registration price — no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
+- **Social tab**: checks username availability across major platforms (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram) so you can secure a consistent handle everywhere. Supports optional GitHub device-flow authentication for higher-rate lookups.
 - **Interrupted runs**: leaving the Check tab mid-run settles `runState` to
   `done` and persists a resume snapshot (`dh:v1:run`); the resume banner
   renders at the top of the Check tab; a fresh run request (share link

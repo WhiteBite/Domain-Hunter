@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Harvest live pricing from Porkbun + cfdomainpricing (API sources) and
  * best-effort HTML scrapers (reg.ru, beget, dynadot, spaceship) and write
