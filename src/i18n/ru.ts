@@ -354,4 +354,11 @@ export const ru: Dict = {
   'results.available.copy': 'Скопировать список',
   'results.available.fav': 'В избранное',
   'results.available.csv': 'CSV по свободным',
+
+  'watch.banner': 'Обновление списка: {freed} освободилось, {taken} занято',
+  'watch.showFavs': 'Показать избранное',
+  'watch.refresh.aria': 'Перепроверить избранное',
+  'watch.badge.freed': 'свободен',
+  'watch.badge.taken': 'занят',
+  'watch.banner.dismiss': 'Закрыть уведомление списка',
 };

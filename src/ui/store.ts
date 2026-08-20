@@ -82,6 +82,13 @@ export const startRequest = writable<number>(0);
  */
 export const exportRows = writable<ExportRow[]>([]);
 
+/**
+ * One-shot bridge: set to true by the watch banner's "Show favorites"
+ * button; ResultsTable consumes it once (switches filter to 'favorites',
+ * then resets the flag). Mirrors the exportRows bridging pattern.
+ */
+export const requestFavoritesView = writable<boolean>(false);
+
 // ---- Generator candidate tray (survives tab switches, persisted) ----
 
 const GEN_TRAY_KEY = 'dh:v1:gentray';

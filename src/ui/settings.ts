@@ -11,6 +11,7 @@ export const KEYS = {
   bootstrap: 'dh:v1:bootstrap',
   run: 'dh:v1:run',
   wordsets: 'dh:v1:wordsets',
+  watch: 'dh:v1:watch',
 } as const;
 
 export function loadSettings(): Settings {

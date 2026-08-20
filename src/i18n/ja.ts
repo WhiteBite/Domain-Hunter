@@ -353,4 +353,11 @@ export const ja: Dict = {
   'results.available.copy': '取得可能リストをコピー',
   'results.available.fav': 'すべてお気に入りに追加',
   'results.available.csv': '取得可能な CSV をダウンロード',
+
+  'watch.banner': 'ウォッチリスト更新: {freed} 件解放、{taken} 件取得済',
+  'watch.showFavs': 'お気に入りを表示',
+  'watch.refresh.aria': 'お気に入りを再確認',
+  'watch.badge.freed': '解放',
+  'watch.badge.taken': '取得済',
+  'watch.banner.dismiss': 'ウォッチリスト通知を閉じる',
 };

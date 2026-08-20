@@ -353,4 +353,11 @@ export const zh: Dict = {
   'results.available.copy': '复制可注册列表',
   'results.available.fav': '全部加入收藏',
   'results.available.csv': '下载可注册 CSV',
+
+  'watch.banner': '关注列表更新：{freed} 个释放，{taken} 个被注册',
+  'watch.showFavs': '显示收藏',
+  'watch.refresh.aria': '重新检查收藏',
+  'watch.badge.freed': '已释放',
+  'watch.badge.taken': '已注册',
+  'watch.banner.dismiss': '关闭关注列表通知',
 };

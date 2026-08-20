@@ -353,4 +353,11 @@ export const en: Dict = {
   'results.available.copy': 'Copy available list',
   'results.available.fav': 'Add all to favorites',
   'results.available.csv': 'Download available CSV',
+
+  'watch.banner': 'Watchlist update: {freed} freed, {taken} taken',
+  'watch.showFavs': 'Show favorites',
+  'watch.refresh.aria': 'Re-check favorites',
+  'watch.badge.freed': 'freed',
+  'watch.badge.taken': 'taken',
+  'watch.banner.dismiss': 'Dismiss watchlist banner',
 };

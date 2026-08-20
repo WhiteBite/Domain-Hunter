@@ -1,7 +1,7 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
-  import { results, settings, pricing, registry, runState, exportRows } from '../store';
+  import { results, settings, pricing, registry, runState, exportRows, requestFavoritesView } from '../store';
   import type { CheckResult, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
   import {
     bestEntry,
@@ -16,6 +16,7 @@
   import { put as putCache } from '../../core/cache';
   import { t } from '../../i18n';
   import { favorites, toggleFavorite } from '../favorites';
+  import { watchChanges, watchRunning, refreshWatchlist, classifyChange } from '../watchlist';
   import { clickOutside } from '../clickoutside';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import StatusBadge from './StatusBadge.svelte';
@@ -261,6 +262,22 @@
     exportRows.set(list);
   });
 
+  // One-shot bridge: the watch banner's "Show favorites" button sets
+  // requestFavoritesView=true; we consume it once (switch filter, reset).
+  let consumedFavRequest = false;
+  $effect(() => {
+    const req = $requestFavoritesView;
+    if (req && !consumedFavRequest) {
+      consumedFavRequest = true;
+      filter = 'favorites';
+      requestFavoritesView.set(false);
+      // Allow the next request to be consumed.
+      setTimeout(() => {
+        consumedFavRequest = false;
+      }, 0);
+    }
+  });
+
   $effect(() => {
     const len = sorted.length;
     if (len > visibleCount && sentinelEl && observer) {
@@ -501,6 +518,13 @@
 
   const hasResults = $derived($results.size > 0);
 
+  /** Map domain -> WatchChange for O(1) row chip lookup. */
+  const watchByDomain = $derived.by(() => {
+    const m = new Map<string, 'freed' | 'taken'>();
+    for (const c of $watchChanges) m.set(c.domain, classifyChange(c.from, c.to));
+    return m;
+  });
+
   const availableTotal = $derived.by(() => {
     let n = 0;
     for (const r of $results.values()) {
@@ -589,6 +613,19 @@
         <button class="filter" class:active={filter === 'favorites'} onclick={() => (filter = 'favorites')} type="button" data-testid="results-filter-favorites">
           {t('results.filters.favorites')}{#if $favorites.size > 0} · <span class="nums">{$favorites.size}</span>{/if}
         </button>
+        <Tooltip text={t('watch.refresh.aria')}>
+          <button
+            class="action-btn watch-refresh"
+            type="button"
+            onclick={() => void refreshWatchlist()}
+            disabled={$watchRunning}
+            aria-label={t('watch.refresh.aria')}
+            title={t('watch.refresh.aria')}
+            data-testid="results-watch-refresh"
+          >
+            <svg class:spin={$watchRunning} viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v3h-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+        </Tooltip>
       </div>
       <div class="search-wrap">
         <input
@@ -793,6 +830,14 @@
                   </a>
                 {:else}
                   <span class="domain-text">{row.result.domain}</span>
+                {/if}
+                {#if watchByDomain.has(row.result.domain)}
+                  {@const wkind = watchByDomain.get(row.result.domain)}
+                  {#if wkind === 'freed'}
+                    <span class="chip-tag watch-freed" data-testid={`results-watch-${sid}`}>{t('watch.badge.freed')}</span>
+                  {:else if wkind === 'taken'}
+                    <span class="chip-tag watch-taken" data-testid={`results-watch-${sid}`}>{t('watch.badge.taken')}</span>
+                  {/if}
                 {/if}
               </td>
               <td class="status-cell">
@@ -1377,6 +1422,46 @@
   .chip-tag.trap {
     background: var(--red-soft);
     color: var(--red);
+  }
+  .chip-tag.watch-freed {
+    background: var(--green-soft);
+    color: var(--green);
+  }
+  .chip-tag.watch-taken {
+    background: var(--red-soft);
+    color: var(--red);
+  }
+  .watch-refresh {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--dur) var(--ease);
+  }
+  .watch-refresh:hover:not(:disabled) {
+    border-color: var(--border-strong);
+    color: var(--text);
+    background: var(--bg-sunken);
+  }
+  .watch-refresh:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .watch-refresh svg {
+    width: 14px;
+    height: 14px;
+  }
+  .watch-refresh .spin {
+    animation-duration: 1.5s;
   }
   .coupon {
     font-size: 11px;

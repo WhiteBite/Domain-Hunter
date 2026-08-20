@@ -353,4 +353,11 @@ export const pt: Dict = {
   'results.available.copy': 'Copiar lista de disponíveis',
   'results.available.fav': 'Adicionar todos aos favoritos',
   'results.available.csv': 'Baixar CSV de disponíveis',
+
+  'watch.banner': 'Atualização da lista: {freed} livres, {taken} ocupados',
+  'watch.showFavs': 'Mostrar favoritos',
+  'watch.refresh.aria': 'Reverificar favoritos',
+  'watch.badge.freed': 'livre',
+  'watch.badge.taken': 'ocupado',
+  'watch.banner.dismiss': 'Fechar aviso da lista',
 };

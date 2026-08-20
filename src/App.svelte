@@ -1,10 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { locale, t, LOCALES, detectLocale } from './i18n';
   import { activeTab, settings, type TabId } from './ui/store';
   import { KEYS, loadSettings, saveSettings } from './ui/settings';
   import { applyTheme, watchSystemTheme } from './ui/theme';
   import { clickOutside } from './ui/clickoutside';
+  import { favorites } from './ui/favorites';
+  import { refreshWatchlist } from './ui/watchlist';
   import type { Locale, Settings } from './types';
   import Flag from './ui/components/Flag.svelte';
   import './ui/tokens.css';
@@ -91,7 +94,19 @@
     }
   }
 
+  let watchlistTriggered = false;
+
   onMount(() => {
+    // Silently re-check favorited domains on load (SPEC §5 dh:v1:watch).
+    // Guarded by a module-level flag so HMR/strict-mode double mount doesn't
+    // double-run. Only fires when favorites are non-empty and the registry
+    // store is ready (it is seeded at module init from tlds.json).
+    if (!watchlistTriggered) {
+      watchlistTriggered = true;
+      if (get(favorites).size > 0) {
+        void refreshWatchlist();
+      }
+    }
     return watchSystemTheme(() => $settings.theme);
   });
 
