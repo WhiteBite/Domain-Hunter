@@ -1,3 +1,10 @@
+<script module lang="ts">
+  // Module-scope consumed-marker for startRequest dedupe. Survives tab-switch
+  // remounts so a stale counter never re-fires the last run (the per-instance
+  // `let` reset to 0 on every remount, re-running the previous query).
+  let lastConsumed = 0;
+</script>
+
 <script lang="ts">
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
@@ -24,6 +31,7 @@
   import type { EngineHandle } from '../../core/engine';
   import { getFresh as cacheGetFresh, put as cachePut } from '../../core/cache';
   import { KEYS, readJson, writeJson, removeKey } from '../settings';
+  import { stopWatchlist } from '../watchlist';
   import { t } from '../../i18n';
   import Tooltip from './Tooltip.svelte';
 
@@ -122,10 +130,9 @@
       if (a) resumeAction.set(null);
     });
 
-    let lastReq = 0;
     unsubStart = startRequest.subscribe((n) => {
-      if (n !== lastReq) {
-        lastReq = n;
+      if (n !== lastConsumed) {
+        lastConsumed = n;
         startFromInput();
       }
     });
@@ -147,7 +154,12 @@
           ts: Date.now(),
         } satisfies RunSnapshot);
       }
-      runState.update((rs) => ({ ...rs, phase: 'done', elapsedMs: Date.now() - rs.startedAt }));
+      runState.update((rs) => ({
+        ...rs,
+        phase: 'done',
+        elapsedMs: Date.now() - rs.startedAt,
+        aborted: true,
+      }));
     }
     engine?.destroy();
     engine = null;
@@ -254,6 +266,9 @@
   }
 
   function startRun(candidates: string[], tlds: string[], ignore: boolean) {
+    // Stop any in-flight watchlist re-check so user runs and the background
+    // watch never hit registries concurrently (SPEC §5 watch + §8 politeness).
+    stopWatchlist();
     results.set(new Map());
     const settingsVal = get(settings);
     const registryVal = get(registry);

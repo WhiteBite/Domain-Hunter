@@ -261,7 +261,13 @@ export async function loadPricing(
   };
 
   const fetchedAt = Date.now();
-  writeCache({ table, fetchedAt });
+  // Snapshot-only fallback (all live sources failed): do NOT cache, so the
+  // next load retries live sources instead of serving the snapshot for 12h.
+  // Live-augmented tables (any live source succeeded) are cached normally.
+  const isSnapshotOnly = sources.length === 1 && sources[0] === 'snapshot';
+  if (!isSnapshotOnly) {
+    writeCache({ table, fetchedAt });
+  }
 
   return { table, fetchedAt, fromCache: false };
 }
@@ -345,17 +351,18 @@ const CURRENCY_SYMBOL: Record<Settings['currency'], string> = {
   EUR: '€',
 };
 
-/** USD cents → display string in the user's currency. null → '—'. */
+/** USD cents → display string in the user's currency. null → '—'.
+ *  Finite values always render with two decimals ($0.50, $20.00, $82.70)
+ *  and keep the locale thousands separator. */
 export function formatPrice(centsUsd: number | null, settings: Settings, locale = 'en'): string {
   if (centsUsd == null) return '—';
   const usd = centsUsd / 100;
   let value = usd;
   if (settings.currency === 'RUB') value = usd * settings.rates.RUB;
   else if (settings.currency === 'EUR') value = usd * settings.rates.EUR;
-  const digits = settings.currency === 'RUB' ? 0 : 2;
   const formatted = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: digits,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
   return `${CURRENCY_SYMBOL[settings.currency]}${formatted}`;
 }

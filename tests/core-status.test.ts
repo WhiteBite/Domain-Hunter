@@ -110,6 +110,36 @@ describe('checkDomain status matrix', () => {
     expect(outcomes).toEqual(['429', 'ok']);
   });
 
+  it('429 outcome carries parsed Retry-After ms (clamped, seconds form)', async () => {
+    const calls: Array<{ kind: string; retryAfterMs?: number }> = [];
+    await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([
+        () => jsonResponse(429, {}, { 'retry-after': '2' }),
+        () => jsonResponse(200),
+      ]),
+      sleep: noSleep,
+      onOutcome: (kind, retryAfterMs) => calls.push({ kind, retryAfterMs }),
+    });
+    const fourTwoNine = calls.find((c) => c.kind === '429');
+    expect(fourTwoNine).toBeDefined();
+    expect(fourTwoNine?.retryAfterMs).toBe(2000);
+  });
+
+  it('429 outcome omits retryAfterMs when header absent', async () => {
+    const calls: Array<{ kind: string; retryAfterMs?: number }> = [];
+    await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([
+        () => jsonResponse(429),
+        () => jsonResponse(200),
+      ]),
+      sleep: noSleep,
+      onOutcome: (kind, retryAfterMs) => calls.push({ kind, retryAfterMs }),
+    });
+    const fourTwoNine = calls.find((c) => c.kind === '429');
+    expect(fourTwoNine).toBeDefined();
+    expect(fourTwoNine?.retryAfterMs).toBeUndefined();
+  });
+
   it('429 exhausted → error', async () => {
     const result = await checkDomain('a.test', tldHigh, infraHigh, {
       fetchImpl: scriptFetch([() => jsonResponse(429)]),

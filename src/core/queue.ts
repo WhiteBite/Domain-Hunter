@@ -95,6 +95,7 @@ export async function runQueue(
       }
       inFlightGlobal += 1;
       let saw429 = false;
+      let retryAfterMs: number | undefined;
       const tldConfig = tldIndex.get(tldOf(domain)) ?? { tld: tldOf(domain), infra: infraId };
       let result: CheckResult;
       try {
@@ -107,8 +108,11 @@ export async function runQueue(
             proxyUrl: opts.proxyUrl,
             fetchTimeoutMs: opts.fetchTimeoutMs,
             maxRetries: opts.maxRetries,
-            onOutcome: (kind) => {
-              if (kind === '429') saw429 = true;
+            onOutcome: (kind, retryAfter) => {
+              if (kind === '429') {
+                saw429 = true;
+                retryAfterMs = retryAfter;
+              }
             },
           },
           signal,
@@ -116,7 +120,7 @@ export async function runQueue(
       } finally {
         inFlightGlobal -= 1;
       }
-      if (saw429) limiter.report429();
+      if (saw429) limiter.report429(retryAfterMs);
       else limiter.reportOk();
       recordResult(result);
     }

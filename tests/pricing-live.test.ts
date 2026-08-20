@@ -165,6 +165,17 @@ describe('loadPricing', () => {
     expect(state.fromCache).toBe(false);
   });
 
+  it('does not cache the snapshot-only fallback (retries live next load)', async () => {
+    const failFetch = vi.fn().mockRejectedValue(new Error('network down'));
+    await loadPricing({
+      force: true,
+      fetchImpl: failFetch as unknown as typeof fetch,
+    });
+    // Snapshot-only tables must not be cached, otherwise the next load would
+    // serve the snapshot for 12h instead of retrying live sources.
+    expect(localStorage.getItem('dh:v1:pricing')).toBeNull();
+  });
+
   it('persists fetched table to localStorage', async () => {
     const mockFetch = (async (url: string) => {
       if (url.includes('porkbun')) {

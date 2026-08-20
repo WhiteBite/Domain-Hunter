@@ -13,7 +13,9 @@ export interface RdapOptions {
   maxRetries?: number;
   proxyUrl?: string;
   sleep?: (ms: number) => Promise<void>;
-  onOutcome?: (kind: OutcomeKind) => void;
+  /** Outcome callback. On a 429, the parsed Retry-After header (ms, clamped)
+   *  is passed so callers can feed it to their AIMD limiter. */
+  onOutcome?: (kind: OutcomeKind, retryAfterMs?: number) => void;
 }
 
 const BACKOFF_STEPS_MS = [1000, 2000, 4000];
@@ -90,7 +92,7 @@ type AggregatorOutcome = 'taken' | 'free' | 'fallthrough';
 async function queryCloudflareAggregator(
   domain: string,
   fetchImpl: typeof fetch,
-  onOutcome?: (kind: OutcomeKind) => void,
+  onOutcome?: (kind: OutcomeKind, retryAfterMs?: number) => void,
   signal?: AbortSignal,
 ): Promise<AggregatorOutcome> {
   try {
@@ -109,7 +111,7 @@ async function queryCloudflareAggregator(
       return 'free';
     }
     if (resp.status === 429) {
-      onOutcome?.('429');
+      onOutcome?.('429', parseRetryAfter(resp.headers.get('retry-after')) ?? undefined);
       return 'fallthrough';
     }
     return 'fallthrough';
@@ -295,7 +297,8 @@ export async function checkDomain(
       return conclude404();
     }
     if (resp.status === 429) {
-      opts.onOutcome?.('429');
+      const retryAfterMs = parseRetryAfter(resp.headers.get('retry-after'));
+      opts.onOutcome?.('429', retryAfterMs ?? undefined);
       attempt += 1;
       if (attempt > maxRetries) {
         return {
@@ -306,7 +309,6 @@ export async function checkDomain(
           latencyMs: Date.now() - startedAt,
         };
       }
-      const retryAfterMs = parseRetryAfter(resp.headers.get('retry-after'));
       await sleep(retryAfterMs ?? BACKOFF_STEPS_MS[Math.min(attempt - 1, BACKOFF_STEPS_MS.length - 1)] ?? 4000);
       continue;
     }

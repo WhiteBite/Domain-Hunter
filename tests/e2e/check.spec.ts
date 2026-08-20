@@ -34,6 +34,7 @@ import {
   ianaBootstrap,
   type RdapMockResponse,
 } from './fixtures';
+import { encodeShare } from '../../src/ui/share';
 
 // ---- Inlined mock helpers (avoid helpers/mocks.ts tlds.json import) ----
 
@@ -225,6 +226,27 @@ async function bootCheckTab(
     ...seed,
   };
   await openApp(page, { seed: fullSeed });
+  await page.waitForSelector('[data-testid="check-input-domains"]', {
+    state: 'visible',
+    timeout: 10_000,
+  });
+}
+
+/**
+ * Boot the Check tab with a share-link hash (#s=...) plus optional seed.
+ * Used to verify share-link runs override lastrun restore.
+ */
+async function bootCheckTabWithHash(
+  page: Page,
+  hash: string,
+  seed?: Record<string, unknown>,
+): Promise<void> {
+  const fullSeed: Record<string, unknown> = {
+    'dh:v1:pricing': seedPricingTable(),
+    'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
+    ...seed,
+  };
+  await openApp(page, { hash, seed: fullSeed });
   await page.waitForSelector('[data-testid="check-input-domains"]', {
     state: 'visible',
     timeout: 10_000,
@@ -573,15 +595,24 @@ test.describe('Check tab', () => {
   // 20. stop during run terminates and shows partial state
   test('20. stop during run terminates and shows partial state', async ({ page }) => {
     await setupBaseMocks(page);
+    // Hold RDAP responses open on a state-driven gate (no hard sleep): the run
+    // stays in 'running' until we resolve the gate after clicking stop. The
+    // holder object defeats TS control-flow narrowing (the resolver is
+    // assigned inside an opaque Promise executor callback).
+    const gateHolder: { resolve: (() => void) | null } = { resolve: null };
+    const gate = new Promise<void>((resolve) => {
+      gateHolder.resolve = resolve;
+    });
     await page.route(/\/domain\//, async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await gate;
       await route.fulfill({ status: 404, headers: CORS });
     });
     await bootCheckTab(page);
     await runCheck(page, 'google.com\nzzqxtest1.com');
-    await expect(page.locator('[data-testid="check-button-stop"]')).toBeVisible();
-    await page.waitForTimeout(300);
-    await page.locator('[data-testid="check-button-stop"]').click();
+    const stopBtn = page.locator('[data-testid="check-button-stop"]');
+    await expect(stopBtn).toBeVisible();
+    await stopBtn.click();
+    if (gateHolder.resolve) gateHolder.resolve();
     await expect(page.locator('[data-testid="check-button-start"]')).toBeVisible({ timeout: 10_000 });
   });
 
@@ -909,5 +940,57 @@ test.describe('Check tab', () => {
     await expect(progress).toBeVisible();
     const progressText = (await progress.textContent()) ?? '';
     expect(progressText).toMatch(/Checked \d+ of \d+/);
+  });
+
+  // 32. resume prompt + lastrun: resume wins, lastrun not applied
+  test('32. resume prompt + lastrun: resume wins, lastrun not applied', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    // Seed BOTH an interrupted-run snapshot (resume) and a lastrun for a
+    // different domain. The resume prompt must take priority; lastrun must
+    // NOT restore its results while the prompt is up (or after discard).
+    await bootCheckTab(page, {
+      'dh:v1:run': {
+        pending: ['resumeme.com'],
+        tlds: ['com'],
+        ignoreCache: false,
+        ts: Date.now(),
+      },
+      'dh:v1:lastrun': {
+        input: 'google.com',
+        tlds: ['com'],
+        candidates: ['google.com'],
+        ts: Date.now(),
+      },
+    });
+    // Resume prompt is shown (priority over lastrun restore).
+    await expect(page.locator('[data-testid="check-button-resume"]')).toBeVisible();
+    // Lastrun domain (google.com) is NOT restored into the results table.
+    await expect(row(page, 'google.com')).toHaveCount(0);
+    // Discard the resume → prompt gone, lastrun still not applied.
+    await page.locator('[data-testid="check-button-discard"]').click();
+    await expect(page.locator('[data-testid="check-button-resume"]')).toBeHidden();
+    await expect(row(page, 'google.com')).toHaveCount(0);
+  });
+
+  // 33. share-hash run wins over lastrun
+  test('33. share-hash run wins over lastrun', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    // Seed a lastrun (google.com taken) and boot with a #s= share hash for a
+    // different domain. The share run must execute; lastrun must NOT restore.
+    const shareHash = encodeShare({ q: 'zzqxtest1.com', tlds: ['com'], run: true });
+    await bootCheckTabWithHash(page, shareHash, {
+      'dh:v1:lastrun': {
+        input: 'google.com',
+        tlds: ['com'],
+        candidates: ['google.com'],
+        ts: Date.now(),
+      },
+    });
+    // Share run executed: zzqxtest1.com is checked (available via 404).
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible({ timeout: 10_000 });
+    // Lastrun domain (google.com) is NOT restored into results.
+    await expect(row(page, 'google.com')).toHaveCount(0);
   });
 });

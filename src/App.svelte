@@ -2,13 +2,14 @@
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { locale, t, LOCALES, detectLocale } from './i18n';
-  import { activeTab, settings, type TabId } from './ui/store';
+  import { activeTab, settings, registry, type TabId } from './ui/store';
   import { KEYS, loadSettings, saveSettings } from './ui/settings';
   import { applyTheme, watchSystemTheme } from './ui/theme';
   import { clickOutside } from './ui/clickoutside';
   import { trapFocus } from './ui/focustrap';
   import { favorites } from './ui/favorites';
   import { refreshWatchlist } from './ui/watchlist';
+  import { fetchBootstrap, mergeWithCurated } from './core/bootstrap';
   import type { Locale, Settings } from './types';
   import Flag from './ui/components/Flag.svelte';
   import './ui/tokens.css';
@@ -45,6 +46,30 @@
 
   let tab = $state<TabId>('check');
   activeTab.subscribe((value) => (tab = value));
+
+  // Reset scroll on tab switch: each tab starts at the top, never at the
+  // previous tab's scroll depth.
+  $effect(() => {
+    void tab;
+    window.scrollTo({ top: 0 });
+  });
+
+  // Tab bar right-edge fade: shown only while the bar actually overflows.
+  let tabsEl: HTMLElement | null = $state(null);
+  let tabsScrollable = $state(false);
+  $effect(() => {
+    const el = tabsEl;
+    // Label lengths change with the locale — re-check on language switch.
+    void current.lang;
+    if (!el) return;
+    const check = (): void => {
+      tabsScrollable = el.scrollWidth > el.clientWidth + 1;
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  });
 
   // Work tabs (check/generators/drops) use the wider content cap so the
   // two-pane workspace has room; text tabs (social/settings/about) stay narrow.
@@ -110,6 +135,33 @@
         void refreshWatchlist();
       }
     }
+
+    // IANA bootstrap auto-discovery (SPEC §6): idle-scheduled so it never
+    // blocks first paint. fetchBootstrap caches internally (24h TTL); merge
+    // with the curated registry (curated zones always win on conflict).
+    // Errors are non-fatal — the curated registry stays in place.
+    const runBootstrap = (): void => {
+      void (async () => {
+        try {
+          const json = await fetchBootstrap();
+          if (json == null) return;
+          registry.set(mergeWithCurated(get(registry), json));
+        } catch (err) {
+          console.warn('bootstrap discovery failed', err);
+        }
+      })();
+    };
+    const ric = (
+      window as Window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      }
+    ).requestIdleCallback;
+    if (typeof ric === 'function') {
+      ric(runBootstrap, { timeout: 2000 });
+    } else {
+      setTimeout(runBootstrap, 500);
+    }
+
     return watchSystemTheme(() => $settings.theme);
   });
 
@@ -202,7 +254,7 @@
       </div>
     </div>
     <!-- svelte-ignore a11y_no_noninteractive_element_to_interactive_role -->
-    <nav class="tabs" role="tablist" aria-label={t('app.name')}>
+    <nav class="tabs" class:fade={tabsScrollable} role="tablist" aria-label={t('app.name')} bind:this={tabsEl}>
       {#each tabs as tabDef (tabDef.id)}
         <button
           role="tab"
@@ -462,6 +514,13 @@
     display: flex;
     gap: var(--space-1);
     overflow-x: auto;
+  }
+
+  /* Right-edge fade hints at more tabs off-canvas (mobile). Applied only
+     while the bar overflows (tabsScrollable). */
+  .tabs.fade {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
   }
 
   .tab {

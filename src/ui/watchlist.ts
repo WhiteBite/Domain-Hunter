@@ -118,6 +118,33 @@ export function pruneOldChanges(
 export const watchChanges = writable<WatchChange[]>([]);
 export const watchRunning = writable<boolean>(false);
 
+// Module-scope watch engine handle + promise resolver so stopWatchlist() can
+// tear down an in-flight watch (e.g. when the user starts a run) without
+// leaving the refreshWatchlist promise dangling.
+let watchEngine: EngineHandle | null = null;
+let watchResolve: (() => void) | null = null;
+
+/**
+ * Stop any in-flight watchlist re-check: terminate the watch engine and
+ * settle watchRunning to false. Safe to call when no watch is running.
+ * Called at the top of a user-initiated run so the two never hit registries
+ * concurrently (SPEC §5 watch + §8 politeness).
+ */
+export function stopWatchlist(): void {
+  const e = watchEngine;
+  watchEngine = null;
+  if (e) {
+    try {
+      e.destroy();
+    } catch {
+      // worker termination must not throw
+    }
+  }
+  watchResolve?.();
+  watchResolve = null;
+  watchRunning.set(false);
+}
+
 // ---- Load + prune on module init ----
 
 function loadChanges(): WatchChange[] {
@@ -167,7 +194,8 @@ export async function refreshWatchlist(): Promise<void> {
     };
 
     await new Promise<void>((resolve) => {
-      const engine: EngineHandle = createEngine((event: EngineEvent) => {
+      watchResolve = resolve;
+      watchEngine = createEngine((event: EngineEvent) => {
         switch (event.type) {
           case 'result':
             fresh.push(event.result);
@@ -176,7 +204,9 @@ export async function refreshWatchlist(): Promise<void> {
             fresh.push(...event.results);
             break;
           case 'finished':
-            engine.destroy();
+            watchEngine?.destroy();
+            watchEngine = null;
+            watchResolve = null;
             resolve();
             break;
           case 'log':
@@ -184,7 +214,7 @@ export async function refreshWatchlist(): Promise<void> {
             break;
         }
       });
-      engine.start(targets, options);
+      watchEngine.start(targets, options);
     });
 
     // Diff and classify.
@@ -206,5 +236,7 @@ export async function refreshWatchlist(): Promise<void> {
     }
   } finally {
     watchRunning.set(false);
+    watchEngine = null;
+    watchResolve = null;
   }
 }

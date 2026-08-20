@@ -28,6 +28,9 @@ export interface RunState {
   errors: number;
   startedAt: number;
   elapsedMs: number;
+  /** True when a run was cut short by unmount/stop rather than finishing
+   *  naturally. History recording skips aborted runs (SPEC §5). */
+  aborted?: boolean;
 }
 
 export const runState = writable<RunState>({
