@@ -3,6 +3,8 @@ import {
   classifyChange,
   diffWatch,
   pruneOldChanges,
+  capChanges,
+  MAX_WATCH_CHANGES,
   type WatchChange,
   type WatchEntry,
 } from '../src/ui/watchlist';
@@ -184,5 +186,44 @@ describe('pruneOldChanges', () => {
       { domain: 'a.com', from: 'taken', to: 'available', ts: NOW - sevenDays },
     ];
     expect(pruneOldChanges(changes, NOW)).toHaveLength(1);
+  });
+});
+
+// ---- capChanges ----
+
+describe('capChanges', () => {
+  function makeChange(domain: string, ts: number): WatchChange {
+    return { domain, from: 'taken', to: 'available', ts };
+  }
+
+  it('keeps all entries when below the cap', () => {
+    const changes = [makeChange('a.com', 1), makeChange('b.com', 2)];
+    expect(capChanges(changes)).toHaveLength(2);
+  });
+
+  it('drops oldest entries when above the cap', () => {
+    const changes = [
+      makeChange('old.com', 1),
+      makeChange('mid.com', 2),
+      makeChange('new.com', 3),
+    ];
+    const capped = capChanges(changes, 2);
+    expect(capped).toHaveLength(2);
+    expect(capped[0]?.domain).toBe('mid.com');
+    expect(capped[1]?.domain).toBe('new.com');
+  });
+
+  it('default cap is MAX_WATCH_CHANGES (200)', () => {
+    expect(MAX_WATCH_CHANGES).toBe(200);
+    const changes: WatchChange[] = [];
+    for (let i = 0; i < MAX_WATCH_CHANGES + 5; i++) changes.push(makeChange(`d${i}.com`, i));
+    const capped = capChanges(changes);
+    expect(capped).toHaveLength(MAX_WATCH_CHANGES);
+    // Oldest 5 dropped.
+    expect(capped[0]?.domain).toBe('d5.com');
+  });
+
+  it('handles empty input', () => {
+    expect(capChanges([])).toEqual([]);
   });
 });

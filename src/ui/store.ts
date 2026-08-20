@@ -95,18 +95,39 @@ export const requestFavoritesView = writable<boolean>(false);
 // ---- Generator candidate tray (survives tab switches, persisted) ----
 
 const GEN_TRAY_KEY = 'dh:v1:gentray';
+/** Maximum candidates in the tray. Oldest entries are dropped on overflow. */
+export const GEN_TRAY_CAP = 5000;
+
+/** Pure: drop oldest entries (from the front) when the tray exceeds the cap. */
+export function capGenTray<T>(list: T[], cap: number = GEN_TRAY_CAP): T[] {
+  return list.length > cap ? list.slice(list.length - cap) : list;
+}
 
 function loadGenTray(): Candidate[] {
   try {
     const raw = localStorage.getItem(GEN_TRAY_KEY);
     const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? (parsed as Candidate[]) : [];
+    return Array.isArray(parsed) ? capGenTray(parsed as Candidate[]) : [];
   } catch {
     return [];
   }
 }
 
-export const genCandidates = writable<Candidate[]>(loadGenTray());
+const _genCandidates = writable<Candidate[]>(loadGenTray());
+
+/**
+ * Capped gen-tray store: set/update automatically drop oldest entries beyond
+ * GEN_TRAY_CAP so localStorage and memory stay bounded.
+ */
+export const genCandidates: typeof _genCandidates = {
+  subscribe: _genCandidates.subscribe,
+  set(value: Candidate[]): void {
+    _genCandidates.set(capGenTray(value));
+  },
+  update(fn: (value: Candidate[]) => Candidate[]): void {
+    _genCandidates.update((v) => capGenTray(fn(v)));
+  },
+};
 
 let trayWriteTimer: ReturnType<typeof setTimeout> | null = null;
 genCandidates.subscribe((value) => {

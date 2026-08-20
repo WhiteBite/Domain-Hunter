@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { toggleInList } from '../src/ui/favorites';
+import { toggleInList, toggleFavoriteCapped, MAX_FAVORITES } from '../src/ui/favorites';
 import { pushEntry, MAX_HISTORY_ENTRIES } from '../src/ui/history';
 import type { HistoryEntry } from '../src/types';
 
@@ -19,6 +19,46 @@ describe('favorites toggleInList', () => {
     const next = toggleInList(base, 'b.com');
     expect(base).toEqual(['a.com']);
     expect(next).toEqual(['a.com', 'b.com']);
+  });
+});
+
+describe('favorites toggleFavoriteCapped (cap enforcement)', () => {
+  it('adds when below the cap', () => {
+    const set = new Set<string>(['a.com']);
+    const { next, added } = toggleFavoriteCapped(set, 'b.com', 2000);
+    expect(added).toBe(true);
+    expect(next.has('b.com')).toBe(true);
+    expect(next.size).toBe(2);
+  });
+
+  it('removes an existing entry even at the cap', () => {
+    const set = new Set<string>(['a.com', 'b.com']);
+    const { next, added } = toggleFavoriteCapped(set, 'a.com', 2);
+    expect(added).toBe(true);
+    expect(next.has('a.com')).toBe(false);
+    expect(next.size).toBe(1);
+  });
+
+  it('rejects a new add when at the cap', () => {
+    const set = new Set<string>(['a.com', 'b.com']);
+    const { next, added } = toggleFavoriteCapped(set, 'c.com', 2);
+    expect(added).toBe(false);
+    expect(next.has('c.com')).toBe(false);
+    expect(next.size).toBe(2);
+  });
+
+  it('does not mutate the input set', () => {
+    const set = new Set<string>(['a.com']);
+    toggleFavoriteCapped(set, 'b.com', 2000);
+    expect(set.size).toBe(1);
+  });
+
+  it('default cap is MAX_FAVORITES (2000)', () => {
+    expect(MAX_FAVORITES).toBe(2000);
+    const set = new Set<string>();
+    for (let i = 0; i < MAX_FAVORITES; i++) set.add(`d${i}.com`);
+    const { added } = toggleFavoriteCapped(set, 'new.com');
+    expect(added).toBe(false);
   });
 });
 

@@ -18,6 +18,16 @@ import { KEYS, readJson, writeJson } from './settings';
 const WATCH_CHANGES_KEY = 'dh:v1:watch-changes';
 const MAX_WATCH_DOMAINS = 200;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+/** Maximum number of watch changes retained. Oldest are dropped on overflow. */
+export const MAX_WATCH_CHANGES = 200;
+
+/** Pure: drop oldest entries (from the front) when changes exceed the cap. */
+export function capChanges(
+  changes: WatchChange[],
+  cap: number = MAX_WATCH_CHANGES,
+): WatchChange[] {
+  return changes.length > cap ? changes.slice(changes.length - cap) : changes;
+}
 
 export interface WatchEntry {
   status: CheckStatus;
@@ -150,7 +160,7 @@ export function stopWatchlist(): void {
 function loadChanges(): WatchChange[] {
   const raw = readJson<WatchChange[]>(WATCH_CHANGES_KEY);
   if (!raw || !Array.isArray(raw)) return [];
-  return pruneOldChanges(raw);
+  return capChanges(pruneOldChanges(raw));
 }
 
 watchChanges.set(loadChanges());
@@ -222,7 +232,7 @@ export async function refreshWatchlist(): Promise<void> {
     writeJson(KEYS.watch, nextMap);
 
     if (changes.length > 0) {
-      watchChanges.update((list) => [...list, ...changes]);
+      watchChanges.update((list) => capChanges([...list, ...changes]));
     }
 
     // Merge fresh results into the results store so the Favorites view
