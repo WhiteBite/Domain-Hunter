@@ -21,6 +21,8 @@
   import SocialTab from './ui/components/SocialTab.svelte';
   import SettingsTab from './ui/components/SettingsTab.svelte';
   import AboutTab from './ui/components/AboutTab.svelte';
+  import IconChevron from './ui/components/icons/IconChevron.svelte';
+  import IconCheck from './ui/components/icons/IconCheck.svelte';
 
   // First visit (no saved settings): honor the browser language. Afterwards
   // the stored preference wins, so a manual choice is never overridden.
@@ -197,9 +199,7 @@
           >
             <Flag code={current.lang} size={18} />
             <span class="lang-code">{current.lang.toUpperCase()}</span>
-            <svg class="lang-chevron" class:rot={langMenuOpen} viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+            <IconChevron class={'lang-chevron' + (langMenuOpen ? ' rot' : '')} />
           </button>
           {#if langMenuOpen}
             <div class="lang-menu" role="menu" aria-label={t('app.language.aria')} use:trapFocus>
@@ -215,7 +215,7 @@
                 >
                   <span class="lang-check" aria-hidden="true">
                     {#if current.lang === loc.code}
-                      <svg viewBox="0 0 16 16"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                      <IconCheck />
                     {/if}
                   </span>
                   <Flag code={loc.code} size={18} />
@@ -422,14 +422,14 @@
     font-weight: 500;
   }
 
-  .lang-chevron {
+  :global(.lang-chevron) {
     width: 12px;
     height: 12px;
     display: block;
     transition: transform var(--dur) var(--ease);
   }
 
-  .lang-chevron.rot {
+  :global(.lang-chevron.rot) {
     transform: rotate(180deg);
   }
 
@@ -482,7 +482,7 @@
     flex: none;
   }
 
-  .lang-check svg {
+  .lang-check :global(svg) {
     width: 14px;
     height: 14px;
   }

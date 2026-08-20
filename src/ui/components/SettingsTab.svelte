@@ -373,11 +373,7 @@
   }
 
   .card {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
     padding: var(--space-4) var(--space-5);
-    box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);

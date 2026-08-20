@@ -6,6 +6,8 @@
   import { get } from 'svelte/store';
   import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
+  import IconChevron from './icons/IconChevron.svelte';
+  import IconCheck from './icons/IconCheck.svelte';
 
   type Preset = 'popular' | 'cheapest' | 'all';
 
@@ -198,9 +200,7 @@
       data-testid="tld-picker-toggle"
       aria-label={t('tld.picker.aria')}
     >
-      <svg class="chevron" class:rot={popoverOpen} viewBox="0 0 16 16" aria-hidden="true">
-        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
+      <IconChevron class={'chevron' + (popoverOpen ? ' rot' : '')} />
       <span class="trigger-label">{t('check.tlds.title')}</span>
       <span class="trigger-count nums" data-testid="tld-selected-count" aria-live="polite">{$selectedTlds.length}</span>
     </button>
@@ -302,7 +302,7 @@
             >
               <span class="zone-check" aria-hidden="true">
                 {#if selected}
-                  <svg viewBox="0 0 16 16"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                  <IconCheck />
                 {/if}
               </span>
               <span class="tld">.{cfg.tld}</span>
@@ -335,7 +335,7 @@
                 aria-expanded={popularOpen}
                 data-testid="tld-group-popular"
               >
-                <svg class="gchevron" class:rot={popularOpen} viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <IconChevron class={'gchevron' + (popularOpen ? ' rot' : '')} />
                 {t('check.tlds.presets.popular')}
                 <span class="group-count nums">{popularTlds.length}</span>
               </button>
@@ -362,7 +362,7 @@
                   >
                     <span class="zone-check" aria-hidden="true">
                       {#if selected}
-                        <svg viewBox="0 0 16 16"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <IconCheck />
                       {/if}
                     </span>
                     <span class="tld">.{cfg.tld}</span>
@@ -398,7 +398,7 @@
                 aria-expanded={cheapestOpen}
                 data-testid="tld-group-cheapest"
               >
-                <svg class="gchevron" class:rot={cheapestOpen} viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <IconChevron class={'gchevron' + (cheapestOpen ? ' rot' : '')} />
                 {t('check.tlds.presets.cheapest')}
                 <span class="group-count nums">{cheapestOnlyTlds.length}</span>
               </button>
@@ -425,7 +425,7 @@
                   >
                     <span class="zone-check" aria-hidden="true">
                       {#if selected}
-                        <svg viewBox="0 0 16 16"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <IconCheck />
                       {/if}
                     </span>
                     <span class="tld">.{cfg.tld}</span>
@@ -461,7 +461,7 @@
                 aria-expanded={allOpen}
                 data-testid="tld-group-all"
               >
-                <svg class="gchevron" class:rot={allOpen} viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <IconChevron class={'gchevron' + (allOpen ? ' rot' : '')} />
                 {t('tld.group.all')}
                 <span class="group-count nums">{allRestTlds.length}</span>
               </button>
@@ -488,7 +488,7 @@
                   >
                     <span class="zone-check" aria-hidden="true">
                       {#if selected}
-                        <svg viewBox="0 0 16 16"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <IconCheck />
                       {/if}
                     </span>
                     <span class="tld">.{cfg.tld}</span>
@@ -558,12 +558,12 @@
     background: var(--accent-soft);
     color: var(--accent);
   }
-  .tld-trigger .chevron {
+  .tld-trigger :global(.chevron) {
     width: 14px;
     height: 14px;
     transition: transform var(--dur) var(--ease);
   }
-  .tld-trigger .chevron.rot {
+  .tld-trigger :global(.chevron.rot) {
     transform: rotate(180deg);
   }
   .trigger-count {
@@ -745,12 +745,12 @@
   .group-toggle:hover {
     color: var(--text);
   }
-  .group-toggle .gchevron {
+  .group-toggle :global(.gchevron) {
     width: 12px;
     height: 12px;
     transition: transform var(--dur) var(--ease);
   }
-  .group-toggle .gchevron.rot {
+  .group-toggle :global(.gchevron.rot) {
     transform: rotate(180deg);
   }
   .group-count {
@@ -797,7 +797,7 @@
     background: var(--accent);
     color: var(--on-accent);
   }
-  .zone-check svg {
+  .zone-check :global(svg) {
     width: 12px;
     height: 12px;
   }

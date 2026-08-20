@@ -8,6 +8,7 @@
   import { createToast, sanitizeId } from '../utils';
   import Toast from './Toast.svelte';
   import Tooltip from './Tooltip.svelte';
+  import IconStar from './icons/IconStar.svelte';
   // Static snapshot shipped with the build (SPEC §17 — dropped-domains feed).
   import snapshot from '../../config/dropped.snapshot.json';
 
@@ -137,15 +138,7 @@
               title={$favorites.has(fullName) ? t('results.fav.remove') : t('results.fav.add')}
               data-testid={`drops-row-fav-${sid}`}
             >
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path
-                  d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"
-                  fill={$favorites.has(fullName) ? 'currentColor' : 'none'}
-                  stroke="currentColor"
-                  stroke-width="1"
-                  stroke-linejoin="round"
-                />
-              </svg>
+              <IconStar filled={$favorites.has(fullName)} strokeWidth={1} />
             </button>
             <Tooltip text={t('drops.copy.aria', { domain: fullName })}>
               <button
@@ -356,7 +349,7 @@
     border-color: var(--accent);
   }
 
-  .icon-btn svg {
+  .icon-btn :global(svg) {
     width: 15px;
     height: 15px;
   }

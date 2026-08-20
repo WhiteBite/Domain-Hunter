@@ -31,6 +31,8 @@
   import ExportMenu from './ExportMenu.svelte';
   import WatchBanner from './WatchBanner.svelte';
   import HintBanner from './HintBanner.svelte';
+  import IconDownload from './icons/IconDownload.svelte';
+  import IconChevron from './icons/IconChevron.svelte';
 
   let shareCopied = $state(false);
   let shareTimer: ReturnType<typeof setTimeout> | undefined;
@@ -218,9 +220,7 @@
         title={t('results.csv')}
         data-testid="check-button-csv"
       >
-        <svg viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M8 2v8M5 7l3 3 3-3M3 13h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+        <IconDownload />
         <span>{t('results.csv')}</span>
       </button>
       <ExportMenu disabled={!hasResults} />
@@ -256,9 +256,7 @@
                 data-testid="check-history-toggle"
                 aria-label={t('check.history.toggle.aria')}
               >
-                <svg class="h-chev" class:rot={historyOpen} viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
+                <IconChevron class={'h-chev' + (historyOpen ? ' rot' : '')} />
                 <h3 class="side-title">{t('check.history.title')}</h3>
                 {#if $history.length > 0}
                   <span class="history-count nums">{$history.length}</span>
@@ -454,7 +452,7 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
-  .action svg {
+  .action :global(svg) {
     width: 14px;
     height: 14px;
   }
@@ -513,13 +511,13 @@
     font-weight: 600;
     font-size: var(--text-sm);
   }
-  .history-toggle .h-chev {
+  .history-toggle :global(.h-chev) {
     width: 14px;
     height: 14px;
     color: var(--text-tertiary);
     transition: transform var(--dur) var(--ease);
   }
-  .history-toggle .h-chev.rot {
+  .history-toggle :global(.h-chev.rot) {
     transform: rotate(180deg);
   }
   .history-count {

@@ -10,11 +10,15 @@
   import { mutate } from '../../generators/mutations';
   import { themes } from '../../generators/themes';
   import { favorites, toggleFavorite } from '../favorites';
-  import { clickOutside } from '../clickoutside';
+  import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
   import { copyText } from '../clipboard';
   import { createToast, downloadText, sanitizeId } from '../utils';
   import Toast from './Toast.svelte';
+  import IconDots from './icons/IconDots.svelte';
+  import IconChevron from './icons/IconChevron.svelte';
+  import IconStar from './icons/IconStar.svelte';
+  import IconX from './icons/IconX.svelte';
 
   const TRAY_MAX = 1000;
   const GEN_PREFS_KEY = 'dh:v1:genprefs';
@@ -85,16 +89,9 @@
   let toast = $state('');
   const toastCtl = createToast((m) => (toast = m));
 
-  // Tray ⋯ menu: Escape closes and returns focus to the trigger (required for
-  // keyboard users now that focus is trapped inside the open menu).
+  // Tray ⋯ menu: popover action handles outside-click, Escape, and focus
+  // return to the trigger (same pattern as RowMenu / AvailableMenu).
   let trayMenuTriggerEl: HTMLButtonElement | null = $state(null);
-
-  function onWindowKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Escape' && menuOpen) {
-      menuOpen = false;
-      trayMenuTriggerEl?.focus();
-    }
-  }
 
   function showToast(message: string): void {
     toastCtl.show(message);
@@ -272,8 +269,6 @@
 
   onDestroy(() => toastCtl.destroy());
 </script>
-
-<svelte:window onkeydown={onWindowKeydown} />
 
 <section class="generators">
   <h2>{t('gen.title')}</h2>
@@ -469,7 +464,7 @@
         </button>
         <div
           class="menu-wrap"
-          use:clickOutside={() => { if (menuOpen) menuOpen = false; }}
+          use:popover={{ open: menuOpen, onClose: () => (menuOpen = false), triggerEl: trayMenuTriggerEl }}
         >
           <button
             class="tray-action-btn"
@@ -483,7 +478,7 @@
             title={t('gen.tray.menu.aria')}
             data-testid="gen-button-tray-menu"
           >
-            <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
+            <IconDots />
           </button>
           {#if menuOpen}
             <div class="tray-menu" role="menu" aria-label={t('gen.tray.menu.aria')} use:trapFocus>
@@ -539,7 +534,7 @@
                 aria-label={t('gen.group.collapse.aria')}
                 data-testid={`gen-group-toggle-${sanitizeId(group.id)}`}
               >
-                <svg class="gchevron" class:rot={!groupCollapsed[group.id]} viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <IconChevron class={'gchevron' + (!groupCollapsed[group.id] ? ' rot' : '')} />
                 <span class="group-label">{t(GROUP_LABEL[group.id])}</span>
                 <span class="group-count nums">{group.items.length}</span>
               </button>
@@ -556,15 +551,7 @@
                         title={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
                         data-testid={`gen-tray-fav-${sanitizeId(cand.n)}`}
                       >
-                        <svg viewBox="0 0 16 16" aria-hidden="true">
-                          <path
-                            d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z"
-                            fill={$favorites.has(cand.n) ? 'currentColor' : 'none'}
-                            stroke="currentColor"
-                            stroke-width="1"
-                            stroke-linejoin="round"
-                          />
-                        </svg>
+                        <IconStar filled={$favorites.has(cand.n)} strokeWidth={1} />
                       </button>
                       <span class="row-name">{cand.n}</span>
                       <span class="row-len nums">{cand.n.length}</span>
@@ -576,7 +563,7 @@
                         title={t('gen.tray.remove')}
                         data-testid={`gen-tray-remove-${sanitizeId(cand.n)}`}
                       >
-                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+                        <IconX />
                       </button>
                     </div>
                   {/each}
@@ -644,11 +631,7 @@
   }
 
   .card {
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
     padding: var(--space-4);
-    box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
@@ -908,7 +891,7 @@
     background: var(--accent-soft);
   }
 
-  .tray-action-btn svg {
+  .tray-action-btn :global(svg) {
     width: 16px;
     height: 16px;
   }
@@ -1023,14 +1006,14 @@
     color: var(--text);
   }
 
-  .group-toggle .gchevron {
+  .group-toggle :global(.gchevron) {
     width: 12px;
     height: 12px;
     transition: transform var(--dur) var(--ease);
     transform: rotate(-90deg);
   }
 
-  .group-toggle .gchevron.rot {
+  .group-toggle :global(.gchevron.rot) {
     transform: rotate(0deg);
   }
 
@@ -1093,7 +1076,7 @@
     color: var(--accent);
   }
 
-  .row-fav svg {
+  .row-fav :global(svg) {
     width: 13px;
     height: 13px;
   }
@@ -1135,7 +1118,7 @@
     color: var(--red);
   }
 
-  .row-remove svg {
+  .row-remove :global(svg) {
     width: 14px;
     height: 14px;
   }

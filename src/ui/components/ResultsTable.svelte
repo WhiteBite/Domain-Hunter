@@ -28,6 +28,9 @@
   import AvailableMenu from './AvailableMenu.svelte';
   import LegendPopover from './LegendPopover.svelte';
   import DetailRow from './DetailRow.svelte';
+  import IconRefresh from './icons/IconRefresh.svelte';
+  import IconStar from './icons/IconStar.svelte';
+  import IconExternal from './icons/IconExternal.svelte';
   import type { DigDetail, RegistrarQuote } from './DetailRow.svelte';
 
   import registrarsJson from '../../config/registrars.json';
@@ -597,7 +600,7 @@
             title={t('watch.refresh.aria')}
             data-testid="results-watch-refresh"
           >
-            <svg class:spin={$watchRunning} viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v3h-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <IconRefresh class={$watchRunning ? 'spin' : ''} />
           </button>
         </Tooltip>
       </div>
@@ -826,9 +829,9 @@
                     data-testid={`results-row-fav-${sid}`}
                   >
                     {#if isFav}
-                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="currentColor" /></svg>
+                      <IconStar filled={true} />
                     {:else}
-                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+                      <IconStar />
                     {/if}
                   </button>
                   {#if buy}
@@ -849,7 +852,7 @@
                         }
                         data-testid={`results-row-buy-${sid}`}
                       >
-                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <IconExternal />
                       </a>
                     {:else}
                       <Tooltip text={t('registrar.noDeeplink', { registrar: buyInfo.registrar?.name ?? '' })}>
@@ -861,7 +864,7 @@
                           aria-label={t('results.buy.aria', { domain: row.result.domain })}
                           data-testid={`results-row-buy-${sid}`}
                         >
-                          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                          <IconExternal />
                         </a>
                       </Tooltip>
                     {/if}
@@ -870,7 +873,7 @@
                          identical on rows without a buy link (star x-position
                          must not shift between rows). -->
                     <span class="action-btn buy-placeholder" aria-hidden="true" tabindex="-1">
-                      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                      <IconExternal />
                     </span>
                   {/if}
                   <RowMenu
@@ -1255,11 +1258,11 @@
     opacity: 0.5;
     cursor: not-allowed;
   }
-  .watch-refresh svg {
+  .watch-refresh :global(svg) {
     width: 14px;
     height: 14px;
   }
-  .watch-refresh .spin {
+  .watch-refresh :global(.spin) {
     animation-duration: 1.5s;
   }
   .coupon {

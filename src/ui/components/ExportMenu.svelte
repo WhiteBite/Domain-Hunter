@@ -7,6 +7,9 @@
   import { trapFocus } from '../focustrap';
   import { copyText } from '../clipboard';
   import { toCsv, toMarkdown, toTsv } from '../csv';
+  import IconDots from './icons/IconDots.svelte';
+  import IconCheck from './icons/IconCheck.svelte';
+  import IconCopy from './icons/IconCopy.svelte';
 
   // Export menu popover state (CSV / Markdown / TSV copy to clipboard).
   let exportMenuOpen = $state(false);
@@ -73,7 +76,7 @@
     title={t('export.menu.aria')}
     data-testid="check-button-export-menu"
   >
-    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
+    <IconDots />
   </button>
   {#if exportMenuOpen}
     <div class="export-menu" role="menu" use:trapFocus>
@@ -85,9 +88,9 @@
         data-testid="check-export-copy-csv"
       >
         {#if exportCopiedKey === 'csv'}
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <IconCheck />
         {:else}
-          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+          <IconCopy />
         {/if}
         {t('export.copyCsv')}
       </button>
@@ -99,7 +102,7 @@
         data-testid="check-export-copy-md"
       >
         {#if exportCopiedKey === 'md'}
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <IconCheck />
         {:else}
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h2v8H2zM6 4h2l2 4 2-4h2v8h-2V7l-2 4-2-4v5H6z" fill="currentColor" /></svg>
         {/if}
@@ -113,7 +116,7 @@
         data-testid="check-export-copy-tsv"
       >
         {#if exportCopiedKey === 'tsv'}
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <IconCheck />
         {:else}
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12M6 4v8M10 4v8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
         {/if}
@@ -148,7 +151,7 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
-  .action svg {
+  .action :global(svg) {
     width: 14px;
     height: 14px;
   }

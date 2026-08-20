@@ -2,6 +2,7 @@
   import { t } from '../../i18n';
   import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
+  import IconInfo from './icons/IconInfo.svelte';
   import type { CheckStatus } from '../../types';
 
   interface LegendItem {
@@ -42,7 +43,7 @@
     title={t('results.legend.aria')}
     data-testid="results-legend-toggle"
   >
-    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 7.4v3.2M8 5.2v.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+    <IconInfo radius={6.5} />
   </button>
   {#if open}
     <div class="legend" role="dialog" aria-label={t('results.legend.aria')} use:trapFocus>

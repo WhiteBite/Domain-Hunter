@@ -2,6 +2,7 @@
   import { t } from '../../i18n';
   import { requestFavoritesView } from '../store';
   import { watchChanges } from '../watchlist';
+  import IconX from './icons/IconX.svelte';
 
   let dismissed = $state(false);
 
@@ -28,7 +29,7 @@
         {t('watch.showFavs')}
       </button>
       <button class="btn ghost" type="button" onclick={() => (dismissed = true)} aria-label={t('watch.banner.dismiss')} data-testid="check-watch-dismiss">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+        <IconX />
       </button>
     </div>
   </div>
@@ -85,7 +86,7 @@
     justify-content: center;
   }
 
-  .watch-actions .btn.ghost svg {
+  .watch-actions .btn.ghost :global(svg) {
     width: 14px;
     height: 14px;
   }

@@ -171,3 +171,12 @@
     transform: rotate(360deg);
   }
 }
+
+/* ---- Card base (SettingsTab / AboutTab / SocialTab / GeneratorsTab) ---- */
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}

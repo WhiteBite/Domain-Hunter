@@ -2,6 +2,11 @@
   import { t } from '../../i18n';
   import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
+  import IconDots from './icons/IconDots.svelte';
+  import IconCheck from './icons/IconCheck.svelte';
+  import IconCopy from './icons/IconCopy.svelte';
+  import IconStar from './icons/IconStar.svelte';
+  import IconDownload from './icons/IconDownload.svelte';
 
   interface Props {
     availCopied: boolean;
@@ -30,7 +35,7 @@
     title={t('results.available.menu.aria')}
     data-testid="results-available-menu"
   >
-    <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
+    <IconDots />
   </button>
   {#if open}
     <div class="menu" role="menu" use:trapFocus>
@@ -42,9 +47,9 @@
         data-testid="results-available-copy"
       >
         {#if availCopied}
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <IconCheck />
         {:else}
-          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
+          <IconCopy />
         {/if}
         {t('results.available.copy')}
       </button>
@@ -55,7 +60,7 @@
         onclick={() => { onFav(); open = false; }}
         data-testid="results-available-fav"
       >
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
+        <IconStar />
         {t('results.available.fav')}
       </button>
       <button
@@ -65,7 +70,7 @@
         onclick={() => { onCsv(); open = false; }}
         data-testid="results-available-csv"
       >
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3M3 13h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <IconDownload />
         {t('results.available.csv')}
       </button>
     </div>
