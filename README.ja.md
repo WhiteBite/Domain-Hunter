@@ -17,15 +17,15 @@ Domain Hunter はレジストリの **RDAP** エンドポイント（Verisign、
 ## 特徴
 
 - **一括登録可否チェック** — 最大 3,000 件の名前を貼り付け。選択した TLD への展開で 1 回あたり最大 30,000 件のチェックを生成し、ソート可能なテーブルにライブで流し込みます。中断した実行は再開可能。
-- **140 以上の厳選 TLD ゾーン** — `com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` と 120 以上の追加ゾーン、17 のレジストリ基盤にまたがります。追加ゾーンはライブの IANA RDAP ブートストラップ経由で自動検出されます。
+- **148 の厳選 TLD ゾーン** — `com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` と 120 以上の追加ゾーン、18 のレジストリ基盤にまたがります。追加ゾーンはライブの IANA RDAP ブートストラップ経由で自動検出されます。
 - **正直な 3 状態の結果** — `available` / `probably_available` / `unknown`。信頼性の低い ccTLD では 404 を DNS-over-HTTPS（Cloudflare + Google DNS）で裏付けしてから「登録可能」と判定します。Domain Hunter は決して推測しません。
 - **5 つの名前ジェネレーター** — ルート × 接辞のコンビネーター、発音可能性スコア付きの音節ミキサー（CMUdict 由来）、厳選テーマ単語セット、TLD ハック（`family` → `fami.ly`）、単語変異（`midas` → `mydas`、`midaz`、`midaso`）。候補はタブ切り替えを生き残る永続トレイに集まり、実行前に予想チェック数も表示します。
-- **ライブ価格と TCO** — Porkbun と Cloudflare からの初年度・更新料金をライブ取得、さらに最大 5 つのレジストラ（Dynadot、Spaceship、ValueDomain のスナップショット）を比較する週次ハーベスト。クーポン、プロモーショントラップ検出（更新料が初年度の 5 倍以上）、3 年間 TCO ソート、13 のレジストラへのカバレッジ連動購入リンク。価格は USD、RUB、EUR に対応。
+- **ライブ価格と TCO** — Porkbun と Cloudflare からの初年度・更新料金をライブ取得、さらに最大 5 つのレジストラ（Dynadot、Spaceship、ValueDomain のスナップショット）を比較する週次ハーベスト。クーポン、プロモーショントラップ検出（更新料が初年度の 5 倍以上）、3 年間 TCO ソート、42 のレジストラへのカバレッジ連動購入リンク。価格は USD、RUB、EUR に対応。
 - **ドメインごとの「購入先」** — 登録可能なドメインを 1 クリックすると、レジストリプレミアム警告（プレミアム価格付き）と現在最安値のレジストラを直接購入リンクとともに表示（公開 DigMyName API、キー不要）。
 - **レジストリへの礼儀** — 基盤ごとの AIMD レート制限（例: Google Registry の厳格な ~1 rps を遵守）、HTTP 429 での `Retry-After` 自動バックオフ、`localStorage` での結果キャッシュ。
 - **お気に入りと履歴** — 任意のドメイン（結果、ジェネレーター候補、削除リスト）にスターを付けて専用フィルター付きの永続ショートリストへ。最近の実行は記憶され 1 クリックで復元。結果は検索・複数選択・選択コピーに対応。
 - **共有と書き出し** — ワンクリックの共有リンク（`#s=` がクエリ + ゾーンを符号化、実行を自動開始）、Excel 互換の CSV 書き出し（BOM + クォート）、行ごとのコピー・再チェック。
-- **プライバシー・バイ・デザイン** — アナリティクス、テレメトリー、アカウントなし。すべての状態はブラウザーの `localStorage` に保存。多言語 UI（英語、ロシア語、スペイン語、ドイツ語、ポルトガル語）、ライト・ダークテーマ、モバイル対応。
+- **プライバシー・バイ・デザイン** — アナリティクス、テレメトリー、アカウントなし。すべての状態はブラウザーの `localStorage` に保存。多言語 UI（英語、ロシア語、スペイン語、ドイツ語、ポルトガル語、中国語、日本語、フランス語）、ライト・ダークテーマ、モバイル対応。
 
 ![Domain Hunter name generators in dark theme: combinator, syllable mixer, thematic word sets, TLD-hacks and mutations](docs/screenshot-en-generators.png)
 
@@ -66,7 +66,7 @@ npm run dev       # 開発用 Vite 開発サーバー
 
 ## 対応ゾーン
 
-147 の厳選ゾーンをレジストリ基盤別にグループ化: Verisign（`com net cc tv`）、Google Registry（`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`）、Identity Digital（`io ai me sh ac pro info live world email studio agency` と 70 以上）、CentralNic（`xyz lol icu cyou bond sbs cfd art` と 30 以上）、Radix（`tech site online fun space store website press host`）、Uniregistry（`cloud link top win bid loan men`）、さらにステルス ccTLD エンドポイント（`de co us uk nl fr ch ru so ly`）。ライブの IANA ブートストラップが新しく委任された gTLD を自動追加します。
+148 の厳選ゾーンをレジストリ基盤別にグループ化: Verisign（`com net cc tv`）、Google Registry（`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`）、Identity Digital（`io ai me sh ac pro info live world email studio agency` と 54 追加）、CentralNic（`xyz lol icu cyou bond sbs cfd art` と 21 追加）、Radix（`tech site online fun space store website press host`）、Uniregistry（`cloud link top win bid loan men`）、さらにステルス ccTLD エンドポイント（`de co us uk nl fr ch ru so ly pl`）と NASK ポーランド（`pl`）。ライブの IANA ブートストラップが新しく委任された gTLD を自動追加します。
 
 ゾーンが足りない？ データ駆動なので `src/config/tlds.json` にエントリーを追加するだけでコード変更は不要です。
 
@@ -75,7 +75,7 @@ npm run dev       # 開発用 Vite 開発サーバー
 | | Domain Hunter | レジストラの検索ボックス | `whois` CLI | 有料 API（WhoisXML、DomainTools） |
 |---|---|---|---|---|
 | 価格 | 無料・MIT | 無料（1 レジストラに固定） | 無料 | ~$19/月から |
-| 一括チェック | 3,000 件 × 140 以上の TLD | 1 件ずつ | スクリプトが必要 | あり・従量課金 |
+| 一括チェック | 3,000 件 × 148 TLD | 1 件ずつ | スクリプトが必要 | あり・従量課金 |
 | サーバー / API キー | **なし — ブラウザーで動作** | 該当せず | ローカルインストール | API キー + 課金 |
 | 名前ジェネレーター | 5 つ内蔵 | 基本的な提案のみ | なし | なし |
 | ライブ価格 + 3 年 TCO | 12 レジストラを比較 | 自社価格のみ | なし | 別料金 |

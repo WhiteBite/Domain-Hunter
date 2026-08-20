@@ -17,15 +17,15 @@ Domain Hunter vérifie la disponibilité des domaines directement auprès des po
 ## Fonctionnalités
 
 - **Vérification de disponibilité en masse** — collez jusqu'à 3 000 noms ; l'expansion sur les TLD sélectionnés produit jusqu'à 30 000 vérifications par exécution, diffusées en direct dans un tableau triable. Les exécutions interrompues peuvent être reprises.
-- **140+ zones TLD sélectionnées** — `com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` et 120+ autres, réparties sur 17 infrastructures de registres. Les zones supplémentaires sont découvertes automatiquement via le bootstrap RDAP IANA en direct.
+- **148 zones TLD sélectionnées** — `com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` et 120+ autres, réparties sur 18 infrastructures de registres. Les zones supplémentaires sont découvertes automatiquement via le bootstrap RDAP IANA en direct.
 - **Résultats honnêtes à trois états** — `available` / `probably_available` / `unknown`. Pour les ccTLDs de faible confiance, un 404 est corroboré avec DNS-over-HTTPS (Cloudflare + Google DNS) avant de déclarer quoi que ce soit comme disponible. Domain Hunter ne devine jamais.
 - **Cinq générateurs de noms** — combinateur racine × affixe, mélangeur de syllabes à score de prononçabilité (dérivé de CMUdict), ensembles de mots thématiques sélectionnés, astuces TLD (`family` → `fami.ly`), et mutations de mots (`midas` → `mydas`, `midaz`, `midaso`). Les candidats se collectent dans un plateau persistant qui survit aux changements d'onglet et affiche le nombre de vérifications prévues avant de les lancer.
-- **Prix en direct et TCO** — prix de première année et de renouvellement en direct depuis Porkbun et Cloudflare, plus une récolte hebdomadaire comparant jusqu'à cinq bureaux d'enregistrement (instantanés Dynadot, Spaceship, ValueDomain) ; codes promotionnels, détection des pièges promotionnels (renouvellement ≥ 5× la première année), tri par TCO sur 3 ans, et liens d'achat orientés couverture vers 13 bureaux d'enregistrement. Prix en USD, RUB ou EUR.
+- **Prix en direct et TCO** — prix de première année et de renouvellement en direct depuis Porkbun et Cloudflare, plus une récolte hebdomadaire comparant jusqu'à cinq bureaux d'enregistrement (instantanés Dynadot, Spaceship, ValueDomain) ; codes promotionnels, détection des pièges promotionnels (renouvellement ≥ 5× la première année), tri par TCO sur 3 ans, et liens d'achat orientés couverture vers 42 bureaux d'enregistrement. Prix en USD, RUB ou EUR.
 - **« Où acheter » par domaine** — un clic sur un domaine disponible affiche un avertissement de premium du registre (avec le prix premium) et le bureau d'enregistrement actuellement le moins cher avec un lien d'achat direct (API publique DigMyName, sans clés).
 - **Poli envers les registres** — limitation de débit AIMD par infrastructure (par ex. la limite stricte de ~1 rps de Google Registry est respectée), recul automatique sur HTTP 429 avec `Retry-After`, et mise en cache des résultats dans `localStorage`.
 - **Favoris et historique** — étoilez n'importe quel domaine (résultats, candidats du générateur, listes d'expirés) dans une liste persistante avec son propre filtre ; les exécutions récentes sont mémorisées et restaurables en un clic. Les résultats prennent en charge la recherche, la sélection multiple et la copie de la sélection.
 - **Partage et export** — liens de partage en un clic (`#s=` encode la requête + les zones, démarre automatiquement l'exécution), export CSV compatible Excel (BOM + guillemets), copie/revérification par ligne.
-- **Privé par conception** — pas d'analytics, pas de télémétrie, pas de comptes. Tout l'état vit dans le `localStorage` de votre navigateur. Interface multilingue (anglais, russe, espagnol, allemand, portugais), thèmes clair et sombre, adapté au mobile.
+- **Privé par conception** — pas d'analytics, pas de télémétrie, pas de comptes. Tout l'état vit dans le `localStorage` de votre navigateur. Interface multilingue (anglais, russe, espagnol, allemand, portugais, chinois, japonais, français), thèmes clair et sombre, adapté au mobile.
 
 ![Générateurs de noms Domain Hunter en thème sombre : combinateur, mélangeur de syllabes, ensembles de mots thématiques, astuces TLD et mutations](docs/screenshot-en-generators.png)
 
@@ -66,7 +66,7 @@ Pas de backend, pas de variables d'environnement, pas de clés API — jamais.
 
 ## Zones prises en charge
 
-147 zones sélectionnées regroupées par infrastructure de registre : Verisign (`com net cc tv`), Google Registry (`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`), Identity Digital (`io ai me sh ac pro info live world email studio agency` et 70+ autres), CentralNic (`xyz lol icu cyou bond sbs cfd art` et 30+ autres), Radix (`tech site online fun space store website press host`), Uniregistry (`cloud link top win bid loan men`), plus des points de terminaison ccTLD furtifs (`de co us uk nl fr ch ru so ly`). Le bootstrap IANA en direct ajoute automatiquement les nouveaux gTLDs délégués.
+148 zones sélectionnées regroupées par infrastructure de registre : Verisign (`com net cc tv`), Google Registry (`dev app page new day how ing meme zip mov foo dad phd prof esq nexus rsvp soy boo channel`), Identity Digital (`io ai me sh ac pro info live world email studio agency` et 54 autres), CentralNic (`xyz lol icu cyou bond sbs cfd art` et 21 autres), Radix (`tech site online fun space store website press host`), Uniregistry (`cloud link top win bid loan men`), plus des points de terminaison ccTLD furtifs (`de co us uk nl fr ch ru so ly pl`) et NASK Pologne (`pl`). Le bootstrap IANA en direct ajoute automatiquement les nouveaux gTLDs délégués.
 
 Il manque une zone ? C'est piloté par les données — ajouter une entrée dans `src/config/tlds.json` suffit, aucune modification de code n'est nécessaire.
 
@@ -75,7 +75,7 @@ Il manque une zone ? C'est piloté par les données — ajouter une entrée dans
 | | Domain Hunter | Champs de recherche de bureaux d'enregistrement | `whois` CLI | API payantes (WhoisXML, DomainTools) |
 |---|---|---|---|---|
 | Prix | Gratuit, MIT | Gratuit (vous enferme chez un bureau d'enregistrement) | Gratuit | À partir de ~19 $/mois |
-| Vérification en masse | 3 000 noms × 140+ TLDs | Un à la fois | Scripting requis | Oui, mesuré |
+| Vérification en masse | 3 000 noms × 148 TLDs | Un à la fois | Scripting requis | Oui, mesuré |
 | Serveurs / clés API | **Aucun — s'exécute dans le navigateur** | N/A | Installation locale | Clé API + facturation |
 | Générateurs de noms | 5 intégrés | Suggestions basiques | Aucun | Aucun |
 | Prix en direct + TCO 3 ans | 12 bureaux d'enregistrement comparés | Prix propres uniquement | Aucun | Frais supplémentaire |

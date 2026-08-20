@@ -26,8 +26,8 @@ src/
   App.svelte            # header, tab router, footer
   types.ts              # ALL shared contracts — single source of truth, never duplicate
   config/
-    tlds.json           # 17 infras + 147 curated zones (data-driven: add zones here, never in code)
-    registrars.json     # 12 registrars: buy-link templates
+    tlds.json           # 18 infras + 148 curated zones (data-driven: add zones here, never in code)
+    registrars.json     # 42 registrars: buy-link templates
     pricing.snapshot.json  # offline pricing baseline
     wholesale.json      # registry floor prices (promo detection)
     dictionaries/       # generator word data + LICENSES.md attribution (required)
