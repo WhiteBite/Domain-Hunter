@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadPricing, normalizePorkbun, normalizeCloudflare } from '../src/pricing/pricing';
+import { loadPricing, normalizePorkbun, normalizeCloudflare, matrixColumns } from '../src/pricing/pricing';
 import snapshot from '../src/config/pricing.snapshot.json';
-import type { PricingTable } from '../src/types';
+import type { PriceEntry, PricingTable } from '../src/types';
 
 const SNAPSHOT = snapshot as unknown as PricingTable;
 
@@ -184,5 +184,49 @@ describe('loadPricing', () => {
     const parsed = JSON.parse(stored!) as { table: PricingTable; fetchedAt: number };
     expect(parsed.table.sources).toContain('porkbun');
     expect(parsed.table.sources).not.toContain('cloudflare');
+  });
+});
+
+describe('matrixColumns', () => {
+  function table(tlds: Record<string, Record<string, PriceEntry>>): PricingTable {
+    return { generatedAt: '2026-01-01T00:00:00.000Z', sources: ['porkbun'], tlds, coupons: {} };
+  }
+
+  it('returns registrar IDs ordered by coverage descending', () => {
+    const tbl = table({
+      com: {
+        porkbun: { reg: 1168, renew: 1168, transfer: 1168 },
+        cloudflare: { reg: 1044, renew: 1044, transfer: null },
+      },
+      net: {
+        porkbun: { reg: 1287, renew: 1287, transfer: 1287 },
+        cloudflare: { reg: 1104, renew: 1104, transfer: null },
+      },
+      io: {
+        porkbun: { reg: 4587, renew: 4587, transfer: 4587 },
+      },
+    });
+    // porkbun covers 3 zones, cloudflare covers 2 → [porkbun, cloudflare]
+    expect(matrixColumns(tbl)).toEqual(['porkbun', 'cloudflare']);
+  });
+
+  it('caps at maxColumns', () => {
+    const regs: Record<string, PriceEntry> = {};
+    for (const rid of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']) {
+      regs[rid] = { reg: 100, renew: 100, transfer: null };
+    }
+    const tbl = table({ com: regs });
+    expect(matrixColumns(tbl, 6)).toHaveLength(6);
+  });
+
+  it('excludes registrars with only null reg prices', () => {
+    const tbl = table({
+      com: {
+        porkbun: { reg: 1168, renew: 1168, transfer: 1168 },
+        cloudflare: { reg: null, renew: 1044, transfer: null },
+      },
+    });
+    // cloudflare has null reg → excluded; only porkbun qualifies
+    expect(matrixColumns(tbl)).toEqual(['porkbun']);
   });
 });

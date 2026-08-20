@@ -149,11 +149,17 @@ export const ALL_TESTIDS = [
   'drops-input-search', // search input
   'drops-select-tld', // TLD filter select
   'drops-button-add-all', // add-all button
+
+  // ---- PricesTab.svelte ----
+  'prices-search', // zone filter search input
+  'prices-sort', // sort mode select
+  'prices-export-csv', // CSV export button
+  'prices-more', // show-more button
 ] as const;
 
 export const DYNAMIC_TESTID_PREFIXES = [
   // ---- App.svelte ----
-  'app-tab-', // tab buttons: app-tab-{tabId} (check|generators|drops|social|settings|about)
+  'app-tab-', // tab buttons: app-tab-{tabId} (check|generators|drops|prices|social|settings|about)
   'app-lang-', // language menu items: app-lang-{code} (en|ru|es|de|pt)
 
   // ---- TldPicker.svelte ----
@@ -192,6 +198,9 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'drops-row-fav-', // drops favorite stars: drops-row-fav-{domain}
   'drops-row-copy-', // drops copy buttons: drops-row-copy-{domain}
   'drops-row-add-', // drops add buttons: drops-row-add-{domain}
+
+  // ---- PricesTab.svelte ----
+  'prices-row-', // price matrix rows: prices-row-{tld}
 
   // ---- SocialTab.svelte ----
   'social-card-link-', // platform open links: social-card-link-{platform}

@@ -163,7 +163,7 @@ export async function seedRunSnapshot(page: Page, snapshot: RunSnapshot): Promis
 
 // ---- Tab navigation ----
 
-export type TabId = 'check' | 'generators' | 'drops' | 'social' | 'settings' | 'about';
+export type TabId = 'check' | 'generators' | 'drops' | 'prices' | 'social' | 'settings' | 'about';
 
 /**
  * A stable interactive element inside each tab panel, used to confirm the
@@ -174,6 +174,7 @@ const TAB_ANCHOR_TESTID: Record<TabId, string> = {
   check: 'check-input-domains',
   generators: 'gen-input-keywords',
   drops: 'drops-input-search',
+  prices: 'prices-search',
   social: 'social-input-handle',
   settings: 'settings-select-theme',
   about: 'about-link-github',

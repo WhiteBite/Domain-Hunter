@@ -141,7 +141,7 @@ test.describe('Inventory meta-test', () => {
     await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
     // Visit every tab so lazily-mounted content enters the DOM.
-    for (const tab of ['check', 'generators', 'drops', 'social', 'settings', 'about'] as const) {
+    for (const tab of ['check', 'generators', 'drops', 'prices', 'social', 'settings', 'about'] as const) {
       await navigateToTab(page, tab);
     }
 
