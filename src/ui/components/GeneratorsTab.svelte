@@ -14,6 +14,7 @@
   import { trapFocus } from '../focustrap';
   import { copyText } from '../clipboard';
   import { createToast, downloadText, sanitizeId } from '../utils';
+  import Toast from './Toast.svelte';
 
   const TRAY_MAX = 1000;
   const GEN_PREFS_KEY = 'dh:v1:genprefs';
@@ -471,7 +472,7 @@
           use:clickOutside={() => { if (menuOpen) menuOpen = false; }}
         >
           <button
-            class="action-btn"
+            class="tray-action-btn"
             class:active={menuOpen}
             type="button"
             bind:this={trayMenuTriggerEl}
@@ -485,7 +486,7 @@
             <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
           </button>
           {#if menuOpen}
-            <div class="menu" role="menu" aria-label={t('gen.tray.menu.aria')} use:trapFocus>
+            <div class="tray-menu" role="menu" aria-label={t('gen.tray.menu.aria')} use:trapFocus>
               <div class="menu-row">
                 <input
                   class="set-name"
@@ -500,7 +501,7 @@
                 </button>
               </div>
               <button
-                class="menu-item"
+                class="tray-menu-item"
                 type="button"
                 role="menuitem"
                 onclick={() => genCandidates.set([])}
@@ -510,7 +511,7 @@
                 {t('gen.tray.clear')}
               </button>
               <button
-                class="menu-item"
+                class="tray-menu-item"
                 type="button"
                 role="menuitem"
                 onclick={() => void copyList()}
@@ -599,7 +600,9 @@
   </div>
 
   {#if toast}
-    <div class="toast" role="status" data-testid="gen-toast">{toast}</div>
+    <div class="toast-anchor">
+      <Toast message={toast} testid="gen-toast" />
+    </div>
   {/if}
 </section>
 
@@ -877,13 +880,9 @@
     max-width: 140px;
   }
 
-  /* ⋯ overflow menu */
-  .menu-wrap {
-    position: relative;
-    display: inline-flex;
-  }
+  /* Shared .menu-wrap lives in src/ui/chrome.css. */
 
-  .action-btn {
+  .tray-action-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -897,24 +896,24 @@
     transition: all var(--dur) var(--ease);
   }
 
-  .action-btn:hover {
+  .tray-action-btn:hover {
     border-color: var(--border-strong);
     color: var(--text);
     background: var(--bg-sunken);
   }
 
-  .action-btn.active {
+  .tray-action-btn.active {
     border-color: var(--accent);
     color: var(--accent);
     background: var(--accent-soft);
   }
 
-  .action-btn svg {
+  .tray-action-btn svg {
     width: 16px;
     height: 16px;
   }
 
-  .menu {
+  .tray-menu {
     position: absolute;
     top: calc(100% + 4px);
     right: 0;
@@ -947,7 +946,7 @@
     font-size: var(--text-xs);
   }
 
-  .menu-item {
+  .tray-menu-item {
     display: flex;
     align-items: center;
     padding: var(--space-1) var(--space-2);
@@ -962,11 +961,11 @@
     transition: background var(--dur) var(--ease);
   }
 
-  .menu-item:hover:not(:disabled) {
+  .tray-menu-item:hover:not(:disabled) {
     background: var(--bg-sunken);
   }
 
-  .menu-item:disabled {
+  .tray-menu-item:disabled {
     opacity: 0.45;
     cursor: not-allowed;
   }
@@ -1273,25 +1272,21 @@
     font-size: var(--text-sm);
   }
 
-  /* Bottom-right so the toast never overlaps the centered footer.
-     Entrance animation is transform/opacity only (GPU-composited; the global
-     reduced-motion rule collapses it). */
-  .toast {
-    position: fixed;
+  /* Bottom-right toast override for the tray (shared .toast is centered).
+     The anchor wrapper is display:contents so it doesn't affect flex layout;
+     the :global(.toast) override only matches inside this component. */
+  .toast-anchor {
+    display: contents;
+  }
+  .toast-anchor :global(.toast) {
     right: var(--space-4);
     bottom: var(--space-4);
+    left: auto;
+    transform: none;
     max-width: 360px;
-    background: var(--bg-elevated);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-full);
     box-shadow: var(--shadow-pop);
-    padding: var(--space-2) var(--space-5);
-    font-size: var(--text-sm);
-    z-index: 200;
     animation: gen-toast-in var(--dur) var(--ease);
   }
-
   @keyframes gen-toast-in {
     from {
       opacity: 0;

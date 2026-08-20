@@ -1,0 +1,173 @@
+/**
+ * Shared chrome styles — global declarations extracted from component-scoped
+ * <style> blocks to kill copy-paste duplication (Wave F5). Every declaration
+ * here is the verbatim majority version; divergent pieces stay in their
+ * components under renamed local classes.
+ *
+ * Imported once in App.svelte right after tokens.css.
+ */
+
+/* ---- Menu chrome (RowMenu / AvailableMenu / ExportMenu / GeneratorsTab) ---- */
+
+.menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1);
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  min-width: 140px;
+}
+
+.menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  text-align: left;
+  min-height: 32px;
+  transition: background var(--dur) var(--ease);
+}
+
+.menu-item:hover {
+  background: var(--bg-sunken);
+}
+
+.menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menu-item.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.menu-item svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+/* ---- Action button (RowMenu / AvailableMenu / LegendPopover / ResultsTable) ---- */
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--dur) var(--ease);
+}
+
+.action-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+  background: var(--bg-sunken);
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.action-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ---- Chip tags (ResultsTable / DetailRow) ---- */
+
+.chip-tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  line-height: 1.5;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.chip-tag.promo {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.chip-tag.trap {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+/* Premium is a warning-tier signal, not an error -- amber, not red. */
+.chip-tag.premium {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.chip-tag.watch-freed {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.chip-tag.watch-taken {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+/* ---- Toast (SettingsTab / DropsTab -- centered, no animation) ---- */
+
+.toast {
+  position: fixed;
+  bottom: var(--space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+  z-index: 200;
+}
+
+/* ---- Spin animation (RowMenu / ResultsTable / SocialTab) ---- */
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

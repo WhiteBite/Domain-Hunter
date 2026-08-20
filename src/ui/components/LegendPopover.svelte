@@ -128,27 +128,5 @@
     color: var(--text-secondary);
     line-height: 1.4;
   }
-  .action-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--text-secondary);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--dur) var(--ease);
-  }
-  .action-btn:hover {
-    border-color: var(--border-strong);
-    color: var(--text);
-    background: var(--bg-sunken);
-  }
-  .action-btn svg {
-    width: 15px;
-    height: 15px;
-  }
+  /* Shared .action-btn (+ :hover, svg) lives in src/ui/chrome.css. */
 </style>

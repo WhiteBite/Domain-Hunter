@@ -251,19 +251,7 @@
     background: var(--bg-overlay);
     text-decoration: none;
   }
-  .chip-tag {
-    display: inline-block;
-    font-size: 10px;
-    padding: 0 4px;
-    border-radius: var(--radius-full);
-    line-height: 1.5;
-    font-weight: 500;
-    width: fit-content;
-  }
-  .chip-tag.premium {
-    background: var(--amber-soft);
-    color: var(--amber);
-  }
+  /* Shared .chip-tag (+ .premium variant) lives in src/ui/chrome.css. */
 
   @media (max-width: 700px) {
     tr.detail-row {

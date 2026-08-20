@@ -536,20 +536,7 @@
     max-width: 100%;
   }
 
-  .toast {
-    position: fixed;
-    bottom: var(--space-5);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg-elevated);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-full);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-2) var(--space-5);
-    font-size: var(--text-sm);
-    z-index: 200;
-  }
+  /* Shared .toast lives in src/ui/chrome.css. */
 
   /* Wide: appearance + engine stack in the left column, data on the right —
      no dead right half. */

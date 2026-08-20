@@ -176,27 +176,5 @@
     z-index: 60;
     min-width: 180px;
   }
-  .menu-item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    border: none;
-    background: transparent;
-    color: var(--text);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    text-align: left;
-    min-height: 32px;
-    transition: background var(--dur) var(--ease);
-  }
-  .menu-item:hover {
-    background: var(--bg-sunken);
-  }
-  .menu-item svg {
-    width: 14px;
-    height: 14px;
-    flex: none;
-  }
+  /* Shared .menu-item lives in src/ui/chrome.css. */
 </style>

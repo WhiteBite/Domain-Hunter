@@ -1228,42 +1228,8 @@
     font-weight: 400;
   }
 
-  .action-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-  }
-
-  .chip-tag {
-    display: inline-block;
-    font-size: 10px;
-    padding: 0 4px;
-    border-radius: var(--radius-full);
-    line-height: 1.5;
-    font-weight: 500;
-    width: fit-content;
-  }
-  .chip-tag.promo {
-    background: var(--green-soft);
-    color: var(--green);
-  }
-  .chip-tag.trap {
-    background: var(--red-soft);
-    color: var(--red);
-  }
-  /* Premium is a warning-tier signal, not an error — amber, not red. */
-  .chip-tag.premium {
-    background: var(--amber-soft);
-    color: var(--amber);
-  }
-  .chip-tag.watch-freed {
-    background: var(--green-soft);
-    color: var(--green);
-  }
-  .chip-tag.watch-taken {
-    background: var(--red-soft);
-    color: var(--red);
-  }
+  /* Shared .action-btn (+ :hover, :disabled, .active, svg) and .chip-tag
+     (+ variants) live in src/ui/chrome.css. */
   .watch-refresh {
     width: 32px;
     height: 32px;
@@ -1319,33 +1285,7 @@
     justify-content: flex-end;
     align-items: center;
   }
-  .action-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--text-secondary);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--dur) var(--ease);
-  }
-  .action-btn:hover {
-    border-color: var(--border-strong);
-    color: var(--text);
-    background: var(--bg-sunken);
-  }
-  .action-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .action-btn svg {
-    width: 15px;
-    height: 15px;
-  }
+  /* Shared .action-btn lives in src/ui/chrome.css. */
   .buy-btn {
     color: var(--accent);
     border-color: color-mix(in srgb, var(--accent) 30%, transparent);
@@ -1359,14 +1299,7 @@
     background: var(--accent);
     border-color: var(--accent);
   }
-  .spin {
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
+  /* Shared .spin + @keyframes spin live in src/ui/chrome.css. */
   .sentinel {
     height: 1px;
     width: 100%;

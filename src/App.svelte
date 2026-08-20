@@ -13,6 +13,7 @@
   import type { Locale, Settings } from './types';
   import Flag from './ui/components/Flag.svelte';
   import './ui/tokens.css';
+  import './ui/chrome.css';
   import CheckTab from './ui/components/CheckTab.svelte';
   import GeneratorsTab from './ui/components/GeneratorsTab.svelte';
   import DropsTab from './ui/components/DropsTab.svelte';

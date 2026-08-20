@@ -6,6 +6,7 @@
   import { filterDrops, type DroppedDomain } from '../../core/dropped';
   import { copyText } from '../clipboard';
   import { createToast, sanitizeId } from '../utils';
+  import Toast from './Toast.svelte';
   import Tooltip from './Tooltip.svelte';
   // Static snapshot shipped with the build (SPEC §17 — dropped-domains feed).
   import snapshot from '../../config/dropped.snapshot.json';
@@ -180,7 +181,7 @@
   {/if}
 
   {#if toast}
-    <div class="toast" role="status">{toast}</div>
+    <Toast message={toast} />
   {/if}
 </section>
 
@@ -376,20 +377,7 @@
     padding-top: var(--space-2);
   }
 
-  .toast {
-    position: fixed;
-    bottom: var(--space-5);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg-elevated);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-full);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-2) var(--space-5);
-    font-size: var(--text-sm);
-    z-index: 200;
-  }
+  /* Shared .toast lives in src/ui/chrome.css. */
 
   @media (max-width: 640px) {
     .snapshot {
