@@ -365,8 +365,8 @@
         >
           <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
         </button>
-        {#if exportMenuOpen}
-          <div class="export-menu" role="menu" use:trapFocus>
+          {#if exportMenuOpen}
+            <div class="export-menu" role="menu" use:trapFocus>
             <button
               class="menu-item"
               role="menuitem"
@@ -412,25 +412,24 @@
           </div>
         {/if}
       </div>
+      <button
+        class="action icon-only"
+        type="button"
+        onclick={() => (collapsed = !collapsed)}
+        aria-label={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
+        title={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
+        data-testid="check-panel-toggle"
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <rect x="2" y="3" width="12" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <path d="M6 3v10" fill="none" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      </button>
     </div>
   </header>
 
   <div class="grid" class:collapsed>
     <div class="col-left">
-      <div class="rail-top">
-        <button
-          class="panel-toggle"
-          type="button"
-          data-testid="check-panel-toggle"
-          aria-label={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
-          title={collapsed ? t('check.panel.expand') : t('check.panel.collapse')}
-          onclick={() => (collapsed = !collapsed)}
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true" class={collapsed ? 'rot' : ''}>
-            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-      </div>
       {#if !collapsed}
         <DomainInput />
         <TldPicker />
@@ -800,38 +799,6 @@
   }
   .grid.collapsed {
     grid-template-columns: auto 1fr;
-  }
-  /* Top strip of the left rail: hosts the collapse toggle as an
-     intentional right-aligned panel control (ghost icon button). */
-  .rail-top {
-    display: flex;
-    justify-content: flex-end;
-    min-height: 28px;
-  }
-  .panel-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: transparent;
-    border-radius: var(--radius-sm);
-    color: var(--text-tertiary);
-    cursor: pointer;
-    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
-  }
-  .panel-toggle:hover {
-    background: var(--bg-overlay);
-    color: var(--text-secondary);
-  }
-  .panel-toggle svg {
-    width: 14px;
-    height: 14px;
-    transition: transform var(--dur) var(--ease);
-  }
-  .panel-toggle svg.rot {
-    transform: rotate(180deg);
   }
   .panel-summary {
     writing-mode: vertical-rl;
