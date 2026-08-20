@@ -415,13 +415,26 @@
 
   select,
   input[type='number'],
-  input[type='url'] {
-    background: var(--bg);
+  input[type='url'],
+  input[type='password'] {
+    background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-2) var(--space-3);
     min-height: 40px;
     font-size: var(--text-sm);
+    font-family: inherit;
+    color: var(--text);
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  select:focus,
+  input[type='number']:focus,
+  input[type='url']:focus,
+  input[type='password']:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
   .row > select,
