@@ -12,6 +12,8 @@
   import { favorites, toggleFavorite } from '../favorites';
   import { clickOutside } from '../clickoutside';
   import { trapFocus } from '../focustrap';
+  import { copyText } from '../clipboard';
+  import { createToast, downloadText, sanitizeId } from '../utils';
 
   const TRAY_MAX = 1000;
   const GEN_PREFS_KEY = 'dh:v1:genprefs';
@@ -80,7 +82,7 @@
   let importError = $state('');
 
   let toast = $state('');
-  let toastTimer: ReturnType<typeof setTimeout> | undefined;
+  const toastCtl = createToast((m) => (toast = m));
 
   // Tray ⋯ menu: Escape closes and returns focus to the trigger (required for
   // keyboard users now that focus is trapped inside the open menu).
@@ -94,9 +96,7 @@
   }
 
   function showToast(message: string): void {
-    toast = message;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => (toast = ''), 1800);
+    toastCtl.show(message);
   }
 
   function splitList(text: string): string[] {
@@ -217,13 +217,7 @@
   }
 
   function download(filename: string, content: string): void {
-    const blob = new Blob([content], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadText(filename, content, 'application/json');
   }
 
   function exportSets(): void {
@@ -271,31 +265,11 @@
 
   async function copyList(): Promise<void> {
     const text = candidates.map((c) => c.n).join('\n');
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast(t('results.copied'));
-    } catch {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast(t('results.copied'));
-      } catch {
-        // clipboard unavailable
-      }
-      document.body.removeChild(ta);
-    }
+    const ok = await copyText(text);
+    if (ok) showToast(t('results.copied'));
   }
 
-  onDestroy(() => clearTimeout(toastTimer));
-
-  function sanitizeId(s: string): string {
-    return s.replace(/[^a-zA-Z0-9]/g, '-');
-  }
+  onDestroy(() => toastCtl.destroy());
 </script>
 
 <svelte:window onkeydown={onWindowKeydown} />
@@ -576,7 +550,7 @@
                         class="row-fav"
                         class:active={$favorites.has(cand.n)}
                         type="button"
-                        onclick={(ev) => { ev.stopPropagation(); toggleFavorite(cand.n); }}
+                        onclick={(ev) => { ev.stopPropagation(); if (!toggleFavorite(cand.n)) showToast(t('results.fav.full')); }}
                         aria-label={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
                         title={$favorites.has(cand.n) ? t('results.fav.remove') : t('results.fav.add')}
                         data-testid={`gen-tray-fav-${sanitizeId(cand.n)}`}

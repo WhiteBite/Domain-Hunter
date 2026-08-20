@@ -5,8 +5,8 @@
   import { activeTab, settings, registry, type TabId } from './ui/store';
   import { KEYS, loadSettings, saveSettings } from './ui/settings';
   import { applyTheme, watchSystemTheme } from './ui/theme';
-  import { clickOutside } from './ui/clickoutside';
   import { trapFocus } from './ui/focustrap';
+  import { popover } from './ui/popover';
   import { favorites } from './ui/favorites';
   import { refreshWatchlist } from './ui/watchlist';
   import { fetchBootstrap, mergeWithCurated } from './core/bootstrap';
@@ -86,6 +86,9 @@
     { id: 'about', labelKey: 'tab.about' },
   ];
 
+  /** Accessible label for the currently-active tab panel. */
+  const currentTabLabel = $derived(tabs.find((td) => td.id === tab)?.labelKey ?? '');
+
   function selectTab(id: TabId) {
     activeTab.set(id);
   }
@@ -113,13 +116,6 @@
   function selectLang(code: Locale) {
     settings.update((s) => ({ ...s, lang: code }));
     closeLangMenu(true);
-  }
-
-  function onWindowKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape' && langMenuOpen) {
-      e.preventDefault();
-      closeLangMenu(true);
-    }
   }
 
   let watchlistTriggered = false;
@@ -170,9 +166,8 @@
   });
 </script>
 
-<svelte:window onkeydown={onWindowKeydown} />
-
 <a class="skip-link" href="#main-content" data-testid="app-skip-link">{t('a11y.skip')}</a>
+<h1 class="visually-hidden">{t('app.name')}</h1>
 <div class="shell" class:wide={isWide} data-testid="app-shell">
   <header class="header">
     <div class="header-inner">
@@ -187,7 +182,7 @@
         </div>
       </div>
       <div class="header-actions">
-        <div class="lang-wrap" use:clickOutside={() => closeLangMenu(false)}>
+        <div class="lang-wrap" use:popover={{ open: langMenuOpen, onClose: () => closeLangMenu(false), triggerEl: langToggleEl }}>
           <button
             class="icon-btn"
             class:active={langMenuOpen}
@@ -258,9 +253,11 @@
       {#each tabs as tabDef (tabDef.id)}
         <button
           role="tab"
+          type="button"
           class="tab"
           class:active={tab === tabDef.id}
           aria-selected={tab === tabDef.id}
+          aria-controls={`panel-${tabDef.id}`}
           onclick={() => selectTab(tabDef.id)}
           data-testid={`app-tab-${tabDef.id}`}
         >
@@ -271,21 +268,23 @@
   </header>
 
   <main class="content" id="main-content" tabindex="-1">
-    {#if tab === 'check'}
-      <CheckTab />
-    {:else if tab === 'generators'}
-      <GeneratorsTab />
-    {:else if tab === 'drops'}
-      <DropsTab />
-    {:else if tab === 'prices'}
-      <PricesTab />
-    {:else if tab === 'social'}
-      <SocialTab />
-    {:else if tab === 'settings'}
-      <SettingsTab />
-    {:else}
-      <AboutTab />
-    {/if}
+    <div id={`panel-${tab}`} role="tabpanel" aria-label={t(currentTabLabel)}>
+      {#if tab === 'check'}
+        <CheckTab />
+      {:else if tab === 'generators'}
+        <GeneratorsTab />
+      {:else if tab === 'drops'}
+        <DropsTab />
+      {:else if tab === 'prices'}
+        <PricesTab />
+      {:else if tab === 'social'}
+        <SocialTab />
+      {:else if tab === 'settings'}
+        <SettingsTab />
+      {:else}
+        <AboutTab />
+      {/if}
+    </div>
   </main>
 
   <footer class="footer">
@@ -297,6 +296,18 @@
 </div>
 
 <style>
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .skip-link {
     position: absolute;
     left: -9999px;

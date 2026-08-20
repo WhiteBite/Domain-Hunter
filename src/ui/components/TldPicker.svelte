@@ -4,7 +4,7 @@
   import { bestEntry, formatPrice, tco3 } from '../../pricing/pricing';
   import { t } from '../../i18n';
   import { get } from 'svelte/store';
-  import { clickOutside } from '../clickoutside';
+  import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
 
   type Preset = 'popular' | 'cheapest' | 'all';
@@ -58,14 +58,6 @@
 
   function togglePopover(): void {
     popoverOpen = !popoverOpen;
-  }
-
-  function onKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Escape' && popoverOpen) {
-      closePopover();
-      // Focus is trapped inside the open popover; return it to the trigger.
-      triggerEl?.focus();
-    }
   }
 
   onMount(() => {
@@ -187,11 +179,9 @@
   const summaryOverflow = $derived(Math.max(0, $selectedTlds.length - 8));
 </script>
 
-<svelte:window onkeydown={onKeydown} />
-
 <div
   class="tld-picker"
-  use:clickOutside={() => { if (popoverOpen) closePopover(); }}
+  use:popover={{ open: popoverOpen, onClose: closePopover, triggerEl }}
   role="group"
   aria-label={t('check.tlds.title')}
 >

@@ -4,6 +4,8 @@
   import { activeTab, checkInput, pendingShareRun } from '../store';
   import { favorites, toggleFavorite } from '../favorites';
   import { filterDrops, type DroppedDomain } from '../../core/dropped';
+  import { copyText } from '../clipboard';
+  import { createToast, sanitizeId } from '../utils';
   import Tooltip from './Tooltip.svelte';
   // Static snapshot shipped with the build (SPEC §17 — dropped-domains feed).
   import snapshot from '../../config/dropped.snapshot.json';
@@ -44,12 +46,10 @@
   );
 
   let toast = $state('');
-  let toastTimer: ReturnType<typeof setTimeout> | undefined;
+  const toastCtl = createToast((m) => (toast = m));
 
   function showToast(message: string): void {
-    toast = message;
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => (toast = ''), 1800);
+    toastCtl.show(message);
   }
 
   function appendToCheck(domains: DroppedDomain[], cap: number): void {
@@ -75,34 +75,14 @@
 
   async function copyDomain(dom: DroppedDomain): Promise<void> {
     const text = `${dom.d}.${dom.tld}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast(t('results.copied'));
-    } catch {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast(t('results.copied'));
-      } catch {
-        // clipboard unavailable — silent
-      }
-      document.body.removeChild(ta);
-    }
+    const ok = await copyText(text);
+    if (ok) showToast(t('results.copied'));
   }
 
   // Avoid stale timer across tab unmounts.
   $effect(() => {
-    return () => clearTimeout(toastTimer);
+    return () => toastCtl.destroy();
   });
-
-  function sanitizeId(s: string): string {
-    return s.replace(/[^a-zA-Z0-9]/g, '-');
-  }
 </script>
 
 <section class="drops">
@@ -151,7 +131,7 @@
               class="icon-btn fav"
               class:active={$favorites.has(fullName)}
               type="button"
-              onclick={() => toggleFavorite(fullName)}
+              onclick={() => { if (!toggleFavorite(fullName)) showToast(t('results.fav.full')); }}
               aria-label={$favorites.has(fullName) ? t('results.fav.remove') : t('results.fav.add')}
               title={$favorites.has(fullName) ? t('results.fav.remove') : t('results.fav.add')}
               data-testid={`drops-row-fav-${sid}`}

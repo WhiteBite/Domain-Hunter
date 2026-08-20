@@ -13,49 +13,31 @@
     resumePrompt,
     resumeAction,
     startRequest,
-    exportRows,
-    requestFavoritesView,
     type RunPhase,
   } from '../store';
   import { history, recordRun, clearHistory } from '../history';
-  import { watchChanges } from '../watchlist';
   import type { HistoryEntry } from '../../types';
   import { loadPricing, freshnessLabel } from '../../pricing/pricing';
-  import { resultsToCsvRows, buildCsv, downloadCsv, toCsv, toTsv, toMarkdown } from '../csv';
+  import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import { encodeShare, parseShare, clearShare } from '../share';
   import { t } from '../../i18n';
-  import { clickOutside } from '../clickoutside';
-  import { trapFocus } from '../focustrap';
+  import { copyText } from '../clipboard';
   import DomainInput from './DomainInput.svelte';
   import TldPicker from './TldPicker.svelte';
   import RunControls from './RunControls.svelte';
   import ProgressBar from './ProgressBar.svelte';
   import ResultsTable from './ResultsTable.svelte';
   import EmptyState from './EmptyState.svelte';
+  import ExportMenu from './ExportMenu.svelte';
+  import WatchBanner from './WatchBanner.svelte';
+  import HintBanner from './HintBanner.svelte';
 
   let shareCopied = $state(false);
   let shareTimer: ReturnType<typeof setTimeout> | undefined;
-  let showHint = $state(false);
   let collapsed = $state(false);
   let historyOpen = $state(false);
   let prevPhase: RunPhase | null = null;
   let unsubRunState: (() => void) | undefined;
-  let watchDismissed = $state(false);
-
-  // Export menu popover (CSV / Markdown / TSV copy to clipboard).
-  let exportMenuOpen = $state(false);
-  let exportMenuTriggerEl: HTMLButtonElement | null = $state(null);
-  let exportCopiedKey = $state<'csv' | 'md' | 'tsv' | null>(null);
-  let exportCopiedTimer: ReturnType<typeof setTimeout> | undefined;
-
-  function dismissHint(): void {
-    showHint = false;
-    try {
-      localStorage.setItem('dh:v1:hint-dismissed', '1');
-    } catch {
-      // non-fatal
-    }
-  }
 
   function nameCount(query: string): number {
     return query.split('\n').filter((l) => l.trim().length > 0).length;
@@ -84,32 +66,16 @@
     startRequest.update((n) => n + 1);
   }
 
-  function onKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Escape' && exportMenuOpen) {
-      exportMenuOpen = false;
-      exportMenuTriggerEl?.focus();
-    }
-  }
-
   onDestroy(() => {
     clearTimeout(shareTimer);
-    if (exportCopiedTimer != null) clearTimeout(exportCopiedTimer);
-    document.removeEventListener('keydown', onKeydown);
     unsubRunState?.();
   });
 
   onMount(() => {
-    document.addEventListener('keydown', onKeydown);
     if (!get(pricing)) {
       loadPricing()
         .then((state) => pricing.set(state))
         .catch(() => {});
-    }
-
-    try {
-      if (!localStorage.getItem('dh:v1:hint-dismissed')) showHint = true;
-    } catch {
-      showHint = true;
     }
 
     // Share link support: pre-fill input/zones, optionally auto-run (SPEC §12).
@@ -159,18 +125,6 @@
 
   const hasResults = $derived($results.size > 0);
 
-  const watchCounts = $derived.by(() => {
-    let freed = 0;
-    let taken = 0;
-    for (const c of $watchChanges) {
-      if (c.to === 'available' || c.to === 'probably_available') freed++;
-      else if (c.to === 'taken') taken++;
-    }
-    return { freed, taken };
-  });
-
-  const showWatchBanner = $derived($watchChanges.length > 0 && !watchDismissed);
-
   function handleExportCsv() {
     const table = $pricing?.table ?? null;
     const rows = resultsToCsvRows(get(results), table, get(settings));
@@ -188,28 +142,6 @@
     downloadCsv(`domain-hunter-${date}.csv`, csv);
   }
 
-  async function copyText(text: string): Promise<boolean> {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      let ok = false;
-      try {
-        ok = document.execCommand('copy');
-      } catch {
-        ok = false;
-      }
-      document.body.removeChild(ta);
-      return ok;
-    }
-  }
-
   async function handleShare() {
     const base = location.href.split('#')[0];
     const url =
@@ -225,39 +157,6 @@
       clearTimeout(shareTimer);
       shareTimer = setTimeout(() => (shareCopied = false), 1500);
     }
-  }
-
-  function exportHeaders(): string[] {
-    return [
-      t('csv.domain'),
-      t('csv.status'),
-      t('results.col.price'),
-      t('price.renewal'),
-      t('price.tco'),
-    ];
-  }
-
-  function flashExportCopied(key: 'csv' | 'md' | 'tsv'): void {
-    exportCopiedKey = key;
-    if (exportCopiedTimer != null) clearTimeout(exportCopiedTimer);
-    exportCopiedTimer = setTimeout(() => {
-      exportCopiedKey = null;
-    }, 1500);
-  }
-
-  async function copyAsCsv(): Promise<void> {
-    const ok = await copyText(toCsv(get(exportRows), exportHeaders()));
-    if (ok) flashExportCopied('csv');
-  }
-
-  async function copyAsMd(): Promise<void> {
-    const ok = await copyText(toMarkdown(get(exportRows), exportHeaders()));
-    if (ok) flashExportCopied('md');
-  }
-
-  async function copyAsTsv(): Promise<void> {
-    const ok = await copyText(toTsv(get(exportRows), exportHeaders()));
-    if (ok) flashExportCopied('tsv');
   }
 </script>
 
@@ -279,34 +178,9 @@
     </div>
   {/if}
 
-  {#if showWatchBanner}
-    <div class="watch-banner" role="status" data-testid="check-watch-banner">
-      <span class="watch-text">
-        {t('watch.banner', { freed: watchCounts.freed, taken: watchCounts.taken })}
-      </span>
-      <div class="watch-actions">
-        <button class="btn primary" type="button" onclick={() => requestFavoritesView.set(true)} data-testid="check-watch-show">
-          {t('watch.showFavs')}
-        </button>
-        <button class="btn ghost" type="button" onclick={() => (watchDismissed = true)} aria-label={t('watch.banner.dismiss')} data-testid="check-watch-dismiss">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-        </button>
-      </div>
-    </div>
-  {/if}
+  <WatchBanner />
 
-  {#if showHint}
-    <div class="hint-strip" role="note" data-testid="check-hint-strip">
-      <ol class="hint-steps">
-        <li>{t('check.hint.1')}</li>
-        <li>{t('check.hint.2')}</li>
-        <li>{t('check.hint.3')}</li>
-      </ol>
-      <button class="hint-dismiss" type="button" onclick={dismissHint} data-testid="check-button-hint-dismiss">
-        {t('check.hint.dismiss')}
-      </button>
-    </div>
-  {/if}
+  <HintBanner />
 
   <header class="tab-header">
     <div class="header-text">
@@ -349,71 +223,7 @@
         </svg>
         <span>{t('results.csv')}</span>
       </button>
-      <div
-        class="export-menu-wrap"
-        use:clickOutside={exportMenuOpen ? () => { exportMenuOpen = false; } : undefined}
-      >
-        <button
-          class="action icon-only"
-          onclick={() => (exportMenuOpen = !exportMenuOpen)}
-          type="button"
-          disabled={!hasResults}
-          bind:this={exportMenuTriggerEl}
-          aria-haspopup="menu"
-          aria-expanded={exportMenuOpen}
-          aria-label={t('export.menu.aria')}
-          title={t('export.menu.aria')}
-          data-testid="check-button-export-menu"
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
-        </button>
-          {#if exportMenuOpen}
-            <div class="export-menu" role="menu" use:trapFocus>
-            <button
-              class="menu-item"
-              role="menuitem"
-              type="button"
-              onclick={() => { void copyAsCsv(); }}
-              data-testid="check-export-copy-csv"
-            >
-              {#if exportCopiedKey === 'csv'}
-                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-              {:else}
-                <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
-              {/if}
-              {t('export.copyCsv')}
-            </button>
-            <button
-              class="menu-item"
-              role="menuitem"
-              type="button"
-              onclick={() => { void copyAsMd(); }}
-              data-testid="check-export-copy-md"
-            >
-              {#if exportCopiedKey === 'md'}
-                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-              {:else}
-                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h2v8H2zM6 4h2l2 4 2-4h2v8h-2V7l-2 4-2-4v5H6z" fill="currentColor" /></svg>
-              {/if}
-              {t('export.copyMd')}
-            </button>
-            <button
-              class="menu-item"
-              role="menuitem"
-              type="button"
-              onclick={() => { void copyAsTsv(); }}
-              data-testid="check-export-copy-tsv"
-            >
-              {#if exportCopiedKey === 'tsv'}
-                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-              {:else}
-                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12M6 4v8M10 4v8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
-              {/if}
-              {t('export.copyTsv')}
-            </button>
-          </div>
-        {/if}
-      </div>
+      <ExportMenu disabled={!hasResults} />
       <button
         class="action icon-only"
         type="button"
@@ -519,40 +329,6 @@
     gap: var(--space-5);
   }
 
-  .hint-strip {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-  }
-
-  .hint-steps {
-    margin: 0;
-    padding-left: 1.2em;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .hint-dismiss {
-    border: none;
-    background: var(--accent-soft);
-    color: var(--accent);
-    border-radius: var(--radius-full);
-    padding: var(--space-1) var(--space-3);
-    min-height: 32px;
-    font-size: var(--text-xs);
-    font-weight: 500;
-    cursor: pointer;
-  }
-
   .resume-banner {
     display: flex;
     flex-wrap: wrap;
@@ -609,60 +385,6 @@
     color: var(--text-secondary);
   }
 
-  .watch-banner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
-    background: var(--green-soft);
-    border-radius: var(--radius-md);
-  }
-
-  .watch-text {
-    font-size: var(--text-sm);
-    color: var(--text);
-  }
-
-  .watch-actions {
-    display: flex;
-    gap: var(--space-2);
-    align-items: center;
-  }
-
-  .watch-actions .btn {
-    min-height: 36px;
-    padding: 0 var(--space-3);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--text);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
-    cursor: pointer;
-  }
-
-  .watch-actions .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .watch-actions .btn.ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    padding: 0 var(--space-2);
-    min-width: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .watch-actions .btn.ghost svg {
-    width: 14px;
-    height: 14px;
-  }
   .tab-header {
     display: flex;
     flex-wrap: wrap;
@@ -740,48 +462,6 @@
     padding: 0;
     width: 36px;
     justify-content: center;
-  }
-  .export-menu-wrap {
-    position: relative;
-    display: inline-flex;
-  }
-  .export-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--space-1);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-pop);
-    z-index: 60;
-    min-width: 180px;
-  }
-  .menu-item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    border: none;
-    background: transparent;
-    color: var(--text);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    text-align: left;
-    min-height: 32px;
-    transition: background var(--dur) var(--ease);
-  }
-  .menu-item:hover {
-    background: var(--bg-sunken);
-  }
-  .menu-item svg {
-    width: 14px;
-    height: 14px;
-    flex: none;
   }
   .grid {
     display: grid;

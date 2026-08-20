@@ -2,7 +2,7 @@
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
   import { results, settings, pricing, registry, runState, exportRows, requestFavoritesView } from '../store';
-  import type { CheckResult, CheckStatus, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
+  import type { CheckResult, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
   import {
     bestEntry,
     formatPrice,
@@ -17,13 +17,18 @@
   import { t } from '../../i18n';
   import { favorites, toggleFavorite } from '../favorites';
   import { watchChanges, watchRunning, refreshWatchlist, classifyChange } from '../watchlist';
-  import { clickOutside } from '../clickoutside';
-  import { trapFocus } from '../focustrap';
+  import { copyText } from '../clipboard';
+  import { sanitizeId } from '../utils';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
+  import RowMenu from './RowMenu.svelte';
+  import AvailableMenu from './AvailableMenu.svelte';
+  import LegendPopover from './LegendPopover.svelte';
+  import DetailRow from './DetailRow.svelte';
+  import type { DigDetail, RegistrarQuote } from './DetailRow.svelte';
 
   import registrarsJson from '../../config/registrars.json';
 
@@ -49,15 +54,8 @@
 
   // Row overflow menu: only one open at a time (keyed by domain).
   let menuFor = $state<string | null>(null);
-  let menuTriggerEl: HTMLButtonElement | null = $state(null);
 
-  // Status legend popover.
-  let legendOpen = $state(false);
-  let legendTriggerEl: HTMLButtonElement | null = $state(null);
-
-  // Available-domains bulk actions popover (next to "Show available (N)").
-  let availMenuOpen = $state(false);
-  let availMenuTriggerEl: HTMLButtonElement | null = $state(null);
+  // Available-domains bulk actions: copied-flash state (menu is in AvailableMenu).
   let availCopied = $state(false);
   let availCopiedTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -65,23 +63,6 @@
   let searchEl: HTMLInputElement | null = $state(null);
 
   function onKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Escape') {
-      if (availMenuOpen) {
-        availMenuOpen = false;
-        availMenuTriggerEl?.focus();
-        return;
-      }
-      if (legendOpen) {
-        legendOpen = false;
-        legendTriggerEl?.focus();
-        return;
-      }
-      if (menuFor !== null) {
-        menuFor = null;
-        menuTriggerEl?.focus();
-      }
-      return;
-    }
     // "/" focuses the results search (unless typing in a form control).
     if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const target = e.target as HTMLElement | null;
@@ -101,30 +82,8 @@
     document.removeEventListener('keydown', onKeydown);
   });
 
-  function toggleMenu(domain: string, triggerEl: HTMLButtonElement): void {
-    // Capture the clicked trigger: bind:this inside the {#each} would leave the
-    // variable pointing at the last rendered row, breaking Escape focus-return.
-    menuTriggerEl = triggerEl;
+  function toggleMenu(domain: string): void {
     menuFor = menuFor === domain ? null : domain;
-  }
-
-  interface LegendItem {
-    status: CheckStatus;
-    labelKey: string;
-    descKey: string;
-    variant: 'available' | 'probably' | 'taken' | 'unknown' | 'error';
-  }
-
-  const legendItems: LegendItem[] = [
-    { status: 'available', labelKey: 'status.available', descKey: 'results.legend.available', variant: 'available' },
-    { status: 'probably_available', labelKey: 'status.probably_available', descKey: 'results.legend.probably_available', variant: 'probably' },
-    { status: 'taken', labelKey: 'status.taken', descKey: 'results.legend.taken', variant: 'taken' },
-    { status: 'unknown', labelKey: 'status.unknown', descKey: 'results.legend.unknown', variant: 'unknown' },
-    { status: 'error', labelKey: 'status.error', descKey: 'results.legend.error', variant: 'error' },
-  ];
-
-  function toggleLegend(): void {
-    legendOpen = !legendOpen;
   }
 
   interface RowData {
@@ -346,15 +305,6 @@
     return best ?? fallback ?? { registrar: null, entry: null };
   }
 
-  interface RegistrarQuote {
-    id: string;
-    name: string;
-    reg: number;
-    renew: number | null;
-    url: string;
-    hasDeepLink: boolean;
-  }
-
   /** Known-registrar quotes for a zone from the pricing store, sorted by
    *  registration price asc (renewal as tie-breaker). Unknown ids skipped.
    *  Each quote carries a buy/search link (deep link when the registrar's
@@ -400,17 +350,6 @@
   }
 
   // ---- On-demand per-domain detail (DigMyName: premium + cheapest registrar) ----
-
-  interface DigDetail {
-    loading?: boolean;
-    failed?: boolean;
-    premium?: boolean;
-    likely?: boolean;
-    price: number | null;
-    registrar: string | null;
-    regPrice: number | null;
-    url: string | null;
-  }
 
   let detailFor = $state<string | null>(null);
   let details = $state<Record<string, DigDetail>>({});
@@ -478,28 +417,6 @@
         ...details,
         [domain]: { failed: true, price: null, registrar: null, regPrice: null, url: null },
       };
-    }
-  }
-
-  async function copyText(text: string): Promise<boolean> {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      let ok = false;
-      try {
-        ok = document.execCommand('copy');
-      } catch {
-        ok = false;
-      }
-      document.body.removeChild(ta);
-      return ok;
     }
   }
 
@@ -647,10 +564,6 @@
     if (sources.length === 0) return name;
     return `${name} · ${sources.includes(id) ? 'live' : 'snapshot'}`;
   }
-
-  function sanitizeId(s: string): string {
-    return s.replace(/[^a-zA-Z0-9]/g, '-');
-  }
 </script>
 
 {#if !hasResults}
@@ -703,35 +616,7 @@
       <span class="count nums" aria-live="polite" data-testid="results-showing-count">
         {t('results.showing', { shown: visible.length, total: sorted.length })}
       </span>
-      <div
-        class="legend-wrap"
-        use:clickOutside={legendOpen ? () => { legendOpen = false; } : undefined}
-      >
-        <button
-          class="action-btn legend-toggle"
-          type="button"
-          bind:this={legendTriggerEl}
-          onclick={toggleLegend}
-          aria-haspopup="dialog"
-          aria-expanded={legendOpen}
-          aria-label={t('results.legend.aria')}
-          title={t('results.legend.aria')}
-          data-testid="results-legend-toggle"
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 7.4v3.2M8 5.2v.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
-        </button>
-        {#if legendOpen}
-          <div class="legend" role="dialog" aria-label={t('results.legend.aria')} use:trapFocus>
-            {#each legendItems as item}
-              <div class="legend-row">
-                <span class="legend-dot {item.variant}" aria-hidden="true"></span>
-                <span class="legend-name">{t(item.labelKey)}</span>
-                <span class="legend-desc">{t(item.descKey)}</span>
-              </div>
-            {/each}
-          </div>
-        {/if}
-      </div>
+      <LegendPopover />
       {#if selected.size > 0}
         <button class="action-small" type="button" onclick={async () => { await copyText([...selected].sort().join('\n')); selected = new Set(); }} data-testid="results-copy-selected">
           {t('results.copy.selected', { n: selected.size })}
@@ -748,62 +633,13 @@
         <button class="filter suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
           {t('results.showAvailable', { n: availableTotal })}
         </button>
-        <div
-          class="menu-wrap avail-menu-wrap"
-          use:clickOutside={availMenuOpen ? () => { availMenuOpen = false; } : undefined}
-        >
-          <button
-            class="action-btn avail-menu-toggle"
-            type="button"
-            bind:this={availMenuTriggerEl}
-            onclick={() => (availMenuOpen = !availMenuOpen)}
-            aria-haspopup="menu"
-            aria-expanded={availMenuOpen}
-            aria-label={t('results.available.menu.aria')}
-            title={t('results.available.menu.aria')}
-            data-testid="results-available-menu"
-          >
-            <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
-          </button>
-          {#if availMenuOpen}
-            <div class="menu" role="menu" use:trapFocus>
-              <button
-                class="menu-item"
-                role="menuitem"
-                type="button"
-                onclick={() => { void copyAvailableList(); }}
-                data-testid="results-available-copy"
-              >
-                {#if availCopied}
-                  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                {:else}
-                  <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
-                {/if}
-                {t('results.available.copy')}
-              </button>
-              <button
-                class="menu-item"
-                role="menuitem"
-                type="button"
-                onclick={() => { favAllAvailable(); availMenuOpen = false; }}
-                data-testid="results-available-fav"
-              >
-                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5l1.7 3.6 3.9.5-2.9 2.7.8 3.9L8 11.3l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
-                {t('results.available.fav')}
-              </button>
-              <button
-                class="menu-item"
-                role="menuitem"
-                type="button"
-                onclick={() => { downloadAvailableCsv(); availMenuOpen = false; }}
-                data-testid="results-available-csv"
-              >
-                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3M3 13h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                {t('results.available.csv')}
-              </button>
-            </div>
-          {/if}
-        </div>
+    <AvailableMenu
+
+          availCopied={availCopied}
+          onCopy={() => void copyAvailableList()}
+          onFav={() => favAllAvailable()}
+          onCsv={() => downloadAvailableCsv()}
+        />
         </div>
       {/if}
     </div>
@@ -1037,161 +873,32 @@
                       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3H3v10h10v-3M9 3h4v4M6 9L13 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     </span>
                   {/if}
-                  <div
-                    class="menu-wrap"
-                    use:clickOutside={menuFor === row.result.domain ? () => { menuFor = null; } : undefined}
-                  >
-                    <button
-                      class="action-btn"
-                      class:active={menuFor === row.result.domain}
-                      onclick={(e) => toggleMenu(row.result.domain, e.currentTarget)}
-                      type="button"
-                      aria-haspopup="menu"
-                      aria-expanded={menuFor === row.result.domain}
-                      aria-label={t('results.row.menu.aria')}
-                      title={t('results.row.menu.aria')}
-                      data-testid={`results-row-menu-${sid}`}
-                    >
-                      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor" /><circle cx="8" cy="8" r="1.4" fill="currentColor" /><circle cx="13" cy="8" r="1.4" fill="currentColor" /></svg>
-                    </button>
-                    {#if menuFor === row.result.domain}
-                      <div class="menu" role="menu" use:trapFocus>
-                        <button
-                          class="menu-item"
-                          role="menuitem"
-                          type="button"
-                          onclick={() => { void handleCopy(row.result.domain); menuFor = null; }}
-                          data-testid={`results-row-copy-${sid}`}
-                        >
-                          {#if copied.has(row.result.domain)}
-                            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                          {:else}
-                            <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M3 11V3h8" fill="none" stroke="currentColor" stroke-width="1.5" /></svg>
-                          {/if}
-                          {t('results.copy')}
-                        </button>
-                        <button
-                          class="menu-item"
-                          role="menuitem"
-                          type="button"
-                          onclick={() => { recheck(row.result.domain); menuFor = null; }}
-                          disabled={rechecking.has(row.result.domain) || rechecking.size >= MAX_RECHECKS}
-                          data-testid={`results-row-recheck-${sid}`}
-                        >
-                          <svg class:spin={rechecking.has(row.result.domain)} viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v3h-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                          {t('results.recheck')}
-                        </button>
-                        <button
-                          class="menu-item"
-                          role="menuitem"
-                          type="button"
-                          class:active={isExpanded}
-                          onclick={() => { void toggleDetail(row.result.domain); }}
-                          data-testid={`results-row-detail-${sid}`}
-                        >
-                          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5" /><path d="M8 7.4v3.2M8 5.2v.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
-                          {t('results.detail.label')}
-                        </button>
-                      </div>
-                    {/if}
-                  </div>
+                  <RowMenu
+                    sid={sid}
+                    isOpen={menuFor === row.result.domain}
+                    copied={copied.has(row.result.domain)}
+                    rechecking={rechecking.has(row.result.domain)}
+                    recheckDisabled={rechecking.size >= MAX_RECHECKS}
+                    isExpanded={isExpanded}
+                    onTriggerClick={() => toggleMenu(row.result.domain)}
+                    onClose={() => (menuFor = null)}
+                    onCopy={() => void handleCopy(row.result.domain)}
+                    onRecheck={() => recheck(row.result.domain)}
+                    onDetail={() => { void toggleDetail(row.result.domain); }}
+                  />
                 </div>
               </td>
             </tr>
             {#if isExpanded}
-              {@const d = details[row.result.domain]}
-              <tr
-                class="detail-row"
-                class:is-available={isAvail}
-                class:is-error={isErr}
-                data-testid={`results-row-expanded-${sid}`}
-              >
-                <td colspan="5">
-                  <div class="detail-grid">
-                    <div class="detail-cell">
-                      <span class="detail-label">{t('price.renewal')}</span>
-                      <span class="detail-value nums">{formatPrice(row.renewal, $settings)}</span>
-                    </div>
-                    <div class="detail-cell">
-                      <span class="detail-label">{t('price.tco')}</span>
-                      <span class="detail-value nums">{formatPrice(row.tco, $settings)}</span>
-                    </div>
-                    {#if row.result.note}
-                      <div class="detail-cell detail-note">
-                        {row.result.note}
-                      </div>
-                    {/if}
-                    {#if quotes.length >= 2}
-                      <div class="detail-cell detail-registrars" data-testid={`results-row-registrars-${sid}`}>
-                        <Tooltip text={t('tooltip.registrars')}>
-                          <span class="detail-label">{t('results.detail.registrars')}</span>
-                        </Tooltip>
-                        <span class="detail-reg-list nums">
-                          {#each quotes.slice(0, 4) as quote, i}
-                            <a
-                              class="detail-reg-item"
-                              class:cheapest={i === 0}
-                              class:no-deeplink={!quote.hasDeepLink}
-                              href={quote.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              title={quote.hasDeepLink ? undefined : t('registrar.noDeeplink', { registrar: quote.name })}
-                              data-testid={`results-row-registrar-${sid}-${quote.id}`}
-                            >
-                              {#if i === 0}<span class="detail-reg-dot" aria-hidden="true"></span>{/if}
-                              {quote.name} — {formatPrice(quote.reg, $settings)} / {formatPrice(quote.renew, $settings)}
-                            </a>
-                          {/each}
-                          {#if quotes.length > 4}
-                            <span
-                              class="detail-reg-more"
-                              title={`${t('results.detail.registrars')}: ${quotes.length}`}
-                            >
-                              {t('results.detail.registrars.more', { n: quotes.length - 4 })}
-                            </span>
-                          {/if}
-                        </span>
-                      </div>
-                    {/if}
-                    {#if !d || d.loading}
-                      <span class="detail-muted">{t('results.detail.loading')}</span>
-                    {:else if d.failed}
-                      <span class="detail-muted">{t('results.detail.failed')}</span>
-                    {:else}
-                      {#if d.premium || d.likely}
-                        <div class="detail-cell">
-                          <span class="chip-tag premium">
-                            {t('results.detail.premium', {
-                              price:
-                                premiumOverrides[row.result.domain] != null
-                                  ? formatPrice(premiumOverrides[row.result.domain], $settings)
-                                  : '—',
-                            })}
-                          </span>
-                        </div>
-                      {/if}
-                      {#if d.registrar}
-                        <div class="detail-cell">
-                          <span class="detail-cheap">
-                            {t('results.detail.cheapest', {
-                              registrar: d.registrar,
-                              price:
-                                d.regPrice != null
-                                  ? formatPrice(Math.round(d.regPrice * 100), $settings)
-                                  : '—',
-                            })}
-                          </span>
-                        </div>
-                      {/if}
-                      {#if d.url}
-                        <a class="detail-buy" href={d.url} target="_blank" rel="noopener noreferrer" data-testid={`results-row-detail-buy-${sid}`}>
-                          {t('results.detail.buy')}
-                        </a>
-                      {/if}
-                    {/if}
-                  </div>
-                </td>
-              </tr>
+              <DetailRow
+                {sid}
+                {row}
+                {isAvail}
+                {isErr}
+                detail={details[row.result.domain]}
+                {quotes}
+                premiumOverride={premiumOverrides[row.result.domain] ?? null}
+              />
             {/if}
           {/each}
         </tbody>
@@ -1473,51 +1180,6 @@
       padding-top: var(--space-1);
     }
 
-    /* Expanded detail: single-column stack, full-width Buy. Merges with the
-       card above it into one visual unit. */
-    tbody tr.row-in:has(+ tr.detail-row) {
-      margin-bottom: 0;
-      border-bottom: none;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-    tr.detail-row {
-      display: block;
-      margin: 0 0 var(--space-2);
-      border: 1px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 var(--radius-md) var(--radius-md);
-      background: var(--bg-sunken);
-    }
-    tr.detail-row.is-available {
-      background: color-mix(in srgb, var(--green-solid) 5%, var(--bg-sunken));
-      box-shadow: inset 2px 0 0 var(--green-solid);
-    }
-    tr.detail-row.is-error {
-      background: color-mix(in srgb, var(--red) 5%, var(--bg-sunken));
-      box-shadow: inset 2px 0 0 var(--red);
-    }
-    tr.detail-row td {
-      display: block;
-      padding: var(--space-3);
-      background: transparent;
-      box-shadow: none;
-    }
-    tr.detail-row.is-available td,
-    tr.detail-row.is-error td {
-      background: transparent;
-    }
-    .detail-grid {
-      flex-direction: column;
-      align-items: stretch;
-      padding-left: 0;
-      max-width: none;
-      gap: var(--space-2);
-    }
-    .detail-buy {
-      width: 100%;
-      justify-content: center;
-    }
   }
   td {
     padding: var(--space-2) var(--space-3);
@@ -1572,118 +1234,6 @@
     background: var(--accent-soft);
   }
 
-  .detail-row td {
-    background: var(--bg-sunken);
-    padding: var(--space-3) var(--space-3);
-    box-shadow: inset 2px 0 0 var(--border-strong);
-  }
-  .detail-row.is-available td {
-    background: var(--row-tint-available);
-    box-shadow: inset 2px 0 0 var(--green-solid);
-  }
-  .detail-row.is-error td {
-    background: var(--row-tint-error);
-    box-shadow: inset 2px 0 0 var(--red);
-  }
-
-  .detail-grid {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    flex-wrap: wrap;
-    font-size: var(--text-xs);
-    /* Align under the Name column: skip the checkbox column
-       (space-3 padding + 14px checkbox + space-3 padding). */
-    padding-left: calc(14px + 2 * var(--space-3));
-    /* Compact single-row flow at wide widths — no dead right half. */
-    max-width: 1200px;
-  }
-
-  .detail-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .detail-label {
-    color: var(--text-tertiary);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  .detail-value {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .detail-note {
-    color: var(--text-secondary);
-    max-width: 300px;
-  }
-
-  .detail-muted {
-    color: var(--text-tertiary);
-    font-size: var(--text-xs);
-  }
-
-  .detail-cheap {
-    color: var(--text-secondary);
-  }
-
-  .detail-reg-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px var(--space-3);
-    color: var(--text-secondary);
-  }
-  .detail-reg-item {
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-    color: inherit;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: color var(--dur) var(--ease);
-  }
-  .detail-reg-item:hover {
-    color: var(--accent-text);
-    text-decoration: underline;
-  }
-  .detail-reg-item.cheapest {
-    color: var(--text);
-    font-weight: 500;
-  }
-  .detail-reg-item.no-deeplink {
-    opacity: 0.8;
-    text-decoration: underline dotted;
-  }
-  .detail-reg-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--green-solid);
-    margin-right: var(--space-1);
-  }
-  .detail-reg-more {
-    color: var(--text-tertiary);
-  }
-
-  .detail-buy {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--accent-text);
-    font-weight: 500;
-    text-decoration: none;
-    transition: all var(--dur) var(--ease);
-  }
-  .detail-buy:hover {
-    background: var(--bg-overlay);
-    text-decoration: none;
-  }
   .chip-tag {
     display: inline-block;
     font-size: 10px;
@@ -1863,77 +1413,6 @@
     user-select: none;
   }
 
-  /* ---- Status legend popover ---- */
-  .legend-wrap {
-    position: relative;
-    display: inline-flex;
-  }
-  .legend-toggle.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-  }
-  .legend {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-3);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    border-radius: 8px;
-    box-shadow: var(--shadow-pop);
-    z-index: 60;
-    min-width: 280px;
-    max-width: 340px;
-  }
-  .legend-row {
-    display: grid;
-    grid-template-columns: 12px 1fr;
-    grid-template-areas:
-      'dot name'
-      'dot desc';
-    column-gap: var(--space-2);
-    row-gap: 1px;
-    align-items: start;
-  }
-  .legend-dot {
-    grid-area: dot;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-top: 5px;
-  }
-  .legend-dot.available {
-    background: var(--green-solid);
-  }
-  .legend-dot.probably {
-    background: transparent;
-    border: 1.5px solid var(--green);
-  }
-  .legend-dot.taken {
-    background: var(--text-tertiary);
-  }
-  .legend-dot.unknown {
-    background: var(--amber);
-  }
-  .legend-dot.error {
-    background: var(--red);
-  }
-  .legend-name {
-    grid-area: name;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--text);
-  }
-  .legend-desc {
-    grid-area: desc;
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-    line-height: 1.4;
-  }
   .action-small {
     padding: var(--space-1) var(--space-3);
     border: 1px solid var(--accent);
@@ -1966,55 +1445,4 @@
     white-space: nowrap;
   }
 
-  /* Row overflow menu */
-  .menu-wrap {
-    position: relative;
-    display: inline-flex;
-  }
-  .menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    right: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--space-1);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    z-index: 50;
-    min-width: 140px;
-  }
-  .menu-item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-    border: none;
-    background: transparent;
-    color: var(--text);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    text-align: left;
-    min-height: 32px;
-    transition: background var(--dur) var(--ease);
-  }
-  .menu-item:hover {
-    background: var(--bg-sunken);
-  }
-  .menu-item:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .menu-item.active {
-    color: var(--accent);
-    background: var(--accent-soft);
-  }
-  .menu-item svg {
-    width: 14px;
-    height: 14px;
-    flex: none;
-  }
 </style>
