@@ -61,6 +61,12 @@ export class AimdLimiter {
     }
   }
 
+  /** Release a reserved slot without recording an outcome (e.g. abort before
+   *  the request actually ran — must not inflate consecutiveOk or back off). */
+  release(): void {
+    this.inFlight = Math.max(0, this.inFlight - 1);
+  }
+
   /** Release the slot and back off multiplicatively. */
   report429(retryAfterMs?: number): void {
     this.inFlight = Math.max(0, this.inFlight - 1);

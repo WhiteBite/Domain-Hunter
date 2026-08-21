@@ -90,7 +90,10 @@ export async function runQueue(
       if (signal.aborted) return;
       await limiter.acquire();
       if (signal.aborted) {
-        limiter.reportOk();
+        // Aborted before the request ran — release the slot without
+        // recording an outcome (reportOk would inflate consecutiveOk and
+        // could spuriously trigger AIMD recovery).
+        limiter.release();
         return;
       }
       inFlightGlobal += 1;

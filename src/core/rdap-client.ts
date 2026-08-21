@@ -288,6 +288,10 @@ export async function checkDomain(
       return networkFailurePath(reason);
     }
 
+    // Transport succeeded — reset the transient-fail counter so a later
+    // network failure after a 429/5xx/200/404 doesn't exhaust the budget.
+    networkFails = 0;
+
     if (resp.status === 200) {
       opts.onOutcome?.('ok');
       return { ...base, status: 'taken', source: 'rdap', latencyMs: Date.now() - startedAt };

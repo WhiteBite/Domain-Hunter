@@ -210,6 +210,32 @@ describe('checkDomain status matrix', () => {
     expect(result.source).toBe('doh');
   });
 
+  it('resets networkFails after a successful HTTP response — [netfail, netfail, 429, netfail, 200] stays on the direct path', async () => {
+    // Bug: networkFails was never reset after a successful fetch, so a
+    // sequence netfail×2 → 429 → netfail would exhaust the 2-retry budget
+    // and fall to networkFailurePath prematurely. After the fix, the 429
+    // resets the counter and the third netfail is still within budget.
+    const outcomes: string[] = [];
+    const result = await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([
+        throwFetch,
+        throwFetch,
+        () => jsonResponse(429, {}, { 'retry-after': '1' }),
+        throwFetch,
+        () => jsonResponse(200),
+      ]),
+      sleep: noSleep,
+      onOutcome: (k) => outcomes.push(k),
+    });
+    // Direct 200 → source 'rdap'. If networkFailurePath had been entered,
+    // the 200 would have been consumed by the Cloudflare aggregator and
+    // source would be 'cloudflare'.
+    expect(result.status).toBe('taken');
+    expect(result.source).toBe('rdap');
+    expect(result.note).toBeUndefined();
+    expect(outcomes).toEqual(['429', 'ok']);
+  });
+
   it('timeout → error with note', async () => {
     // RDAP hangs until the internal timeout aborts; DoH resolvers are down.
     const hangingFetch = ((url: string, init?: RequestInit) => {

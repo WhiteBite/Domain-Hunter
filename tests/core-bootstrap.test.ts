@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchBootstrap, mergeWithCurated, parseBootstrapServices } from '../src/core/bootstrap';
-import { clearCache, getFresh, put } from '../src/core/cache';
+import { clearCache, getFresh, MAX_ENTRIES, put } from '../src/core/cache';
 import type { TldRegistry } from '../src/types';
 
 function memoryStorage(): Storage {
@@ -115,6 +115,32 @@ describe('cache', () => {
     clearCache();
     expect(getFresh('c.com', 1000)).toBeNull();
   });
+
+  it('promotes a recently-read entry so it survives FIFO eviction at the MAX_ENTRIES boundary', () => {
+    vi.useFakeTimers();
+    clearCache();
+    const entry = () => ({
+      status: 'taken' as const,
+      source: 'rdap' as const,
+      ts: Date.now(),
+      tld: 'com',
+    });
+    // Fill the cache to the boundary.
+    for (let i = 0; i < MAX_ENTRIES; i++) {
+      put(`d${i}.com`, entry());
+    }
+    // Read d0.com — promotes it to most-recently-used (end of the Map).
+    expect(getFresh('d0.com', 60_000)?.status).toBe('taken');
+    // One more entry pushes past MAX_ENTRIES → eviction runs at the next
+    // debounced write tick.
+    put(`d${MAX_ENTRIES}.com`, entry());
+    vi.advanceTimersByTime(2000);
+    // d0.com (promoted) survives; d1.com (oldest unread) is evicted.
+    expect(getFresh('d0.com', 60_000)).not.toBeNull();
+    expect(getFresh('d1.com', 60_000)).toBeNull();
+    clearCache();
+    vi.useRealTimers();
+  });
 });
 
 describe('fetchBootstrap', () => {
@@ -132,5 +158,17 @@ describe('fetchBootstrap', () => {
   it('returns null on network failure', async () => {
     const fetchImpl = (async () => Promise.reject(new TypeError('offline'))) as unknown as typeof fetch;
     expect(await fetchBootstrap(fetchImpl)).toBeNull();
+  });
+
+  it('returns stale cached json when the 24h cache is stale and the network fetch fails', async () => {
+    // Bug: when the cache was stale AND the refresh failed, fetchBootstrap
+    // returned null — discarding usable stale zone data. Fix: serve the
+    // stale json as-is (fetchedAt stays honest, callers treat it as
+    // bootstrap data).
+    const stale = { json: ianaSample, fetchedAt: Date.now() - 25 * 60 * 60 * 1000 };
+    localStorage.setItem('dh:v1:bootstrap', JSON.stringify(stale));
+    const fetchImpl = (async () => Promise.reject(new TypeError('offline'))) as unknown as typeof fetch;
+    const result = await fetchBootstrap(fetchImpl);
+    expect(result).toEqual(ianaSample);
   });
 });

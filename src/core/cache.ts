@@ -7,7 +7,7 @@
 import type { CacheEntry } from '../types';
 
 const CACHE_KEY = 'dh:v1:cache';
-const MAX_ENTRIES = 4000;
+export const MAX_ENTRIES = 4000;
 const WRITE_DEBOUNCE_MS = 1500;
 
 let memory: Map<string, CacheEntry> | null = null;
@@ -54,9 +54,13 @@ function scheduleWrite(): void {
 }
 
 export function getFresh(domain: string, ttlMs: number): CacheEntry | null {
-  const entry = load().get(domain);
+  const map = load();
+  const entry = map.get(domain);
   if (!entry) return null;
   if (Date.now() - entry.ts > ttlMs) return null;
+  // Promote to most-recently-used so hot keys survive FIFO eviction.
+  map.delete(domain);
+  map.set(domain, entry);
   return entry;
 }
 

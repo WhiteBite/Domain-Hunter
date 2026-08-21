@@ -16,18 +16,21 @@ interface BootstrapCache {
 export async function fetchBootstrap(
   fetchImpl: typeof fetch = fetch,
 ): Promise<unknown | null> {
+  let staleJson: unknown = null;
   try {
     const raw = localStorage.getItem(BOOTSTRAP_KEY);
     if (raw) {
       const cached = JSON.parse(raw) as BootstrapCache;
       if (Date.now() - cached.fetchedAt < TTL_MS) return cached.json;
+      // Cache stale — keep the json as a fallback for when the refresh fails.
+      staleJson = cached.json;
     }
   } catch {
     // fall through to network
   }
   try {
     const resp = await fetchImpl(BOOTSTRAP_URL);
-    if (!resp.ok) return null;
+    if (!resp.ok) return staleJson;
     const json: unknown = await resp.json();
     try {
       const payload: BootstrapCache = { json, fetchedAt: Date.now() };
@@ -37,7 +40,10 @@ export async function fetchBootstrap(
     }
     return json;
   } catch {
-    return null;
+    // Network failure: serve stale bootstrap data rather than discarding
+    // usable zone info. fetchedAt stays honest — callers treat it as
+    // bootstrap data (zones change rarely; stale is better than empty).
+    return staleJson;
   }
 }
 
