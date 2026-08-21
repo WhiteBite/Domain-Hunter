@@ -10,6 +10,8 @@
 
 **[▶ ライブデモ](https://whitebite.github.io/Domain-Hunter/)** — インストール不要ですぐ動きます。
 
+> **これは完成した製品で、今すぐ使えます。** <https://whitebite.github.io/Domain-Hunter/> を開いて、ドメインのチェックや名前の生成をすぐに始めましょう。インストールもサインアップも API キーもトラッキングも一切不要です。アプリ全体は単一の HTML ファイル（`dist/index.html`）にコンパイルされ、`file://` からオフラインでも動作します。ダウンロードして、共有して、どこでも実行してください。
+
 ![Domain Hunter checking five brand names across 15 TLDs — streaming results with status badges, first-year and renewal prices, CSV export](docs/screenshot-en-check.png)
 
 Domain Hunter はレジストリの **RDAP** エンドポイント（Verisign、Google Registry、Identity Digital、CentralNic、Radix…）に対して直接ドメイン登録可否をチェックし、5 つの内蔵ジェネレーターでブランド可能な名前案を生成し、**ライブのレジストラ価格**と 3 年間の TCO を表示し、すべてを CSV に書き出します。WHOIS 検索サービスや WhoisXML・DomainTools などの有料ドメイン API に代わるプライバシー重視の選択肢であり、アプリ全体が 1 つの自己完結型 HTML ファイルです。
@@ -57,6 +59,17 @@ npm run dev       # 開発用 Vite 開発サーバー
 
 **任意の静的ホストまたはディスク:** `dist/index.html` を公開または開く。すべてのパスは相対（`base: './'`）なので、任意のサブパスで動作します。
 
+## RDAP と WHOIS
+
+WHOIS は構造化されていないテキストを返します——プログラムで解析するのが難しく、大規模な自動化には遅い、人間が読むための段落の壁です。RDAP（Registration Data Access Protocol、[RFC 9083](https://www.rfc-editor.org/rfc/rfc9083) で標準化）は JSON の後継です：構造化され、機械可読で、API 消費のために設計されています。Domain Hunter が使うすべてのエンドポイントは寛容な CORS ヘッダーを送信するため、プロキシなしでブラウザーから直接レジストリを呼び出せます。これにより、一括チェックは高速で、レート制限に優しく、無料になります。
+
+## 誰向けか
+
+- **ドメイン投資家＆ドロップキャッチャー** — 148 以上の TLD で数百の名前を監視リストで追跡し、削除/期限切れドメインを追跡し、解放または取得された変更を CSV でエクスポート。
+- **ブランドネーミング** — 5 つのジェネレーター（コンビネーター、音節ミキサー、テーマセット、TLD ハック、変異）がすぐにチェックできる候補を生成します。
+- **開発者** — 単一ファイルの MIT ビルド、埋め込み可能、バックエンド不要、依存関係なし。フォークして、デプロイして、拡張してください。
+- **プライバシー重視のユーザー** — アカウントなし、ログなし、アナリティクスなし。すべてはブラウザー内でローカルに動作します。
+
 ## 仕組み
 
 1. ブラウザーが **レジストリの RDAP エンドポイントに直接通信** — Domain Hunter が使うすべてのエンドポイントは CORS を開放しているため、サーバーやプロキシは不要です。
@@ -80,6 +93,7 @@ npm run dev       # 開発用 Vite 開発サーバー
 | 名前ジェネレーター | 5 つ内蔵 | 基本的な提案のみ | なし | なし |
 | ライブ価格 + 3 年 TCO | 12 レジストラを比較 | 自社価格のみ | なし | 別料金 |
 | プライバシー | トラッキングなし・ローカルのみ | 検索履歴が記録される | プライベート | クエリログあり |
+| 名前案の品質 | 5 つのジェネレーター（コンビネーター、音節、テーマ、TLD ハック、変異） | 基本的な提案のみ | なし | なし |
 
 保証された SLA、プレミアムドメインの価格フィード、1 日数百万件のチェックが必要なら有料 API を選んでください。今すぐ数百の候補を素早く・無料・プライベートにブレインストームして検証したいなら Domain Hunter を選んでください。
 
@@ -116,6 +130,21 @@ Svelte 5 + TypeScript（strict）、Vite 7、`vite-plugin-singlefile` — アプ
 ## コントリビュート
 
 Issue と PR を歓迎します。最初のコントリビュートにおすすめ: 新しい厳選ゾーン（`src/config/tlds.json` を編集）、新しいテーマ単語セット（`src/config/dictionaries/`）、翻訳（`src/i18n/`）。ビルド・テストコマンドとプロジェクトの規約は [AGENTS.md](AGENTS.md) を参照してください。
+
+## 引用
+
+学術または技術的な仕事で Domain Hunter に言及する場合は、[`CITATION.cff`](CITATION.cff) のメタデータを使用してください：
+
+```bibtex
+@software{domain_hunter_2026,
+  author = {WhiteBite},
+  title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
+  version = {2.0.0},
+  year = {2026},
+  url = {https://github.com/WhiteBite/Domain-Hunter},
+  license = {MIT}
+}
+```
 
 ## ライセンス
 

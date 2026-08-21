@@ -10,6 +10,8 @@ Vérificateur de disponibilité de domaines en masse, gratuit et open-source, qu
 
 **[▶ Démo en ligne](https://whitebite.github.io/Domain-Hunter/)** — fonctionne instantanément, rien à installer.
 
+> **C'est un produit fini que vous pouvez utiliser dès maintenant.** Ouvrez <https://whitebite.github.io/Domain-Hunter/> et commencez à vérifier des domaines ou à générer des noms immédiatement. Pas d'installation, pas d'inscription, pas de clés API, pas de suivi. Toute l'application se compile en un seul fichier HTML (`dist/index.html`) qui fonctionne aussi hors ligne depuis `file://`. Téléchargez-le, partagez-le, exécutez-le partout.
+
 ![Domain Hunter vérifiant cinq noms de marque sur 15 TLD — résultats en flux avec badges de statut, prix de première année et de renouvellement, export CSV](docs/screenshot-en-check.png)
 
 Domain Hunter vérifie la disponibilité des domaines directement auprès des points de terminaison **RDAP** des registres (Verisign, Google Registry, Identity Digital, CentralNic, Radix…), génère des idées de noms brandables avec cinq générateurs intégrés, affiche les **prix en direct des bureaux d'enregistrement** avec le TCO sur 3 ans, et exporte tout en CSV. C'est une alternative respectueuse de la vie privée aux services de recherche WHOIS et aux API payantes comme WhoisXML ou DomainTools — toute l'application est un seul fichier HTML autonome.
@@ -57,6 +59,17 @@ Pas de backend, pas de variables d'environnement, pas de clés API — jamais.
 
 **N'importe quel hôte statique ou disque :** servez ou ouvrez `dist/index.html`. Tous les chemins sont relatifs (`base: './'`), donc ça fonctionne sous n'importe quel sous-chemin.
 
+## RDAP vs WHOIS
+
+WHOIS retourne du texte non structuré — un mur de paragraphes lisibles par les humains mais difficiles à parser programmatiquement et lents à automatiser à grande échelle. RDAP (Registration Data Access Protocol, standardisé dans [RFC 9083](https://www.rfc-editor.org/rfc/rfc9083)) est son successeur JSON : structuré, machine-readable, et conçu pour la consommation API. Chaque point de terminaison que Domain Hunter utilise envoie des en-têtes CORS permissifs, donc votre navigateur appelle les registres directement sans aucun proxy. Cela rend la vérification en masse rapide, respectueuse des limites de débit, et gratuite.
+
+## À qui s'adresse-t-il
+
+- **Investisseurs en domaines & drop-catchers** — surveillez une watchlist de centaines de noms sur 148+ TLDs, suivez les domaines expirés/abandonnés, et exportez les changements de libération ou d'occupation en CSV.
+- **Naming de marque** — cinq générateurs (combinateur, mélangeur de syllabes, ensembles thématiques, astuces TLD, mutations) produisent des candidats que vous pouvez vérifier immédiatement.
+- **Développeurs** — build MIT en un seul fichier, intégrable, sans backend, sans dépendances. Forkez-le, déployez-le, étendez-le.
+- **Utilisateurs soucieux de la vie privée** — pas de comptes, pas de journaux, pas d'analytics. Tout s'exécute localement dans votre navigateur.
+
 ## Comment ça marche
 
 1. Le navigateur parle **directement aux points de terminaison RDAP des registres** — tous les points de terminaison utilisés par Domain Hunter ont le CORS ouvert, donc aucun serveur ni proxy n'est requis.
@@ -80,6 +93,7 @@ Il manque une zone ? C'est piloté par les données — ajouter une entrée dans
 | Générateurs de noms | 5 intégrés | Suggestions basiques | Aucun | Aucun |
 | Prix en direct + TCO 3 ans | 12 bureaux d'enregistrement comparés | Prix propres uniquement | Aucun | Frais supplémentaire |
 | Confidentialité | Pas de suivi, local uniquement | Historique de recherche journalisé | Privé | Journaux de requêtes |
+| Qualité des idées de noms | 5 générateurs (combinateur, syllabes, thèmes, astuces TLD, mutations) | Suggestions basiques | Aucun | Aucun |
 
 Choisissez une API payante si vous avez besoin de SLAs garantis, de flux de prix pour domaines premium, ou de millions de vérifications par jour. Choisissez Domain Hunter quand vous voulez un moyen rapide, gratuit et privé de brainstormer et valider des centaines de candidats tout de suite.
 
@@ -116,6 +130,21 @@ Svelte 5 + TypeScript (strict), Vite 7, et `vite-plugin-singlefile` — toute l'
 ## Contribuer
 
 Les issues et PRs sont les bienvenues. Bonnes premières contributions : nouvelles zones sélectionnées (éditez `src/config/tlds.json`), nouveaux ensembles de mots thématiques (`src/config/dictionaries/`), traductions (`src/i18n/`). Voir [AGENTS.md](AGENTS.md) pour les commandes de build/test et les conventions du projet.
+
+## Citation
+
+Si vous faites référence à Domain Hunter dans un travail académique ou technique, veuillez utiliser les métadonnées dans [`CITATION.cff`](CITATION.cff) :
+
+```bibtex
+@software{domain_hunter_2026,
+  author = {WhiteBite},
+  title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
+  version = {2.0.0},
+  year = {2026},
+  url = {https://github.com/WhiteBite/Domain-Hunter},
+  license = {MIT}
+}
+```
 
 ## Licence
 

@@ -10,6 +10,8 @@
 
 **[▶ 在线演示](https://whitebite.github.io/Domain-Hunter/)** — 即开即用，无需安装。
 
+> **这是一个已完成的产品，你现在就可以使用。** 打开 <https://whitebite.github.io/Domain-Hunter/> 即可立即开始检查域名或生成名称。无需安装、无需注册、无需 API 密钥、无追踪。整个应用编译为单个 HTML 文件（`dist/index.html`），也可在 `file://` 下离线运行。下载它、分享它、在任何地方运行它。
+
 ![Domain Hunter 查询五个品牌名称跨 15 个 TLD——实时流入结果，带状态标签、首年与续费价格、CSV 导出](docs/screenshot-en-check.png)
 
 Domain Hunter 直接对接注册局 **RDAP** 端点（Verisign、Google Registry、Identity Digital、CentralNic、Radix……）查询域名可注册性，内置五种生成器发明品牌化名称，展示**实时注册商价格**与三年总成本（TCO），并可将一切导出为 CSV。它是 WHOIS 查询服务和 WhoisXML、DomainTools 等付费域名 API 的隐私友好替代方案——整个应用就是一个自包含的 HTML 文件。
@@ -57,6 +59,17 @@ npm run dev       # Vite 开发服务器
 
 **任意静态主机或磁盘：** 提供或打开 `dist/index.html`。所有路径均为相对路径（`base: './'`），因此可在任意子路径下运行。
 
+## RDAP 与 WHOIS
+
+WHOIS 返回的是非结构化文本——一段段人类可读的段落，难以用程序解析，也难以大规模自动化。RDAP（注册数据访问协议，标准化为 [RFC 9083](https://www.rfc-editor.org/rfc/rfc9083)）是它的 JSON 继任者：结构化、机器可读，专为 API 消费而设计。Domain Hunter 使用的每个端点都发送宽松的 CORS 头，因此你的浏览器可以直接调用注册局，无需任何代理。这让批量检查快速、友好于速率限制，且完全免费。
+
+## 适合谁用
+
+- **域名投资者与抢注者** — 在 148+ TLD 上监控数百个名称的 watchlist，跟踪已过期/已删除的域名，并以 CSV 导出释放或已被占用的变更。
+- **品牌命名** — 五种生成器（词根组合器、音节混合器、主题词集、TLD 技巧、词汇变形）产出可立即验证的候选名称。
+- **开发者** — 单文件 MIT 构建，可嵌入，无需后端，无依赖。Fork 它、部署它、扩展它。
+- **注重隐私的用户** — 无需账号、无日志、无分析。一切在你的浏览器中本地运行。
+
 ## 工作原理
 
 1. 浏览器**直接与注册局 RDAP 端点通信** — Domain Hunter 使用的所有端点均开放 CORS，因此无需服务器或代理。
@@ -80,6 +93,7 @@ npm run dev       # Vite 开发服务器
 | 名称生成器 | 内置 5 种 | 基础建议 | 无 | 无 |
 | 实时价格 + 三年 TCO | 对比 12 个注册商 | 仅自家价格 | 无 | 额外收费 |
 | 隐私 | 无追踪，仅本地 | 搜索历史被记录 | 私密 | 查询日志 |
+| 名称创意质量 | 5 种生成器（组合器、音节、主题、TLD 技巧、变形） | 基础建议 | 无 | 无 |
 
 如果你需要保证 SLA、溢价域名定价数据流或每天数百万次查询，请选择付费 API。如果你想要一种快速、免费、私密的方式来头脑风暴并验证数百个候选名称，请选择 Domain Hunter。
 
@@ -116,6 +130,21 @@ Svelte 5 + TypeScript（严格模式）、Vite 7 和 `vite-plugin-singlefile` �
 ## 贡献
 
 欢迎提 Issue 和 PR。适合新手的贡献：新增精选区域（编辑 `src/config/tlds.json`）、新增主题词集（`src/config/dictionaries/`）、翻译（`src/i18n/`）。构建/测试命令和项目约定见 [AGENTS.md](AGENTS.md)。
+
+## 引用
+
+如果你在学术或技术工作中引用 Domain Hunter，请使用 [`CITATION.cff`](CITATION.cff) 中的元数据：
+
+```bibtex
+@software{domain_hunter_2026,
+  author = {WhiteBite},
+  title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
+  version = {2.0.0},
+  year = {2026},
+  url = {https://github.com/WhiteBite/Domain-Hunter},
+  license = {MIT}
+}
+```
 
 ## 许可证
 
