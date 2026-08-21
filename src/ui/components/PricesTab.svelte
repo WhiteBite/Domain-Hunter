@@ -2,7 +2,7 @@
   import { t } from '../../i18n';
   import { pricing, registry, settings } from '../store';
   import { bestEntry, formatPrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
-  import { pointsFromCompact, summarizeTrend } from '../../pricing/trends';
+  import { pointsFromCompact, sparkSeries, summarizeTrend } from '../../pricing/trends';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
@@ -100,6 +100,33 @@
     if (entry && isPromoTrap(entry)) return promoTrapTitle(entry, s);
     if (isMin) return t('prices.min.title', { registrar: registrarName.get(registrarId) ?? registrarId });
     return '';
+  }
+
+  // Sparkline geometry: 64×14 viewBox, 1px padding, y inverted (SVG y grows
+  // downward, prices grow upward). Values are raw USD cents from sparkSeries.
+  const SPARK_W = 64;
+  const SPARK_H = 14;
+  const SPARK_PAD = 1;
+
+  function sparkGeometry(values: number[]): { points: string; lastX: number; lastY: number } {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min;
+    const innerW = SPARK_W - 2 * SPARK_PAD;
+    const innerH = SPARK_H - 2 * SPARK_PAD;
+    const step = values.length > 1 ? innerW / (values.length - 1) : 0;
+    let lastX = SPARK_W / 2;
+    let lastY = SPARK_H / 2;
+    const parts: string[] = [];
+    values.forEach((v, i) => {
+      const x = SPARK_PAD + i * step;
+      // Constant series (span 0) draws through the vertical middle.
+      const y = span === 0 ? SPARK_H / 2 : SPARK_H - SPARK_PAD - ((v - min) / span) * innerH;
+      lastX = Math.round(x * 100) / 100;
+      lastY = Math.round(y * 100) / 100;
+      parts.push(`${lastX},${lastY}`);
+    });
+    return { points: parts.join(' '), lastX, lastY };
   }
 
   function showMore(): void {
@@ -225,6 +252,8 @@
             {@const best = bestEntry(table, tld)}
             {@const minRid = best?.registrarId ?? null}
             {@const trend = summarizeTrend(pointsFromCompact(history[tld] ?? []))}
+            {@const spark = sparkSeries(history[tld] ?? [])}
+            {@const sparkGeo = spark ? sparkGeometry(spark.values) : null}
             <tr data-testid={`prices-row-${tld}`}>
               <td class="zone-cell">{tld}</td>
               {#each columns as rid (rid)}
@@ -245,6 +274,25 @@
               </td>
               <td class="price-cell nums best-cell">
                 {formatPrice(tco3(table, tld), $settings)}
+                {#if sparkGeo}
+                  <svg
+                    class="spark trend-{trend.dir ?? 'flat'}"
+                    width="64"
+                    height="14"
+                    viewBox="0 0 64 14"
+                    aria-hidden="true"
+                  >
+                    <polyline
+                      points={sparkGeo.points}
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <circle cx={sparkGeo.lastX} cy={sparkGeo.lastY} r="2" fill="currentColor" />
+                  </svg>
+                {/if}
                 {#if trend.dir}
                   <span
                     class="trend trend-{trend.dir}"
@@ -492,6 +540,12 @@
     text-decoration: underline dotted var(--amber);
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
+  }
+
+  .spark {
+    vertical-align: middle;
+    margin-inline-start: var(--space-1);
+    opacity: 0.9;
   }
 
   .trend {

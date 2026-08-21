@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { pointsFromCompact, summarizeTrend, type TrendPoint } from '../src/pricing/trends';
+import {
+  pointsFromCompact,
+  sparkSeries,
+  summarizeTrend,
+  type TrendPoint,
+} from '../src/pricing/trends';
 
 describe('summarizeTrend', () => {
   it('returns up when latest reg is more than 2% above oldest', () => {
@@ -121,5 +126,78 @@ describe('pointsFromCompact', () => {
     const result = summarizeTrend(pointsFromCompact(rows));
     // Then the round-trip yields the expected trend
     expect(result).toEqual({ pct: 10, dir: 'up' });
+  });
+});
+
+describe('sparkSeries', () => {
+  it('returns null for empty input', () => {
+    expect(sparkSeries([])).toBeNull();
+  });
+
+  it('returns null for a single point', () => {
+    // A sparkline needs at least one line segment
+    const rows: Array<[string, number | null, number | null]> = [['2026-08', 1046, 1046]];
+    expect(sparkSeries(rows)).toBeNull();
+  });
+
+  it('returns null when fewer than 2 rows have a non-null reg', () => {
+    // Given three rows where only one has a reg value
+    const rows: Array<[string, number | null, number | null]> = [
+      ['2026-06', null, 900],
+      ['2026-07', 1000, 900],
+      ['2026-08', null, 950],
+    ];
+    expect(sparkSeries(rows)).toBeNull();
+  });
+
+  it('skips rows with null reg and keeps the remaining months aligned', () => {
+    // Given a gap in the middle of the series
+    const rows: Array<[string, number | null, number | null]> = [
+      ['2026-06', 900, 900],
+      ['2026-07', null, 950],
+      ['2026-08', 1100, 950],
+    ];
+    // Then the null month is dropped and months/values stay index-aligned
+    expect(sparkSeries(rows)).toEqual({
+      months: ['2026-06', '2026-08'],
+      values: [900, 1100],
+    });
+  });
+
+  it('sorts rows chronologically regardless of input order', () => {
+    // Given rows stored out of order
+    const rows: Array<[string, number | null, number | null]> = [
+      ['2026-08', 1100, 1100],
+      ['2026-06', 900, 900],
+      ['2026-07', 1000, 1000],
+    ];
+    // Then output is month-ascending
+    expect(sparkSeries(rows)).toEqual({
+      months: ['2026-06', '2026-07', '2026-08'],
+      values: [900, 1000, 1100],
+    });
+  });
+
+  it('sorts chronologically across year boundaries', () => {
+    // YYYY-MM string comparison is chronological across years too
+    const rows: Array<[string, number | null, number | null]> = [
+      ['2026-01', 1100, 1100],
+      ['2025-12', 1000, 1000],
+    ];
+    expect(sparkSeries(rows)).toEqual({
+      months: ['2025-12', '2026-01'],
+      values: [1000, 1100],
+    });
+  });
+
+  it('passes values through unchanged (normalization is a render-time concern)', () => {
+    // Given raw cent values, including a constant series
+    const rows: Array<[string, number | null, number | null]> = [
+      ['2026-07', 500, 500],
+      ['2026-08', 500, 500],
+    ];
+    // Then values are returned verbatim, not scaled or shifted
+    const series = sparkSeries(rows);
+    expect(series).toEqual({ months: ['2026-07', '2026-08'], values: [500, 500] });
   });
 });

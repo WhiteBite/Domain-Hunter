@@ -88,3 +88,26 @@ export function pointsFromCompact(
 ): TrendPoint[] {
   return rows.map(([m, reg, renew]) => ({ m, reg, renew }));
 }
+
+/**
+ * Extract the chronological series of non-null first-year (reg) prices
+ * for sparkline rendering. Rows are sorted by month ascending (YYYY-MM
+ * string comparison = chronological); rows with null reg are skipped.
+ * Returns null when fewer than 2 usable points remain — a sparkline
+ * needs at least one line segment. Values are raw USD cents, unmodified;
+ * normalization to pixel coordinates happens at render time.
+ */
+export function sparkSeries(
+  rows: Array<[string, number | null, number | null]>,
+): { months: string[]; values: number[] } | null {
+  const sorted = [...rows].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  const months: string[] = [];
+  const values: number[] = [];
+  for (const [m, reg] of sorted) {
+    if (reg == null) continue;
+    months.push(m);
+    values.push(reg);
+  }
+  if (values.length < 2) return null;
+  return { months, values };
+}
