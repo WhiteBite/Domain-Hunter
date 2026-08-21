@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Weekly harvester for the "Dropped domains" tab.
  *
