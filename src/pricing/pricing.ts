@@ -37,7 +37,12 @@ const SNAPSHOT: PricingTable = {
     ]),
   ),
 };
-const FLOORS = (wholesale as { floors: Record<string, number> }).floors;
+const wholesaleJson = wholesale as {
+  floors: Record<string, number>;
+  scheduled?: Record<string, Array<{ from: string; cents: number }>>;
+};
+const FLOORS = wholesaleJson.floors;
+const SCHEDULED = wholesaleJson.scheduled ?? {};
 
 const PRICING_KEY = 'dh:v1:pricing';
 const FRESH_MS = 12 * 60 * 60 * 1000; // 12h
@@ -322,8 +327,26 @@ export function priceTier(centsUsd: number): 'cheap' | 'mid' | 'high' {
   return 'high';
 }
 
-export function isBelowFloor(tld: string, centsUsd: number): boolean {
-  const floor = FLOORS[tld];
+/** Currently-effective wholesale floor: the base floor plus any scheduled
+ *  changes whose `from` date has passed (e.g. the Verisign .com hike on
+ *  2026-11-01), so promo detection stays correct without a data edit. */
+export function currentFloor(tld: string, nowMs: number = Date.now()): number | null {
+  let floor: number | null = FLOORS[tld] ?? null;
+  const changes = SCHEDULED[tld];
+  if (changes) {
+    for (const c of changes) {
+      if (Date.parse(c.from) <= nowMs) floor = c.cents;
+    }
+  }
+  return floor;
+}
+
+export function isBelowFloor(
+  tld: string,
+  centsUsd: number,
+  nowMs: number = Date.now(),
+): boolean {
+  const floor = currentFloor(tld, nowMs);
   return floor != null && centsUsd < floor;
 }
 

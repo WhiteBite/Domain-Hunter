@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tco3, bestCoupon, couponDiscountCents, bestRenewal, couponEffectivePrice, premiumLikely } from '../src/pricing/pricing';
+import { tco3, bestCoupon, couponDiscountCents, bestRenewal, couponEffectivePrice, premiumLikely, currentFloor, isBelowFloor } from '../src/pricing/pricing';
 import type { Coupon, PriceEntry, PricingTable } from '../src/types';
 
 function table(
@@ -333,5 +333,29 @@ describe('premiumLikely', () => {
   it('is case-insensitive for dictionary matching', () => {
     // 'Business' should match 'business' in the dictionary.
     expect(premiumLikely('Business', 'xyz')).toBe(true);
+  });
+});
+
+describe('currentFloor / scheduled floors', () => {
+  const beforeHike = Date.parse('2026-10-31T00:00:00Z');
+  const afterHike = Date.parse('2026-11-02T00:00:00Z');
+
+  it('returns the base floor before the scheduled date', () => {
+    expect(currentFloor('com', beforeHike)).toBe(1026);
+  });
+
+  it('returns the scheduled floor once the date has passed', () => {
+    expect(currentFloor('com', afterHike)).toBe(1097);
+  });
+
+  it('returns the base floor for tlds without a schedule', () => {
+    expect(currentFloor('net', afterHike)).toBe(1091);
+    expect(currentFloor('zzzz', afterHike)).toBeNull();
+  });
+
+  it('isBelowFloor flips across the scheduled date', () => {
+    // $10.50 is above the current floor but below the post-hike floor.
+    expect(isBelowFloor('com', 1050, beforeHike)).toBe(false);
+    expect(isBelowFloor('com', 1050, afterHike)).toBe(true);
   });
 });
