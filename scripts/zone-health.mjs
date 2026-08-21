@@ -3,7 +3,8 @@
  * Zone health check — for each curated TLD, GET the resolved RDAP base with
  * a random unregistered domain and expect HTTP 404 (domain not found).
  * Records {http, cors, ok, ms, ts} per TLD. Concurrency 4, timeout 8s.
- * Writes repo-root health.json. Always exits 0 (failures visible in the file).
+ * Writes public/health.json (vite copies it into dist/ so the hosted app can
+ * fetch ./health.json; file:// builds skip the probe). Always exits 0.
  */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -11,7 +12,7 @@ import { fetchWithTimeout, readJson, writeJson } from './lib/http.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TLDS_PATH = join(__dirname, '..', 'src', 'config', 'tlds.json');
-const HEALTH_PATH = join(__dirname, '..', 'health.json');
+const HEALTH_PATH = join(__dirname, '..', 'public', 'health.json');
 const TIMEOUT_MS = 8_000;
 const CONCURRENCY = 4;
 

@@ -27,6 +27,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add health.json
-          git diff --quiet --cached -- health.json || git commit -m "chore: update zone health"
+          git add public/health.json
+          git diff --quiet --cached -- public/health.json || git commit -m "chore: update zone health"
           git push

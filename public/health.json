@@ -1,0 +1,1045 @@
+{
+  "generatedAt": "2026-08-21T20:59:27.255Z",
+  "tlds": {
+    "com": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 721,
+      "ts": "2026-08-21T20:59:27.253Z"
+    },
+    "net": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 250,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "cc": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 384,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "tv": {
+      "http": 400,
+      "cors": true,
+      "ok": false,
+      "ms": 258,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "dev": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 527,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "app": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 508,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "page": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 414,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "new": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 454,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "day": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 432,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "how": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 231,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ing": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 243,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "meme": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 225,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "zip": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 217,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "mov": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 222,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "foo": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 299,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "dad": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 291,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "phd": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 291,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "prof": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 299,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "esq": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 304,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "nexus": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 290,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "rsvp": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 680,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "soy": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 286,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "boo": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 297,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "channel": {
+      "http": 429,
+      "cors": false,
+      "ok": false,
+      "ms": 298,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "io": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 634,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ai": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 560,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "me": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 663,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "sh": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 706,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ac": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 677,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "pro": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 198,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "info": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 191,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "live": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 211,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "world": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 186,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "email": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 235,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "studio": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 185,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "agency": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 210,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "life": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 195,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "digital": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 225,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "guru": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 215,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ninja": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 186,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "works": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 210,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "today": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 189,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "news": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 228,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "media": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 221,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "finance": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 200,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "money": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 211,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "fund": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 189,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "estate": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 220,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "engineering": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 223,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "tools": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 191,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "services": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 219,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "support": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 191,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "consulting": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 218,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "business": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 217,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "company": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 197,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "group": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 210,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "network": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 187,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "systems": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 223,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "technology": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 216,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "solutions": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 187,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "global": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 209,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "community": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 186,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "social": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 218,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "expert": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 214,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "academy": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 186,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "education": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 207,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "university": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 191,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "design": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 209,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "gallery": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 275,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "video": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 186,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "events": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 210,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "market": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 188,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "pizza": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 223,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "bar": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 175,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "casino": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 216,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "games": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 210,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "dog": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 184,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "cat": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 173,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "wtf": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 222,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "cool": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 235,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "pink": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 209,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "blue": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 188,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "green": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 188,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "gold": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 222,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "fitness": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 215,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "doctor": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 187,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "taxi": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 209,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "team": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 420,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "tennis": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 225,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "soccer": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 188,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "xyz": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 297,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "lol": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 403,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "icu": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 390,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "cyou": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 303,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "bond": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 293,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "sbs": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 67,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "cfd": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 88,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "art": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 111,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "lat": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 87,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "monster": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 92,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ooo": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 89,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "quest": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 89,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "cam": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 68,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "help": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 90,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "mom": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 94,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "baby": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 97,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "beauty": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 76,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "best": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 97,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "fans": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 353,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "game": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 103,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "hair": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 65,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "homes": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 91,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "inc": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 86,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "pics": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 69,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "rent": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 89,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "skin": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 94,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "tickets": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 85,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "yachts": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 66,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "college": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 95,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "tech": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 848,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "site": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 925,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "online": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 1174,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "fun": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 863,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "space": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 576,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "store": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 174,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "website": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 152,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "press": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 145,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "host": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 151,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "uno": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 181,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "pw": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 147,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "cloud": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 833,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "link": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 944,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "top": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 1121,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "win": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 688,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "bid": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 539,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "loan": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 146,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "men": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 145,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "de": {
+      "http": 404,
+      "cors": false,
+      "ok": true,
+      "ms": 548,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "co": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 505,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "us": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 767,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "uk": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 649,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "nl": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 437,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "fr": {
+      "http": 0,
+      "cors": false,
+      "ok": false,
+      "ms": 8015,
+      "error": "fetch https://rdap.afnic.fr/domain/dh-health-0o2lokpvy1mu.fr failed: This operation was aborted",
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ch": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 752,
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ru": {
+      "http": 0,
+      "cors": false,
+      "ok": false,
+      "ms": 8015,
+      "error": "fetch https://rdap.tcinet.ru/domain/dh-health-vx5lfymrnktg.ru failed: This operation was aborted",
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "so": {
+      "http": 0,
+      "cors": false,
+      "ok": false,
+      "ms": 8004,
+      "error": "fetch https://rdap.nic.so/domain/dh-health-2qkr6u9pnrjw.so failed: This operation was aborted",
+      "ts": "2026-08-21T20:59:27.254Z"
+    },
+    "ly": {
+      "http": 0,
+      "cors": false,
+      "ok": false,
+      "ms": 8007,
+      "error": "fetch https://rdap.nic.ly/domain/dh-health-60e29odpd8x0.ly failed: This operation was aborted",
+      "ts": "2026-08-21T20:59:27.255Z"
+    },
+    "pl": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "ms": 3695,
+      "ts": "2026-08-21T20:59:27.255Z"
+    }
+  }
+}
