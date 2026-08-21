@@ -306,8 +306,9 @@ unknown (amber), error (red). Filters: all / available (includes probably) / tak
   `pricing.snapshot.json` (sources: ['snapshot']).
 - Porkbun `coupons[]` parsed into PricingTable.coupons; UI shows best coupon per TLD
   ("$0.95 with code XYZ52" style, first-year-only marked).
-- `wholesale.json` floors (USD cents): com 1097, net 1091, org 1100 (Nov 2026 values), de 116,
-  uk 526, nl 506, fr 586. Displayed price < floor → "promo" chip.
+- `wholesale.json` floors (USD cents, currently-effective as of its asOf date): com 1026
+  until 2026-11-01 then 1097 (Verisign hike), net 1091, org 1100, de 116, uk 526, nl 506,
+  fr 586. Displayed price < floor → "promo" chip.
 - TCO: `tco3(tld) = min over registrars (reg + 2×renew)`; results sortable by TCO;
   "promo trap" badge when renew ≥ 5×reg.
 - Renewal column shows the cheapest renewal over registrars (badge of that
@@ -438,6 +439,10 @@ affiliate link activation (config already affiliate-ready: Porkbun Ambassador + 
   bot-blocked as of Aug 2026; Dynadot `tld_price` API requires an account key
   (no GUEST access). The carry-over merge keeps last-known coverage whenever a
   source fails, so partial harvests never shrink the snapshot.
+- **Affiliate-ready buy links**: `registrars.json` carries per-registrar
+  `affiliate.param` + `affiliate.tag` (Porkbun/Dynadot first); with an empty
+  tag links stay clean. The About tab discloses the mechanism; prices and
+  rankings never depend on it.
 - **Results table**: sticky header inside its own scroll area, right-aligned
   tabular-numeral price columns, subtle zebra striping, sticky domain column
   on narrow screens; renewal column with the cheapest-renewal registrar badge;

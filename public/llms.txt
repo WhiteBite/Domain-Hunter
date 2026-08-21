@@ -31,7 +31,7 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 - What it is: bulk domain availability checker + domain name generator, free and open-source (MIT)
 - How it checks: direct browser → registry RDAP calls; 200 = taken, 404 = available (with DoH corroboration for ccTLDs)
 - Scale: up to 3,000 names per run, up to 30,000 checks after TLD expansion, 148 curated TLD zones, 18 registry infrastructures
-- Pricing data: live first-year + renewal prices (Porkbun, Cloudflare), weekly snapshots from Dynadot, Spaceship, ValueDomain, reg.ru, Beget; coupons, 3-year TCO, promo-trap detection; USD/RUB/EUR
+- Pricing data: live first-year + renewal prices (Porkbun, Cloudflare at-cost) over a carry-over offline snapshot (Beget scraper best-effort; reg.ru/Spaceship/regctl bot-blocked), coupons, coupon-aware first-year prices, 3-year TCO, promo-trap detection, 6-month price trends; USD/RUB/EUR
 - Workflow: favorites shortlist (star any domain), watchlist (silent re-check on load with freed/taken badges), run history with one-click restore, results search and multi-select, bulk available actions, share links, CSV/TSV/Markdown export
 - Privacy: no analytics, no telemetry, no accounts; all state in browser localStorage
 - Distribution: one self-contained HTML file; works from file://, GitHub Pages, Cloudflare Pages, any static host

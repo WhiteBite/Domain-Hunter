@@ -33,6 +33,7 @@ The **Prices tab** shows a TLD × registrar price matrix with the cheapest cell 
 - **Coupons, promo-trap detection**, coupon-aware first-year prices, and 3-year TCO sorting. Prices shown in USD, RUB, or EUR.
 - **Price trends** (▲/▼ over six months) from CI-harvested snapshot history, and instant **possible-premium hints** for dictionary words and short labels in premium-heavy zones.
 - **Coverage-aware buy links** target the cheapest registrar that has a deep-link template, not merely the cheapest price in the table.
+- **Affiliate-ready** buy links (data-driven tag, off by default, disclosed in About) — prices and rankings are never affected.
 
 ## How to find available domain name ideas
 

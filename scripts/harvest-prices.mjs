@@ -397,6 +397,18 @@ async function fetchRegctl() {
   return normalizeRegctl(await res.json());
 }
 
+/** Porkbun's dump is slow (12-18s) and occasionally times out; one retry
+ *  after a short pause markedly raises hourly-harvest success. */
+async function fetchPorkbunWithRetry() {
+  try {
+    return await fetchPorkbun();
+  } catch (err) {
+    console.error(`porkbun first attempt failed: ${err?.message ?? err}; retrying once`);
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+    return await fetchPorkbun();
+  }
+}
+
 // ---- Main ----
 
 async function main() {
@@ -405,7 +417,7 @@ async function main() {
   begetEurToUsd = fx.begetEurToUsd;
 
   const apiSources = [
-    ['porkbun', fetchPorkbun],
+    ['porkbun', fetchPorkbunWithRetry],
     ['cloudflare', fetchCloudflare],
   ];
   const scraperSources = [
