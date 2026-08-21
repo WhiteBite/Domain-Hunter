@@ -133,6 +133,13 @@
   color: var(--amber);
 }
 
+/* "Possible premium" heuristic -- softer amber, same tier, distinct text. */
+.chip-tag.premium-likely {
+  background: var(--amber-soft);
+  color: var(--amber);
+  opacity: 0.85;
+}
+
 .chip-tag.watch-freed {
   background: var(--green-soft);
   color: var(--green);

@@ -147,6 +147,7 @@ export const de: Dict = {
   'price.promo': 'Promo',
   'price.promoTrap': 'Promo-Falle',
   'price.premium': 'Premium',
+  'price.premiumLikely': 'möglicher Premium',
   'price.coupon': '{price} mit Code {code}',
   'price.fresh.now': 'Preise: live',
   'price.fresh.hours': 'Preise: vor {n} Std.',
@@ -265,7 +266,10 @@ export const de: Dict = {
 
   'tooltip.promoTrap': 'Promo-Falle: erstes Jahr {first}, Verlängerung {renew} ({times}×) — ab Jahr 2 zahlst du den Verlängerungspreis.',
   'tooltip.promo': 'Unter dem Großhandelspreis des Registers — fast sicher eine Erstjahres-Promo; prüfe den Verlängerungspreis.',
+  'tooltip.premiumLikely': 'Wörterbuchwörter und kurze Namen in dieser Zone sind oft Registry-Premium — im Registrar-Warenkorb überprüfen.',
   'tooltip.registrars': 'Live-Preise: Porkbun und Cloudflare (at-cost); andere Registrar aus wöchentlichen Snapshots. Sortiert nach Erstjahrespreis.',
+  'tooltip.trend':
+    'Preisänderung des ersten Jahres über die letzten {months} Monate (CI-gesammelte Historie)',
   'common.loading': 'Wird geladen…',
   'footer.note': 'Open Source · MIT · kein Tracking',
   'csv.domain': 'Domain',

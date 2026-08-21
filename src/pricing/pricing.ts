@@ -6,7 +6,9 @@
  */
 import snapshot from '../config/pricing.snapshot.json';
 import wholesale from '../config/wholesale.json';
-import type { Coupon, PriceEntry, PricingTable, Settings } from '../types';
+import commonWords from '../config/dictionaries/words-common.json';
+import tldsJson from '../config/tlds.json';
+import type { Coupon, PriceEntry, PricingTable, Settings, TldRegistry } from '../types';
 import type { PricingState } from '../ui/store';
 
 // The snapshot stores registrar prices as compact [reg, renew, transfer]
@@ -412,4 +414,52 @@ export function freshnessLabel(
   const ageHours = Math.floor((now - state.fetchedAt) / 3_600_000);
   if (ageHours < 1) return { key: 'price.fresh.now' };
   return { key: 'price.fresh.hours', params: { n: ageHours } };
+}
+
+/** Cheapest renewal across registrars with a non-null renew price.
+ *  Tie: first encountered. Returns null when no registrar has a renew price. */
+export function bestRenewal(
+  table: PricingTable,
+  tld: string,
+): { registrarId: string; renew: number } | null {
+  const entries = table.tlds[tld];
+  if (!entries) return null;
+  let best: { registrarId: string; renew: number } | null = null;
+  for (const [registrarId, entry] of Object.entries(entries)) {
+    if (entry.renew == null) continue;
+    if (!best || entry.renew < best.renew) {
+      best = { registrarId, renew: entry.renew };
+    }
+  }
+  return best;
+}
+
+/** Effective first-year price after applying a coupon. null when reg or
+ *  coupon is null. Discount is capped at reg by couponDiscountCents, so the
+ *  result is always >= 0. */
+export function couponEffectivePrice(
+  reg: number | null,
+  coupon: Coupon | null,
+): number | null {
+  if (reg == null || coupon == null) return null;
+  return Math.max(0, reg - couponDiscountCents(coupon, reg));
+}
+
+const COMMON_WORDS: ReadonlySet<string> = new Set(commonWords as string[]);
+
+/** Zones where short/dictionary labels are frequently registry premiums —
+ *  the list is data and lives in src/config/tlds.json. */
+const PREMIUM_HEAVY_TLDS: ReadonlySet<string> = new Set(
+  (tldsJson as unknown as TldRegistry).premiumHeavyTlds ?? [],
+);
+
+/** Conservative heuristic: short or dictionary-word labels in premium-heavy
+ *  zones are often registry premiums. Never true for hyphenated or numeric
+ *  labels, or outside the heavy-zone set. */
+export function premiumLikely(label: string, tld: string): boolean {
+  if (label.includes('-') || /[0-9]/.test(label)) return false;
+  if (!PREMIUM_HEAVY_TLDS.has(tld)) return false;
+  const lower = label.toLowerCase();
+  if (lower.length <= 4) return true;
+  return COMMON_WORDS.has(lower);
 }

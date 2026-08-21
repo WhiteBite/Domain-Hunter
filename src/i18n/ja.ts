@@ -147,6 +147,7 @@ export const ja: Dict = {
   'price.promo': 'プロモ',
   'price.promoTrap': 'プロモーショントラップ',
   'price.premium': 'プレミアム',
+  'price.premiumLikely': 'プレミアムの可能性',
   'price.coupon': 'コード {code} で {price}',
   'price.fresh.now': '価格: ライブ',
   'price.fresh.hours': '価格: {n} 時間前',
@@ -265,7 +266,10 @@ export const ja: Dict = {
 
   'tooltip.promoTrap': 'プロモート罠: 初年度 {first}、更新 {renew} ({times}×) — 2 年目以降は更新料を支払います。',
   'tooltip.promo': 'レジストリの卸値を下回る — ほぼ間違いなく初年度プロモーションです; 更新料を確認してください。',
+  'tooltip.premiumLikely': 'このゾーンの辞書語および短い名前はレジストリプレミアムであることが多いです — レジストラのカートで確認してください。',
   'tooltip.registrars': 'ライブ価格: Porkbun と Cloudflare (原価); 他のレジストラは週次スナップショット由来。初年度価格でソート済み。',
+  'tooltip.trend':
+    '過去 {months} か月の初年度価格変動（CI 収集の履歴）',
   'common.loading': '読み込み中…',
   'footer.note': 'オープンソース · MIT · トラッキングなし',
   'csv.domain': 'ドメイン',

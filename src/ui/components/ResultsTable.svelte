@@ -12,6 +12,9 @@
     bestCoupon,
     tco3,
     couponDiscountCents,
+    bestRenewal,
+    couponEffectivePrice,
+    premiumLikely,
   } from '../../pricing/pricing';
   import { createEngine } from '../../core/engine';
   import type { EngineHandle } from '../../core/engine';
@@ -100,9 +103,13 @@
     tco: number | null;
     firstYear: number | null;
     /** Original standard first-year price (non-null only when a premium
-     *  override is active, for struck-through display). */
+     *  override or coupon discount is active, for struck-through display). */
     standardFirstYear: number | null;
     renewal: number | null;
+    /** Registrar id offering the cheapest renewal (for the renewal badge). */
+    renewalRegistrarId: string | null;
+    /** True only when a DigMyName premium override is active (not for coupons). */
+    isPremiumOverride: boolean;
   }
 
   const rows = $derived.by(() => {
@@ -113,13 +120,20 @@
       const override = premiumOverrides[r.domain] ?? null;
       const stdFirstYear = best?.entry.reg ?? null;
       const stdTco = table ? tco3(table, r.tld) : null;
+      const renewalBest = table ? bestRenewal(table, r.tld) : null;
+      const coupon = table ? bestCoupon(table, r.tld) : null;
+      const couponPrice = couponEffectivePrice(stdFirstYear, coupon);
+      const couponApplies =
+        couponPrice != null && stdFirstYear != null && couponPrice < stdFirstYear;
       arr.push({
         result: r,
         best,
         tco: override ?? stdTco,
-        firstYear: override ?? stdFirstYear,
-        standardFirstYear: override != null ? stdFirstYear : null,
-        renewal: best?.entry.renew ?? null,
+        firstYear: override ?? (couponApplies && couponPrice != null ? couponPrice : stdFirstYear),
+        standardFirstYear: override != null || couponApplies ? stdFirstYear : null,
+        renewal: renewalBest?.renew ?? best?.entry.renew ?? null,
+        renewalRegistrarId: renewalBest?.registrarId ?? best?.registrarId ?? null,
+        isPremiumOverride: override != null,
       });
     }
     return arr;
@@ -180,12 +194,22 @@
 
   const visible = $derived(sorted.slice(0, visibleCount));
 
+  let prevFilter: FilterKey = 'all';
+
   $effect(() => {
     void filter;
     void sortKey;
     void sortDir;
     void query;
     visibleCount = 100;
+    // When switching to the Available filter with the default name sort,
+    // default to TCO sort (cheapest total cost first). Manual sorts are
+    // preserved: only the default 'name' sort is overridden.
+    if (filter === 'available' && prevFilter !== 'available' && sortKey === 'name') {
+      sortKey = 'tco';
+      sortDir = 'asc';
+    }
+    prevFilter = filter;
   });
 
   $effect(() => {
@@ -758,6 +782,12 @@
                 <span class="sort-arrow" class:visible={sortKey === 'price'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
               </button>
             </th>
+            <th class="renew-col" aria-sort={ariaSort('renew')}>
+              <button class="sort-btn" onclick={() => toggleSort('renew')} type="button" data-testid="results-sort-renew">
+                {t('price.renewal')}
+                <span class="sort-arrow" class:visible={sortKey === 'renew'} class:desc={sortDir === 'desc'} aria-hidden="true">▲</span>
+              </button>
+            </th>
             <th class="actions-col">{t('results.col.actions')}</th>
           </tr>
         </thead>
@@ -833,7 +863,7 @@
                     >
                       {formatPrice(row.firstYear, $settings)}
                     </span>
-                    {#if row.standardFirstYear == null && row.best}
+                    {#if !row.isPremiumOverride && row.best}
                       {@const rid = row.best.registrarId}
                       {@const icon = REGISTRAR_ICONS[rid]}
                       {@const mono = registrarMonogram(rid)}
@@ -856,7 +886,7 @@
                       {/if}
                     {/if}
                   </span>
-                  {#if row.standardFirstYear != null}
+                  {#if row.isPremiumOverride}
                     <Tooltip text={t('results.detail.premium', { price: formatPrice(row.firstYear, $settings) })}>
                       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
                       <span class="chip-tag premium" tabindex="0" data-testid={`results-chip-premium-${sid}`}>{t('price.premium')}</span>
@@ -879,6 +909,12 @@
                       <span class="chip-tag trap" tabindex="0" data-testid={`results-chip-trap-${sid}`}>{t('price.promoTrap')}</span>
                     </Tooltip>
                   {/if}
+                  {#if isAvail && premiumLikely(row.result.domain.slice(0, -(row.result.tld.length + 1)), row.result.tld)}
+                    <Tooltip text={t('tooltip.premiumLikely')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag premium-likely" tabindex="0" data-testid={`results-chip-premium-likely-${sid}`}>{t('price.premiumLikely')}</span>
+                    </Tooltip>
+                  {/if}
                   {#if coupon && row.best != null && row.best.entry.reg != null}
                     {@const reg = row.best.entry.reg ?? 0}
                     <span class="coupon">
@@ -886,6 +922,33 @@
                     </span>
                   {/if}
                 </div>
+              </td>
+              <td class="renew-cell nums">
+                <span class="renew-line">
+                  <span class="renew" style="color: {priceColor(row.renewal)}">{formatPrice(row.renewal, $settings)}</span>
+                  {#if row.renewalRegistrarId}
+                    {@const rid = row.renewalRegistrarId}
+                    {@const icon = REGISTRAR_ICONS[rid]}
+                    {@const mono = registrarMonogram(rid)}
+                    {@const badgeTitle = registrarBadgeTitle(rid)}
+                    {#if icon}
+                      <img
+                        src={icon}
+                        alt=""
+                        class="reg-badge reg-img"
+                        title={badgeTitle}
+                        aria-label={badgeTitle}
+                      />
+                    {:else}
+                      <span
+                        class="reg-badge"
+                        style="--reg-hue: {mono.hue}"
+                        title={badgeTitle}
+                        aria-label={badgeTitle}
+                      >{mono.short}</span>
+                    {/if}
+                  {/if}
+                </span>
               </td>
               <td class="actions-cell">
                 <div class="actions">
@@ -1180,7 +1243,7 @@
       grid-template-columns: auto minmax(0, 1fr) minmax(0, max-content);
       grid-template-areas:
         'select domain price'
-        'select status price'
+        'select status renew'
         'actions actions actions';
       column-gap: var(--space-2);
       row-gap: var(--space-1);
@@ -1246,6 +1309,11 @@
       align-self: start;
       white-space: normal;
     }
+    td.renew-cell {
+      grid-area: renew;
+      align-self: start;
+      white-space: normal;
+    }
     td.actions-cell {
       grid-area: actions;
       display: flex;
@@ -1265,6 +1333,22 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+  .renew-col {
+    text-align: right;
+  }
+  .renew-cell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .renew-line {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .renew {
+    font-weight: 500;
   }
   .price-stack {
     display: flex;

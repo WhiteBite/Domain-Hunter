@@ -283,5 +283,6 @@
     { "tld": "ly", "infra": "nic-ly", "flags": { "hackable": true } },
     { "tld": "pl", "infra": "nask" }
   ],
-  "hackTlds": ["ly", "io", "me", "so", "ai", "sh", "ac", "cc", "tv", "co"]
+  "hackTlds": ["ly", "io", "me", "so", "ai", "sh", "ac", "cc", "tv", "co"],
+  "premiumHeavyTlds": ["xyz", "shop", "icu", "top", "cfd", "sbs", "click", "lol", "online", "site", "fun", "space", "website", "store", "tech", "art", "bond", "cyou", "help", "news"]
 }

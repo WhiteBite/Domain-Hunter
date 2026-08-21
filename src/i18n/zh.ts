@@ -147,6 +147,7 @@ export const zh: Dict = {
   'price.promo': '促销',
   'price.promoTrap': '促销陷阱',
   'price.premium': '溢价',
+  'price.premiumLikely': '可能溢价',
   'price.coupon': '{price}，优惠码 {code}',
   'price.fresh.now': '价格：实时',
   'price.fresh.hours': '价格：{n} 小时前',
@@ -265,7 +266,10 @@ export const zh: Dict = {
 
   'tooltip.promoTrap': '促销陷阱：首年 {first}，续费 {renew}（{times}×）——从第 2 年起支付续费价格。',
   'tooltip.promo': '低于注册局批发底价——几乎肯定是首年促销；请检查续费价格。',
+  'tooltip.premiumLikely': '该区域中的字典词和短名称通常是注册局溢价域名——请在注册商购物车中核实。',
   'tooltip.registrars': '实时价格：Porkbun 和 Cloudflare（成本价）；其他注册商来自每周快照。按首年价格排序。',
+  'tooltip.trend':
+    '过去 {months} 个月的首年价格变化（CI 采集的历史数据）',
   'common.loading': '加载中…',
   'footer.note': '开源 · MIT · 无追踪',
   'csv.domain': '域名',

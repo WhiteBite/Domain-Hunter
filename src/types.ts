@@ -46,6 +46,9 @@ export interface TldRegistry {
   tlds: TldConfig[];
   /** Subset of TLD strings used by the TLD-hack generator. */
   hackTlds: string[];
+  /** Zones where short/dictionary labels are often registry premiums
+   *  (heuristic "possible premium" chip). */
+  premiumHeavyTlds?: string[];
 }
 
 export interface CheckResult {

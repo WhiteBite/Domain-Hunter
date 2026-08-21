@@ -90,6 +90,7 @@ export const ALL_TESTIDS = [
   'results-sort-name', // sort by name
   'results-sort-status', // sort by status
   'results-sort-price', // sort by first-year price
+  'results-sort-renew', // sort by renewal price
   'results-showing-count', // "showing X of Y" live region
   'results-legend-toggle', // status legend popover trigger
   'results-available-menu', // available-domains bulk actions menu trigger (⋯)
@@ -185,6 +186,7 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'results-row-menu-', // row overflow menu triggers: results-row-menu-{domain}
   'results-watch-', // watch status chips: results-watch-{domain}
   'results-chip-premium-', // focusable premium chips: results-chip-premium-{domain}
+  'results-chip-premium-likely-', // focusable premium-likely chips: results-chip-premium-likely-{domain}
   'results-chip-promo-', // focusable promo chips: results-chip-promo-{domain}
   'results-chip-trap-', // focusable promo-trap chips: results-chip-trap-{domain}
 

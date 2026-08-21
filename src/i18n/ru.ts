@@ -147,6 +147,7 @@ export const ru: Dict = {
   'price.promo': 'промо',
   'price.promoTrap': 'промо-ловушка',
   'price.premium': 'премиум',
+  'price.premiumLikely': 'возможен премиум',
   'price.coupon': '{price} по коду {code}',
   'price.fresh.now': 'цены: актуальные',
   'price.fresh.hours': 'цены: {n} ч назад',
@@ -266,7 +267,10 @@ export const ru: Dict = {
 
   'tooltip.promoTrap': 'Промо-ловушка: первый год {first}, продление {renew} ({times}×) — со второго года вы платите цену продления.',
   'tooltip.promo': 'Дешевле оптовой цены реестра — почти наверняка промо первого года; проверьте цену продления.',
+  'tooltip.premiumLikely': 'Словарные слова и короткие имена в этой зоне часто являются премиум-доменами реестра — проверьте в корзине регистратора.',
   'tooltip.registrars': 'Цены live: Porkbun и Cloudflare (at-cost); остальные регистраторы — из недельных снапшотов. Сортировка по цене первого года.',
+  'tooltip.trend':
+    'Изменение цены первого года за последние {months} мес. (история из CI)',
   'common.loading': 'Загрузка…',
   'footer.note': 'Открытый код · MIT · без слежки',
   'csv.domain': 'Домен',

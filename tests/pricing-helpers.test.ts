@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tco3, bestCoupon, couponDiscountCents } from '../src/pricing/pricing';
+import { tco3, bestCoupon, couponDiscountCents, bestRenewal, couponEffectivePrice, premiumLikely } from '../src/pricing/pricing';
 import type { Coupon, PriceEntry, PricingTable } from '../src/types';
 
 function table(
@@ -209,5 +209,129 @@ describe('bestCoupon', () => {
     );
     // 100% of 500 = 500 off > 400 off → PCT100 wins.
     expect(bestCoupon(tbl, 'com')?.code).toBe('PCT100');
+  });
+});
+
+describe('bestRenewal', () => {
+  it('returns the cheapest renewal across registrars', () => {
+    const tbl = table({
+      com: {
+        a: { reg: 1000, renew: 1500, transfer: null },
+        b: { reg: 1200, renew: 900, transfer: null },
+        c: { reg: 800, renew: 2000, transfer: null },
+      },
+    });
+    expect(bestRenewal(tbl, 'com')).toEqual({ registrarId: 'b', renew: 900 });
+  });
+
+  it('keeps the first encountered on a tie', () => {
+    const tbl = table({
+      com: {
+        a: { reg: 1000, renew: 1000, transfer: null },
+        b: { reg: 1200, renew: 1000, transfer: null },
+      },
+    });
+    expect(bestRenewal(tbl, 'com')?.registrarId).toBe('a');
+  });
+
+  it('returns null when no registrar has a renew price', () => {
+    const tbl = table({
+      ai: { porkbun: { reg: 8270, renew: null, transfer: null } },
+    });
+    expect(bestRenewal(tbl, 'ai')).toBeNull();
+  });
+
+  it('returns null for an unknown TLD', () => {
+    expect(bestRenewal(table({}), 'nope')).toBeNull();
+  });
+
+  it('skips registrars with a null renew and picks the min among the rest', () => {
+    const tbl = table({
+      com: {
+        a: { reg: 1000, renew: null, transfer: null },
+        b: { reg: 1200, renew: 1200, transfer: null },
+        c: { reg: 1500, renew: 800, transfer: null },
+      },
+    });
+    expect(bestRenewal(tbl, 'com')).toEqual({ registrarId: 'c', renew: 800 });
+  });
+});
+
+describe('couponEffectivePrice', () => {
+  it('applies an amount coupon below reg', () => {
+    // reg 1000, coupon 200 off → 800.
+    expect(couponEffectivePrice(1000, coupon('X', 'amount', 200))).toBe(800);
+  });
+
+  it('caps an amount coupon at reg (never negative)', () => {
+    // reg 300, coupon 500 off → capped at 300 → 0.
+    expect(couponEffectivePrice(300, coupon('X', 'amount', 500))).toBe(0);
+  });
+
+  it('applies a percentage coupon', () => {
+    // reg 1000, 50% off → 500.
+    expect(couponEffectivePrice(1000, coupon('X', 'percentage', 50))).toBe(500);
+  });
+
+  it('returns null when reg is null', () => {
+    expect(couponEffectivePrice(null, coupon('X', 'amount', 200))).toBeNull();
+  });
+
+  it('returns null when coupon is null', () => {
+    expect(couponEffectivePrice(1000, null)).toBeNull();
+  });
+
+  it('returns null when both are null', () => {
+    expect(couponEffectivePrice(null, null)).toBeNull();
+  });
+
+  it('returns reg when the coupon gives zero discount', () => {
+    // reg 1000, 0% coupon → 1000.
+    expect(couponEffectivePrice(1000, coupon('X', 'percentage', 0))).toBe(1000);
+  });
+});
+
+describe('premiumLikely', () => {
+  it('returns true for a short label in a heavy zone', () => {
+    // 3-char label in .xyz → true.
+    expect(premiumLikely('abc', 'xyz')).toBe(true);
+  });
+
+  it('returns true for a 4-char label in a heavy zone (boundary)', () => {
+    expect(premiumLikely('abcd', 'xyz')).toBe(true);
+  });
+
+  it('returns false for a long non-dictionary label in a heavy zone', () => {
+    // 10-char nonsense label, not in dictionary.
+    expect(premiumLikely('xyzqwerty', 'xyz')).toBe(false);
+  });
+
+  it('returns true for a dictionary word in a heavy zone', () => {
+    // 'home' is in words-common.json, 4 chars (also caught by the short rule).
+    expect(premiumLikely('home', 'xyz')).toBe(true);
+    // 'business' is in words-common.json, 8 chars — only the dictionary rule applies.
+    expect(premiumLikely('business', 'xyz')).toBe(true);
+  });
+
+  it('returns false for a hyphenated label even in a heavy zone', () => {
+    expect(premiumLikely('my-brand', 'xyz')).toBe(false);
+  });
+
+  it('returns false for a label with digits even in a heavy zone', () => {
+    expect(premiumLikely('brand2', 'xyz')).toBe(false);
+  });
+
+  it('returns false for a dictionary word in a non-heavy zone', () => {
+    // 'business' in .com — .com is not in PREMIUM_HEAVY_TLDS.
+    expect(premiumLikely('business', 'com')).toBe(false);
+  });
+
+  it('returns false for a short label in a non-heavy zone', () => {
+    expect(premiumLikely('abc', 'com')).toBe(false);
+  });
+
+  it('is case-insensitive for dictionary matching', () => {
+    // 'Business' should match 'business' in the dictionary.
+    expect(premiumLikely('Business', 'xyz')).toBe(true);
   });
 });

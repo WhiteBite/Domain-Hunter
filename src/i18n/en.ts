@@ -147,6 +147,7 @@ export const en: Dict = {
   'price.promo': 'promo',
   'price.promoTrap': 'promo trap',
   'price.premium': 'premium',
+  'price.premiumLikely': 'possible premium',
   'price.coupon': '{price} with code {code}',
   'price.fresh.now': 'prices: live',
   'price.fresh.hours': 'prices: {n} h ago',
@@ -265,7 +266,10 @@ export const en: Dict = {
 
   'tooltip.promoTrap': 'Promo trap: first year {first}, renewal {renew} ({times}×) — from year 2 you pay the renewal price.',
   'tooltip.promo': 'Below the registry wholesale floor — almost certainly a first-year promo; check the renewal price.',
+  'tooltip.premiumLikely': 'Single dictionary words and short names in this zone are often registry premiums — verify in the registrar cart.',
   'tooltip.registrars': 'Live prices: Porkbun and Cloudflare (at-cost); other registrars from weekly snapshots. Sorted by first-year price.',
+  'tooltip.trend':
+    '1st-year price change over the last {months} months (CI-harvested history)',
   'common.loading': 'Loading…',
   'footer.note': 'Open-source · MIT · no tracking',
   'csv.domain': 'Domain',

@@ -298,16 +298,50 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
-  test('sort buttons set aria-sort on their column (name/status/price)', async ({ page }) => {
+  test('sort buttons set aria-sort on their column (name/status/price/renew)', async ({
+    page,
+  }) => {
     await bootWithMixedResults(page);
 
     // Literal testids (the inventory meta-test greps specs for exact strings).
-    for (const testid of ['results-sort-name', 'results-sort-status', 'results-sort-price']) {
+    for (const testid of [
+      'results-sort-name',
+      'results-sort-status',
+      'results-sort-price',
+      'results-sort-renew',
+    ]) {
       const btn = page.locator(`[data-testid="${testid}"]`);
       const th = page.locator(`th:has([data-testid="${testid}"])`);
       await btn.click();
       await expect(th).toHaveAttribute('aria-sort', /ascending|descending/);
     }
+    expectNoLeaks(page);
+  });
+
+  test('premium-likely chip flags short names in premium-heavy zones', async ({
+    page,
+  }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await mockRdap(page, [{ domain: 'ace.xyz', response: { status: 404 } }]);
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-xyz"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'ace.xyz');
+    await page.click('[data-testid="check-button-start"]');
+
+    // 'ace' (≤4 chars) in .xyz (premium-heavy) → heuristic chip on the
+    // available row.
+    await expect(
+      page.locator('[data-testid="results-chip-premium-likely-ace-xyz"]'),
+    ).toBeVisible({ timeout: 15_000 });
     expectNoLeaks(page);
   });
 
@@ -415,11 +449,13 @@ test.describe('Misc coverage', () => {
       timeout: 15_000,
     });
 
-    // Before opening details, the row shows the standard cheapest price
-    // ($10.44 cloudflare) and no strike-through.
+    // Before opening details, the row shows the coupon-effective first-year
+    // price ($10.44 − $0.95 AWESOME2026 = $9.49) with the standard price
+    // struck through.
     const priceCell = page.locator('[data-testid="results-row-zzqxtest1-com"] .price-cell');
-    await expect(priceCell).toContainText('$10.44');
-    await expect(priceCell.locator('.price-strike')).toHaveCount(0);
+    await expect(priceCell).toContainText('$9.49');
+    await expect(priceCell.locator('.price-strike')).toHaveCount(1);
+    await expect(priceCell.locator('.price-strike')).toContainText('$10.44');
 
     // Open details (triggers the on-demand DigMyName premium check).
     await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
@@ -497,12 +533,14 @@ test.describe('Misc coverage', () => {
     await expect(btn).toBeEnabled();
     await expect(page.locator('[data-testid="results-premium-found"]')).toHaveCount(0);
 
-    // Before bulk check: premium row shows standard price, no strike-through.
+    // Before bulk check: premium row shows the coupon-effective first-year
+    // price with the standard price struck through (AWESOME2026 applies to .com).
     const premCell = page.locator(
       '[data-testid="results-row-zzqxpremium-com"] .price-cell',
     );
-    await expect(premCell).toContainText('$10.44');
-    await expect(premCell.locator('.price-strike')).toHaveCount(0);
+    await expect(premCell).toContainText('$9.49');
+    await expect(premCell.locator('.price-strike')).toHaveCount(1);
+    await expect(premCell.locator('.price-strike')).toContainText('$10.44');
 
     // Click the bulk premium check button.
     await btn.click();
@@ -514,10 +552,11 @@ test.describe('Misc coverage', () => {
     await expect(premCell.locator('.price-strike')).toContainText('$10.44');
     await expect(premCell.locator('.chip-tag.premium')).toBeVisible();
 
+    // Non-premium row keeps the coupon-effective price (strike stays visible).
     const plainCell = page.locator(
       '[data-testid="results-row-zzqxplain-com"] .price-cell',
     );
-    await expect(plainCell.locator('.price-strike')).toHaveCount(0);
+    await expect(plainCell.locator('.price-strike')).toHaveCount(1);
 
     // Found chip shows "premium: 1".
     const found = page.locator('[data-testid="results-premium-found"]');
