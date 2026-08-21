@@ -10,6 +10,8 @@ Free, open-source bulk domain availability checker and name generator that runs 
 
 **[▶ Live demo](https://whitebite.github.io/Domain-Hunter/)** — works instantly, nothing to install.
 
+> **This is a finished product you can use right now.** Open <https://whitebite.github.io/Domain-Hunter/> and start checking domains or generating names immediately. No install, no signup, no API keys, no tracking. The entire app compiles into a single HTML file (`dist/index.html`) that also works offline from `file://`. Download it, share it, run it anywhere.
+
 ![Domain Hunter checking five brand names across 15 TLDs — streaming results with status badges, first-year and renewal prices, CSV export](docs/screenshot-en-check.png)
 
 Domain Hunter calls registry **RDAP** endpoints directly from the browser (Verisign, Google Registry, Identity Digital, CentralNic, Radix…) to tell you which domains are available. It generates brandable name ideas with five built-in generators, shows **live registrar prices** with 3-year total cost of ownership, and exports everything to CSV, TSV, or Markdown. It is a privacy-friendly alternative to WHOIS lookup services and paid domain APIs like WhoisXML or DomainTools — the whole app compiles into one self-contained HTML file that also works from `file://`.
@@ -116,6 +118,17 @@ Step-by-step articles published alongside the app:
 - [How to check domain availability in bulk](https://whitebite.github.io/Domain-Hunter/how-to-check-domain-availability-in-bulk.html) — RDAP method, step-by-step bulk checking, trust and rate-limit caveats
 - [Domain name ideas that are actually available](https://whitebite.github.io/Domain-Hunter/domain-name-ideas-that-are-actually-available.html) — five naming techniques: combinatorics, syllables, TLD hacks, mutations, themes
 
+## RDAP vs WHOIS
+
+WHOIS returns unstructured text — a human-readable wall of paragraphs that is hard to parse programmatically and slow to automate at scale. RDAP (Registration Data Access Protocol, standardized as [RFC 9083](https://www.rfc-editor.org/rfc/rfc9083)) is its JSON successor: structured, machine-readable, and designed for API consumption. Every endpoint Domain Hunter uses sends permissive CORS headers, so your browser calls registries directly with zero proxy. That makes bulk checking fast, rate-limit friendly, and free.
+
+## Who is it for
+
+- **Domain investors & drop-catchers** — monitor a watchlist of hundreds of names across 148+ TLDs, track dropped/expired domains, and export freed or taken changes in CSV.
+- **Brand naming** — five generators (combinator, syllable mixer, thematic sets, TLD-hacks, mutations) produce candidates you can check immediately.
+- **Developers** — single-file MIT build, embeddable, no backend, no dependencies. Fork it, deploy it, extend it.
+- **Privacy-conscious users** — no accounts, no logs, no analytics. Everything runs locally in your browser.
+
 ## How it works
 
 1. The browser talks **directly to registry RDAP endpoints** — all endpoints used by Domain Hunter have open CORS, so no server or proxy is required.
@@ -140,6 +153,7 @@ Missing a zone? It is data-driven — adding an entry to `src/config/tlds.json` 
 | Live prices + 3-year TCO | Multi-registrar comparison | Own prices only | None | Extra fee |
 | Export formats | CSV, TSV, Markdown, share links | None | Manual | Depends |
 | Privacy | No tracking, local-only | Search history logged | Private | Query logs |
+| Name ideas quality | 5 generators (combinator, syllables, themes, TLD-hacks, mutations) | Basic suggestions | None | None |
 
 Choose a paid API if you need guaranteed SLAs, premium-domain pricing feeds, or millions of checks per day. Choose Domain Hunter when you want a fast, free, private way to brainstorm and validate hundreds of candidates right now.
 
@@ -184,6 +198,21 @@ Svelte 5 + TypeScript (strict), Vite 7, and `vite-plugin-singlefile` — the ent
 ## Contributing
 
 Issues and PRs are welcome. Good first contributions: new curated zones (edit `src/config/tlds.json`), new thematic word sets (`src/config/dictionaries/`), translations (`src/i18n/`). See [AGENTS.md](AGENTS.md) for build/test commands and project conventions.
+
+## Citing
+
+If you reference Domain Hunter in academic or technical work, please use the metadata in [`CITATION.cff`](CITATION.cff):
+
+```bibtex
+@software{domain_hunter_2026,
+  author = {WhiteBite},
+  title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
+  version = {2.0.0},
+  year = {2026},
+  url = {https://github.com/WhiteBite/Domain-Hunter},
+  license = {MIT}
+}
+```
 
 ## License
 
