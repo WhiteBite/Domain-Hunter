@@ -310,6 +310,20 @@ unknown (amber), error (red). Filters: all / available (includes probably) / tak
   uk 526, nl 506, fr 586. Displayed price < floor → "promo" chip.
 - TCO: `tco3(tld) = min over registrars (reg + 2×renew)`; results sortable by TCO;
   "promo trap" badge when renew ≥ 5×reg.
+- Renewal column shows the cheapest renewal over registrars (badge of that
+  registrar); first-year cell is coupon-aware: when the best coupon lowers the
+  price, the effective price renders with the standard reg price struck through
+  (registry-premium override wins over coupon).
+- Harvest carry-over: snapshot builds start from the previous snapshot; fresh
+  sources win per registrar and coupons dedupe fresh-wins — a flaky source never
+  erases coverage.
+- Price history: a weekly CI job appends one monthly min-reg/min-renew point per
+  TLD to `src/config/price-history.json` (13-month window); the Prices tab shows
+  a 6-month trend indicator (▲/▼ when |Δ| ≥ 2%, flat otherwise, hidden when
+  history is insufficient).
+- Instant "possible premium" heuristic chip on available rows: dictionary words
+  and ≤4-char labels in premium-heavy zones (no network call); the on-demand
+  DigMyName check remains authoritative.
 - UI always shows price freshness: "just now" / "N h ago" / "snapshot {date}".
 - Disclaimer (About + tooltip): estimates; premium names cost more; check registrar cart.
 
@@ -402,7 +416,7 @@ affiliate link activation (config already affiliate-ready: Porkbun Ambassador + 
 
 ## 17. Post-spec evolutions (implemented after §1–16)
 
-- **Drops tab**: scans expired/dropped domains via a bundled snapshot and reports those still available at standard registration price — no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
+- **Drops tab**: scans expired/dropped domains via a bundled snapshot — refreshed weekly by `scripts/harvest-drops.mjs` from the WhoisFreaks daily dropped-domains CSV (ASCII labels 4–12 chars, pronounceable, deduped, cap 2000) — and reports those still available at standard registration price, no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
 - **Social tab**: checks username availability across major platforms (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram) so you can secure a consistent handle everywhere. Supports optional GitHub device-flow authentication for higher-rate lookups.
 - **Interrupted runs**: leaving the Check tab mid-run settles `runState` to
   `done` and persists a resume snapshot (`dh:v1:run`); the resume banner
@@ -418,9 +432,15 @@ affiliate link activation (config already affiliate-ready: Porkbun Ambassador + 
   (no auth, CORS `*`, rate-limited client-side to on-demand clicks) shows a
   registry-premium warning with price and the currently cheapest registrar
   with a buy URL.
-- **Harvest sources**: Porkbun + cfdomainpricing (live and harvest); Dynadot
-  GUEST XML (`tldPrices`, ~805 TLDs) and regctl.sh `prices.json` (Spaceship /
-  Porkbun / Cloudflare / ValueDomain) as best-effort harvest-only sources.
+- **Harvest sources**: Porkbun + cfdomainpricing (live and harvest); beget HTML
+  scraper best-effort (works). reg.ru (JS cookie challenge), Spaceship
+  (Cloudflare 403) and regctl.sh (TLS-blocked from CI) stay wired but are
+  bot-blocked as of Aug 2026; Dynadot `tld_price` API requires an account key
+  (no GUEST access). The carry-over merge keeps last-known coverage whenever a
+  source fails, so partial harvests never shrink the snapshot.
 - **Results table**: sticky header inside its own scroll area, right-aligned
   tabular-numeral price columns, subtle zebra striping, sticky domain column
-  on narrow screens.
+  on narrow screens; renewal column with the cheapest-renewal registrar badge;
+  the available filter defaults to TCO sort; coupon-effective first-year price
+  with the standard price struck through; heuristic "possible premium" chip on
+  available rows.

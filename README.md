@@ -29,8 +29,9 @@ Paste up to 3,000 domain names, pick the TLDs you care about, and hit start. Res
 
 The **Prices tab** shows a TLD × registrar price matrix with the cheapest cell highlighted, promo-trap flags (renewal ≥ 5× first year), and an exportable CSV. The results table includes a detail row with full **registrar price comparison** and clickable buy/search links for every available domain.
 
-- **Live prices** from Porkbun and Cloudflare at-cost, plus weekly snapshots from Dynadot, Spaceship, ValueDomain, reg.ru, and Beget harvested via regctl.sh.
-- **Coupons, promo-trap detection**, and 3-year TCO sorting. Prices shown in USD, RUB, or EUR.
+- **Live prices** from Porkbun and Cloudflare at-cost over an offline snapshot with carry-over, so a flaky source never erases coverage.
+- **Coupons, promo-trap detection**, coupon-aware first-year prices, and 3-year TCO sorting. Prices shown in USD, RUB, or EUR.
+- **Price trends** (▲/▼ over six months) from CI-harvested snapshot history, and instant **possible-premium hints** for dictionary words and short labels in premium-heavy zones.
 - **Coverage-aware buy links** target the cheapest registrar that has a deep-link template, not merely the cheapest price in the table.
 
 ## How to find available domain name ideas
@@ -47,7 +48,7 @@ Every candidate collects in a persistent tray that survives tab switches and sho
 
 ## Dropped domains at registration price
 
-The **Drops tab** scans expired/dropped domains and reports those still available at standard registration price — no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
+The **Drops tab** scans expired/dropped domains — the bundled snapshot is refreshed weekly from the WhoisFreaks daily dropped-domains feed — and reports those still available at standard registration price, no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
 
 ## Social handles
 
