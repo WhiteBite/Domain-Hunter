@@ -42,8 +42,11 @@
           checkPlatform(p, n, fetch, get(settings).proxyUrl || undefined, get(settings).githubToken || undefined)
             .catch(() => 'unknown' as SocialStatus)
             .then((s) => {
-              cards[i].status = s;
-              cards[i].loading = false;
+              const card = cards[i];
+              if (card) {
+                card.status = s;
+                card.loading = false;
+              }
             }),
         ),
       );

@@ -442,7 +442,9 @@
     const worker = async (): Promise<void> => {
       while (idx < targets.length) {
         const i = idx++;
-        const { domain } = targets[i];
+        const target = targets[i];
+        if (!target) break;
+        const { domain } = target;
         const detail = await fetchPremiumDetail(domain);
         details = { ...details, [domain]: detail };
         if (isPremiumPriced(detail)) {
@@ -530,7 +532,10 @@
   /** Map domain -> WatchChange for O(1) row chip lookup. */
   const watchByDomain = $derived.by(() => {
     const m = new Map<string, 'freed' | 'taken'>();
-    for (const c of $watchChanges) m.set(c.domain, classifyChange(c.from, c.to));
+    for (const c of $watchChanges) {
+      const ch = classifyChange(c.from, c.to);
+      if (ch) m.set(c.domain, ch);
+    }
     return m;
   });
 

@@ -112,7 +112,7 @@
         }));
       }
       if (Array.isArray(parsed.wordsets)) {
-        const existing = readJson<Array<{ id: string }>>(KEYS.wordsets) ?? [];
+        const existing = readJson<Array<{ id: string; name: string; words: string[] }>>(KEYS.wordsets) ?? [];
         const map = new Map(existing.map((ws) => [ws.id, ws]));
         for (const item of parsed.wordsets) {
           const ws = item as { id?: unknown; name?: unknown; words?: unknown };

@@ -393,8 +393,8 @@
       <details class="card sets-card">
         <summary class="sets-summary" data-testid="gen-summary-sets">
           <span>{t('gen.themes.custom')}</span>
-          <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-          <span class="controls" onclick={(e) => e.stopPropagation()} data-testid="gen-sets-controls">
+          <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+          <span class="controls" role="group" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} data-testid="gen-sets-controls">
             <button class="btn" type="button" onclick={exportSets} data-testid="gen-button-export-sets">{t('gen.themes.export')}</button>
             <label class="btn file-btn">
               {t('gen.themes.import')}
