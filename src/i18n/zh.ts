@@ -261,6 +261,7 @@ export const zh: Dict = {
   'about.prices.title': '价格',
   'about.prices.body':
     '注册价格从公开注册商数据（Porkbun、Cloudflare 成本价）实时获取，并以离线快照作为后备。这些是估算值——溢价域名费用更高，且续费价格通常高于首年促销价。',
+  'about.affiliate': '部分购买链接可能附带推广标记，您无需额外付费；价格和排序不受影响。',
   'about.license': 'MIT 许可证——免费使用、分支和修改。',
   'about.github': '在 GitHub 上查看源码',
 
@@ -317,11 +318,13 @@ export const zh: Dict = {
   'results.premium.aria':
     '向 DigMyName 查询最便宜的 20 个可用域名的注册局溢价价格；溢价域名会显示真实价格。',
 
-  'watch.banner': '关注列表更新：{freed} 个释放，{taken} 个被注册',
+  'watch.banner': '关注列表更新：{freed} 个释放，{taken} 个被注册，{priceDrops} 个降价',
   'watch.showFavs': '显示收藏',
   'watch.refresh.aria': '重新检查收藏',
   'watch.badge.freed': '已释放',
   'watch.badge.taken': '已注册',
+  'watch.badge.priceDrop': '降价',
+  'tooltip.priceDrop': '首年价格自您收藏以来下降了 {pct}%：{old} → {new}',
   'watch.banner.dismiss': '关闭关注列表通知',
 
   'prices.title': '域名价格',

@@ -262,6 +262,8 @@ export const fr: Dict = {
   'about.prices.title': 'Prix',
   'about.prices.body':
     'Les prix d’enregistrement sont récupérés en direct depuis les données publiques des bureaux d’enregistrement (Porkbun, Cloudflare au coût) avec un instantané hors ligne comme solution de secours. Ce sont des estimations — les noms premium coûtent plus cher, et les renouvellements dépassent souvent les promos de première année.',
+  'about.affiliate':
+    'Certains liens d’achat peuvent inclure un tag affilié sans surcoût pour vous ; les prix et classements ne sont jamais affectés.',
   'about.license': 'Licence MIT — libre d’utilisation, de fork et de modification.',
   'about.github': 'Code source sur GitHub',
 
@@ -318,11 +320,13 @@ export const fr: Dict = {
   'results.premium.aria':
     "Demande à DigMyName les prix premium du registre pour jusqu'aux 20 domaines disponibles les moins chers ; les noms premium affichent leur prix réel.",
 
-  'watch.banner': 'Mise à jour de la liste: {freed} libérés, {taken} pris',
+  'watch.banner': 'Mise à jour de la liste: {freed} libérés, {taken} pris, {priceDrops} baisses de prix',
   'watch.showFavs': 'Afficher les favoris',
   'watch.refresh.aria': 'Revérifier les favoris',
   'watch.badge.freed': 'libre',
   'watch.badge.taken': 'pris',
+  'watch.badge.priceDrop': 'baisse de prix',
+  'tooltip.priceDrop': 'Le prix de la première année a baissé de {pct}% depuis que vous l\'avez mis en favori : {old} → {new}',
   'watch.banner.dismiss': 'Fermer la notification de liste',
 
   'prices.title': 'Prix des domaines',

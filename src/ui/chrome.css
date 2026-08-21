@@ -150,6 +150,11 @@
   color: var(--red);
 }
 
+.chip-tag.watch-price-drop {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
 /* ---- Toast (SettingsTab / DropsTab -- centered, no animation) ---- */
 
 .toast {

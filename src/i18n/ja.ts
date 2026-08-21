@@ -261,6 +261,8 @@ export const ja: Dict = {
   'about.prices.title': '価格',
   'about.prices.body':
     '登録価格は公開レジストラデータ（Porkbun、Cloudflare の原価）からライブ取得され、オフラインスナップショットがフォールバックとして使われます。これらは推定値です — プレミアム名はより高額で、更新料は初年度プロモを超えることがよくあります。',
+  'about.affiliate':
+    '一部の購入リンクにはアフィリエイトタグが付く場合がありますが、追加費用はなく、価格やランキングには影響しません。',
   'about.license': 'MIT ライセンス — 自由に使用、フォーク、改変できます。',
   'about.github': 'GitHub でソースコード',
 
@@ -317,11 +319,13 @@ export const ja: Dict = {
   'results.premium.aria':
     'DigMyName に最安値の利用可能ドメイン20件までレジストリプレミアム価格を問い合わせ、プレミアム名には実際の価格を表示します。',
 
-  'watch.banner': 'ウォッチリスト更新: {freed} 件解放、{taken} 件取得済',
+  'watch.banner': 'ウォッチリスト更新: {freed} 件解放、{taken} 件取得済、{priceDrops} 件値下がり',
   'watch.showFavs': 'お気に入りを表示',
   'watch.refresh.aria': 'お気に入りを再確認',
   'watch.badge.freed': '解放',
   'watch.badge.taken': '取得済',
+  'watch.badge.priceDrop': '値下がり',
+  'tooltip.priceDrop': '初年度価格がスターを付けた時から {pct}% 下がりました: {old} → {new}',
   'watch.banner.dismiss': 'ウォッチリスト通知を閉じる',
 
   'prices.title': 'ドメイン価格',

@@ -9,11 +9,16 @@
   const watchCounts = $derived.by(() => {
     let freed = 0;
     let taken = 0;
+    let priceDrop = 0;
     for (const c of $watchChanges) {
+      if (c.kind === 'price_drop') {
+        priceDrop++;
+        continue;
+      }
       if (c.to === 'available' || c.to === 'probably_available') freed++;
       else if (c.to === 'taken') taken++;
     }
-    return { freed, taken };
+    return { freed, taken, priceDrop };
   });
 
   const showWatchBanner = $derived($watchChanges.length > 0 && !dismissed);
@@ -22,7 +27,7 @@
 {#if showWatchBanner}
   <div class="watch-banner" role="status" data-testid="check-watch-banner">
     <span class="watch-text">
-      {t('watch.banner', { freed: watchCounts.freed, taken: watchCounts.taken })}
+      {t('watch.banner', { freed: watchCounts.freed, taken: watchCounts.taken, priceDrops: watchCounts.priceDrop })}
     </span>
     <div class="watch-actions">
       <button class="btn primary" type="button" onclick={() => requestFavoritesView.set(true)} data-testid="check-watch-show">

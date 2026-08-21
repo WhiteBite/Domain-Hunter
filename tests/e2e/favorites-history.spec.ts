@@ -387,4 +387,44 @@ test.describe('Watchlist — silent re-check of favorited domains', () => {
     await expect(refresh).toBeVisible();
     await expect(refresh).not.toBeDisabled();
   });
+
+  test('price-drop chip appears when favorited domain price fell ≥5%', async ({ page }) => {
+    await assertNoLeaks(page);
+    await mockBootstrap(page, ianaBootstrap());
+    await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+    // zzqxpricedrop.com → 404 (high-trust .com → available)
+    await mockRdap(page, [{ domain: 'zzqxpricedrop.com', response: rdapFree() }]);
+    await openApp(page, {
+      seed: {
+        'dh:v1:pricing': seedPricingTable(),
+        'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
+        'dh:v1:favorites': ['zzqxpricedrop.com'],
+        // Watch map seeded with same status as the RDAP result → no status
+        // change, so the only watch change is the price drop.
+        'dh:v1:watch': { 'zzqxpricedrop.com': { status: 'available', ts: Date.now() } },
+        // Baseline $20.00 (2000 cents); cheapest .com in seedPricingTable is
+        // $10.44 (1044 cents, cloudflare) → 47.8% drop ≥ 5% threshold.
+        'dh:v1:watchprices': { 'zzqxpricedrop.com': { cents: 2000, ts: Date.now() } },
+      },
+    });
+    await page.waitForSelector('[data-testid="check-input-domains"]', {
+      state: 'visible',
+      timeout: 10_000,
+    });
+
+    // Watch banner appears (refreshWatchlist completed, price_drop detected).
+    const banner = page.locator('[data-testid="check-watch-banner"]');
+    await expect(banner).toBeVisible({ timeout: 15_000 });
+
+    // Switch to favorites filter to see the row.
+    await page.locator('[data-testid="check-watch-show"]').click();
+    await expect(row(page, 'zzqxpricedrop.com')).toBeVisible({ timeout: 10_000 });
+
+    // Price-drop chip is visible with the price-drop class.
+    const chip = page.locator(
+      `[data-testid="results-watch-${sanitizeDomain('zzqxpricedrop.com')}"]`,
+    );
+    await expect(chip).toBeVisible();
+    await expect(chip).toHaveClass(/watch-price-drop/);
+  });
 });

@@ -261,6 +261,8 @@ export const de: Dict = {
   'about.prices.title': 'Preise',
   'about.prices.body':
     'Registrierungspreise werden live aus öffentlichen Registrar-Daten (Porkbun, Cloudflare at-cost) mit einer Offline-Momentaufnahme als Fallback abgerufen. Es sind Schätzungen — Premium-Namen kosten mehr, und Verlängerungen übersteigen oft Erstjahres-Promos.',
+  'about.affiliate':
+    'Manche Kauf-Links können ohne Mehrkosten für dich ein Affiliate-Tag enthalten; Preise und Rankings bleiben unbeeinflusst.',
   'about.license': 'MIT-Lizenz — frei zu nutzen, zu forken und zu ändern.',
   'about.github': 'Quellcode auf GitHub',
 
@@ -317,11 +319,13 @@ export const de: Dict = {
   'results.premium.aria':
     'Fragt DigMyName nach Registry-Premium-Preisen für bis zu 20 der günstigsten verfügbaren Domains; Premium-Namen zeigen ihren echten Preis.',
 
-  'watch.banner': 'Watchlist-Update: {freed} frei, {taken} belegt',
+  'watch.banner': 'Watchlist-Update: {freed} frei, {taken} belegt, {priceDrops} Preisrückgänge',
   'watch.showFavs': 'Favoriten anzeigen',
   'watch.refresh.aria': 'Favoriten neu prüfen',
   'watch.badge.freed': 'frei',
   'watch.badge.taken': 'belegt',
+  'watch.badge.priceDrop': 'Preisrückgang',
+  'tooltip.priceDrop': 'Der Erstjahrespreis ist seit dem Markieren um {pct}% gesunken: {old} → {new}',
   'watch.banner.dismiss': 'Watchlist-Hinweis schließen',
 
   'prices.title': 'Domain-Preise',

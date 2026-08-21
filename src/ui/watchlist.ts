@@ -8,14 +8,16 @@
  */
 import { writable } from 'svelte/store';
 import { get } from 'svelte/store';
-import type { CheckResult, CheckStatus, EngineEvent, EngineOptions } from '../types';
+import type { CheckResult, CheckStatus, EngineEvent, EngineOptions, PricingTable } from '../types';
 import { createEngine } from '../core/engine';
 import type { EngineHandle } from '../core/engine';
+import { bestEntry } from '../pricing/pricing';
 import { favorites } from './favorites';
-import { results, runState, registry } from './store';
+import { results, runState, registry, pricing } from './store';
 import { KEYS, readJson, writeJson } from './settings';
 
 const WATCH_CHANGES_KEY = 'dh:v1:watch-changes';
+const WATCH_PRICES_KEY = 'dh:v1:watchprices';
 const MAX_WATCH_DOMAINS = 200;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 /** Maximum number of watch changes retained. Oldest are dropped on overflow. */
@@ -39,6 +41,32 @@ export interface WatchChange {
   from: CheckStatus;
   to: CheckStatus;
   ts: number;
+  /** 'price_drop' for price-drop alerts; undefined for status flips. */
+  kind?: 'price_drop';
+  /** Original first-year price (cents) when kind === 'price_drop'. */
+  priceOld?: number;
+  /** New first-year price (cents) when kind === 'price_drop'. */
+  priceNew?: number;
+}
+
+interface PriceBaseline {
+  cents: number;
+  ts: number;
+}
+
+/**
+ * Pure: classify a price drop. Returns true when both prices are non-null,
+ * baseline is positive, and the current price fell by at least `threshold`
+ * (default 5%) below the baseline.
+ */
+export function classifyPriceDrop(
+  baselineCents: number | null,
+  currentCents: number | null,
+  threshold = 0.05,
+): boolean {
+  if (baselineCents == null || currentCents == null) return false;
+  if (baselineCents <= 0) return false;
+  return (baselineCents - currentCents) / baselineCents >= threshold;
 }
 
 /**
@@ -121,6 +149,32 @@ export function pruneOldChanges(
   now: number = Date.now(),
 ): WatchChange[] {
   return changes.filter((c) => now - c.ts <= MAX_AGE_MS);
+}
+
+// ---- Price baselines (dh:v1:watchprices) ----
+
+function readPriceBaselines(): Record<string, PriceBaseline> {
+  return readJson<Record<string, PriceBaseline>>(WATCH_PRICES_KEY) ?? {};
+}
+
+function writePriceBaselines(map: Record<string, PriceBaseline>): void {
+  writeJson(WATCH_PRICES_KEY, map);
+}
+
+/**
+ * Set or remove the price baseline for a favorited domain.
+ * Called from the favorites star toggle: when starring, pass the current
+ * cheapest reg price (or null if unknown); when unstarring, pass null to
+ * remove the baseline.
+ */
+export function notePrice(domain: string, cents: number | null): void {
+  const map = readPriceBaselines();
+  if (cents == null) {
+    delete map[domain];
+  } else {
+    map[domain] = { cents, ts: Date.now() };
+  }
+  writePriceBaselines(map);
 }
 
 // ---- Stores ----
@@ -231,8 +285,50 @@ export async function refreshWatchlist(): Promise<void> {
     const { changes, nextMap } = diffWatch(prev, fresh, favs);
     writeJson(KEYS.watch, nextMap);
 
-    if (changes.length > 0) {
-      watchChanges.update((list) => capChanges([...list, ...changes]));
+    // Price-drop pass: compare cheapest reg vs stored baseline.
+    // Reads the pricing store (or localStorage cache fallback); if the
+    // pricing table is missing the pass is skipped silently.
+    let table = get(pricing)?.table ?? null;
+    if (!table) {
+      const cached = readJson<{ table: PricingTable; fetchedAt: number }>(KEYS.pricing);
+      table = cached?.table ?? null;
+    }
+
+    const priceDropChanges: WatchChange[] = [];
+    if (table) {
+      const baselines = readPriceBaselines();
+      let baselinesUpdated = false;
+      for (const domain of targets) {
+        const tld = domain.split('.').pop() ?? '';
+        const best = bestEntry(table, tld);
+        const currentCents = best?.entry.reg ?? null;
+        const baseline = baselines[domain];
+        if (baseline && currentCents != null && classifyPriceDrop(baseline.cents, currentCents)) {
+          // Price drop detected — add a price_drop change, keep old baseline.
+          const freshResult = fresh.find((r) => r.domain === domain);
+          const status = freshResult?.status ?? 'unknown';
+          priceDropChanges.push({
+            domain,
+            from: status,
+            to: status,
+            ts: Date.now(),
+            kind: 'price_drop',
+            priceOld: baseline.cents,
+            priceNew: currentCents,
+          });
+          // Do NOT overwrite the baseline.
+        } else if (currentCents != null) {
+          // No drop — update the baseline to the current price.
+          baselines[domain] = { cents: currentCents, ts: Date.now() };
+          baselinesUpdated = true;
+        }
+      }
+      if (baselinesUpdated) writePriceBaselines(baselines);
+    }
+
+    const allChanges = [...changes, ...priceDropChanges];
+    if (allChanges.length > 0) {
+      watchChanges.update((list) => capChanges([...list, ...allChanges]));
     }
 
     // Merge fresh results into the results store so the Favorites view
