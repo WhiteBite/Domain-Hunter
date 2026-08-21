@@ -5,10 +5,12 @@
     "market": "global",
     "searchUrl": "https://porkbun.com/checkout/search?q={domain}",
     "affiliate": {
-      "program": "ambassador-inhouse",
-      "viable": true,
-      "note": "No network approval; link-based."
-    }
+   "program": "ambassador-inhouse",
+   "viable": true,
+   "note": "No network approval; link-based.",
+   "param": "invite={tag}",
+   "tag": ""
+  }
   },
   {
     "id": "cloudflare",
@@ -27,10 +29,12 @@
     "market": "global",
     "searchUrl": "https://www.dynadot.com/domain/search.html?domain={domain}",
     "affiliate": {
-      "program": "ambassador-inhouse",
-      "viable": true,
-      "note": "30% domains."
-    }
+   "program": "ambassador-inhouse",
+   "viable": true,
+   "note": "30% domains.",
+   "param": "affid={tag}",
+   "tag": ""
+  }
   },
   {
     "id": "spaceship",

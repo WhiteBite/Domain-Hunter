@@ -21,11 +21,12 @@
   import { put as putCache } from '../../core/cache';
   import { t } from '../../i18n';
   import { favorites, toggleFavorite } from '../favorites';
-  import { watchChanges, watchRunning, refreshWatchlist, classifyChange } from '../watchlist';
+  import { watchChanges, watchRunning, refreshWatchlist, classifyChange, notePrice } from '../watchlist';
   import { copyText } from '../clipboard';
   import { sanitizeId } from '../utils';
   import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
+  import { applyAffiliate } from '../affiliate';
   import { REGISTRAR_ICONS } from '../registrar-icons';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
@@ -355,9 +356,12 @@
         reg: e.reg,
         renew: e.renew,
         hasDeepLink,
-        url: hasDeepLink
-          ? r.searchUrl.replace('{domain}', encodeURIComponent(domain))
-          : r.searchUrl,
+        url: applyAffiliate(
+          r,
+          hasDeepLink
+            ? r.searchUrl.replace('{domain}', encodeURIComponent(domain))
+            : r.searchUrl,
+        ),
       });
     }
     list.sort((a, b) => a.reg - b.reg || (a.renew ?? Infinity) - (b.renew ?? Infinity));
@@ -552,12 +556,21 @@
 
   const hasResults = $derived($results.size > 0);
 
-  /** Map domain -> WatchChange for O(1) row chip lookup. */
+  /** Map domain -> WatchChip for O(1) row chip lookup. */
   const watchByDomain = $derived.by(() => {
-    const m = new Map<string, 'freed' | 'taken'>();
+    interface WatchChip {
+      kind: 'freed' | 'taken' | 'price_drop';
+      priceOld?: number;
+      priceNew?: number;
+    }
+    const m = new Map<string, WatchChip>();
     for (const c of $watchChanges) {
+      if (c.kind === 'price_drop') {
+        m.set(c.domain, { kind: 'price_drop', priceOld: c.priceOld, priceNew: c.priceNew });
+        continue;
+      }
       const ch = classifyChange(c.from, c.to);
-      if (ch) m.set(c.domain, ch);
+      if (ch) m.set(c.domain, { kind: ch });
     }
     return m;
   });
@@ -797,9 +810,15 @@
             {@const isErr = row.result.status === 'error'}
             {@const buyInfo = registrarFor(row.result.tld)}
             {@const buy = buyInfo.registrar
-              ? buyInfo.registrar.searchUrl.includes('{domain}')
-                ? buyInfo.registrar.searchUrl.replace('{domain}', encodeURIComponent(row.result.domain))
-                : buyInfo.registrar.searchUrl
+              ? applyAffiliate(
+                  buyInfo.registrar,
+                  buyInfo.registrar.searchUrl.includes('{domain}')
+                    ? buyInfo.registrar.searchUrl.replace(
+                        '{domain}',
+                        encodeURIComponent(row.result.domain),
+                      )
+                    : buyInfo.registrar.searchUrl,
+                )
               : null}
             {@const buyHasDeepLink = buyInfo.registrar?.searchUrl.includes('{domain}') ?? false}
             {@const coupon = couponFor(row.result.tld)}
@@ -843,11 +862,23 @@
               <td class="status-cell">
                 <StatusBadge status={row.result.status} size="sm" />
                 {#if watchByDomain.has(row.result.domain)}
-                  {@const wkind = watchByDomain.get(row.result.domain)}
-                  {#if wkind === 'freed'}
+                  {@const wc = watchByDomain.get(row.result.domain)}
+                  {#if wc?.kind === 'freed'}
                     <span class="chip-tag watch-freed" data-testid={`results-watch-${sid}`}>{t('watch.badge.freed')}</span>
-                  {:else if wkind === 'taken'}
+                  {:else if wc?.kind === 'taken'}
                     <span class="chip-tag watch-taken" data-testid={`results-watch-${sid}`}>{t('watch.badge.taken')}</span>
+                  {:else if wc?.kind === 'price_drop'}
+                    {@const pct = wc.priceOld != null && wc.priceNew != null && wc.priceOld > 0
+                      ? Math.round((wc.priceOld - wc.priceNew) / wc.priceOld * 100)
+                      : 0}
+                    <Tooltip text={t('tooltip.priceDrop', {
+                      pct,
+                      old: formatPrice(wc.priceOld ?? null, $settings),
+                      new: formatPrice(wc.priceNew ?? null, $settings),
+                    })}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag watch-price-drop" tabindex="0" data-testid={`results-watch-${sid}`}>{t('watch.badge.priceDrop')}</span>
+                    </Tooltip>
                   {/if}
                 {/if}
               </td>
@@ -955,7 +986,15 @@
                   <button
                     class="action-btn"
                     class:active={isFav}
-                    onclick={() => toggleFavorite(row.result.domain)}
+                    onclick={() => {
+                      const wasFav = isFav;
+                      toggleFavorite(row.result.domain);
+                      if (wasFav) {
+                        notePrice(row.result.domain, null);
+                      } else {
+                        notePrice(row.result.domain, row.best?.entry.reg ?? null);
+                      }
+                    }}
                     type="button"
                     aria-label={isFav ? t('results.fav.remove') : t('results.fav.add')}
                     title={isFav ? t('results.fav.remove') : t('results.fav.add')}

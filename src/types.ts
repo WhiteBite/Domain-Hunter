@@ -124,7 +124,15 @@ export interface RegistrarConfig {
   name: string;
   /** Search URL template with a '{domain}' placeholder. */
   searchUrl: string;
-  affiliate?: { program: string; viable: boolean; note?: string };
+  /** Affiliate tagging (SPEC §16): `param` is a query pair template with a
+   *  '{tag}' placeholder; with an empty/absent `tag` links stay clean. */
+  affiliate?: {
+    program: string;
+    viable: boolean;
+    note?: string;
+    param?: string;
+    tag?: string;
+  };
 }
 
 // ---- Settings (persisted at dh:v1:settings) ----
