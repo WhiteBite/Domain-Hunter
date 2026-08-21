@@ -31,7 +31,10 @@
   import IconRefresh from './icons/IconRefresh.svelte';
   import IconStar from './icons/IconStar.svelte';
   import IconExternal from './icons/IconExternal.svelte';
-  import type { DigDetail, RegistrarQuote } from './DetailRow.svelte';
+  import IconTag from './icons/IconTag.svelte';
+  import type { RegistrarQuote } from './DetailRow.svelte';
+  import { fetchPremiumDetail, isPremiumPriced, premiumOverrideCents } from '../dig';
+  import type { DigDetail } from '../dig';
 
   import registrarsJson from '../../config/registrars.json';
 
@@ -377,50 +380,85 @@
       ...details,
       [domain]: { loading: true, price: null, registrar: null, regPrice: null, url: null },
     };
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 8000);
-      const res = await fetch(
-        `https://api.digmyname.com/functions/v1/public-api/check?domain=${encodeURIComponent(domain)}`,
-        { signal: ctrl.signal },
-      );
-      clearTimeout(timer);
-      if (!res.ok) throw new Error(String(res.status));
-      const json = (await res.json()) as { result?: Record<string, unknown> };
-      const r = json.result;
-      if (!r) throw new Error('no result');
-      const cheapest = (r.cheapest_registrar ?? null) as Record<string, unknown> | null;
-      const isPremium = r.premium === true || r.likely_premium === true;
-      const priceUsd = typeof r.price_usd === 'number' ? r.price_usd : null;
-      // Store a per-domain override so the row price cell and detail chip
-      // both reflect the registry premium price (single source).
-      if (isPremium && priceUsd != null) {
-        premiumOverrides = {
-          ...premiumOverrides,
-          [domain]: Math.round(priceUsd * 100),
-        };
+    const detail = await fetchPremiumDetail(domain);
+    // Store a per-domain override so the row price cell and detail chip
+    // both reflect the registry premium price (single source).
+    if (isPremiumPriced(detail)) {
+      const override = premiumOverrideCents(detail);
+      if (override != null) {
+        premiumOverrides = { ...premiumOverrides, [domain]: override };
       }
-      details = {
-        ...details,
-        [domain]: {
-          premium: r.premium === true,
-          likely: r.likely_premium === true,
-          price: priceUsd,
-          registrar: cheapest && typeof cheapest.name === 'string' ? cheapest.name : null,
-          regPrice:
-            cheapest && typeof cheapest.reg_price_usd === 'number' ? cheapest.reg_price_usd : null,
-          url:
-            typeof r.buy_url === 'string' && r.buy_url.startsWith('https://')
-              ? r.buy_url
-              : null,
-        },
-      };
-    } catch {
-      details = {
-        ...details,
-        [domain]: { failed: true, price: null, registrar: null, regPrice: null, url: null },
-      };
     }
+    details = { ...details, [domain]: detail };
+  }
+
+  // ---- Bulk "check premium prices" toolbar action ----
+
+  /** Cap on how many domains the bulk premium check will query in one click.
+   *  DigMyName is on-demand and rate-limited client-side; 20 keeps it polite. */
+  const PREMIUM_CHECK_CAP = 20;
+
+  let premiumChecking = $state(false);
+  let premiumDone = $state(0);
+  let premiumTotal = $state(0);
+  let premiumFound = $state(0);
+
+  /** Available/probably_available rows not yet premium-checked, sorted by
+   *  cheapest first-year price asc. A row is "checked" once it has a non-failed
+   *  entry in `details` (premium or not) or an existing `premiumOverrides`
+   *  entry (already known premium). */
+  const premiumCheckEligible = $derived.by(() => {
+    const table = $pricing?.table ?? null;
+    const list: { domain: string; firstYear: number | null }[] = [];
+    for (const r of $results.values()) {
+      if (r.status !== 'available' && r.status !== 'probably_available') continue;
+      if (premiumOverrides[r.domain] != null) continue;
+      const d = details[r.domain];
+      if (d && !d.failed) continue;
+      const best = table ? bestEntry(table, r.tld) : null;
+      list.push({ domain: r.domain, firstYear: best?.entry.reg ?? null });
+    }
+    list.sort((a, b) => (a.firstYear ?? Infinity) - (b.firstYear ?? Infinity));
+    return list;
+  });
+
+  const canPremiumCheck = $derived(
+    $runState.phase === 'done' && !premiumChecking && premiumCheckEligible.length > 0,
+  );
+
+  /** Bulk-fetch DigMyName premium data for the cheapest eligible available
+   *  domains (capped at PREMIUM_CHECK_CAP). Concurrency 2 — sequential-friendly
+   *  to DigMyName. Premium results with a numeric price are stored into
+   *  `premiumOverrides` so the price cell shows the real price + strike + chip. */
+  async function runPremiumCheck(): Promise<void> {
+    if (!canPremiumCheck) return;
+    const targets = premiumCheckEligible.slice(0, PREMIUM_CHECK_CAP);
+    premiumChecking = true;
+    premiumDone = 0;
+    premiumTotal = targets.length;
+    premiumFound = 0;
+
+    let idx = 0;
+    const worker = async (): Promise<void> => {
+      while (idx < targets.length) {
+        const i = idx++;
+        const { domain } = targets[i];
+        const detail = await fetchPremiumDetail(domain);
+        details = { ...details, [domain]: detail };
+        if (isPremiumPriced(detail)) {
+          const override = premiumOverrideCents(detail);
+          if (override != null) {
+            premiumOverrides = { ...premiumOverrides, [domain]: override };
+            premiumFound++;
+          }
+        }
+        premiumDone++;
+      }
+    };
+    // Two concurrent workers — simple promise pool, no new deps.
+    await Promise.all([worker(), worker()]);
+
+    premiumChecking = false;
   }
 
   async function handleCopy(domain: string) {
@@ -630,9 +668,35 @@
           {t('results.fav.copy', { n: $favorites.size })}
         </button>
       {/if}
-      {#if $runState.phase === 'done' && filter === 'all' && availableTotal > 0}
-        <!-- Keep "Show available (N)" and its ⋯ menu on one line, right-aligned. -->
+      {#if $runState.phase === 'done' && ((filter === 'all' && availableTotal > 0) || premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking)}
+        <!-- Keep "Show available (N)" / premium-check and their menus on one line, right-aligned. -->
         <div class="nowrap-group">
+        {#if premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking}
+          <Tooltip text={t('results.premium.aria')}>
+            <button
+              class="filter premium-check"
+              type="button"
+              onclick={() => void runPremiumCheck()}
+              disabled={!canPremiumCheck}
+              aria-label={t('results.premium.aria')}
+              title={t('results.premium.aria')}
+              data-testid="results-premium-check"
+            >
+              <IconTag />
+              {#if premiumChecking}
+                {t('results.premium.checking', { done: premiumDone, total: premiumTotal })}
+              {:else}
+                {t('results.premium.check')}
+              {/if}
+            </button>
+          </Tooltip>
+          {#if !premiumChecking && premiumFound > 0}
+            <span class="chip-tag premium" data-testid="results-premium-found">
+              {t('results.premium.found', { n: premiumFound })}
+            </span>
+          {/if}
+        {/if}
+        {#if filter === 'all' && availableTotal > 0}
         <button class="filter suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
           {t('results.showAvailable', { n: availableTotal })}
         </button>
@@ -643,6 +707,7 @@
           onFav={() => favAllAvailable()}
           onCsv={() => downloadAvailableCsv()}
         />
+        {/if}
         </div>
       {/if}
     </div>
@@ -1312,6 +1377,16 @@
     background: var(--green-soft);
     border-color: var(--green);
     color: var(--green);
+  }
+  .filter.premium-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .filter.premium-check :global(svg) {
+    width: 14px;
+    height: 14px;
+    flex: none;
   }
   .search {
     border: 1px solid var(--border);

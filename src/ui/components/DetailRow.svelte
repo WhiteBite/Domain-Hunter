@@ -4,6 +4,7 @@
   import { settings } from '../store';
   import { t } from '../../i18n';
   import Tooltip from './Tooltip.svelte';
+  import type { DigDetail } from '../dig';
 
   export interface RowData {
     result: CheckResult;
@@ -12,17 +13,6 @@
     firstYear: number | null;
     standardFirstYear: number | null;
     renewal: number | null;
-  }
-
-  export interface DigDetail {
-    loading?: boolean;
-    failed?: boolean;
-    premium?: boolean;
-    likely?: boolean;
-    price: number | null;
-    registrar: string | null;
-    regPrice: number | null;
-    url: string | null;
   }
 
   export interface RegistrarQuote {

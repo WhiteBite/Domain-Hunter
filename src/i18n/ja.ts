@@ -307,6 +307,12 @@ export const ja: Dict = {
   'results.available.fav': 'すべてお気に入りに追加',
   'results.available.csv': '取得可能な CSV をダウンロード',
 
+  'results.premium.check': 'プレミアム価格を確認',
+  'results.premium.checking': '{done}/{total}',
+  'results.premium.found': 'プレミアム: {n}',
+  'results.premium.aria':
+    'DigMyName に最安値の利用可能ドメイン20件までレジストリプレミアム価格を問い合わせ、プレミアム名には実際の価格を表示します。',
+
   'watch.banner': 'ウォッチリスト更新: {freed} 件解放、{taken} 件取得済',
   'watch.showFavs': 'お気に入りを表示',
   'watch.refresh.aria': 'お気に入りを再確認',

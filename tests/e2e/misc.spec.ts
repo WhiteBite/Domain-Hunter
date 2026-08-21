@@ -439,6 +439,94 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
+  test('bulk premium check: button fetches premium prices and shows found chip', async ({
+    page,
+  }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+      digmyname: [
+        {
+          domain: 'zzqxpremium.com',
+          result: {
+            premium: true,
+            likely_premium: false,
+            price_usd: 2500,
+            cheapest_registrar: { name: 'porkbun', reg_price_usd: 11.68 },
+            buy_url: 'https://porkbun.com/checkout/search?q=zzqxpremium.com',
+          },
+        },
+        {
+          domain: 'zzqxplain.com',
+          result: {
+            premium: false,
+            likely_premium: false,
+            cheapest_registrar: { name: 'porkbun', reg_price_usd: 11.68 },
+            buy_url: 'https://porkbun.com/checkout/search?q=zzqxplain.com',
+          },
+        },
+      ],
+    });
+    await mockRdap(page, [
+      { domain: 'zzqxpremium.com', response: { status: 404 } },
+      { domain: 'zzqxplain.com', response: { status: 404 } },
+    ]);
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxpremium.com\nzzqxplain.com');
+    await page.click('[data-testid="check-button-start"]');
+    await expect(page.locator('[data-testid="results-row-zzqxpremium-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.locator('[data-testid="results-row-zzqxplain-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.locator('[data-testid="check-button-stop"]')).toBeHidden({
+      timeout: 15_000,
+    });
+
+    // Before bulk check: premium button is visible and enabled, no found chip.
+    const btn = page.locator('[data-testid="results-premium-check"]');
+    await expect(btn).toBeVisible();
+    await expect(btn).toBeEnabled();
+    await expect(page.locator('[data-testid="results-premium-found"]')).toHaveCount(0);
+
+    // Before bulk check: premium row shows standard price, no strike-through.
+    const premCell = page.locator(
+      '[data-testid="results-row-zzqxpremium-com"] .price-cell',
+    );
+    await expect(premCell).toContainText('$10.44');
+    await expect(premCell.locator('.price-strike')).toHaveCount(0);
+
+    // Click the bulk premium check button.
+    await btn.click();
+
+    // After the check resolves: premium domain shows $2,500.00 with strike
+    // and amber premium chip; non-premium domain keeps standard price.
+    await expect(premCell).toContainText('$2,500.00', { timeout: 10_000 });
+    await expect(premCell.locator('.price-strike')).toBeVisible();
+    await expect(premCell.locator('.price-strike')).toContainText('$10.44');
+    await expect(premCell.locator('.chip-tag.premium')).toBeVisible();
+
+    const plainCell = page.locator(
+      '[data-testid="results-row-zzqxplain-com"] .price-cell',
+    );
+    await expect(plainCell.locator('.price-strike')).toHaveCount(0);
+
+    // Found chip shows "premium: 1".
+    const found = page.locator('[data-testid="results-premium-found"]');
+    await expect(found).toBeVisible();
+    await expect(found).toContainText('premium: 1');
+
+    expectNoLeaks(page);
+  });
+
   test('gen-sets-controls is rendered in the sets summary', async ({ page }) => {
     await assertNoNetworkLeaks(page);
     await mockAll(page, {

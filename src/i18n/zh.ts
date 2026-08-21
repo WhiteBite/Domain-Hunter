@@ -307,6 +307,12 @@ export const zh: Dict = {
   'results.available.fav': '全部加入收藏',
   'results.available.csv': '下载可注册 CSV',
 
+  'results.premium.check': '检查溢价价格',
+  'results.premium.checking': '{done}/{total}',
+  'results.premium.found': '溢价: {n}',
+  'results.premium.aria':
+    '向 DigMyName 查询最便宜的 20 个可用域名的注册局溢价价格；溢价域名会显示真实价格。',
+
   'watch.banner': '关注列表更新：{freed} 个释放，{taken} 个被注册',
   'watch.showFavs': '显示收藏',
   'watch.refresh.aria': '重新检查收藏',

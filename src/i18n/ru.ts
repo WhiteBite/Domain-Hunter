@@ -308,6 +308,12 @@ export const ru: Dict = {
   'results.available.fav': 'В избранное',
   'results.available.csv': 'CSV по свободным',
 
+  'results.premium.check': 'Проверить премиум-цены',
+  'results.premium.checking': '{done}/{total}',
+  'results.premium.found': 'премиум: {n}',
+  'results.premium.aria':
+    'Запрашивает у DigMyName цены реестра на премиум для 20 самых дешёвых свободных доменов; для премиум-имён показывается реальная цена.',
+
   'watch.banner': 'Обновление списка: {freed} освободилось, {taken} занято',
   'watch.showFavs': 'Показать избранное',
   'watch.refresh.aria': 'Перепроверить избранное',

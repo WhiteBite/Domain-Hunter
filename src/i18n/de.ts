@@ -307,6 +307,12 @@ export const de: Dict = {
   'results.available.fav': 'Alle zu Favoriten hinzufügen',
   'results.available.csv': 'Verfügbare als CSV herunterladen',
 
+  'results.premium.check': 'Premium-Preise prüfen',
+  'results.premium.checking': '{done}/{total}',
+  'results.premium.found': 'Premium: {n}',
+  'results.premium.aria':
+    'Fragt DigMyName nach Registry-Premium-Preisen für bis zu 20 der günstigsten verfügbaren Domains; Premium-Namen zeigen ihren echten Preis.',
+
   'watch.banner': 'Watchlist-Update: {freed} frei, {taken} belegt',
   'watch.showFavs': 'Favoriten anzeigen',
   'watch.refresh.aria': 'Favoriten neu prüfen',

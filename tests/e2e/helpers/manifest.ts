@@ -97,6 +97,8 @@ export const ALL_TESTIDS = [
   'results-available-fav', // available menu: add all to favorites
   'results-available-csv', // available menu: download available CSV
   'results-watch-refresh', // watchlist refresh button (next to favorites filter)
+  'results-premium-check', // bulk premium-price check toolbar button
+  'results-premium-found', // chip showing found premium count after bulk check
 
   // ---- GeneratorsTab.svelte ----
   'gen-input-keywords', // keywords text input

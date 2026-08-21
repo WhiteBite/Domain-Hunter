@@ -307,6 +307,12 @@ export const pt: Dict = {
   'results.available.fav': 'Adicionar todos aos favoritos',
   'results.available.csv': 'Baixar CSV de disponíveis',
 
+  'results.premium.check': 'Verificar preços premium',
+  'results.premium.checking': '{done}/{total}',
+  'results.premium.found': 'premium: {n}',
+  'results.premium.aria':
+    'Pede ao DigMyName os preços premium do registro de até 20 domínios disponíveis mais baratos; nomes premium mostram seu preço real.',
+
   'watch.banner': 'Atualização da lista: {freed} livres, {taken} ocupados',
   'watch.showFavs': 'Mostrar favoritos',
   'watch.refresh.aria': 'Reverificar favoritos',
