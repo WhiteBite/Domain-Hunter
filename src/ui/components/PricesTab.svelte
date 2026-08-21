@@ -2,14 +2,18 @@
   import { t } from '../../i18n';
   import { pricing, registry, settings } from '../store';
   import { bestEntry, formatPrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
+  import { pointsFromCompact, summarizeTrend } from '../../pricing/trends';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
   import type { PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
   import registrarsJson from '../../config/registrars.json';
+  import historyJson from '../../config/price-history.json';
 
   const registrars = registrarsJson as unknown as RegistrarConfig[];
   const registrarName = new Map<string, string>(registrars.map((r) => [r.id, r.name]));
+  const history =
+    historyJson as unknown as Record<string, Array<[string, number | null, number | null]>>;
 
   type SortMode = 'reg' | 'renew' | 'alpha';
 
@@ -220,6 +224,7 @@
           {#each visibleZones as tld (tld)}
             {@const best = bestEntry(table, tld)}
             {@const minRid = best?.registrarId ?? null}
+            {@const trend = summarizeTrend(pointsFromCompact(history[tld] ?? []))}
             <tr data-testid={`prices-row-${tld}`}>
               <td class="zone-cell">{tld}</td>
               {#each columns as rid (rid)}
@@ -240,6 +245,15 @@
               </td>
               <td class="price-cell nums best-cell">
                 {formatPrice(tco3(table, tld), $settings)}
+                {#if trend.dir}
+                  <span
+                    class="trend trend-{trend.dir}"
+                    title={t('tooltip.trend', { months: 6 })}
+                  >
+                    {#if trend.dir === 'up'}▲ +{trend.pct}%{:else if trend.dir === 'down'}▼
+                      {trend.pct}%{:else}→{/if}
+                  </span>
+                {/if}
               </td>
             </tr>
           {/each}
@@ -478,6 +492,25 @@
     text-decoration: underline dotted var(--amber);
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
+  }
+
+  .trend {
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+    margin-inline-start: var(--space-1);
+    white-space: nowrap;
+  }
+
+  .trend-up {
+    color: var(--price-high);
+  }
+
+  .trend-down {
+    color: var(--price-cheap);
+  }
+
+  .trend-flat {
+    color: var(--text-tertiary);
   }
 
   .price-cell:empty::before,
