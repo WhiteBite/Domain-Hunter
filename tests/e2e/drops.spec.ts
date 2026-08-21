@@ -11,20 +11,41 @@ import { test, expect, type Page } from '@playwright/test';
 import { setupPage, grantClipboard, readClipboard } from './helpers/setup';
 import { assertNoNetworkLeaks, getLeakedRequests, mockAll } from './helpers/mocks';
 import { ianaBootstrap, porkbunPricing, cloudflarePricing } from './fixtures';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-// ---- Test data (from src/config/dropped.snapshot.json, shipped with build) ----
+// ---- Test data (derived from src/config/dropped.snapshot.json, bundled) ----
+
+// Read via node:fs (Playwright's Node runner) — JSON import attributes are
+// unavailable in the transpiled specs. Same pattern as inventory.spec.ts.
+const SNAPSHOT_PATH = fileURLToPath(
+  new URL('../../src/config/dropped.snapshot.json', import.meta.url),
+);
 
 // First domain in the snapshot. sanitizeId(d + '.' + tld) replaces '.' with '-'.
-const FIRST_DOMAIN = 'acvaldezvillalobos.com';
-const FIRST_COPY_TESTID = 'drops-row-copy-acvaldezvillalobos-com';
-const FIRST_ADD_TESTID = 'drops-row-add-acvaldezvillalobos-com';
+const snapshotList = (
+  JSON.parse(readFileSync(SNAPSHOT_PATH, 'utf8')) as { list: string[] }
+).list;
+const [firstLabel = '', firstTld = ''] = (snapshotList[0] ?? '').split(' ');
+const FIRST_DOMAIN = `${firstLabel}.${firstTld}`;
+const FIRST_SID = FIRST_DOMAIN.replaceAll('.', '-');
+const FIRST_COPY_TESTID = `drops-row-copy-${FIRST_SID}`;
+const FIRST_ADD_TESTID = `drops-row-add-${FIRST_SID}`;
+const FIRST_ROW_TESTID = `results-row-${FIRST_SID}`;
 
 // RENDER_CAP in DropsTab.svelte — max visible rows.
 const RENDER_CAP = 300;
 
-// cfd has 21 entries in the snapshot — well under RENDER_CAP, in the top-20
-// TLD select options.
-const CFD_COUNT = 21;
+// Pick a TLD among the top-20 select options whose count fits under the
+// render cap, so the select-filter test can assert an exact row count.
+const tldCounts = new Map<string, number>();
+for (const row of snapshotList) {
+  const tld = row.split(' ')[1] ?? '';
+  if (tld) tldCounts.set(tld, (tldCounts.get(tld) ?? 0) + 1);
+}
+const top20 = [...tldCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20);
+const underCap = top20.filter(([, n]) => n <= RENDER_CAP);
+const [SEL_TLD, SEL_COUNT] = underCap[underCap.length - 1] ?? top20[0] ?? ['', 0];
 
 // ---- Local tab navigation (workaround for navigateToTab gap) ----
 
@@ -74,7 +95,7 @@ test.describe('Drops tab', () => {
   test('search input filters rows by substring', async ({ page }) => {
     await gotoDrops(page);
 
-    await page.fill('[data-testid="drops-input-search"]', 'acvaldezvillalobos');
+    await page.fill('[data-testid="drops-input-search"]', firstLabel);
 
     // Only one domain matches the full label substring.
     const rows = page.locator('[data-testid^="drops-row-copy-"]');
@@ -85,10 +106,10 @@ test.describe('Drops tab', () => {
   test('TLD select filters rows by zone', async ({ page }) => {
     await gotoDrops(page);
 
-    await page.selectOption('[data-testid="drops-select-tld"]', 'cfd');
+    await page.selectOption('[data-testid="drops-select-tld"]', SEL_TLD);
 
     const rows = page.locator('[data-testid^="drops-row-copy-"]');
-    await expect(rows).toHaveCount(CFD_COUNT);
+    await expect(rows).toHaveCount(Math.min(SEL_COUNT, RENDER_CAP));
   });
 
   test('row copy button writes the domain to the clipboard', async ({ page }) => {
@@ -112,11 +133,11 @@ test.describe('Drops tab', () => {
     const value = await textarea.inputValue();
     expect(value).toContain(FIRST_DOMAIN);
 
-    // «To check» auto-starts the run (pendingShareRun): a result row streams in.
-    // .com is high-trust; RDAP unmatched → 404 → available.
-    await expect(
-      page.locator('[data-testid="results-row-acvaldezvillalobos-com"]'),
-    ).toBeVisible({ timeout: 15_000 });
+    // «To check» auto-starts the run (pendingShareRun): a result row streams in
+    // (RDAP unmatched → 404; the row renders regardless of final status).
+    await expect(page.locator(`[data-testid="${FIRST_ROW_TESTID}"]`)).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('add-all button fills many domains and auto-runs', async ({ page }) => {

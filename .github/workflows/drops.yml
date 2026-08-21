@@ -2,11 +2,15 @@ name: Harvest Dropped Domains
 
 on:
   schedule:
-    - cron: "0 5 * * 1"
+    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: harvest-drops
+  cancel-in-progress: false
 
 jobs:
   harvest:
@@ -21,7 +25,7 @@ jobs:
 
       - run: npm ci
 
-      - run: node scripts/harvest-dropped.mjs
+      - run: node scripts/harvest-drops.mjs
 
       - name: Commit snapshot if changed
         run: |
