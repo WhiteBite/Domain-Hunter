@@ -39,7 +39,10 @@ const FLOORS = (wholesale as { floors: Record<string, number> }).floors;
 
 const PRICING_KEY = 'dh:v1:pricing';
 const FRESH_MS = 12 * 60 * 60 * 1000; // 12h
-const FETCH_TIMEOUT_MS = 10_000;
+// Porkbun's full pricing dump is slow (12-18s observed from some networks);
+// loadPricing runs idle after first paint and is cache-first, so a longer
+// window trades negligible readiness delay for not dropping the main source.
+const FETCH_TIMEOUT_MS = 20_000;
 
 // ---- Normalization (pure, exported for tests + harvest script parity) ----
 
@@ -296,11 +299,19 @@ export function bestEntry(
   return best;
 }
 
-/** 3-year total cost of ownership, USD cents: reg + 2×renew at the cheapest registrar. */
+/** 3-year total cost of ownership, USD cents: min over registrars of (reg + 2×renew).
+ *  Per SPEC §9 this is the true minimum across all registrars with both prices,
+ *  not the TCO at the reg-cheapest registrar (which can be higher). */
 export function tco3(table: PricingTable, tld: string): number | null {
-  const best = bestEntry(table, tld);
-  if (!best || best.entry.reg == null || best.entry.renew == null) return null;
-  return best.entry.reg + 2 * best.entry.renew;
+  const entries = table.tlds[tld];
+  if (!entries) return null;
+  let min: number | null = null;
+  for (const entry of Object.values(entries)) {
+    if (entry.reg == null || entry.renew == null) continue;
+    const tco = entry.reg + 2 * entry.renew;
+    if (min == null || tco < min) min = tco;
+  }
+  return min;
 }
 
 export function priceTier(centsUsd: number): 'cheap' | 'mid' | 'high' {
@@ -319,10 +330,33 @@ export function isPromoTrap(entry: PriceEntry): boolean {
   return entry.reg != null && entry.reg > 0 && entry.renew != null && entry.renew >= 5 * entry.reg;
 }
 
+/** Discount (USD cents) a coupon applies against a first-year registration price.
+ *  'amount': the coupon face value in cents, capped at the reg price so a coupon
+ *  can never pay the user to register. 'percentage': whole percent of reg,
+ *  rounded to the nearest cent. */
+export function couponDiscountCents(coupon: Coupon, regCents: number): number {
+  if (coupon.type === 'amount') return Math.min(coupon.amount, regCents);
+  return Math.round((regCents * coupon.amount) / 100);
+}
+
+/** Best coupon for a TLD: the one that maximizes the first-year discount against
+ *  the cheapest registrar's reg price. Falls back to coupons[0] when no reg
+ *  price is known (cannot rank by discount). Ties keep the first encountered. */
 export function bestCoupon(table: PricingTable, tld: string): Coupon | null {
   const coupons = table.coupons[tld];
   if (!coupons || coupons.length === 0) return null;
-  return coupons[0] ?? null;
+  const reg = bestEntry(table, tld)?.entry.reg;
+  if (reg == null) return coupons[0] ?? null;
+  let best: Coupon | null = null;
+  let bestDiscount = -1;
+  for (const c of coupons) {
+    const discount = couponDiscountCents(c, reg);
+    if (best == null || discount > bestDiscount) {
+      best = c;
+      bestDiscount = discount;
+    }
+  }
+  return best;
 }
 
 /**

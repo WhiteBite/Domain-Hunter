@@ -10,6 +10,8 @@
     isBelowFloor,
     isPromoTrap,
     bestCoupon,
+    tco3,
+    couponDiscountCents,
   } from '../../pricing/pricing';
   import { createEngine } from '../../core/engine';
   import type { EngineHandle } from '../../core/engine';
@@ -110,10 +112,7 @@
       const best = table ? bestEntry(table, r.tld) : null;
       const override = premiumOverrides[r.domain] ?? null;
       const stdFirstYear = best?.entry.reg ?? null;
-      const stdTco =
-        best && best.entry.reg != null && best.entry.renew != null
-          ? best.entry.reg + 2 * best.entry.renew
-          : null;
+      const stdTco = table ? tco3(table, r.tld) : null;
       arr.push({
         result: r,
         best,
@@ -880,9 +879,10 @@
                       <span class="chip-tag trap" tabindex="0" data-testid={`results-chip-trap-${sid}`}>{t('price.promoTrap')}</span>
                     </Tooltip>
                   {/if}
-                  {#if coupon}
+                  {#if coupon && row.best != null && row.best.entry.reg != null}
+                    {@const reg = row.best.entry.reg ?? 0}
                     <span class="coupon">
-                      {t('price.coupon', { price: formatPrice(coupon.amount, $settings), code: coupon.code })}
+                      {t('price.coupon', { price: formatPrice(Math.max(0, reg - couponDiscountCents(coupon, reg)), $settings), code: coupon.code })}
                     </span>
                   {/if}
                 </div>
