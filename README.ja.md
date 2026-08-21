@@ -1,6 +1,6 @@
 # Domain Hunter — 一括ドメイン登録可否チェッカー＆名前ジェネレーター
 
-[English](README.md) | [Русский](README.ru.md) | [中文](README.zh.md) | **日本語** | [Français](README.fr.md)
+[English](README.md) | [Русский](README.ru.md) | [中文](README.zh.md) | **日本語** | [Français](README.fr.md) | [Español](README.es.md) | [Deutsch](README.de.md) | [Português](README.pt.md)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-gold.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/WhiteBite/Domain-Hunter?style=social)](https://github.com/WhiteBite/Domain-Hunter/stargazers)

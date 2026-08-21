@@ -1,6 +1,6 @@
 # Domain Hunter — Vérificateur de disponibilité de domaines en masse & générateur de noms
 
-[English](README.md) | [Русский](README.ru.md) | [中文](README.zh.md) | [日本語](README.ja.md) | **Français**
+[English](README.md) | [Русский](README.ru.md) | [中文](README.zh.md) | [日本語](README.ja.md) | **Français** | [Español](README.es.md) | [Deutsch](README.de.md) | [Português](README.pt.md)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-gold.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/WhiteBite/Domain-Hunter?style=social)](https://github.com/WhiteBite/Domain-Hunter/stargazers)

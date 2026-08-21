@@ -1,6 +1,6 @@
 # Domain Hunter — 批量域名可注册性查询与名称生成器
 
-[English](README.md) | [Русский](README.ru.md) | **中文** | [日本語](README.ja.md) | [Français](README.fr.md)
+[English](README.md) | [Русский](README.ru.md) | **中文** | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md) | [Deutsch](README.de.md) | [Português](README.pt.md)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-gold.svg)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/WhiteBite/Domain-Hunter?style=social)](https://github.com/WhiteBite/Domain-Hunter/stargazers)
