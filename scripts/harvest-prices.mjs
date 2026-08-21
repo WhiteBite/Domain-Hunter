@@ -12,11 +12,13 @@
  */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { fetchWithTimeout, UA, writeJson } from './lib/http.mjs';
+import { fetchWithTimeout, UA, writeJson, readJson } from './lib/http.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = join(__dirname, '..', 'src', 'config', 'pricing.snapshot.json');
-const FETCH_TIMEOUT_MS = 15_000;
+// Porkbun's full pricing dump is slow (12-18s observed); the harvest runs in
+// CI with no UX constraint, so give sources room instead of dropping coverage.
+const FETCH_TIMEOUT_MS = 30_000;
 const REGRU_RUB_TO_USD = 97; // fallback: 97 RUB = 1 USD
 const BEGET_EUR_TO_USD = 1.08; // fallback: 1 EUR = 1.08 USD
 let regruRubToUsd = REGRU_RUB_TO_USD;
@@ -70,7 +72,7 @@ function normalizeCloudflare(json) {
   return { tlds, coupons: {} };
 }
 
-function mergePricing(target, src) {
+export function mergePricing(target, src) {
   for (const [tld, registrars] of Object.entries(src.tlds)) {
     if (!target.tlds[tld]) target.tlds[tld] = {};
     Object.assign(target.tlds[tld], registrars);
@@ -79,6 +81,68 @@ function mergePricing(target, src) {
     if (!target.coupons[tld]) target.coupons[tld] = [];
     target.coupons[tld].push(...coupons);
   }
+}
+
+// ---- Snapshot carry-over (prevents flaky sources from erasing coverage) ----
+
+/**
+ * Expand the compact on-disk snapshot format
+ * (tld -> registrarId -> [reg, renew, transfer]) back to the normalized
+ * { tlds, coupons } shape with PriceEntry objects.
+ * Mirrors src/pricing/pricing.ts:14-37 exactly.
+ */
+export function expandCompactSnapshot(raw) {
+  const tlds = {};
+  for (const [tld, regs] of Object.entries(raw?.tlds ?? {})) {
+    if (!regs || typeof regs !== 'object') continue;
+    const bucket = {};
+    for (const [rid, arr] of Object.entries(regs)) {
+      if (!Array.isArray(arr)) continue;
+      const [reg, renew, transfer] = arr;
+      bucket[rid] = { reg: reg ?? null, renew: renew ?? null, transfer: transfer ?? null };
+    }
+    if (Object.keys(bucket).length > 0) tlds[tld] = bucket;
+  }
+  const coupons = {};
+  for (const [tld, list] of Object.entries(raw?.coupons ?? {})) {
+    if (Array.isArray(list)) coupons[tld] = list;
+  }
+  return { tlds, coupons };
+}
+
+/**
+ * Read and expand the previous snapshot file. Returns null on missing or
+ * corrupt file so a flaky read never crashes the harvest.
+ */
+export async function readPrevious(path) {
+  try {
+    return expandCompactSnapshot(await readJson(path));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Deduplicate coupon codes per TLD. When the same code appears in both
+ * carried-over (previous) and fresh entries, the FRESH entry wins.
+ * mergePricing pushes previous coupons first, then fresh ones later, so
+ * iterating in array order and letting later entries overwrite earlier
+ * ones in a Map gives fresh-wins semantics.
+ */
+export function dedupeCoupons(coupons) {
+  const result = {};
+  for (const [tld, list] of Object.entries(coupons)) {
+    if (!Array.isArray(list)) continue;
+    const byCode = new Map();
+    for (const c of list) {
+      if (!c || typeof c !== 'object') continue;
+      const code = c.code;
+      if (typeof code !== 'string') continue;
+      byCode.set(code, c);
+    }
+    if (byCode.size > 0) result[tld] = [...byCode.values()];
+  }
+  return result;
 }
 
 // ---- FX rates ----
@@ -112,7 +176,8 @@ async function fetchPorkbun() {
   const res = await fetchWithTimeout('https://api.porkbun.com/api/json/v3/pricing/get', {
     timeoutMs: FETCH_TIMEOUT_MS,
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    // NOTE: no Content-Type header on purpose — mirrors src/pricing/pricing.ts
+    // (a JSON content type measurably slows Porkbun's response).
     body: '{}',
   });
   if (!res.ok) throw new Error(`porkbun ${res.status}`);
@@ -352,9 +417,21 @@ async function main() {
   ];
   const named = apiOnly ? apiSources : [...apiSources, ...scraperSources];
 
+  // Carry-over: load the previous snapshot FIRST so a flaky source this run
+  // does not erase TLD coverage from a prior successful harvest. Fresh
+  // sources merge on top (Object.assign per registrar gives fresh-wins).
+  const previous = await readPrevious(SNAPSHOT_PATH);
+  const merged = previous ?? { tlds: {}, coupons: {} };
+  const carriedTldCount = previous ? Object.keys(previous.tlds).length : 0;
+  let carriedRegistrarCount = 0;
+  if (previous) {
+    for (const regs of Object.values(previous.tlds)) {
+      carriedRegistrarCount += Object.keys(regs).length;
+    }
+  }
+
   const results = await Promise.allSettled(named.map(([, fn]) => fn()));
   const sources = [];
-  const merged = { tlds: {}, coupons: {} };
 
   results.forEach((result, i) => {
     const name = named[i][0];
@@ -370,6 +447,9 @@ async function main() {
     console.error('ALL pricing sources failed');
     process.exit(1);
   }
+
+  // Dedupe coupons: carried-over + fresh may have duplicate codes; fresh wins.
+  merged.coupons = dedupeCoupons(merged.coupons);
 
   // Compact on-disk format: registrar prices as [reg, renew, transfer] arrays
   // (~3× smaller than objects); pricing.ts expands them back at load.
@@ -397,8 +477,12 @@ async function main() {
 
   const tldCount = Object.keys(merged.tlds).length;
   const couponCount = Object.keys(merged.coupons).length;
+  const carryNote =
+    carriedTldCount > 0
+      ? ` (carried ${carriedTldCount} TLDs / ${carriedRegistrarCount} registrar entries from previous)`
+      : '';
   console.log(
-    `harvested ${tldCount} TLDs from ${sources.join(', ')}, ${couponCount} coupons -> ${SNAPSHOT_PATH}`,
+    `harvested ${tldCount} TLDs from ${sources.join(', ')}${carryNote}, ${couponCount} coupons -> ${SNAPSHOT_PATH}`,
   );
 }
 

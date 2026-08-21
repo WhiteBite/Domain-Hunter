@@ -1,8 +1,8 @@
 /**
- * Minimal ambient types for node:fs used by tests/e2e/inventory.spec.ts.
+ * Minimal ambient types for node:fs/node:path/node:os used by tests.
  * The project's tsconfig has types: ["vite/client"] (no @types/node), but
- * Playwright's runner executes specs in Node, so the real module exists at
- * runtime — these declarations only satisfy tsc.
+ * vitest and Playwright runners execute in Node, so the real modules exist
+ * at runtime — these declarations only satisfy tsc.
  */
 declare module 'node:fs' {
   export function readFileSync(path: string, encoding: string): string;
@@ -11,8 +11,19 @@ declare module 'node:fs' {
     path: string,
     options: { withFileTypes: true },
   ): Array<{ name: string; isDirectory(): boolean }>;
+  export function writeFileSync(path: string, data: string): void;
+  export function mkdirSync(path: string, options: { recursive: true }): string;
+  export function rmSync(path: string, options: { recursive: true }): void;
 }
 
 declare module 'node:url' {
   export function fileURLToPath(url: URL | string): string;
+}
+
+declare module 'node:path' {
+  export function join(...paths: string[]): string;
+}
+
+declare module 'node:os' {
+  export function tmpdir(): string;
 }
