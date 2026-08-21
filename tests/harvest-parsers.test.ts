@@ -13,12 +13,12 @@ describe('normalizeRegru', () => {
     expect(result.coupons).toEqual({});
   });
 
-  it('converts .ru prices correctly (169 RUB reg, 226 RUB renew at rate 97)', () => {
+  it('converts .ru prices correctly (169 RUB reg, 226 RUB renew at rate 90)', () => {
     const result = normalizeRegru(regruHtml);
     const ru = result.tlds['ru']?.regru;
     expect(ru).toBeDefined();
-    expect(ru?.reg).toBe(Math.round((169 / 97) * 100));
-    expect(ru?.renew).toBe(Math.round((226 / 97) * 100));
+    expect(ru?.reg).toBe(Math.round((169 / 90) * 100));
+    expect(ru?.renew).toBe(Math.round((226 / 90) * 100));
     expect(ru?.transfer).toBeNull();
   });
 
@@ -26,15 +26,15 @@ describe('normalizeRegru', () => {
     const result = normalizeRegru(regruHtml);
     const rf = result.tlds['рф']?.regru;
     expect(rf).toBeDefined();
-    expect(rf?.reg).toBe(Math.round((169 / 97) * 100));
-    expect(rf?.renew).toBe(Math.round((226 / 97) * 100));
+    expect(rf?.reg).toBe(Math.round((169 / 90) * 100));
+    expect(rf?.renew).toBe(Math.round((226 / 90) * 100));
   });
 
   it('includes .com with RUB→USD conversion', () => {
     const result = normalizeRegru(regruHtml);
     const com = result.tlds['com']?.regru;
     expect(com).toBeDefined();
-    expect(com?.reg).toBe(Math.round((1792 / 97) * 100));
+    expect(com?.reg).toBe(Math.round((1792 / 90) * 100));
   });
 
   it('throws on broken HTML', () => {
@@ -49,12 +49,12 @@ describe('normalizeBeget', () => {
     expect(result.coupons).toEqual({});
   });
 
-  it('converts first entry (aaa.pro: 245 EUR reg, 260 EUR renew at rate 1.08)', () => {
+  it('converts first entry (aaa.pro: 245 EUR reg, 260 EUR renew at rate 1.10)', () => {
     const result = normalizeBeget(begetHtml);
     const entry = result.tlds['aaa.pro']?.beget;
     expect(entry).toBeDefined();
-    expect(entry?.reg).toBe(Math.round(245 * 1.08 * 100));
-    expect(entry?.renew).toBe(Math.round(260 * 1.08 * 100));
+    expect(entry?.reg).toBe(Math.round(245 * 1.10 * 100));
+    expect(entry?.renew).toBe(Math.round(260 * 1.10 * 100));
     expect(entry?.transfer).toBeNull();
   });
 
@@ -62,8 +62,8 @@ describe('normalizeBeget', () => {
     const result = normalizeBeget(begetHtml);
     const entry = result.tlds['academy']?.beget;
     expect(entry).toBeDefined();
-    expect(entry?.reg).toBe(Math.round(40 * 1.08 * 100));
-    expect(entry?.renew).toBe(Math.round(56 * 1.08 * 100));
+    expect(entry?.reg).toBe(Math.round(40 * 1.10 * 100));
+    expect(entry?.renew).toBe(Math.round(56 * 1.10 * 100));
   });
 
   it('throws on broken HTML', () => {

@@ -12,15 +12,15 @@
  */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { fetchWithTimeout, UA, writeJson, readJson } from './lib/http.mjs';
+import { fetchWithTimeout, fetchWithRetry, UA, writeJson, readJson } from './lib/http.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = join(__dirname, '..', 'src', 'config', 'pricing.snapshot.json');
 // Porkbun's full pricing dump is slow (12-18s observed); the harvest runs in
 // CI with no UX constraint, so give sources room instead of dropping coverage.
 const FETCH_TIMEOUT_MS = 30_000;
-const REGRU_RUB_TO_USD = 97; // fallback: 97 RUB = 1 USD
-const BEGET_EUR_TO_USD = 1.08; // fallback: 1 EUR = 1.08 USD
+const REGRU_RUB_TO_USD = 90; // fallback: 90 RUB = 1 USD (asOf Aug 2026)
+const BEGET_EUR_TO_USD = 1.10; // fallback: 1 EUR = 1.10 USD (asOf Aug 2026)
 let regruRubToUsd = REGRU_RUB_TO_USD;
 let begetEurToUsd = BEGET_EUR_TO_USD;
 
@@ -163,6 +163,7 @@ async function fetchFxRates() {
     if (typeof eur !== 'number' || !Number.isFinite(eur) || eur <= 0) throw new Error('er-api: invalid EUR rate');
     return { regruRubToUsd: rub, begetEurToUsd: 1 / eur };
   } catch (err) {
+    console.log('::warning::FX rates unavailable; using fallback RUB=' + REGRU_RUB_TO_USD + ' EUR=' + BEGET_EUR_TO_USD);
     console.warn(
       `FX rates: using fallback constants (${REGRU_RUB_TO_USD} RUB/USD, ${BEGET_EUR_TO_USD} USD/EUR) — ${err.message}`,
     );
@@ -173,13 +174,13 @@ async function fetchFxRates() {
 // ---- Fetch ----
 
 async function fetchPorkbun() {
-  const res = await fetchWithTimeout('https://api.porkbun.com/api/json/v3/pricing/get', {
+  const res = await fetchWithRetry('https://api.porkbun.com/api/json/v3/pricing/get', {
     timeoutMs: FETCH_TIMEOUT_MS,
     method: 'POST',
     // NOTE: no Content-Type header on purpose — mirrors src/pricing/pricing.ts
     // (a JSON content type measurably slows Porkbun's response).
     body: '{}',
-  });
+  }, { retries: 2 });
   if (!res.ok) throw new Error(`porkbun ${res.status}`);
   const json = await res.json();
   if (!json || typeof json !== 'object' || !json.pricing) throw new Error('porkbun bad response');
@@ -187,7 +188,7 @@ async function fetchPorkbun() {
 }
 
 async function fetchCloudflare() {
-  const res = await fetchWithTimeout('https://cfdomainpricing.com/prices.json', { timeoutMs: FETCH_TIMEOUT_MS });
+  const res = await fetchWithRetry('https://cfdomainpricing.com/prices.json', { timeoutMs: FETCH_TIMEOUT_MS }, { retries: 2 });
   if (!res.ok) throw new Error(`cloudflare ${res.status}`);
   const json = await res.json();
   if (!json || typeof json !== 'object') throw new Error('cloudflare bad response');
@@ -356,57 +357,45 @@ function normalizeRegctl(json) {
 }
 
 async function fetchRegru() {
-  const res = await fetchWithTimeout('https://www.reg.ru/domain/new/prices/', {
+  const res = await fetchWithRetry('https://www.reg.ru/domain/new/prices/', {
     timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
-  });
+  }, { retries: 1 });
   if (!res.ok) throw new Error(`regru ${res.status}`);
   return normalizeRegru(await res.text());
 }
 
 async function fetchBeget() {
-  const res = await fetchWithTimeout('https://beget.com/en/domains/zone', {
+  const res = await fetchWithRetry('https://beget.com/en/domains/zone', {
     timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
-  });
+  }, { retries: 1 });
   if (!res.ok) throw new Error(`beget ${res.status}`);
   return normalizeBeget(await res.text());
 }
 
 async function fetchDynadot() {
-  const res = await fetchWithTimeout('https://www.dynadot.com/domain/prices', {
+  const res = await fetchWithRetry('https://www.dynadot.com/domain/prices', {
     timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
-  });
+  }, { retries: 1 });
   if (!res.ok) throw new Error(`dynadot ${res.status}`);
   return normalizeDynadotHtml(await res.text());
 }
 
 async function fetchSpaceship() {
-  const res = await fetchWithTimeout('https://www.spaceship.com/domains/', {
+  const res = await fetchWithRetry('https://www.spaceship.com/domains/', {
     timeoutMs: FETCH_TIMEOUT_MS,
     headers: { 'user-agent': UA, accept: 'text/html' },
-  });
+  }, { retries: 1 });
   if (!res.ok) throw new Error(`spaceship ${res.status}`);
   return normalizeSpaceship(await res.text());
 }
 
 async function fetchRegctl() {
-  const res = await fetchWithTimeout('https://regctl.sh/prices.json', { timeoutMs: FETCH_TIMEOUT_MS });
+  const res = await fetchWithRetry('https://regctl.sh/prices.json', { timeoutMs: FETCH_TIMEOUT_MS }, { retries: 1 });
   if (!res.ok) throw new Error(`regctl ${res.status}`);
   return normalizeRegctl(await res.json());
-}
-
-/** Porkbun's dump is slow (12-18s) and occasionally times out; one retry
- *  after a short pause markedly raises hourly-harvest success. */
-async function fetchPorkbunWithRetry() {
-  try {
-    return await fetchPorkbun();
-  } catch (err) {
-    console.error(`porkbun first attempt failed: ${err?.message ?? err}; retrying once`);
-    await new Promise((resolve) => setTimeout(resolve, 2_000));
-    return await fetchPorkbun();
-  }
 }
 
 // ---- Main ----
@@ -417,7 +406,7 @@ async function main() {
   begetEurToUsd = fx.begetEurToUsd;
 
   const apiSources = [
-    ['porkbun', fetchPorkbunWithRetry],
+    ['porkbun', fetchPorkbun],
     ['cloudflare', fetchCloudflare],
   ];
   const scraperSources = [

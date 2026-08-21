@@ -37,6 +37,31 @@ export async function fetchWithTimeout(url, { timeoutMs = 10_000, headers, redir
   }
 }
 
+/**
+ * fetchWithTimeout with retry. On failure, sleeps backoffMs*(attempt+1) and
+ * retries up to `retries` times (so retries=2 means 3 total attempts).
+ * Throws the last error after retries are exhausted.
+ *
+ * @param {string} url
+ * @param {Parameters<typeof fetchWithTimeout>[1]} [opts]
+ * @param {{retries?: number, backoffMs?: number}} [retryOpts]
+ * @returns {Promise<Response>}
+ */
+export async function fetchWithRetry(url, opts, { retries = 2, backoffMs = 2000 } = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetchWithTimeout(url, opts);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, backoffMs * (attempt + 1)));
+      }
+    }
+  }
+  throw lastErr;
+}
+
 /** Read a file and JSON.parse its contents. */
 export async function readJson(path) {
   return JSON.parse(await readFile(path, 'utf8'));
