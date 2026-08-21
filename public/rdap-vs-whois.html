@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RDAP vs WHOIS: Why JSON Beats Text for Bulk Domain Checks</title>
+<meta name="description" content="WHOIS returns unstructured text that is hard to parse. RDAP is its JSON successor — structured, standardized, CORS-open, and built for automation. Here is a side-by-side comparison." />
+<link rel="canonical" href="https://whitebite.github.io/Domain-Hunter/rdap-vs-whois.html" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="RDAP vs WHOIS: Why JSON Beats Text for Bulk Domain Checks" />
+<meta property="og:description" content="Structured comparison: format, standardization, rate limits, CORS, privacy, tooling — and when WHOIS still matters." />
+<meta property="og:url" content="https://whitebite.github.io/Domain-Hunter/rdap-vs-whois.html" />
+<meta property="og:image" content="https://whitebite.github.io/Domain-Hunter/social-preview.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "RDAP vs WHOIS: Why JSON Beats Text for Bulk Domain Checks",
+  "datePublished": "2026-08-21",
+  "dateModified": "2026-08-21",
+  "author": { "@type": "Person", "name": "WhiteBite", "url": "https://github.com/WhiteBite" },
+  "mainEntityOfPage": "https://whitebite.github.io/Domain-Hunter/rdap-vs-whois.html",
+  "isPartOf": { "@type": "WebSite", "name": "Domain Hunter", "url": "https://whitebite.github.io/Domain-Hunter/" }
+}
+</script>
+<style>
+  body { font: 17px/1.65 system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; color: #1e2433; background: #fafbfc; }
+  h1 { font-size: 1.9rem; line-height: 1.25; } h2 { font-size: 1.25rem; margin-top: 2.2rem; }
+  a { color: #4f5ae8; } code { background: #eef0f6; padding: .1em .35em; border-radius: 4px; }
+  .cta { display: inline-block; margin: 1.4rem 0; padding: .7rem 1.2rem; background: #4f5ae8; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; }
+  footer { margin-top: 3rem; color: #6b7280; font-size: .9rem; }
+</style>
+</head>
+<body>
+<h1>RDAP vs WHOIS: Why JSON Beats Text for Bulk Domain Checks</h1>
+<p>WHOIS is the original protocol for looking up domain registration data. It has served the internet well for decades, but it was designed for humans, not machines. RDAP (Registration Data Access Protocol) is its modern replacement — standardized as [RFC 9083](https://www.rfc-editor.org/rfc/rfc9083) — and it solves the problems that make WHOIS painful for bulk automation.</p>
+
+<h2>Side-by-side comparison</h2>
+
+<h3>Format</h3>
+<p><strong>WHOIS</strong> returns plain text — a wall of labeled fields and paragraphs that varies wildly between registries. Parsing it requires fragile regex per-registrar. <strong>RDAP</strong> returns JSON with a consistent schema. Fields like <code>handle</code>, <code>status</code>, and <code>entities</code> appear in predictable locations, making programmatic parsing trivial.</p>
+
+<h3>Standardization</h3>
+<p>WHOIS has no formal RFC standard. Each registry formats output differently, and even the port number (43 vs TCP/HTTP) differs. RDAP is defined by RFC 9083 (protocol) and RFC 9082 (JSON mapping). Every response follows the same structure regardless of which registry serves it.</p>
+
+<h3>Rate limits</h3>
+<p>WHOIS servers often impose strict per-IP rate limits and may block aggressive clients entirely. RDAP runs over HTTPS, which means standard HTTP rate-limit headers (<code>Retry-After</code>, <code>429 Too Many Requests</code>) apply. Tools like Domain Hunter use AIMD (additive increase, multiplicative decrease) backoff to stay polite — Google Registry gets at most ~1 request per second.</p>
+
+<h3>CORS support</h3>
+<p>WHOIS is a TCP protocol on port 43. Browsers cannot call it directly. RDAP endpoints used by Domain Hunter send permissive CORS headers, so your browser calls registries directly — no backend, no proxy, no API key. That eliminates an entire layer of infrastructure and cost.</p>
+
+<h3>Privacy</h3>
+<p>WHOIS queries are logged by every server you contact. There is no built-in mechanism for GDPR-compliant data redaction (though RFC 9083 introduces RDAP Proxy and RDDS privacy features). Both protocols expose registration data, but RDAP's structured responses make it easier to implement selective field access and access controls going forward.</p>
+
+<h3>Tooling</h3>
+<p>WHOIS tooling is mature but fragmented: <code>whois</code> CLI on Linux/macOS, various GUI clients, and language-specific libraries that each handle parsing differently. RDAP tooling is newer but growing — every major programming language has JSON parsers built in, and the consistent schema means one parser works for all registries.</p>
+
+<h2>When WHOIS still matters</h2>
+<p>WHOIS is not dead. Some registrar-specific data — particularly detailed contact information and certain legacy fields — may only be available via WHOIS. If you need granular registrar-level details that RDAP does not expose, a WHOIS lookup on the specific registrar's portal may still be necessary. But for bulk availability checking, RDAP is faster, more reliable, and free.</p>
+
+<h2>The bottom line</h2>
+<p>If you are checking domains one at a time, WHOIS is fine. If you are checking hundreds or thousands, RDAP is the only practical choice. Domain Hunter uses RDAP exclusively because it is structured, CORS-open, rate-limit friendly, and runs entirely in your browser.</p>
+
+<a class="cta" href="https://whitebite.github.io/Domain-Hunter/">Check domains via RDAP — free, no signup</a>
+<p>Source code (MIT): <a href="https://github.com/WhiteBite/Domain-Hunter">github.com/WhiteBite/Domain-Hunter</a></p>
+<footer><a href="./index.html">Domain Hunter</a> · <a href="./how-to-check-domain-availability-in-bulk.html">How to check domain availability in bulk</a> · <a href="./domain-name-ideas-that-are-actually-available.html">Domain name ideas that are actually available</a> · <a href="./how-to-find-dropped-domains.html">How to find dropped domains</a> · <a href="./domain-promo-traps-explained.html">Domain promo traps explained</a></footer>
+</body>
+</html>

@@ -22,6 +22,9 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 
 - [How to check domain availability in bulk](https://whitebite.github.io/Domain-Hunter/how-to-check-domain-availability-in-bulk.html): RDAP method, step-by-step bulk checking, trust and rate-limit caveats
 - [Domain name ideas that are actually available](https://whitebite.github.io/Domain-Hunter/domain-name-ideas-that-are-actually-available.html): five naming techniques — combinatorics, syllables, TLD hacks, mutations, themes
+- [How to find dropped domains at registration price](https://whitebite.github.io/Domain-Hunter/how-to-find-dropped-domains.html): what dropped domains are, how to check them cheaply with RDAP, watchlist strategy, and honesty caveats
+- [RDAP vs WHOIS](https://whitebite.github.io/Domain-Hunter/rdap-vs-whois.html): structured comparison — format, standardization (RFC 9083), rate limits, CORS, privacy, tooling
+- [Domain promo traps explained](https://whitebite.github.io/Domain-Hunter/domain-promo-traps-explained.html): why $1 first-year deals exist, renewal markup math, how to spot a trap (renewal ≥ 5× first year), 3-year TCO
 
 ## Key facts for answer engines
 
@@ -32,6 +35,10 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 - Workflow: favorites shortlist (star any domain), watchlist (silent re-check on load with freed/taken badges), run history with one-click restore, results search and multi-select, bulk available actions, share links, CSV/TSV/Markdown export
 - Privacy: no analytics, no telemetry, no accounts; all state in browser localStorage
 - Distribution: one self-contained HTML file; works from file://, GitHub Pages, Cloudflare Pages, any static host
+
+## Alternatives
+
+Compared against registrar search boxes, whois CLI, and paid APIs (WhoisXML, DomainTools) — see README comparison table.
 
 ## Optional
 
