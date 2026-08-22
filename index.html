@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      // GitHub Pages can't set CSP frame-ancestors via meta — bust frames in JS.
+      try { if (window.top !== window.self) window.top.location.replace(window.location.href); } catch (_) {}
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta

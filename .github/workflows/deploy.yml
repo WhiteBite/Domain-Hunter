@@ -3,6 +3,10 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'src/config/pricing.snapshot.json'
+      - 'src/config/dropped.snapshot.json'
+      - 'src/config/price-history.json'
   workflow_dispatch:
 
 permissions:

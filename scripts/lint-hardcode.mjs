@@ -104,6 +104,7 @@ const ZONE_ALLOWLIST_FILES = new Set([
   'src/i18n/locales.ts',                     // locale codes ('en', 'ru', 'es', …) — not zones
   'src/ui/components/ResultsTable.svelte',   // status legend literals ('available', 'taken', …) — statuses, not zones
   'src/ui/components/LegendPopover.svelte',   // status legend variants ('available', 'probably', …) — statuses, not zones
+  'src/ui/share.ts',                          // share-link whitelist literals ('all','available','taken','problems' / sort keys) — enum values, not zones
 ]);
 
 // ---------------------------------------------------------------------------
