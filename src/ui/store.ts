@@ -92,6 +92,76 @@ export const exportRows = writable<ExportRow[]>([]);
  */
 export const requestFavoritesView = writable<boolean>(false);
 
+// ---- Results view persistence (SPEC §5 dh:v1:resultsview) ----
+
+/** View fields restorable from a share link. nulls = absent (backward
+ *  compatible with old links that carry only q/tlds/run). */
+export interface SharedView {
+  filter: 'all' | 'available' | 'taken' | 'problems' | null;
+  sortKey: 'name' | 'price' | 'renew' | 'tco' | null;
+  sortDir: 'asc' | 'desc' | null;
+  query: string;
+}
+
+/** One-shot bridge: CheckTab stashes parsed share-link view fields here;
+ *  ResultsTable consumes them once on mount, then clears the store. */
+export const sharedView = writable<SharedView | null>(null);
+
+/** Shape persisted to dh:v1:resultsview. */
+export interface ResultsView {
+  v: 1;
+  filter: 'all' | 'available' | 'taken' | 'problems' | 'favorites';
+  sortKey: 'name' | 'price' | 'renew' | 'tco' | 'status';
+  sortDir: 'asc' | 'desc';
+  budget: number;
+  hideTraps: boolean;
+}
+
+const RESULTS_VIEW_KEY = 'dh:v1:resultsview';
+
+/** Read persisted results view from localStorage. Returns null on any
+ *  parse/validation failure (never throws). */
+export function loadResultsView(): ResultsView | null {
+  try {
+    const raw = localStorage.getItem(RESULTS_VIEW_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<ResultsView>;
+    if (parsed.v !== 1) return null;
+    const filter = parsed.filter;
+    const sortKey = parsed.sortKey;
+    const sortDir = parsed.sortDir;
+    const budget = typeof parsed.budget === 'number' ? parsed.budget : 0;
+    const hideTraps = typeof parsed.hideTraps === 'boolean' ? parsed.hideTraps : false;
+    if (
+      filter !== 'all' && filter !== 'available' && filter !== 'taken' &&
+      filter !== 'problems' && filter !== 'favorites'
+    ) return null;
+    if (
+      sortKey !== 'name' && sortKey !== 'price' && sortKey !== 'renew' &&
+      sortKey !== 'tco' && sortKey !== 'status'
+    ) return null;
+    if (sortDir !== 'asc' && sortDir !== 'desc') return null;
+    return { v: 1, filter, sortKey, sortDir, budget, hideTraps };
+  } catch {
+    return null;
+  }
+}
+
+let resultsViewTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Debounced (~300ms) write of the results view to localStorage. */
+export function saveResultsView(view: ResultsView): void {
+  if (resultsViewTimer != null) clearTimeout(resultsViewTimer);
+  resultsViewTimer = setTimeout(() => {
+    resultsViewTimer = null;
+    try {
+      localStorage.setItem(RESULTS_VIEW_KEY, JSON.stringify(view));
+    } catch {
+      // storage unavailable — non-fatal
+    }
+  }, 300);
+}
+
 // ---- Generator candidate tray (survives tab switches, persisted) ----
 
 const GEN_TRAY_KEY = 'dh:v1:gentray';

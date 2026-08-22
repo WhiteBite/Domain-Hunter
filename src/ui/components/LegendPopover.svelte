@@ -54,6 +54,16 @@
           <span class="legend-desc">{t(item.descKey)}</span>
         </div>
       {/each}
+      <div class="legend-divider" aria-hidden="true"></div>
+      <div class="legend-shortcuts">
+        <span class="legend-name legend-section-title">{t('results.shortcuts.title')}</span>
+        <ul class="shortcut-list">
+          <li><kbd>/</kbd> <span>{t('results.shortcuts.search')}</span></li>
+          <li><kbd>1–5</kbd> <span>{t('results.shortcuts.filters')}</span></li>
+          <li><kbd>s</kbd> <span>{t('results.shortcuts.sortCycle')}</span></li>
+          <li><kbd>S</kbd> <span>{t('results.shortcuts.sortDir')}</span></li>
+        </ul>
+      </div>
     </div>
   {/if}
 </div>
@@ -128,6 +138,50 @@
     font-size: var(--text-xs);
     color: var(--text-secondary);
     line-height: 1.4;
+  }
+  .legend-divider {
+    height: 1px;
+    background: var(--border);
+    margin: var(--space-1) 0;
+  }
+  .legend-shortcuts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .legend-section-title {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-1);
+  }
+  .shortcut-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .shortcut-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+  .shortcut-list kbd {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    line-height: 1;
+    padding: 2px 5px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-sunken);
+    color: var(--text-tertiary);
+    min-width: 20px;
+    text-align: center;
   }
   /* Shared .action-btn (+ :hover, svg) lives in src/ui/chrome.css. */
 </style>

@@ -993,4 +993,127 @@ test.describe('Check tab', () => {
     // Lastrun domain (google.com) is NOT restored into results.
     await expect(row(page, 'google.com')).toHaveCount(0);
   });
+
+  // 34. budget filter reduces rows to those at or below the max price
+  test('34. budget filter reduces rows by first-year price', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, []);
+    await bootCheckTab(page);
+    // Clear TLDs, select com + xyz (com cheapest=$10.44, xyz cheapest=$2.04).
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
+    await page.locator('[data-testid="tld-button-clear"]').click();
+    await page.locator('[data-testid="tld-chip-com"]').click();
+    await page.locator('[data-testid="tld-chip-xyz"]').click();
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
+    await runCheck(page, 'zzqxtest1.com\nzzqxtest1.xyz');
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+    await expect(row(page, 'zzqxtest1.xyz')).toBeVisible();
+    // Set budget to $5 → 500 cents. com (1044) excluded, xyz (204) kept.
+    await page.locator('[data-testid="results-budget-input"]').fill('5');
+    await expect(row(page, 'zzqxtest1.xyz')).toBeVisible();
+    await expect(row(page, 'zzqxtest1.com')).toBeHidden();
+    // Clear budget → both visible again.
+    await page.locator('[data-testid="results-budget-input"]').fill('');
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+    await expect(row(page, 'zzqxtest1.xyz')).toBeVisible();
+  });
+
+  // 35. hide promo traps toggle hides trap rows and shows count
+  test('35. hide promo traps toggle hides trap rows', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, []);
+    await bootCheckTab(page);
+    // Clear TLDs, select com + xyz. xyz porkbun: reg=204 renew=1298 (6.36× → trap).
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
+    await page.locator('[data-testid="tld-button-clear"]').click();
+    await page.locator('[data-testid="tld-chip-com"]').click();
+    await page.locator('[data-testid="tld-chip-xyz"]').click();
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
+    await runCheck(page, 'zzqxtest1.com\nzzqxtest1.xyz');
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+    await expect(row(page, 'zzqxtest1.xyz')).toBeVisible();
+    // Verify xyz has a trap chip.
+    await expect(row(page, 'zzqxtest1.xyz').locator('[data-testid="results-chip-trap-zzqxtest1-xyz"]')).toBeVisible();
+    // Toggle hide traps on.
+    await page.locator('[data-testid="results-hide-traps"]').click();
+    // xyz (trap) hidden, com (not trap) still visible.
+    await expect(row(page, 'zzqxtest1.xyz')).toBeHidden();
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+    // Toggle off → both visible again.
+    await page.locator('[data-testid="results-hide-traps"]').click();
+    await expect(row(page, 'zzqxtest1.xyz')).toBeVisible();
+  });
+
+  // 36. select-all-matching appears when sorted > visible and selects all
+  test('36. select all matching appears and selects all sorted rows', async ({ page }) => {
+    await setupBaseMocks(page);
+    // Seed 101 cache entries + lastrun so results restore instantly on boot
+    // (avoids a slow 101-domain run that would hit Verisign's rate limit).
+    const names = Array.from({ length: 101 }, (_, i) => `zzqxtest${i}.com`);
+    const now = Date.now();
+    const cache: Record<string, { status: string; source: string; ts: number; tld: string }> = {};
+    for (const name of names) {
+      cache[name] = { status: 'available', source: 'rdap', ts: now, tld: 'com' };
+    }
+    await bootCheckTab(page, {
+      'dh:v1:cache': cache,
+      'dh:v1:lastrun': {
+        input: names.join('\n'),
+        tlds: ['com'],
+        candidates: names,
+        ts: now,
+      },
+    });
+    await expect(row(page, 'zzqxtest0.com')).toBeVisible({ timeout: 10_000 });
+    // The select-all-matching link should be visible (101 sorted > 100 visible).
+    const selectAllLink = page.locator('[data-testid="results-select-all-matching"]');
+    await expect(selectAllLink).toBeVisible();
+    // Click it — all 101 sorted rows should be selected.
+    await selectAllLink.click();
+    // Verify a sample of rows are selected (checkbox checked).
+    const checkbox0 = page.locator('[data-testid="results-row-select-zzqxtest0-com"]');
+    await expect(checkbox0).toBeChecked();
+    const checkbox50 = page.locator('[data-testid="results-row-select-zzqxtest50-com"]');
+    await expect(checkbox50).toBeChecked();
+  });
+
+  // 37. export menu: copy as JSON puts parseable JSON on the clipboard
+  test('37. export menu copy-json puts dh-results-v1 JSON on the clipboard', async ({ page, context }) => {
+    await grantClipboard(context);
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com\nzzqxtest1.com');
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+
+    await page.locator('[data-testid="check-button-export-menu"]').click();
+    await page.locator('[data-testid="check-export-copy-json"]').click();
+    const clip = await readClipboard(page);
+    const parsed = JSON.parse(clip) as { schema: string; rows: Array<Record<string, unknown>> };
+    expect(parsed.schema).toBe('dh-results-v1');
+    expect(parsed.rows.length).toBe(2);
+    const domains = parsed.rows.map((r) => r.domain);
+    expect(domains).toContain('google.com');
+    expect(domains).toContain('zzqxtest1.com');
+  });
+
+  // 38. download JSON button downloads a domains.json file with the schema
+  test('38. download JSON button downloads domains.json with dh-results-v1', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await bootCheckTab(page);
+    await runCheck(page, 'google.com\nzzqxtest1.com');
+    await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.locator('[data-testid="check-button-download-json"]').click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe('domains.json');
+    const path = await download.path();
+    expect(path).not.toBeNull();
+    const content = readFileSync(path!, 'utf8');
+    const parsed = JSON.parse(content) as { schema: string; rows: Array<Record<string, unknown>> };
+    expect(parsed.schema).toBe('dh-results-v1');
+    expect(parsed.rows.length).toBe(2);
+  });
 });

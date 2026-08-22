@@ -1,7 +1,7 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
-  import { results, settings, pricing, registry, runState, exportRows, requestFavoritesView } from '../store';
+  import { results, settings, pricing, registry, runState, exportRows, requestFavoritesView, sharedView, loadResultsView, saveResultsView, type ResultsView } from '../store';
   import type { CheckResult, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
   import {
     bestEntry,
@@ -28,6 +28,7 @@
   import { registrarMonogram } from '../registrar-badge';
   import { applyAffiliate } from '../affiliate';
   import { REGISTRAR_ICONS } from '../registrar-icons';
+  import { applyViewFilters, displayToUsdCents, type FilterKey } from '../table-filters';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
   import RowMenu from './RowMenu.svelte';
@@ -46,7 +47,6 @@
 
   const registrars = registrarsJson as unknown as RegistrarConfig[];
 
-  type FilterKey = 'all' | 'available' | 'taken' | 'problems' | 'favorites';
   type SortKey = 'name' | 'price' | 'renew' | 'tco' | 'status';
   type SortDir = 'asc' | 'desc';
 
@@ -63,6 +63,14 @@
   const MAX_RECHECKS = 3;
   let query = $state('');
   let selected = $state<Set<string>>(new Set());
+  /** Budget filter input value (display currency). 0/empty = inactive. */
+  let budgetInput = $state('');
+  /** Budget in USD cents (converted from budgetInput via settings.rates).
+   *  0 = inactive. Recomputed in the filtered derived. */
+  let hideTraps = $state(false);
+  /** True while restoring persisted/shared view — suppresses the
+   *  auto-tco-on-available $effect so it only fires on manual changes. */
+  let restoring = false;
 
   // Row overflow menu: only one open at a time (keyed by domain).
   let menuFor = $state<string | null>(null);
@@ -75,19 +83,101 @@
   let searchEl: HTMLInputElement | null = $state(null);
 
   function onKeydown(e: KeyboardEvent): void {
-    // "/" focuses the results search (unless typing in a form control).
+    // Ignore shortcuts when typing in a form control, composing (IME), or
+    // when a menu/detail popover is open (menuFor/detailFor set).
+    const target = e.target as HTMLElement | null;
+    const tag = target?.tagName.toLowerCase();
+    const inForm = tag === 'input' || tag === 'textarea' || tag === 'select';
+    const menuOpen = menuFor != null || detailFor != null;
+    if (e.isComposing || inForm || menuOpen) {
+      // "/" still works from the search box itself — but only if not in a
+      // different form control. Let the search input's own "/" pass.
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey && tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
+        // fall through to focus search
+      } else {
+        return;
+      }
+    }
+
+    // "/" focuses the results search.
     if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      const target = e.target as HTMLElement | null;
-      const tag = target?.tagName.toLowerCase();
-      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
       e.preventDefault();
       searchEl?.focus();
       searchEl?.select();
+      return;
+    }
+
+    // Don't interfere with modifier combos (Ctrl+s, Cmd+s, etc.).
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    // Digits 1-5 → switch filter.
+    if (e.key >= '1' && e.key <= '5') {
+      e.preventDefault();
+      const filters: FilterKey[] = ['all', 'available', 'taken', 'problems', 'favorites'];
+      const idx = parseInt(e.key, 10) - 1;
+      filter = filters[idx] ?? 'all';
+      return;
+    }
+
+    // 's' cycles sortKey: name → price → renew → tco → status → name.
+    if (e.key === 's' && !e.shiftKey) {
+      e.preventDefault();
+      const cycle: SortKey[] = ['name', 'price', 'renew', 'tco', 'status'];
+      const idx = cycle.indexOf(sortKey);
+      sortKey = cycle[(idx + 1) % cycle.length] ?? 'name';
+      return;
+    }
+
+    // 'S' (shift+s) toggles sort direction.
+    if ((e.key === 'S' || e.key === 's') && e.shiftKey) {
+      e.preventDefault();
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      return;
     }
   }
 
   onMount(() => {
     document.addEventListener('keydown', onKeydown);
+
+    // Restore persisted results view BEFORE first render where possible.
+    // The restoring flag suppresses the auto-tco-on-available $effect so
+    // a saved 'available' filter keeps its saved sortKey.
+    restoring = true;
+    const saved = loadResultsView();
+    if (saved) {
+      filter = saved.filter;
+      sortKey = saved.sortKey;
+      sortDir = saved.sortDir;
+      hideTraps = saved.hideTraps;
+      // Budget is stored as USD cents; convert back to display currency
+      // for the input. USD: cents/100; RUB/EUR: cents/100 × rate.
+      if (saved.budget > 0) {
+        const usd = saved.budget / 100;
+        let display = usd;
+        if ($settings.currency === 'RUB') display = usd * $settings.rates.RUB;
+        else if ($settings.currency === 'EUR') display = usd * $settings.rates.EUR;
+        // Round to 2 decimals to avoid float noise in the input.
+        budgetInput = (Math.round(display * 100) / 100).toString();
+      }
+    }
+
+    // Consume shared view from a share link (one-shot). CheckTab stashes
+    // parsed share fields into the sharedView store; we apply them here.
+    const shared = get(sharedView);
+    if (shared) {
+      if (shared.filter) filter = shared.filter;
+      if (shared.sortKey) sortKey = shared.sortKey;
+      if (shared.sortDir) sortDir = shared.sortDir;
+      if (shared.query) query = shared.query;
+      sharedView.set(null);
+    }
+
+    // Clear restoring on the next microtask so the $effects that depend
+    // on filter/sortKey/sortDir see the restored values without the
+    // auto-tco override firing.
+    setTimeout(() => {
+      restoring = false;
+    }, 0);
   });
 
   onDestroy(() => {
@@ -140,36 +230,22 @@
     return arr;
   });
 
-  const filtered = $derived.by(() => {
-    let arr: RowData[];
-    switch (filter) {
-      case 'available':
-        arr = rows.filter(
-          (r) =>
-            r.result.status === 'available' ||
-            r.result.status === 'probably_available',
-        );
-        break;
-      case 'taken':
-        arr = rows.filter((r) => r.result.status === 'taken');
-        break;
-      case 'problems':
-        arr = rows.filter(
-          (r) => r.result.status === 'unknown' || r.result.status === 'error',
-        );
-        break;
-      case 'favorites':
-        arr = rows.filter((r) => $favorites.has(r.result.domain));
-        break;
-      default:
-        arr = rows;
-    }
-    const q = query.trim().toLowerCase();
-    if (q) {
-      arr = arr.filter((r) => r.result.domain.toLowerCase().includes(q));
-    }
-    return arr;
+  const filterResult = $derived.by(() => {
+    const budgetCents = displayToUsdCents(
+      parseFloat(budgetInput) || 0,
+      $settings,
+    );
+    return applyViewFilters(rows, {
+      filter,
+      query,
+      budgetCents,
+      hideTraps,
+      favorites: $favorites,
+    });
   });
+
+  const filtered = $derived(filterResult.rows);
+  const trapsHidden = $derived(filterResult.trapsHidden);
 
   const sorted = $derived.by(() => {
     const arr = [...filtered];
@@ -205,12 +281,35 @@
     visibleCount = 100;
     // When switching to the Available filter with the default name sort,
     // default to TCO sort (cheapest total cost first). Manual sorts are
-    // preserved: only the default 'name' sort is overridden.
-    if (filter === 'available' && prevFilter !== 'available' && sortKey === 'name') {
+    // preserved: only the default 'name' sort is overridden. Suppressed
+    // during restore so a persisted/shared 'available' filter doesn't
+    // clobber a saved sortKey.
+    if (filter === 'available' && prevFilter !== 'available' && sortKey === 'name' && !restoring) {
       sortKey = 'tco';
       sortDir = 'asc';
     }
     prevFilter = filter;
+  });
+
+  // Persist the results view (debounced ~300ms) on every change.
+  $effect(() => {
+    // Touch all reactive deps so the effect re-runs on any change.
+    void filter;
+    void sortKey;
+    void sortDir;
+    void budgetInput;
+    void hideTraps;
+    // Skip the initial run while restoring (the restore itself writes).
+    if (restoring) return;
+    const view: ResultsView = {
+      v: 1,
+      filter,
+      sortKey,
+      sortDir,
+      budget: displayToUsdCents(parseFloat(budgetInput) || 0, $settings),
+      hideTraps,
+    };
+    saveResultsView(view);
   });
 
   $effect(() => {
@@ -556,6 +655,20 @@
 
   const hasResults = $derived($results.size > 0);
 
+  /** Neutral skeleton rows for pending candidates while a run streams.
+   *  Pending domain names are not in the results store yet, so the rows are
+   *  name-less pulsing bars derived from total − done. Rendered after the
+   *  real rows, capped, aria-hidden, and never part of sorting/filtering/
+   *  selection/export (they live outside `visible`). Shown only in the
+   *  default view — a pending candidate's status is unknown, so skeletons
+   *  would mislead inside a status filter or a search result. */
+  const SKELETON_CAP = 20;
+  const skeletonCount = $derived(
+    $runState.phase === 'running' && filter === 'all' && query.trim() === ''
+      ? Math.min(Math.max($runState.total - $runState.done, 0), SKELETON_CAP)
+      : 0,
+  );
+
   /** Map domain -> WatchChip for O(1) row chip lookup. */
   const watchByDomain = $derived.by(() => {
     interface WatchChip {
@@ -626,6 +739,7 @@
       t('csv.priceFirstYear'),
       t('csv.priceRenewal'),
       t('csv.bestRegistrar'),
+      t('csv.buyUrl'),
       t('csv.checkedAt'),
     ];
     const csv = buildCsv(rows, headers);
@@ -695,9 +809,52 @@
         />
         <kbd class="search-kbd" aria-hidden="true">/</kbd>
       </div>
+      <div class="budget-wrap">
+        <input
+          class="budget-input"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder={t('results.budget.label')}
+          aria-label={t('results.budget.aria')}
+          title={t('results.budget.aria')}
+          bind:value={budgetInput}
+          data-testid="results-budget-input"
+        />
+      </div>
+      <button
+        class="filter toggle-btn"
+        class:active={hideTraps}
+        type="button"
+        aria-pressed={hideTraps}
+        aria-label={t('results.hideTraps.aria')}
+        title={t('results.hideTraps.aria')}
+        onclick={() => (hideTraps = !hideTraps)}
+        data-testid="results-hide-traps"
+      >
+        {#if hideTraps && trapsHidden > 0}
+          {t('results.hideTraps.count', { n: trapsHidden })}
+        {:else}
+          {t('results.hideTraps')}
+        {/if}
+      </button>
       <span class="count nums" aria-live="polite" data-testid="results-showing-count">
         {t('results.showing', { shown: visible.length, total: sorted.length })}
       </span>
+      {#if sorted.length > visible.length}
+        <button
+          class="action-small select-all-matching"
+          type="button"
+          onclick={() => {
+            selected = new Set(sorted.map((r) => r.result.domain));
+          }}
+          aria-label={t('results.selectAllMatching.aria')}
+          title={t('results.selectAllMatching.aria')}
+          data-testid="results-select-all-matching"
+        >
+          {t('results.selectAllMatching', { n: sorted.length })}
+        </button>
+      {/if}
       <LegendPopover />
       {#if selected.size > 0}
         <button class="action-small" type="button" onclick={async () => { await copyText([...selected].sort().join('\n')); selected = new Set(); }} data-testid="results-copy-selected">
@@ -828,7 +985,7 @@
             {@const sid = sanitizeId(row.result.domain)}
             {@const isExpanded = detailFor === row.result.domain}
             {@const quotes = registrarQuotes(row.result.tld, row.result.domain)}
-            <tr class="row-in" class:available={isAvail} class:error={isErr} data-testid={`results-row-${sid}`}>
+            <tr class="row-in" class:available={isAvail} class:error={isErr} class:row-taken={row.result.status === 'taken'} data-testid={`results-row-${sid}`}>
               <td class="select-cell">
                 <input
                   type="checkbox"
@@ -1076,6 +1233,18 @@
               />
             {/if}
           {/each}
+          {#if skeletonCount > 0}
+            {#each Array.from({ length: skeletonCount }, (v, i) => i) as si (`skel-${si}`)}
+              <tr class="skeleton-row" aria-hidden="true">
+                <td class="select-cell"><span class="skel-bar skel-check"></span></td>
+                <td class="domain-cell"><span class="skel-bar skel-domain"></span></td>
+                <td class="status-cell"><span class="skel-bar skel-status"></span></td>
+                <td class="price-cell"><span class="skel-bar skel-num"></span></td>
+                <td class="renew-cell"><span class="skel-bar skel-num"></span></td>
+                <td class="actions-cell"><span class="skel-bar skel-action"></span></td>
+              </tr>
+            {/each}
+          {/if}
         </tbody>
       </table>
       <div bind:this={sentinelEl} class="sentinel" aria-hidden="true"></div>
@@ -1236,16 +1405,16 @@
     transition: background var(--dur) var(--ease);
     animation: dh-row-in 160ms var(--ease);
   }
-  tbody tr:nth-child(even):not(.available):not(.error):not(.detail-row) {
+  tbody tr:nth-child(even):not(.available):not(.error):not(.detail-row):not(.skeleton-row) {
     background: color-mix(in srgb, var(--bg-sunken) 55%, transparent);
   }
-  tbody tr:nth-child(even):hover {
+  tbody tr:nth-child(even):not(.skeleton-row):hover {
     background: var(--bg-sunken);
   }
   tbody tr:last-child {
     border-bottom: none;
   }
-  tbody tr:hover {
+  tbody tr:not(.skeleton-row):hover {
     background: var(--bg-sunken);
   }
   tr.available {
@@ -1262,6 +1431,66 @@
   tr.error:hover {
     background: color-mix(in srgb, var(--row-tint-error) 60%, var(--bg-sunken));
   }
+
+  /* ---- Taken rows: the price budget is unactionable (the domain can't be
+     bought) — dim prices to a neutral tone and hide registrar badges and
+     promo/premium chips. Status badge and actions are kept. ---- */
+  tr.row-taken .price,
+  tr.row-taken .price-strike,
+  tr.row-taken .renew {
+    color: var(--text-tertiary) !important; /* overrides inline tier colors */
+  }
+  tr.row-taken .price-stack .reg-badge,
+  tr.row-taken .renew-line .reg-badge,
+  tr.row-taken .price-stack .chip-tag,
+  tr.row-taken .price-stack .coupon {
+    display: none;
+  }
+
+  /* ---- Pending-candidate skeleton rows (streaming runs). Name-less pulsing
+     bars standing in for candidates that have not reported yet; decorative
+     only (aria-hidden, pointer-events off). ---- */
+  tr.skeleton-row {
+    animation: none;
+    pointer-events: none;
+  }
+  .skel-bar {
+    display: block;
+    height: 10px;
+    border-radius: var(--radius-full);
+    background: var(--border-strong);
+    animation: dh-skel-pulse 1.2s var(--ease) infinite;
+  }
+  .skel-check {
+    width: 14px;
+    height: 14px;
+    border-radius: var(--radius-sm);
+  }
+  .skel-domain {
+    width: 160px;
+    max-width: 100%;
+  }
+  .skel-status {
+    width: 72px;
+  }
+  .skel-num {
+    width: 48px;
+    margin-left: auto;
+  }
+  .skel-action {
+    width: 64px;
+    margin-left: auto;
+  }
+  @keyframes dh-skel-pulse {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+
   /* ---- Mobile: rows become stacked cards (no horizontal-scroll clipping).
      Card backgrounds are OPAQUE (row tint mixed over --bg-elevated via
      color-mix) so nothing bleeds through. ---- */
@@ -1319,6 +1548,31 @@
     tbody tr.row-in > td {
       padding: 0;
       background: transparent;
+    }
+    /* Skeleton rows become simple cards with a check + name + status bar. */
+    tbody tr.skeleton-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3);
+      margin-bottom: var(--space-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+    }
+    tbody tr.skeleton-row > td {
+      padding: 0;
+      background: transparent;
+    }
+    tbody tr.skeleton-row td:nth-child(2) {
+      flex: 1;
+    }
+    /* Price/renewal/action bars are redundant in the narrow card. */
+    tbody tr.skeleton-row td:nth-child(n + 4) {
+      display: none;
+    }
+    .skel-domain {
+      width: 100%;
     }
     td.select-cell {
       grid-area: select;
@@ -1550,6 +1804,36 @@
     color: var(--text-tertiary);
     pointer-events: none;
     user-select: none;
+  }
+
+  .budget-wrap {
+    display: inline-flex;
+    align-items: center;
+  }
+  .budget-input {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    min-height: 32px;
+    background: var(--bg-elevated);
+    width: 100px;
+    color: var(--text);
+    text-align: right;
+  }
+  .budget-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  /* Hide the number spinner for a cleaner pill look. */
+  .budget-input::-webkit-inner-spin-button,
+  .budget-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .budget-input {
+    -moz-appearance: textfield;
+    appearance: textfield;
   }
 
   .action-small {

@@ -36,6 +36,8 @@ export const ALL_TESTIDS = [
   'check-export-copy-csv', // export menu: copy as CSV
   'check-export-copy-md', // export menu: copy as Markdown
   'check-export-copy-tsv', // export menu: copy as TSV
+  'check-export-copy-json', // export menu: copy as JSON
+  'check-button-download-json', // Check tab: download JSON file
   'check-hint-strip', // hint strip container (role=note)
   'check-panel-toggle', // left input panel collapse/expand toggle
   'check-history-toggle', // history section collapsible toggle
@@ -100,6 +102,9 @@ export const ALL_TESTIDS = [
   'results-watch-refresh', // watchlist refresh button (next to favorites filter)
   'results-premium-check', // bulk premium-price check toolbar button
   'results-premium-found', // chip showing found premium count after bulk check
+  'results-budget-input', // budget max-price number input
+  'results-hide-traps', // hide promo traps toggle button
+  'results-select-all-matching', // select all matching rows link button
 
   // ---- GeneratorsTab.svelte ----
   'gen-input-keywords', // keywords text input

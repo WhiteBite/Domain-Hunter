@@ -13,6 +13,7 @@ export const KEYS = {
   lastrun: 'dh:v1:lastrun',
   wordsets: 'dh:v1:wordsets',
   watch: 'dh:v1:watch',
+  resultsview: 'dh:v1:resultsview',
 } as const;
 
 export function loadSettings(): Settings {
