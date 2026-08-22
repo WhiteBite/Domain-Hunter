@@ -65,7 +65,7 @@ export const ru: Dict = {
   'check.progress.checked': 'Проверено {done} из {total}',
   'check.progress.available': 'Свободно: {n}',
   'check.progress.errors': 'Ошибок: {n}',
-  'check.progress.elapsed': '{s} с',
+  'check.progress.elapsed': '{s}',
 
   'results.title': 'Результаты',
   'results.empty.title': 'Пока ничего не проверено',
@@ -114,14 +114,13 @@ export const ru: Dict = {
   'check.history.title': 'История',
   'check.history.empty': 'Завершённых проверок пока нет.',
   'check.history.restore': 'Восстановить эту проверку',
-  'check.history.meta': '{names} имён · {zones} зон',
+  'check.history.meta': 'имён: {names} · зон: {zones}',
   'check.history.clear': 'Очистить историю',
   'check.panel.collapse': 'Свернуть панель ввода',
   'check.panel.expand': 'Развернуть панель ввода',
   'results.showAvailable': 'Показать свободные ({n})',
   'results.buy.at': 'Купить у {registrar} · {price}',
   'registrar.noDeeplink': 'У {registrar} нет публичной глубокой ссылки — кнопка откроет его поиск; домен нужно вставить вручную.',
-  'results.detail.loading': 'Запрашиваем данные регистраторов…',
   'results.detail.failed': 'По этому домену нет дополнительных данных.',
   'results.detail.premium': 'Премиум реестра ≈ {price}',
   'results.detail.cheapest': 'Сейчас дешевле всего: {registrar} · {price}',
@@ -282,6 +281,7 @@ export const ru: Dict = {
   'csv.priceRenewal': 'Продление',
   'csv.bestRegistrar': 'Самый дешёвый регистратор',
   'csv.checkedAt': 'Проверено',
+  'csv.buyUrl': 'Ссылка покупки',
 
   'check.history.toggle.aria': 'Показать/скрыть историю',
   'tld.picker.aria': 'Выбрать зоны',
@@ -309,6 +309,8 @@ export const ru: Dict = {
   'export.copyCsv': 'Скопировать CSV',
   'export.copyMd': 'Скопировать Markdown',
   'export.copyTsv': 'Скопировать таблицу (TSV)',
+  'export.copyJson': 'Скопировать JSON',
+  'export.downloadJson': 'Скачать JSON',
   'results.available.menu.aria': 'Действия со свободными доменами',
   'results.available.copy': 'Скопировать список',
   'results.available.fav': 'В избранное',
@@ -319,6 +321,19 @@ export const ru: Dict = {
   'results.premium.found': 'премиум: {n}',
   'results.premium.aria':
     'Запрашивает у DigMyName цены реестра на премиум для 20 самых дешёвых свободных доменов; для премиум-имён показывается реальная цена.',
+
+  'results.budget.label': 'макс $/год',
+  'results.budget.aria': 'Фильтр по максимальной цене первого года',
+  'results.hideTraps': 'Скрыть промо-ловушки',
+  'results.hideTraps.count': 'Скрыть промо-ловушки ({n})',
+  'results.hideTraps.aria': 'Скрыть строки с промо-ловушками',
+  'results.selectAllMatching': 'Выбрать все {n} совпадений',
+  'results.selectAllMatching.aria': 'Выбрать все строки по текущему фильтру и сортировке',
+  'results.shortcuts.title': 'Горячие клавиши',
+  'results.shortcuts.search': '/ — поиск',
+  'results.shortcuts.filters': '1–5 — переключить фильтр',
+  'results.shortcuts.sortCycle': 's — сменить сортировку',
+  'results.shortcuts.sortDir': 'S — изменить направление',
 
   'watch.banner': 'Обновление списка: {freed} освободилось, {taken} занято, {priceDrops} упали в цене',
   'watch.showFavs': 'Показать избранное',
@@ -345,4 +360,16 @@ export const ru: Dict = {
   'prices.hideUnpriced': 'Скрыть зоны без цен',
   'prices.hideUnpriced.aria':
     'Скрыть зоны без цены регистрации в видимых столбцах регистраторов',
+  'prices.col.renewal': 'Продление (лучшая цена)',
+  'prices.col.tco': 'За 3 года (лучшая цена)',
+  'prices.legend.band': 'Лучшие цены',
+  'prices.legend.band.tip':
+    'Столбцы «Продление» и «За 3 года» показывают лучшую цену среди всех регистраторов для каждой зоны.',
+  'prices.legend.dot': 'Дешевле всех',
+  'prices.legend.dot.tip': 'Зелёная точка отмечает минимальную цену первого года в строке.',
+  'prices.legend.trap': 'Промо-ловушка',
+  'prices.legend.trap.tip':
+    'Пунктирное подчёркивание — продление стоит в 5 и более раз дороже первого года.',
+  'prices.trends.coldstart':
+    'Тренды появятся, когда накопятся ежемесячные снимки цен — данных пока нет.',
 };

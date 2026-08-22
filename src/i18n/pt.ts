@@ -65,7 +65,7 @@ export const pt: Dict = {
   'check.progress.checked': 'Verificados {done} de {total}',
   'check.progress.available': '{n} disponíveis',
   'check.progress.errors': '{n} erros',
-  'check.progress.elapsed': '{s}s',
+  'check.progress.elapsed': '{s}',
 
   'results.title': 'Resultados',
   'results.empty.title': 'Nada verificado ainda',
@@ -114,14 +114,13 @@ export const pt: Dict = {
   'check.history.title': 'Histórico',
   'check.history.empty': 'Nenhuma verificação concluída ainda.',
   'check.history.restore': 'Restaurar esta verificação',
-  'check.history.meta': '{names} nomes · {zones} zonas',
+  'check.history.meta': 'nomes: {names} · zonas: {zones}',
   'check.history.clear': 'Limpar histórico',
   'check.panel.collapse': 'Recolher painel de entrada',
   'check.panel.expand': 'Expandir painel de entrada',
   'results.showAvailable': 'Mostrar disponíveis ({n})',
   'results.buy.at': 'Comprar em {registrar} · {price}',
   'registrar.noDeeplink': '{registrar} não tem link profundo público — o botão abre a página de busca; cole o domínio lá.',
-  'results.detail.loading': 'Buscando dados de registradores…',
   'results.detail.failed': 'Nenhum dado adicional disponível para este domínio.',
   'results.detail.premium': 'Premium do registro ≈ {price}',
   'results.detail.cheapest': 'Mais barato agora: {registrar} · {price}',
@@ -281,6 +280,7 @@ export const pt: Dict = {
   'csv.priceRenewal': 'Renovação',
   'csv.bestRegistrar': 'Registrador mais barato',
   'csv.checkedAt': 'Verificado em',
+  'csv.buyUrl': 'URL de compra',
 
   'check.history.toggle.aria': 'Mostrar/ocultar histórico',
   'tld.picker.aria': 'Selecionar zonas',
@@ -308,6 +308,8 @@ export const pt: Dict = {
   'export.copyCsv': 'Copiar como CSV',
   'export.copyMd': 'Copiar como Markdown',
   'export.copyTsv': 'Copiar como TSV',
+  'export.copyJson': 'Copiar como JSON',
+  'export.downloadJson': 'Baixar JSON',
   'results.available.menu.aria': 'Ações de domínios disponíveis',
   'results.available.copy': 'Copiar lista de disponíveis',
   'results.available.fav': 'Adicionar todos aos favoritos',
@@ -318,6 +320,19 @@ export const pt: Dict = {
   'results.premium.found': 'premium: {n}',
   'results.premium.aria':
     'Pede ao DigMyName os preços premium do registro de até 20 domínios disponíveis mais baratos; nomes premium mostram seu preço real.',
+
+  'results.budget.label': 'máx $/ano',
+  'results.budget.aria': 'Filtro de preço máximo do primeiro ano',
+  'results.hideTraps': 'Ocultar armadilhas promocionais',
+  'results.hideTraps.count': 'Ocultar armadilhas promocionais ({n})',
+  'results.hideTraps.aria': 'Alternar ocultação de linhas com armadilha promocional',
+  'results.selectAllMatching': 'Selecionar os {n} correspondentes',
+  'results.selectAllMatching.aria': 'Selecionar todas as linhas que correspondem ao filtro e ordenação atuais',
+  'results.shortcuts.title': 'Atalhos',
+  'results.shortcuts.search': '/ — buscar',
+  'results.shortcuts.filters': '1–5 — trocar filtro',
+  'results.shortcuts.sortCycle': 's — rotacionar ordenação',
+  'results.shortcuts.sortDir': 'S — inverter direção',
 
   'watch.banner': 'Atualização da lista: {freed} livres, {taken} ocupados, {priceDrops} baixaram de preço',
   'watch.showFavs': 'Mostrar favoritos',
@@ -344,4 +359,16 @@ export const pt: Dict = {
   'prices.hideUnpriced': 'Ocultar zonas sem preço',
   'prices.hideUnpriced.aria':
     'Ocultar zonas sem preço de registro nas colunas de registradores visíveis',
+  'prices.col.renewal': 'Renovação (mais barata)',
+  'prices.col.tco': '3 anos (mais barato)',
+  'prices.legend.band': 'Colunas do melhor preço',
+  'prices.legend.band.tip':
+    'As colunas de renovação e 3 anos mostram o melhor preço entre todos os registradores de cada zona.',
+  'prices.legend.dot': 'Registrador mais barato',
+  'prices.legend.dot.tip': 'O ponto verde marca o menor preço de primeiro ano da linha.',
+  'prices.legend.trap': 'Armadilha promocional',
+  'prices.legend.trap.tip':
+    'Sublinhado pontilhado — a renovação custa 5× ou mais o preço do primeiro ano.',
+  'prices.trends.coldstart':
+    'As tendências aparecem quando snapshots mensais de preços se acumulam — nenhum coletado ainda.',
 };

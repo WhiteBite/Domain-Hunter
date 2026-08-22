@@ -65,7 +65,7 @@ export const de: Dict = {
   'check.progress.checked': '{done} von {total} geprüft',
   'check.progress.available': '{n} verfügbar',
   'check.progress.errors': '{n} Fehler',
-  'check.progress.elapsed': '{s}s',
+  'check.progress.elapsed': '{s}',
 
   'results.title': 'Ergebnisse',
   'results.empty.title': 'Noch nichts geprüft',
@@ -114,14 +114,13 @@ export const de: Dict = {
   'check.history.title': 'Verlauf',
   'check.history.empty': 'Noch keine abgeschlossenen Prüfungen.',
   'check.history.restore': 'Diese Prüfung wiederherstellen',
-  'check.history.meta': '{names} Namen · {zones} Zonen',
+  'check.history.meta': 'Namen: {names} · Zonen: {zones}',
   'check.history.clear': 'Verlauf löschen',
   'check.panel.collapse': 'Eingabebereich einklappen',
   'check.panel.expand': 'Eingabebereich ausklappen',
   'results.showAvailable': 'Verfügbare anzeigen ({n})',
   'results.buy.at': 'Bei {registrar} kaufen · {price}',
   'registrar.noDeeplink': '{registrar} hat keinen öffentlichen Deep-Link — die Schaltfläche öffnet seine Suchseite; fügen Sie die Domain dort ein.',
-  'results.detail.loading': 'Registrar-Daten werden abgerufen…',
   'results.detail.failed': 'Keine Zusatzdaten für diese Domain verfügbar.',
   'results.detail.premium': 'Registry-Premium ≈ {price}',
   'results.detail.cheapest': 'Jetzt am günstigsten: {registrar} · {price}',
@@ -281,6 +280,7 @@ export const de: Dict = {
   'csv.priceRenewal': 'Verlängerung',
   'csv.bestRegistrar': 'Günstigster Registrar',
   'csv.checkedAt': 'Geprüft am',
+  'csv.buyUrl': 'Kauf-URL',
 
   'check.history.toggle.aria': 'Verlauf ein/ausklappen',
   'tld.picker.aria': 'Zonen wählen',
@@ -308,6 +308,8 @@ export const de: Dict = {
   'export.copyCsv': 'Als CSV kopieren',
   'export.copyMd': 'Als Markdown kopieren',
   'export.copyTsv': 'Als TSV kopieren',
+  'export.copyJson': 'Als JSON kopieren',
+  'export.downloadJson': 'JSON herunterladen',
   'results.available.menu.aria': 'Aktionen für verfügbare Domains',
   'results.available.copy': 'Verfügbare Liste kopieren',
   'results.available.fav': 'Alle zu Favoriten hinzufügen',
@@ -318,6 +320,19 @@ export const de: Dict = {
   'results.premium.found': 'Premium: {n}',
   'results.premium.aria':
     'Fragt DigMyName nach Registry-Premium-Preisen für bis zu 20 der günstigsten verfügbaren Domains; Premium-Namen zeigen ihren echten Preis.',
+
+  'results.budget.label': 'max $/Jahr',
+  'results.budget.aria': 'Filter für maximalen Preis im ersten Jahr',
+  'results.hideTraps': 'Promo-Fallen ausblenden',
+  'results.hideTraps.count': 'Promo-Fallen ausblenden ({n})',
+  'results.hideTraps.aria': 'Ausblenden von Promo-Fallen-Zeilen umschalten',
+  'results.selectAllMatching': 'Alle {n} Treffer auswählen',
+  'results.selectAllMatching.aria': 'Alle Zeilen auswählen, die dem aktuellen Filter und Sortierung entsprechen',
+  'results.shortcuts.title': 'Tastenkürzel',
+  'results.shortcuts.search': '/ — Suche',
+  'results.shortcuts.filters': '1–5 — Filter wechseln',
+  'results.shortcuts.sortCycle': 's — Sortierung rotieren',
+  'results.shortcuts.sortDir': 'S — Sortierrichtung umschalten',
 
   'watch.banner': 'Watchlist-Update: {freed} frei, {taken} belegt, {priceDrops} Preisrückgänge',
   'watch.showFavs': 'Favoriten anzeigen',
@@ -344,4 +359,16 @@ export const de: Dict = {
   'prices.hideUnpriced': 'Zonen ohne Preise ausblenden',
   'prices.hideUnpriced.aria':
     'Zonen ohne Registrierungspreis in den sichtbaren Registrar-Spalten ausblenden',
+  'prices.col.renewal': 'Verlängerung (günstigste)',
+  'prices.col.tco': '3 Jahre (günstigste)',
+  'prices.legend.band': 'Günstigste Spalten',
+  'prices.legend.band.tip':
+    'Die Spalten „Verlängerung“ und „3 Jahre“ zeigen den besten Preis aller Registrare pro Zone.',
+  'prices.legend.dot': 'Günstigster Registrar',
+  'prices.legend.dot.tip': 'Der grüne Punkt markiert den niedrigsten Erstjahrespreis der Zeile.',
+  'prices.legend.trap': 'Promo-Falle',
+  'prices.legend.trap.tip':
+    'Gestrichelte Unterstreichung — die Verlängerung kostet das Fünffache oder mehr des Erstjahrespreises.',
+  'prices.trends.coldstart':
+    'Trends erscheinen, sobald monatliche Preis-Snapshots gesammelt wurden — noch keine vorhanden.',
 };

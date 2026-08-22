@@ -65,7 +65,7 @@ export const es: Dict = {
   'check.progress.checked': 'Comprobados {done} de {total}',
   'check.progress.available': '{n} disponibles',
   'check.progress.errors': '{n} errores',
-  'check.progress.elapsed': '{s}s',
+  'check.progress.elapsed': '{s}',
 
   'results.title': 'Resultados',
   'results.empty.title': 'Aún no se ha comprobado nada',
@@ -114,14 +114,13 @@ export const es: Dict = {
   'check.history.title': 'Historial',
   'check.history.empty': 'Aún no hay comprobaciones completadas.',
   'check.history.restore': 'Restaurar esta comprobación',
-  'check.history.meta': '{names} nombres · {zones} zonas',
+  'check.history.meta': 'nombres: {names} · zonas: {zones}',
   'check.history.clear': 'Limpiar historial',
   'check.panel.collapse': 'Contraer panel de entrada',
   'check.panel.expand': 'Expandir panel de entrada',
   'results.showAvailable': 'Mostrar disponibles ({n})',
   'results.buy.at': 'Comprar en {registrar} · {price}',
   'registrar.noDeeplink': '{registrar} no tiene enlace profundo público — el botón abre su página de búsqueda; pega el dominio allí.',
-  'results.detail.loading': 'Obteniendo datos de registradores…',
   'results.detail.failed': 'No hay datos adicionales para este dominio.',
   'results.detail.premium': 'Premium del registro ≈ {price}',
   'results.detail.cheapest': 'Más barato ahora: {registrar} · {price}',
@@ -281,6 +280,7 @@ export const es: Dict = {
   'csv.priceRenewal': 'Renovación',
   'csv.bestRegistrar': 'Registrador más barato',
   'csv.checkedAt': 'Comprobado el',
+  'csv.buyUrl': 'URL de compra',
 
   'check.history.toggle.aria': 'Mostrar/ocultar historial',
   'tld.picker.aria': 'Seleccionar zonas',
@@ -308,6 +308,8 @@ export const es: Dict = {
   'export.copyCsv': 'Copiar como CSV',
   'export.copyMd': 'Copiar como Markdown',
   'export.copyTsv': 'Copiar como TSV',
+  'export.copyJson': 'Copiar como JSON',
+  'export.downloadJson': 'Descargar JSON',
   'results.available.menu.aria': 'Acciones de dominios disponibles',
   'results.available.copy': 'Copiar lista de disponibles',
   'results.available.fav': 'Añadir todos a favoritos',
@@ -318,6 +320,19 @@ export const es: Dict = {
   'results.premium.found': 'premium: {n}',
   'results.premium.aria':
     'Pide a DigMyName los precios premium del registro de hasta 20 dominios disponibles más baratos; los nombres premium muestran su precio real.',
+
+  'results.budget.label': 'máx $/año',
+  'results.budget.aria': 'Filtro de precio máximo del primer año',
+  'results.hideTraps': 'Ocultar trampas promocionales',
+  'results.hideTraps.count': 'Ocultar trampas promocionales ({n})',
+  'results.hideTraps.aria': 'Alternar ocultación de filas con trampa promocional',
+  'results.selectAllMatching': 'Seleccionar los {n} coincidentes',
+  'results.selectAllMatching.aria': 'Seleccionar todas las filas que coinciden con el filtro y orden actuales',
+  'results.shortcuts.title': 'Atajos',
+  'results.shortcuts.search': '/ — buscar',
+  'results.shortcuts.filters': '1–5 — cambiar filtro',
+  'results.shortcuts.sortCycle': 's — rotar orden',
+  'results.shortcuts.sortDir': 'S — invertir dirección',
 
   'watch.banner': 'Actualización de lista: {freed} liberados, {taken} ocupados, {priceDrops} bajaron de precio',
   'watch.showFavs': 'Mostrar favoritos',
@@ -344,4 +359,16 @@ export const es: Dict = {
   'prices.hideUnpriced': 'Ocultar zonas sin precio',
   'prices.hideUnpriced.aria':
     'Ocultar zonas sin precio de registro en las columnas de registradores visibles',
+  'prices.col.renewal': 'Renovación (más barata)',
+  'prices.col.tco': '3 años (más barato)',
+  'prices.legend.band': 'Columnas del mejor precio',
+  'prices.legend.band.tip':
+    'Las columnas de renovación y 3 años muestran el mejor precio entre todos los registradores de cada zona.',
+  'prices.legend.dot': 'Registrador más barato',
+  'prices.legend.dot.tip': 'El punto verde marca el precio de primer año más bajo de la fila.',
+  'prices.legend.trap': 'Trampa promocional',
+  'prices.legend.trap.tip':
+    'Subrayado punteado: la renovación cuesta 5 veces o más el precio del primer año.',
+  'prices.trends.coldstart':
+    'Las tendencias aparecen cuando se acumulan instantáneas mensuales de precios; aún no hay ninguna.',
 };

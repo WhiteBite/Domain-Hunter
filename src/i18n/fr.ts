@@ -66,7 +66,7 @@ export const fr: Dict = {
   'check.progress.checked': 'Vérifié {done} sur {total}',
   'check.progress.available': '{n} disponibles',
   'check.progress.errors': '{n} erreurs',
-  'check.progress.elapsed': '{s} s',
+  'check.progress.elapsed': '{s}',
 
   'results.title': 'Résultats',
   'results.empty.title': 'Rien n’a encore été vérifié',
@@ -115,14 +115,13 @@ export const fr: Dict = {
   'check.history.title': 'Historique',
   'check.history.empty': 'Aucune vérification terminée pour l’instant.',
   'check.history.restore': 'Restaurer cette vérification',
-  'check.history.meta': '{names} noms · {zones} zones',
+  'check.history.meta': 'noms : {names} · zones : {zones}',
   'check.history.clear': 'Effacer l’historique',
   'check.panel.collapse': 'Réduire le panneau de saisie',
   'check.panel.expand': 'Agrandir le panneau de saisie',
   'results.showAvailable': 'Afficher les disponibles ({n})',
   'results.buy.at': 'Acheter chez {registrar} · {price}',
   'registrar.noDeeplink': '{registrar} n’a pas de lien profond public — le bouton ouvre sa page de recherche ; collez le domaine là.',
-  'results.detail.loading': 'Récupération des données du bureau d’enregistrement…',
   'results.detail.failed': 'Aucune donnée supplémentaire disponible pour ce domaine.',
   'results.detail.premium': 'Premium du registre ≈ {price}',
   'results.detail.cheapest': 'Le moins cher maintenant : {registrar} · {price}',
@@ -282,6 +281,7 @@ export const fr: Dict = {
   'csv.priceRenewal': 'Renouvellement',
   'csv.bestRegistrar': 'Bureau d’enregistrement le moins cher',
   'csv.checkedAt': 'Vérifié le',
+  'csv.buyUrl': 'URL d’achat',
 
   'check.history.toggle.aria': 'Basculer l’historique',
   'tld.picker.aria': 'Sélectionner des zones',
@@ -309,6 +309,8 @@ export const fr: Dict = {
   'export.copyCsv': 'Copier en CSV',
   'export.copyMd': 'Copier en Markdown',
   'export.copyTsv': 'Copier en TSV',
+  'export.copyJson': 'Copier en JSON',
+  'export.downloadJson': 'Télécharger JSON',
   'results.available.menu.aria': 'Actions des domaines disponibles',
   'results.available.copy': 'Copier la liste des disponibles',
   'results.available.fav': 'Tout ajouter aux favoris',
@@ -319,6 +321,19 @@ export const fr: Dict = {
   'results.premium.found': 'premium : {n}',
   'results.premium.aria':
     "Demande à DigMyName les prix premium du registre pour jusqu'aux 20 domaines disponibles les moins chers ; les noms premium affichent leur prix réel.",
+
+  'results.budget.label': 'max $/an',
+  'results.budget.aria': 'Filtre de prix maximum en première année',
+  'results.hideTraps': 'Masquer les pièges promotionnels',
+  'results.hideTraps.count': 'Masquer les pièges promotionnels ({n})',
+  'results.hideTraps.aria': 'Basculer le masquage des lignes avec piège promotionnel',
+  'results.selectAllMatching': 'Sélectionner les {n} correspondances',
+  'results.selectAllMatching.aria': 'Sélectionner toutes les lignes correspondant au filtre et au tri actuels',
+  'results.shortcuts.title': 'Raccourcis',
+  'results.shortcuts.search': '/ — rechercher',
+  'results.shortcuts.filters': '1–5 — changer de filtre',
+  'results.shortcuts.sortCycle': 's — rotation du tri',
+  'results.shortcuts.sortDir': 'S — inverser le sens du tri',
 
   'watch.banner': 'Mise à jour de la liste: {freed} libérés, {taken} pris, {priceDrops} baisses de prix',
   'watch.showFavs': 'Afficher les favoris',
@@ -345,4 +360,16 @@ export const fr: Dict = {
   'prices.hideUnpriced': 'Masquer les zones sans prix',
   'prices.hideUnpriced.aria':
     'Masquer les zones sans prix d’enregistrement dans les colonnes de registraires visibles',
+  'prices.col.renewal': 'Renouvellement (le moins cher)',
+  'prices.col.tco': '3 ans (le moins cher)',
+  'prices.legend.band': 'Colonnes meilleur prix',
+  'prices.legend.band.tip':
+    'Les colonnes Renouvellement et 3 ans affichent le meilleur prix parmi tous les registraires pour chaque zone.',
+  'prices.legend.dot': 'Registraire le moins cher',
+  'prices.legend.dot.tip': 'Le point vert marque le prix de première année le plus bas de la ligne.',
+  'prices.legend.trap': 'Piège promo',
+  'prices.legend.trap.tip':
+    'Souligné pointillé — le renouvellement coûte 5 fois ou plus le prix de la première année.',
+  'prices.trends.coldstart':
+    'Les tendances apparaissent dès que des instantanés mensuels des prix s’accumulent — aucun pour l’instant.',
 };

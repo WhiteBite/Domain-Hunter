@@ -65,7 +65,7 @@ export const en: Dict = {
   'check.progress.checked': 'Checked {done} of {total}',
   'check.progress.available': '{n} available',
   'check.progress.errors': '{n} errors',
-  'check.progress.elapsed': '{s}s',
+  'check.progress.elapsed': '{s}',
 
   'results.title': 'Results',
   'results.empty.title': 'Nothing checked yet',
@@ -114,14 +114,13 @@ export const en: Dict = {
   'check.history.title': 'History',
   'check.history.empty': 'No completed checks yet.',
   'check.history.restore': 'Restore this check',
-  'check.history.meta': '{names} names · {zones} zones',
+  'check.history.meta': 'names: {names} · zones: {zones}',
   'check.history.clear': 'Clear history',
   'check.panel.collapse': 'Collapse input panel',
   'check.panel.expand': 'Expand input panel',
   'results.showAvailable': 'Show available ({n})',
   'results.buy.at': 'Buy at {registrar} · {price}',
   'registrar.noDeeplink': '{registrar} has no public deep link — the button opens its search page; paste the domain there.',
-  'results.detail.loading': 'Fetching registrar data…',
   'results.detail.failed': 'No extra data available for this domain.',
   'results.detail.premium': 'Registry premium ≈ {price}',
   'results.detail.cheapest': 'Cheapest now: {registrar} · {price}',
@@ -281,6 +280,7 @@ export const en: Dict = {
   'csv.priceRenewal': 'Renewal',
   'csv.bestRegistrar': 'Cheapest registrar',
   'csv.checkedAt': 'Checked at',
+  'csv.buyUrl': 'Buy URL',
 
   'check.history.toggle.aria': 'Toggle history',
   'tld.picker.aria': 'Select zones',
@@ -308,6 +308,8 @@ export const en: Dict = {
   'export.copyCsv': 'Copy as CSV',
   'export.copyMd': 'Copy as Markdown',
   'export.copyTsv': 'Copy as TSV',
+  'export.copyJson': 'Copy as JSON',
+  'export.downloadJson': 'Download JSON',
   'results.available.menu.aria': 'Available domains actions',
   'results.available.copy': 'Copy available list',
   'results.available.fav': 'Add all to favorites',
@@ -318,6 +320,19 @@ export const en: Dict = {
   'results.premium.found': 'premium: {n}',
   'results.premium.aria':
     'Asks DigMyName for registry premium prices of up to 20 cheapest available domains; premium names get their real price shown.',
+
+  'results.budget.label': 'max $/yr',
+  'results.budget.aria': 'Maximum first-year price filter',
+  'results.hideTraps': 'Hide promo traps',
+  'results.hideTraps.count': 'Hide promo traps ({n})',
+  'results.hideTraps.aria': 'Toggle hiding of promo-trap rows',
+  'results.selectAllMatching': 'Select all {n} matching',
+  'results.selectAllMatching.aria': 'Select every row matching the current filter and sort',
+  'results.shortcuts.title': 'Shortcuts',
+  'results.shortcuts.search': '/ — focus search',
+  'results.shortcuts.filters': '1–5 — switch filter',
+  'results.shortcuts.sortCycle': 's — cycle sort',
+  'results.shortcuts.sortDir': 'S — toggle sort direction',
 
   'watch.banner': 'Watchlist update: {freed} freed, {taken} taken, {priceDrops} price drops',
   'watch.showFavs': 'Show favorites',
@@ -344,4 +359,16 @@ export const en: Dict = {
   'prices.hideUnpriced': 'Hide unpriced zones',
   'prices.hideUnpriced.aria':
     'Hide zones with no registration price in the visible registrar columns',
+  'prices.col.renewal': 'Renewal (cheapest)',
+  'prices.col.tco': '3-year (cheapest)',
+  'prices.legend.band': 'Cheapest columns',
+  'prices.legend.band.tip':
+    'Renewal and 3-year columns show the best price across all registrars for each zone.',
+  'prices.legend.dot': 'Cheapest registrar',
+  'prices.legend.dot.tip': 'Green dot marks the lowest first-year price in the row.',
+  'prices.legend.trap': 'Promo trap',
+  'prices.legend.trap.tip':
+    'Dotted underline — renewal costs 5× or more of the first-year price.',
+  'prices.trends.coldstart':
+    'Trends appear as monthly price snapshots accumulate — none collected yet.',
 };
