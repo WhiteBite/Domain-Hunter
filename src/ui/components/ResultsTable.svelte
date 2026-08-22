@@ -838,76 +838,80 @@
           {t('results.hideTraps')}
         {/if}
       </button>
-      <span class="count nums" aria-live="polite" data-testid="results-showing-count">
-        {t('results.showing', { shown: visible.length, total: sorted.length })}
-      </span>
-      {#if sorted.length > visible.length}
-        <button
-          class="action-small select-all-matching"
-          type="button"
-          onclick={() => {
-            selected = new Set(sorted.map((r) => r.result.domain));
-          }}
-          aria-label={t('results.selectAllMatching.aria')}
-          title={t('results.selectAllMatching.aria')}
-          data-testid="results-select-all-matching"
-        >
-          {t('results.selectAllMatching', { n: sorted.length })}
-        </button>
-      {/if}
-      <LegendPopover />
-      {#if selected.size > 0}
-        <button class="action-small" type="button" onclick={async () => { await copyText([...selected].sort().join('\n')); selected = new Set(); }} data-testid="results-copy-selected">
-          {t('results.copy.selected', { n: selected.size })}
-        </button>
-      {/if}
-      {#if filter === 'favorites' && $favorites.size > 0}
-        <button class="action-small" type="button" onclick={() => copyText([...$favorites].sort().join('\n'))} data-testid="results-copy-favorites">
-          {t('results.fav.copy', { n: $favorites.size })}
-        </button>
-      {/if}
-      {#if $runState.phase === 'done' && ((filter === 'all' && availableTotal > 0) || premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking)}
-        <!-- Keep "Show available (N)" / premium-check and their menus on one line, right-aligned. -->
-        <div class="nowrap-group">
-        {#if premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking}
-          <Tooltip text={t('results.premium.aria')}>
+      <!-- Meta row: legend + showing-count + select-all link on the left,
+           bulk actions (premium-check, show-available, ⋯ menu) on the right. -->
+      <div class="meta-row">
+        <div class="meta-left">
+          <LegendPopover />
+          <span class="count nums" aria-live="polite" data-testid="results-showing-count">
+            {t('results.showing', { shown: visible.length, total: sorted.length })}
+          </span>
+          {#if sorted.length > visible.length}
             <button
-              class="filter premium-check"
+              class="action-link select-all-matching"
               type="button"
-              onclick={() => void runPremiumCheck()}
-              disabled={!canPremiumCheck}
-              aria-label={t('results.premium.aria')}
-              title={t('results.premium.aria')}
-              data-testid="results-premium-check"
+              onclick={() => {
+                selected = new Set(sorted.map((r) => r.result.domain));
+              }}
+              aria-label={t('results.selectAllMatching.aria')}
+              title={t('results.selectAllMatching.aria')}
+              data-testid="results-select-all-matching"
             >
-              <IconTag />
-              {#if premiumChecking}
-                {t('results.premium.checking', { done: premiumDone, total: premiumTotal })}
-              {:else}
-                {t('results.premium.check')}
-              {/if}
+              {t('results.selectAllMatching', { n: sorted.length })}
             </button>
-          </Tooltip>
-          {#if !premiumChecking && premiumFound > 0}
-            <span class="chip-tag premium" data-testid="results-premium-found">
-              {t('results.premium.found', { n: premiumFound })}
-            </span>
           {/if}
-        {/if}
-        {#if filter === 'all' && availableTotal > 0}
-        <button class="filter suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
-          {t('results.showAvailable', { n: availableTotal })}
-        </button>
-    <AvailableMenu
-
-          availCopied={availCopied}
-          onCopy={() => void copyAvailableList()}
-          onFav={() => favAllAvailable()}
-          onCsv={() => downloadAvailableCsv()}
-        />
-        {/if}
+          {#if selected.size > 0}
+            <button class="action-link" type="button" onclick={async () => { await copyText([...selected].sort().join('\n')); selected = new Set(); }} data-testid="results-copy-selected">
+              {t('results.copy.selected', { n: selected.size })}
+            </button>
+          {/if}
+          {#if filter === 'favorites' && $favorites.size > 0}
+            <button class="action-link" type="button" onclick={() => copyText([...$favorites].sort().join('\n'))} data-testid="results-copy-favorites">
+              {t('results.fav.copy', { n: $favorites.size })}
+            </button>
+          {/if}
         </div>
-      {/if}
+        {#if $runState.phase === 'done' && ((filter === 'all' && availableTotal > 0) || premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking)}
+          <div class="meta-right">
+            {#if premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking}
+              <Tooltip text={t('results.premium.aria')}>
+                <button
+                  class="ghost-btn premium-check"
+                  type="button"
+                  onclick={() => void runPremiumCheck()}
+                  disabled={!canPremiumCheck}
+                  aria-label={t('results.premium.aria')}
+                  title={t('results.premium.aria')}
+                  data-testid="results-premium-check"
+                >
+                  <IconTag />
+                  {#if premiumChecking}
+                    {t('results.premium.checking', { done: premiumDone, total: premiumTotal })}
+                  {:else}
+                    {t('results.premium.check')}
+                  {/if}
+                </button>
+              </Tooltip>
+              {#if !premiumChecking && premiumFound > 0}
+                <span class="chip-tag premium" data-testid="results-premium-found">
+                  {t('results.premium.found', { n: premiumFound })}
+                </span>
+              {/if}
+            {/if}
+            {#if filter === 'all' && availableTotal > 0}
+              <button class="ghost-btn suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
+                {t('results.showAvailable', { n: availableTotal })}
+              </button>
+              <AvailableMenu
+                availCopied={availCopied}
+                onCopy={() => void copyAvailableList()}
+                onFav={() => favAllAvailable()}
+                onCsv={() => downloadAvailableCsv()}
+              />
+            {/if}
+          </div>
+        {/if}
+      </div>
     </div>
 
     {#if filter === 'favorites' && $favorites.size === 0}
@@ -1113,7 +1117,8 @@
               </td>
               <td class="renew-cell nums">
                 <span class="renew-line">
-                  <span class="renew" style="color: {priceColor(row.renewal)}">{formatPrice(row.renewal, $settings)}</span>
+                  <!-- Renewal stays neutral (tier colors live on the 1st-year column only). -->
+                  <span class="renew">{formatPrice(row.renewal, $settings)}</span>
                   {#if row.renewalRegistrarId}
                     {@const rid = row.renewalRegistrarId}
                     {@const icon = REGISTRAR_ICONS[rid]}
@@ -1281,13 +1286,41 @@
   .filters :global(.tip-wrap) {
     margin-left: auto;
   }
-  /* "Show available (N)" + its ⋯ menu never split across lines. */
-  .nowrap-group {
-    display: inline-flex;
+  /* Meta row under the filter pills: legend + showing-count + select-all
+     link on the left, bulk actions on the right. flex-basis 100% forces it
+     onto its own line inside the wrapping toolbar. */
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    flex-basis: 100%;
+  }
+  .meta-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+  /* Premium-check + "Show available (N)" + ⋯ menu never split across lines. */
+  .meta-right {
+    display: flex;
     flex-wrap: nowrap;
     align-items: center;
     gap: var(--space-2);
     margin-left: auto;
+  }
+  /* The ⋯ menu trigger shares the global .action-btn chrome; re-tint it to
+     the meta-row ghost style (transparent bg, stronger border, accent hover). */
+  .meta-right :global(.action-btn) {
+    background: transparent;
+    border-color: var(--border-strong);
+  }
+  .meta-right :global(.action-btn:hover) {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--text);
   }
   .filter {
     padding: var(--space-1) var(--space-3);
@@ -1640,8 +1673,12 @@
     align-items: center;
     gap: var(--space-1);
   }
+  /* Renewal values are neutral in both themes — the red/amber/green tier
+     ramp belongs to the 1st-year column only. Taken rows still override to
+     tertiary via the tr.row-taken rule above. */
   .renew {
     font-weight: 500;
+    color: var(--text-secondary);
   }
   .price-stack {
     display: flex;
@@ -1755,17 +1792,34 @@
     width: 100%;
   }
 
-  .filter.suggest {
-    background: var(--green-soft);
-    border-color: var(--green);
-    color: var(--green);
-  }
-  .filter.premium-check {
+  /* Ghost pill for meta-row bulk actions (premium-check, show-available):
+     transparent bg, strong border, secondary text; hover lifts text and
+     border to accent. No filled buttons in the meta row. */
+  .ghost-btn {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
+    min-height: 32px;
+    white-space: nowrap;
+    transition: all var(--dur) var(--ease);
   }
-  .filter.premium-check :global(svg) {
+  .ghost-btn:hover:not(:disabled) {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .ghost-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .ghost-btn.premium-check :global(svg) {
     width: 14px;
     height: 14px;
     flex: none;
@@ -1817,7 +1871,7 @@
     font-size: var(--text-xs);
     min-height: 32px;
     background: var(--bg-elevated);
-    width: 100px;
+    width: 90px;
     color: var(--text);
     text-align: right;
   }
@@ -1836,20 +1890,24 @@
     appearance: textfield;
   }
 
-  .action-small {
-    padding: var(--space-1) var(--space-3);
-    border: 1px solid var(--accent);
-    background: var(--accent);
-    color: var(--on-accent);
-    border-radius: var(--radius-full);
+  /* Quiet accent text-link for secondary bulk actions (select-all-matching,
+     copy-selected, copy-favorites) — must not outshout the primary CTA. */
+  .action-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--accent-text);
     font-size: var(--text-xs);
     font-weight: 500;
     cursor: pointer;
     min-height: 32px;
-    transition: all var(--dur) var(--ease);
+    transition: color var(--dur) var(--ease);
   }
-  .action-small:hover {
-    opacity: 0.9;
+  .action-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
   }
   .fav-empty {
     color: var(--text-tertiary);

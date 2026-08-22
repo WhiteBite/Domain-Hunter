@@ -564,6 +564,26 @@
     border-radius: var(--radius-full);
     font-weight: 400;
   }
+  /* "Clear history" — ghost token button (HintBanner's scoped .hint-dismiss
+     does not reach this component; without this rule the button renders as
+     an unstyled native rectangle). */
+  .hint-dismiss {
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-3);
+    min-height: 28px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--dur) var(--ease);
+  }
+  .hint-dismiss:hover {
+    color: var(--text);
+    background: var(--bg-sunken);
+  }
   .history-list {
     list-style: none;
     margin: 0;
