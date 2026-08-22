@@ -13,12 +13,13 @@
     resumePrompt,
     resumeAction,
     startRequest,
+    sharedView,
     type RunPhase,
   } from '../store';
   import { history, recordRun, clearHistory } from '../history';
   import type { HistoryEntry } from '../../types';
   import { loadPricing, freshnessLabel } from '../../pricing/pricing';
-  import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
+  import { resultsToCsvRows, buildCsv, downloadCsv, resultsToJson } from '../csv';
   import { encodeShare, parseShare, clearShare } from '../share';
   import { t } from '../../i18n';
   import { copyText } from '../clipboard';
@@ -89,6 +90,15 @@
         const valid = shared.tlds.filter((tld) => known.has(tld));
         if (valid.length > 0) selectedTlds.set(valid);
       }
+      // Stash view fields for ResultsTable to consume on mount.
+      if (shared.filter || shared.sortKey || shared.sortDir || shared.query) {
+        sharedView.set({
+          filter: shared.filter,
+          sortKey: shared.sortKey,
+          sortDir: shared.sortDir,
+          query: shared.query,
+        });
+      }
       clearShare();
       if (shared.q || shared.run) pendingShareRun.set(true);
     }
@@ -137,11 +147,26 @@
       t('csv.priceFirstYear'),
       t('csv.priceRenewal'),
       t('csv.bestRegistrar'),
+      t('csv.buyUrl'),
       t('csv.checkedAt'),
     ];
     const csv = buildCsv(rows, headers);
     const date = new Date().toISOString().slice(0, 10);
     downloadCsv(`domain-hunter-${date}.csv`, csv);
+  }
+
+  function handleDownloadJson() {
+    const table = $pricing?.table ?? null;
+    const json = resultsToJson(get(results), table);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'domains.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   async function handleShare() {
@@ -222,6 +247,17 @@
       >
         <IconDownload />
         <span>{t('results.csv')}</span>
+      </button>
+      <button
+        class="action"
+        onclick={handleDownloadJson}
+        type="button"
+        disabled={!hasResults}
+        title={t('export.downloadJson')}
+        data-testid="check-button-download-json"
+      >
+        <IconDownload />
+        <span>{t('export.downloadJson')}</span>
       </button>
       <ExportMenu disabled={!hasResults} />
       <button

@@ -2,8 +2,12 @@
  * CSV export — Excel-compatible (BOM + comma delimiter + CRLF + quoting).
  * Prices sourced from the pricing module via bestEntry + formatPrice.
  */
-import type { CheckResult, PricingTable, Settings } from '../types';
+import type { CheckResult, PricingTable, RegistrarConfig, Settings } from '../types';
 import { bestEntry, formatPrice } from '../pricing/pricing';
+import { applyAffiliate } from './affiliate';
+import registrarsJson from '../config/registrars.json';
+
+const registrars = registrarsJson as unknown as RegistrarConfig[];
 
 export interface CsvRow {
   domain: string;
@@ -12,7 +16,37 @@ export interface CsvRow {
   priceFirstYear: string;
   priceRenewal: string;
   bestRegistrar: string;
+  buyUrl: string;
   checkedAt: string;
+}
+
+/** Cheapest-registrar buy URL for a TLD among registrars with a reg price
+ *  (deep-link registrar preferred), affiliate tag applied when configured.
+ *  '' when no quote exists. Mirrors ResultsTable's registrarFor so exports
+ *  and UI agree. */
+export function buyUrlFor(
+  tld: string,
+  domain: string,
+  table: PricingTable | null,
+): string {
+  const entries = table?.tlds[tld] ?? null;
+  if (!entries) return '';
+  let best: { reg: RegistrarConfig; price: number } | null = null;
+  let fallback: { reg: RegistrarConfig; price: number } | null = null;
+  for (const r of registrars) {
+    const e = entries[r.id];
+    if (!e || e.reg == null) continue;
+    const candidate = { reg: r, price: e.reg };
+    if (r.searchUrl.includes('{domain}')) {
+      if (!best || candidate.price < best.price) best = candidate;
+    } else if (!fallback || candidate.price < fallback.price) fallback = candidate;
+  }
+  const pick = best ?? fallback;
+  if (!pick) return '';
+  const url = pick.reg.searchUrl.includes('{domain}')
+    ? pick.reg.searchUrl.replace('{domain}', encodeURIComponent(domain))
+    : pick.reg.searchUrl;
+  return applyAffiliate(pick.reg, url);
 }
 
 /**
@@ -35,6 +69,7 @@ export function resultsToCsvRows(
       priceFirstYear: formatPrice(entry?.reg ?? null, settings),
       priceRenewal: formatPrice(entry?.renew ?? null, settings),
       bestRegistrar: best?.registrarId ?? '',
+      buyUrl: buyUrlFor(result.tld, result.domain, table),
       checkedAt: new Date(result.checkedAt).toISOString(),
     });
   }
@@ -65,6 +100,7 @@ export function buildCsv(rows: CsvRow[], headers: string[]): string {
         row.priceFirstYear,
         row.priceRenewal,
         row.bestRegistrar,
+        row.buyUrl,
         row.checkedAt,
       ]
         .map(escapeCsvField)
@@ -138,6 +174,58 @@ export function resultsToExportRows(
     });
   }
   return rows;
+}
+
+// ---- JSON export (machine-readable, versioned schema) ----
+
+export interface JsonExportRow {
+  domain: string;
+  status: string;
+  tld: string;
+  priceFirstYearCents: number | null;
+  priceRenewalCents: number | null;
+  priceTcoCents: number | null;
+  bestRegistrar: string;
+  buyUrl: string;
+  checkedAt: string;
+}
+
+export interface JsonExport {
+  schema: 'dh-results-v1';
+  generatedAt: string;
+  rows: JsonExportRow[];
+}
+
+/** Versioned JSON export: raw USD cents (null-safe) plus buyUrl so results
+ *  can be piped into scripts without re-deriving prices. */
+export function resultsToJson(
+  results: Map<string, CheckResult>,
+  table: PricingTable | null,
+): string {
+  const rows: JsonExportRow[] = [];
+  for (const result of results.values()) {
+    const best = table ? bestEntry(table, result.tld) : null;
+    const entry = best?.entry ?? null;
+    const reg = entry?.reg ?? null;
+    const renew = entry?.renew ?? null;
+    rows.push({
+      domain: result.domain,
+      status: result.status,
+      tld: result.tld,
+      priceFirstYearCents: reg,
+      priceRenewalCents: renew,
+      priceTcoCents: reg != null && renew != null ? reg + 2 * renew : null,
+      bestRegistrar: best?.registrarId ?? '',
+      buyUrl: buyUrlFor(result.tld, result.domain, table),
+      checkedAt: new Date(result.checkedAt).toISOString(),
+    });
+  }
+  const payload: JsonExport = {
+    schema: 'dh-results-v1',
+    generatedAt: new Date().toISOString(),
+    rows,
+  };
+  return JSON.stringify(payload, null, 2);
 }
 
 /** formatPrice but null → '' (empty cell) instead of '—'. */

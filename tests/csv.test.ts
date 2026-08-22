@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resultsToCsvRows, buildCsv, resultsToExportRows, toCsv, toTsv, toMarkdown } from '../src/ui/csv';
+import { resultsToCsvRows, buildCsv, resultsToExportRows, toCsv, toTsv, toMarkdown, buyUrlFor, resultsToJson } from '../src/ui/csv';
 import type { ExportRow } from '../src/ui/csv';
 import type { CheckResult, PricingTable, Settings } from '../src/types';
 import { DEFAULT_SETTINGS } from '../src/types';
@@ -46,6 +46,7 @@ describe('resultsToCsvRows', () => {
     expect(rows[0]?.priceFirstYear).toBe('$11.68');
     expect(rows[0]?.priceRenewal).toBe('$11.68');
     expect(rows[0]?.bestRegistrar).toBe('porkbun');
+    expect(rows[0]?.buyUrl).toBe('https://porkbun.com/checkout/search?q=myapp.com');
     expect(rows[0]?.checkedAt).toBe('2026-01-01T12:00:00.000Z');
     expect(rows[1]?.priceFirstYear).toBe('$8.75');
   });
@@ -72,6 +73,7 @@ describe('buildCsv', () => {
     priceFirstYear: '$11.68',
     priceRenewal: '$11.68',
     bestRegistrar: 'porkbun',
+    buyUrl: 'https://porkbun.com/checkout/search?q=a.com',
     checkedAt: '2026-01-01T00:00:00.000Z',
   };
 
@@ -82,6 +84,7 @@ describe('buildCsv', () => {
     'First year',
     'Renewal',
     'Cheapest registrar',
+    'Buy URL',
     'Checked at',
   ];
 
@@ -93,7 +96,7 @@ describe('buildCsv', () => {
   it('contains header row', () => {
     const csv = buildCsv([], defaultHeaders);
     expect(csv).toContain(
-      'Domain,Status,TLD,First year,Renewal,Cheapest registrar,Checked at',
+      'Domain,Status,TLD,First year,Renewal,Cheapest registrar,Buy URL,Checked at',
     );
   });
 
@@ -250,5 +253,68 @@ describe('toMarkdown', () => {
   it('emits empty string for empty price values', () => {
     const md = toMarkdown([{ ...exportSample, priceFirstYear: '', priceTco: '' }], exportHeaders);
     expect(md).toContain('| a.com | available |  | $11.68 |  |');
+  });
+});
+
+// ---- Buy URL + JSON export ----
+
+describe('buyUrlFor', () => {
+  it('builds a deep link for the cheapest registrar with a quote', () => {
+    expect(buyUrlFor('com', 'myapp.com', table)).toBe(
+      'https://porkbun.com/checkout/search?q=myapp.com',
+    );
+  });
+
+  it('returns empty string when the table has no quote for the tld', () => {
+    expect(buyUrlFor('zzz', 'x.zzz', table)).toBe('');
+  });
+
+  it('returns empty string without a pricing table', () => {
+    expect(buyUrlFor('com', 'x.com', null)).toBe('');
+  });
+});
+
+describe('resultsToJson', () => {
+  it('emits the versioned schema with raw cents and buyUrl', () => {
+    const results = new Map<string, CheckResult>([
+      [
+        'myapp.com',
+        {
+          domain: 'myapp.com',
+          tld: 'com',
+          status: 'available',
+          source: 'rdap',
+          checkedAt: Date.parse('2026-01-01T12:00:00.000Z'),
+        },
+      ],
+    ]);
+    const parsed = JSON.parse(resultsToJson(results, table)) as {
+      schema: string;
+      generatedAt: string;
+      rows: Array<Record<string, unknown>>;
+    };
+    expect(parsed.schema).toBe('dh-results-v1');
+    expect(parsed.generatedAt).toBeTruthy();
+    expect(parsed.rows).toHaveLength(1);
+    const row = parsed.rows[0];
+    expect(row?.domain).toBe('myapp.com');
+    expect(row?.priceFirstYearCents).toBe(1168);
+    expect(row?.priceRenewalCents).toBe(1168);
+    expect(row?.priceTcoCents).toBe(1168 + 2 * 1168);
+    expect(row?.bestRegistrar).toBe('porkbun');
+    expect(row?.buyUrl).toBe('https://porkbun.com/checkout/search?q=myapp.com');
+  });
+
+  it('keeps null prices as null (not formatted strings)', () => {
+    const results = new Map<string, CheckResult>([
+      ['x.zzz', { domain: 'x.zzz', tld: 'zzz', status: 'unknown', source: 'rdap', checkedAt: 0 }],
+    ]);
+    const parsed = JSON.parse(resultsToJson(results, table)) as {
+      rows: Array<Record<string, unknown>>;
+    };
+    const row = parsed.rows[0];
+    expect(row?.priceFirstYearCents).toBeNull();
+    expect(row?.priceTcoCents).toBeNull();
+    expect(row?.buyUrl).toBe('');
   });
 });

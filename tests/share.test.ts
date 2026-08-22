@@ -87,3 +87,48 @@ describe('clearShare', () => {
     expect(() => clearShare()).not.toThrow();
   });
 });
+
+describe('share view state', () => {
+  it('roundtrips filter/sort/query', () => {
+    const hash = encodeShare({
+      q: 'midas',
+      tlds: ['com'],
+      run: true,
+      filter: 'available',
+      sortKey: 'tco',
+      sortDir: 'asc',
+      query: 'midas.',
+    });
+    const parsed = parseShare(hash);
+    expect(parsed?.filter).toBe('available');
+    expect(parsed?.sortKey).toBe('tco');
+    expect(parsed?.sortDir).toBe('asc');
+    expect(parsed?.query).toBe('midas.');
+  });
+
+  it('old links without view fields parse with nulls', () => {
+    const parsed = parseShare(encodeShare({ q: 'x', tlds: ['com'] }));
+    expect(parsed?.filter).toBeNull();
+    expect(parsed?.sortKey).toBeNull();
+    expect(parsed?.sortDir).toBeNull();
+    expect(parsed?.query).toBe('');
+  });
+
+  it('rejects unknown filter/sort values to null (whitelist)', () => {
+    const json = JSON.stringify({
+      q: 'x',
+      tlds: [],
+      filter: 'favorites',
+      sortKey: 'bogus',
+      sortDir: 'sideways',
+    });
+    const bytes = new TextEncoder().encode(json);
+    let binary = '';
+    for (const b of bytes) binary += String.fromCharCode(b);
+    const b64 = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const parsed = parseShare('#s=' + b64);
+    expect(parsed?.filter).toBeNull();
+    expect(parsed?.sortKey).toBeNull();
+    expect(parsed?.sortDir).toBeNull();
+  });
+});

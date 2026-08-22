@@ -1,20 +1,20 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { onDestroy } from 'svelte';
-  import { exportRows } from '../store';
+  import { exportRows, results, pricing } from '../store';
   import { t } from '../../i18n';
   import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
   import { copyText } from '../clipboard';
-  import { toCsv, toMarkdown, toTsv } from '../csv';
+  import { toCsv, toMarkdown, toTsv, resultsToJson } from '../csv';
   import IconDots from './icons/IconDots.svelte';
   import IconCheck from './icons/IconCheck.svelte';
   import IconCopy from './icons/IconCopy.svelte';
 
-  // Export menu popover state (CSV / Markdown / TSV copy to clipboard).
+  // Export menu popover state (CSV / Markdown / TSV / JSON copy to clipboard).
   let exportMenuOpen = $state(false);
   let exportMenuTriggerEl: HTMLButtonElement | null = $state(null);
-  let exportCopiedKey = $state<'csv' | 'md' | 'tsv' | null>(null);
+  let exportCopiedKey = $state<'csv' | 'md' | 'tsv' | 'json' | null>(null);
   let exportCopiedTimer: ReturnType<typeof setTimeout> | undefined;
 
   function exportHeaders(): string[] {
@@ -27,7 +27,7 @@
     ];
   }
 
-  function flashExportCopied(key: 'csv' | 'md' | 'tsv'): void {
+  function flashExportCopied(key: 'csv' | 'md' | 'tsv' | 'json'): void {
     exportCopiedKey = key;
     if (exportCopiedTimer != null) clearTimeout(exportCopiedTimer);
     exportCopiedTimer = setTimeout(() => {
@@ -48,6 +48,13 @@
   async function copyAsTsv(): Promise<void> {
     const ok = await copyText(toTsv(get(exportRows), exportHeaders()));
     if (ok) flashExportCopied('tsv');
+  }
+
+  async function copyAsJson(): Promise<void> {
+    const table = get(pricing)?.table ?? null;
+    const json = resultsToJson(get(results), table);
+    const ok = await copyText(json);
+    if (ok) flashExportCopied('json');
   }
 
   onDestroy(() => {
@@ -121,6 +128,20 @@
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12M6 4v8M10 4v8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
         {/if}
         {t('export.copyTsv')}
+      </button>
+      <button
+        class="menu-item"
+        role="menuitem"
+        type="button"
+        onclick={() => { void copyAsJson(); }}
+        data-testid="check-export-copy-json"
+      >
+        {#if exportCopiedKey === 'json'}
+          <IconCheck />
+        {:else}
+          <IconCopy />
+        {/if}
+        {t('export.copyJson')}
       </button>
     </div>
   {/if}

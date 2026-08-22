@@ -4,16 +4,35 @@
  * app auto-starts the check (SPEC §12).
  */
 
+/** View-state values allowed in share links. 'favorites' is deliberately
+ *  excluded — it depends on the recipient's local favorites set. */
+export type ShareFilter = 'all' | 'available' | 'taken' | 'problems';
+export type ShareSortKey = 'name' | 'price' | 'renew' | 'tco';
+export type ShareSortDir = 'asc' | 'desc';
+
+const FILTERS: readonly ShareFilter[] = ['all', 'available', 'taken', 'problems'];
+const SORT_KEYS: readonly ShareSortKey[] = ['name', 'price', 'renew', 'tco'];
+const SORT_DIRS: readonly ShareSortDir[] = ['asc', 'desc'];
+
 export interface ShareState {
   q: string;
   tlds: string[];
   run?: boolean;
+  filter?: ShareFilter;
+  sortKey?: ShareSortKey;
+  sortDir?: ShareSortDir;
+  /** Results-table search box value at share time. */
+  query?: string;
 }
 
 export interface ParsedShare {
   q: string;
   tlds: string[];
   run: boolean;
+  filter: ShareFilter | null;
+  sortKey: ShareSortKey | null;
+  sortDir: ShareSortDir | null;
+  query: string;
 }
 
 /** Encode share state into a `#s=...` hash (base64url, unicode-safe). */
@@ -62,7 +81,17 @@ export function parseShare(hash?: string): ParsedShare | null {
       ? obj.tlds.filter((t): t is string => typeof t === 'string')
       : [];
     const run = obj.run === true;
-    return { q, tlds, run };
+    const filter = FILTERS.includes(obj.filter as ShareFilter)
+      ? (obj.filter as ShareFilter)
+      : null;
+    const sortKey = SORT_KEYS.includes(obj.sortKey as ShareSortKey)
+      ? (obj.sortKey as ShareSortKey)
+      : null;
+    const sortDir = SORT_DIRS.includes(obj.sortDir as ShareSortDir)
+      ? (obj.sortDir as ShareSortDir)
+      : null;
+    const query = typeof obj.query === 'string' ? obj.query : '';
+    return { q, tlds, run, filter, sortKey, sortDir, query };
   } catch {
     return null;
   }
