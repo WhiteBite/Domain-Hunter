@@ -104,6 +104,7 @@ export const ALL_TESTIDS = [
   'results-premium-found', // chip showing found premium count after bulk check
   'results-budget-input', // budget max-price number input
   'results-hide-traps', // hide promo traps toggle button
+  'results-pair-toggle', // renewal column pair-mode toggle button
   'results-select-all-matching', // select all matching rows link button
 
   // ---- GeneratorsTab.svelte ----

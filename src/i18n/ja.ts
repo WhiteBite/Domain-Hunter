@@ -326,6 +326,10 @@ export const ja: Dict = {
   'results.hideTraps': 'プロモトラップを非表示',
   'results.hideTraps.count': 'プロモトラップを非表示 ({n})',
   'results.hideTraps.aria': 'プロモトラップ行の非表示を切り替え',
+  'results.pairMode.best': '列ごとの最安値',
+  'results.pairMode.paired': '同一レジストラのペア',
+  'results.pairMode.aria':
+    '更新列：市場最安の更新、または初年度価格と同じレジストラでの更新',
   'results.selectAllMatching': '一致する {n} 件をすべて選択',
   'results.selectAllMatching.aria': '現在のフィルターとソートに一致するすべての行を選択',
   'results.shortcuts.title': 'ショートカット',

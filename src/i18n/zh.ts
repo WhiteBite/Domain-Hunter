@@ -325,6 +325,10 @@ export const zh: Dict = {
   'results.hideTraps': '隐藏促销陷阱',
   'results.hideTraps.count': '隐藏促销陷阱 ({n})',
   'results.hideTraps.aria': '切换隐藏促销陷阱行',
+  'results.pairMode.best': '各列最优',
+  'results.pairMode.paired': '同一注册商配对',
+  'results.pairMode.aria':
+    '续费列：市场最优续费，或与首年价格相同的注册商续费',
   'results.selectAllMatching': '选择全部 {n} 个匹配项',
   'results.selectAllMatching.aria': '选择符合当前筛选和排序的所有行',
   'results.shortcuts.title': '快捷键',

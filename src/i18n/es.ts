@@ -326,6 +326,10 @@ export const es: Dict = {
   'results.hideTraps': 'Ocultar trampas promocionales',
   'results.hideTraps.count': 'Ocultar trampas promocionales ({n})',
   'results.hideTraps.aria': 'Alternar ocultación de filas con trampa promocional',
+  'results.pairMode.best': 'Mejor por columna',
+  'results.pairMode.paired': 'Par del mismo registrador',
+  'results.pairMode.aria':
+    'Columna de renovación: mejor renovación del mercado, o renovación en el mismo registrador que el precio del primer año',
   'results.selectAllMatching': 'Seleccionar los {n} coincidentes',
   'results.selectAllMatching.aria': 'Seleccionar todas las filas que coinciden con el filtro y orden actuales',
   'results.shortcuts.title': 'Atajos',

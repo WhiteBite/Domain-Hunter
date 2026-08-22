@@ -326,6 +326,10 @@ export const pt: Dict = {
   'results.hideTraps': 'Ocultar armadilhas promocionais',
   'results.hideTraps.count': 'Ocultar armadilhas promocionais ({n})',
   'results.hideTraps.aria': 'Alternar ocultação de linhas com armadilha promocional',
+  'results.pairMode.best': 'Melhor por coluna',
+  'results.pairMode.paired': 'Par do mesmo registrador',
+  'results.pairMode.aria':
+    'Coluna de renovação: melhor renovação do mercado, ou renovação no mesmo registrador do preço do primeiro ano',
   'results.selectAllMatching': 'Selecionar os {n} correspondentes',
   'results.selectAllMatching.aria': 'Selecionar todas as linhas que correspondem ao filtro e ordenação atuais',
   'results.shortcuts.title': 'Atalhos',

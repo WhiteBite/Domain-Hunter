@@ -1116,4 +1116,29 @@ test.describe('Check tab', () => {
     expect(parsed.schema).toBe('dh-results-v1');
     expect(parsed.rows.length).toBe(2);
   });
+
+  // 39. pair toggle switches renewal between market best and same-registrar
+  test('39. pair toggle switches renewal between market best and same-registrar', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, []);
+    await bootCheckTab(page);
+    // Clear TLDs, select dev only. dev porkbun: reg=875 renew=1287;
+    // dev cloudflare: reg=1044 renew=1225. bestEntry=porkbun (875),
+    // bestRenewal=cloudflare (1225). Perfect for the pair-mode test.
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
+    await page.locator('[data-testid="tld-button-clear"]').click();
+    await page.locator('[data-testid="tld-chip-dev"]').click();
+    await page.locator('[data-testid="tld-picker-toggle"]').click();
+    await runCheck(page, 'zzqxtest1.dev');
+    await expect(row(page, 'zzqxtest1.dev')).toBeVisible();
+    // Default mode ('best'): renewal = cloudflare $12.25 (cheapest renewal).
+    const renewCell = row(page, 'zzqxtest1.dev').locator('.renew-cell .renew');
+    await expect(renewCell).toHaveText('$12.25');
+    // Switch to paired mode: renewal = porkbun $12.87 (same registrar as $8.75 first-year).
+    await page.locator('[data-testid="results-pair-toggle"]').click();
+    await expect(renewCell).toHaveText('$12.87');
+    // Switch back to best mode.
+    await page.locator('[data-testid="results-pair-toggle"]').click();
+    await expect(renewCell).toHaveText('$12.25');
+  });
 });

@@ -327,6 +327,10 @@ export const ru: Dict = {
   'results.hideTraps': 'Скрыть промо-ловушки',
   'results.hideTraps.count': 'Скрыть промо-ловушки ({n})',
   'results.hideTraps.aria': 'Скрыть строки с промо-ловушками',
+  'results.pairMode.best': 'Лучшие по колонкам',
+  'results.pairMode.paired': 'Пара у одного регистратора',
+  'results.pairMode.aria':
+    'Колонка продления: лучшее продление на рынке или продление у того же регистратора, что цена покупки',
   'results.selectAllMatching': 'Выбрать все {n} совпадений',
   'results.selectAllMatching.aria': 'Выбрать все строки по текущему фильтру и сортировке',
   'results.shortcuts.title': 'Горячие клавиши',

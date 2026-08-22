@@ -326,6 +326,10 @@ export const en: Dict = {
   'results.hideTraps': 'Hide promo traps',
   'results.hideTraps.count': 'Hide promo traps ({n})',
   'results.hideTraps.aria': 'Toggle hiding of promo-trap rows',
+  'results.pairMode.best': 'Best per column',
+  'results.pairMode.paired': 'Same-registrar pair',
+  'results.pairMode.aria':
+    'Renewal column: best market renewal, or renewal at the same registrar as the first-year price',
   'results.selectAllMatching': 'Select all {n} matching',
   'results.selectAllMatching.aria': 'Select every row matching the current filter and sort',
   'results.shortcuts.title': 'Shortcuts',

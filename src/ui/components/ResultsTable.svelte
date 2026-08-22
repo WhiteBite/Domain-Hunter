@@ -68,6 +68,10 @@
   /** Budget in USD cents (converted from budgetInput via settings.rates).
    *  0 = inactive. Recomputed in the filtered derived. */
   let hideTraps = $state(false);
+  /** Renewal column semantics: 'best' = cheapest renewal across registrars;
+   *  'paired' = renewal at the same registrar as the displayed first-year
+   *  price. Persisted in dh:v1:resultsview. */
+  let pairMode = $state<'best' | 'paired'>('best');
   /** True while restoring persisted/shared view — suppresses the
    *  auto-tco-on-available $effect so it only fires on manual changes. */
   let restoring = false;
@@ -149,6 +153,7 @@
       sortKey = saved.sortKey;
       sortDir = saved.sortDir;
       hideTraps = saved.hideTraps;
+      pairMode = saved.pairMode;
       // Budget is stored as USD cents; convert back to display currency
       // for the input. USD: cents/100; RUB/EUR: cents/100 × rate.
       if (saved.budget > 0) {
@@ -211,7 +216,7 @@
       const override = premiumOverrides[r.domain] ?? null;
       const stdFirstYear = best?.entry.reg ?? null;
       const stdTco = table ? tco3(table, r.tld) : null;
-      const renewalBest = table ? bestRenewal(table, r.tld) : null;
+      const renewalBest = table && pairMode === 'best' ? bestRenewal(table, r.tld) : null;
       const coupon = table ? bestCoupon(table, r.tld) : null;
       const couponPrice = couponEffectivePrice(stdFirstYear, coupon);
       const couponApplies =
@@ -299,6 +304,7 @@
     void sortDir;
     void budgetInput;
     void hideTraps;
+    void pairMode;
     // Skip the initial run while restoring (the restore itself writes).
     if (restoring) return;
     const view: ResultsView = {
@@ -308,6 +314,7 @@
       sortDir,
       budget: displayToUsdCents(parseFloat(budgetInput) || 0, $settings),
       hideTraps,
+      pairMode,
     };
     saveResultsView(view);
   });
@@ -837,6 +844,18 @@
         {:else}
           {t('results.hideTraps')}
         {/if}
+      </button>
+      <button
+        class="filter toggle-btn"
+        class:active={pairMode === 'paired'}
+        type="button"
+        aria-pressed={pairMode === 'paired'}
+        aria-label={t('results.pairMode.aria')}
+        title={t('results.pairMode.aria')}
+        onclick={() => (pairMode = pairMode === 'paired' ? 'best' : 'paired')}
+        data-testid="results-pair-toggle"
+      >
+        {pairMode === 'paired' ? t('results.pairMode.paired') : t('results.pairMode.best')}
       </button>
       <!-- Meta row: legend + showing-count + select-all link on the left,
            bulk actions (premium-check, show-available, ⋯ menu) on the right. -->

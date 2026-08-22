@@ -326,6 +326,10 @@ export const de: Dict = {
   'results.hideTraps': 'Promo-Fallen ausblenden',
   'results.hideTraps.count': 'Promo-Fallen ausblenden ({n})',
   'results.hideTraps.aria': 'Ausblenden von Promo-Fallen-Zeilen umschalten',
+  'results.pairMode.best': 'Beste pro Spalte',
+  'results.pairMode.paired': 'Paar vom selben Registrar',
+  'results.pairMode.aria':
+    'Erneuerungsspalte: beste Markterneuerung oder Erneuerung beim selben Registrar wie der Preis für das erste Jahr',
   'results.selectAllMatching': 'Alle {n} Treffer auswählen',
   'results.selectAllMatching.aria': 'Alle Zeilen auswählen, die dem aktuellen Filter und Sortierung entsprechen',
   'results.shortcuts.title': 'Tastenkürzel',

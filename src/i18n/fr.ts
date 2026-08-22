@@ -327,6 +327,10 @@ export const fr: Dict = {
   'results.hideTraps': 'Masquer les pièges promotionnels',
   'results.hideTraps.count': 'Masquer les pièges promotionnels ({n})',
   'results.hideTraps.aria': 'Basculer le masquage des lignes avec piège promotionnel',
+  'results.pairMode.best': 'Meilleur par colonne',
+  'results.pairMode.paired': 'Paire du même registrar',
+  'results.pairMode.aria':
+    "Colonne de renouvellement : meilleur renouvellement du marché, ou renouvellement chez le même registrar que le prix de première année",
   'results.selectAllMatching': 'Sélectionner les {n} correspondances',
   'results.selectAllMatching.aria': 'Sélectionner toutes les lignes correspondant au filtre et au tri actuels',
   'results.shortcuts.title': 'Raccourcis',

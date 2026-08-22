@@ -115,6 +115,10 @@ export interface ResultsView {
   sortDir: 'asc' | 'desc';
   budget: number;
   hideTraps: boolean;
+  /** Renewal column semantics: 'best' = cheapest renewal across registrars;
+   *  'paired' = renewal at the same registrar as the displayed first-year
+   *  price. Defaults to 'best' for backward compatibility. */
+  pairMode: 'best' | 'paired';
 }
 
 const RESULTS_VIEW_KEY = 'dh:v1:resultsview';
@@ -132,6 +136,7 @@ export function loadResultsView(): ResultsView | null {
     const sortDir = parsed.sortDir;
     const budget = typeof parsed.budget === 'number' ? parsed.budget : 0;
     const hideTraps = typeof parsed.hideTraps === 'boolean' ? parsed.hideTraps : false;
+    const pairMode = parsed.pairMode === 'paired' ? 'paired' : 'best';
     if (
       filter !== 'all' && filter !== 'available' && filter !== 'taken' &&
       filter !== 'problems' && filter !== 'favorites'
@@ -141,7 +146,7 @@ export function loadResultsView(): ResultsView | null {
       sortKey !== 'tco' && sortKey !== 'status'
     ) return null;
     if (sortDir !== 'asc' && sortDir !== 'desc') return null;
-    return { v: 1, filter, sortKey, sortDir, budget, hideTraps };
+    return { v: 1, filter, sortKey, sortDir, budget, hideTraps, pairMode };
   } catch {
     return null;
   }
