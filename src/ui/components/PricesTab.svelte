@@ -15,6 +15,10 @@
   const history =
     historyJson as unknown as Record<string, Array<[string, number | null, number | null]>>;
 
+  /** Cold start: no CI-harvested snapshots bundled yet → trends are impossible
+      and the user gets a one-line explanation instead of empty trend cells. */
+  const hasHistory = Object.keys(history).length > 0;
+
   type SortMode = 'reg' | 'renew' | 'alpha';
 
   let query = $state('');
@@ -219,6 +223,26 @@
     </button>
   </div>
 
+  {#if table && Object.keys(table.tlds).length > 0}
+    <div class="legend">
+      <span class="legend-item" title={t('prices.legend.band.tip')}>
+        <span class="swatch swatch-band" aria-hidden="true"></span>
+        {t('prices.legend.band')}
+      </span>
+      <span class="legend-item" title={t('prices.legend.dot.tip')}>
+        <span class="swatch swatch-dot" aria-hidden="true"></span>
+        {t('prices.legend.dot')}
+      </span>
+      <span class="legend-item" title={t('prices.legend.trap.tip')}>
+        <span class="swatch swatch-trap" aria-hidden="true"></span>
+        {t('prices.legend.trap')}
+      </span>
+    </div>
+    {#if !hasHistory}
+      <p class="muted coldstart">{t('prices.trends.coldstart')}</p>
+    {/if}
+  {/if}
+
   {#if !table || Object.keys(table.tlds).length === 0}
     <p class="muted empty">{t('prices.empty')}</p>
   {:else}
@@ -243,8 +267,8 @@
                 </span>
               </th>
             {/each}
-            <th class="price-col best-col">{t('price.renewal')}</th>
-            <th class="price-col best-col">{t('price.tco')}</th>
+            <th class="price-col best-col">{t('prices.col.renewal')}</th>
+            <th class="price-col best-col">{t('prices.col.tco')}</th>
           </tr>
         </thead>
         <tbody>
@@ -398,10 +422,13 @@
     background: var(--accent-hover);
   }
 
+  /* On-state: soft fill + accent border + outer ring so the pressed toggle is
+     unmistakable in both themes (same family as the results filter chips). */
   .btn.active {
     background: var(--accent-soft);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
   /* Cheapest-registrar columns (renewal / 3y TCO) are set off from the
@@ -409,6 +436,56 @@
   .best-col,
   .best-cell {
     border-left: 1px solid var(--border);
+  }
+
+  /* Compact encoding legend under the toolbar; each item carries a title
+     tooltip with the long explanation (same pattern as cell tooltips). */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    cursor: help;
+  }
+
+  .swatch {
+    flex: none;
+  }
+
+  /* Mini column band: sunken fill + leading divider, mirroring how the
+     cheapest columns are set off in the table (no full border, so it does
+     not read as a checkbox). */
+  .swatch-band {
+    width: 10px;
+    height: 12px;
+    background: var(--bg-sunken);
+    border-left: 2px solid var(--border-strong);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .swatch-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green-solid);
+    margin: 0 2px;
+  }
+
+  .swatch-trap {
+    width: 14px;
+    height: 10px;
+    border-bottom: 1px dotted var(--amber);
+  }
+
+  .coldstart {
+    margin-top: calc(-1 * var(--space-2));
   }
 
   .table-wrap {

@@ -6,12 +6,32 @@
   let elapsedSec = $state(0);
   let timerId: ReturnType<typeof setInterval> | null = null;
 
+  /** Elapsed seconds of the CURRENT run only. While running, count from
+    * runState.startedAt; once done, use the elapsedMs captured at finish so
+    * a restored previous run never leaks its stale timestamp into the stat. */
+  function currentElapsedSec(): number {
+    const rs = get(runState);
+    if (rs.phase === 'running') {
+      return rs.startedAt > 0 ? Math.floor((Date.now() - rs.startedAt) / 1000) : 0;
+    }
+    return Math.max(0, Math.floor(rs.elapsedMs / 1000));
+  }
+
+  /** Humanized duration: <60s → '24s', <1h → '34 min', else '2 h 5 min'. */
+  function humanizeElapsed(sec: number): string {
+    if (sec < 60) return `${sec}s`;
+    if (sec < 3600) return `${Math.floor(sec / 60)} min`;
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    return m > 0 ? `${h} h ${m} min` : `${h} h`;
+  }
+
   $effect(() => {
     const phase = $runState.phase;
     if (phase === 'running') {
+      elapsedSec = currentElapsedSec();
       timerId = setInterval(() => {
-        const rs = get(runState);
-        elapsedSec = rs.startedAt > 0 ? Math.floor((Date.now() - rs.startedAt) / 1000) : 0;
+        elapsedSec = currentElapsedSec();
       }, 1000);
       return () => {
         if (timerId != null) clearInterval(timerId);
@@ -19,8 +39,7 @@
       };
     }
     if (phase === 'done') {
-      const rs = get(runState);
-      elapsedSec = rs.startedAt > 0 ? Math.floor((Date.now() - rs.startedAt) / 1000) : 0;
+      elapsedSec = currentElapsedSec();
     }
     if (phase === 'idle') {
       elapsedSec = 0;
@@ -46,7 +65,7 @@
         <span class="stat err nums">{t('check.progress.errors', { n: $runState.errors })}</span>
       {/if}
       <span class="sep" aria-hidden="true">·</span>
-      <span class="stat time nums">{t('check.progress.elapsed', { s: elapsedSec })}</span>
+      <span class="stat time nums">{t('check.progress.elapsed', { s: humanizeElapsed(elapsedSec) })}</span>
     </div>
   </div>
 {/if}

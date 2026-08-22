@@ -109,8 +109,10 @@
   --scrollbar-thumb: rgba(16, 24, 40, 0.16);
   --scrollbar-thumb-hover: rgba(16, 24, 40, 0.26);
 
-  /* focus — accent ring + soft glow */
-  --focus-ring: 0 0 0 2px rgba(94, 106, 210, 0.55), 0 0 12px rgba(94, 106, 210, 0.25);
+  /* focus — keyboard focus is a double ring with a surface-colored gap so it
+     reads distinct from the selected/active state (accent border + soft fill,
+     no ring). Box shadows follow the element's own border-radius. */
+  --focus-ring: 0 0 0 2px var(--bg-elevated), 0 0 0 4px var(--accent);
 }
 
 [data-theme='dark'] {
@@ -122,10 +124,12 @@
   --bg-sunken: #08090b;
   --bg-overlay: #1a1d22;
 
-  /* borders — semi-transparent white over dark surfaces */
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
+  /* borders — semi-transparent white over dark surfaces. Raised one step so
+     outlines on outlined controls (icon buttons, chips, inputs) stay visible
+     against the near-black elevated surfaces. */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.20);
 
   /* text — never pure white */
   --text: #eef1f6;
@@ -176,8 +180,8 @@
   --scrollbar-thumb: rgba(255, 255, 255, 0.16);
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.26);
 
-  /* focus — same accent ring + soft glow */
-  --focus-ring: 0 0 0 2px rgba(94, 106, 210, 0.55), 0 0 12px rgba(94, 106, 210, 0.25);
+  /* focus — same double ring as light; vars resolve per theme */
+  --focus-ring: 0 0 0 2px var(--bg-elevated), 0 0 0 4px var(--accent);
 }
 
 /* ---- base ---- */
@@ -229,7 +233,6 @@ textarea {
 :focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
-  border-radius: var(--radius-sm);
 }
 
 a {
@@ -319,6 +322,60 @@ input[type='radio']:checked {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='3' fill='white'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
+}
+
+/* Range sliders: fully themed. The UA-native track renders bright white in
+   dark mode even with accent-color, so take over track + thumb rendering.
+   The track uses a border token so the unfilled portion stays dark-friendly. */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  min-height: 20px;
+  padding: 0;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  border: 2px solid var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--dur) var(--ease);
+}
+
+input[type='range']:hover::-webkit-slider-thumb {
+  background: var(--accent-hover);
+}
+
+input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  border: 2px solid var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+}
+
+input[type='range']:hover::-moz-range-thumb {
+  background: var(--accent-hover);
 }
 
 /* ---- utilities ---- */

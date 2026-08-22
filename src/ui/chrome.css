@@ -155,6 +155,21 @@
   color: var(--amber);
 }
 
+/* ---- Status badge dark-contrast lift (StatusBadge) ----
+   The 'taken' variant is neutral-soft fill + secondary text with no border —
+   on near-black dark rows that reads gray-on-gray. Raise text and border one
+   step. Selector specificity (attribute + two classes) outweighs the
+   component-scoped rules without !important. */
+
+[data-theme='dark'] .badge.taken {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+[data-theme='dark'] .badge.taken .dot {
+  background: var(--text-secondary);
+}
+
 /* ---- Toast (SettingsTab / DropsTab -- centered, no animation) ---- */
 
 .toast {

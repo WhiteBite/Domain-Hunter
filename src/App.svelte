@@ -57,7 +57,8 @@
     window.scrollTo({ top: 0 });
   });
 
-  // Tab bar right-edge fade: shown only while the bar actually overflows.
+  // Tab bar right-edge fade: shown only while the bar overflows AND there is
+  // still content to the right (hides once scrolled to the end).
   let tabsEl: HTMLElement | null = $state(null);
   let tabsScrollable = $state(false);
   $effect(() => {
@@ -66,12 +67,27 @@
     void current.lang;
     if (!el) return;
     const check = (): void => {
-      tabsScrollable = el.scrollWidth > el.clientWidth + 1;
+      const overflowing = el.scrollWidth > el.clientWidth + 1;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+      tabsScrollable = overflowing && !atEnd;
     };
     check();
+    el.addEventListener('scroll', check, { passive: true });
     const ro = new ResizeObserver(check);
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      el.removeEventListener('scroll', check);
+      ro.disconnect();
+    };
+  });
+
+  // Keep the active tab visible in the strip when tabs overflow (mobile).
+  $effect(() => {
+    void tab;
+    const el = tabsEl;
+    if (!el) return;
+    const active = el.querySelector<HTMLButtonElement>('.tab.active');
+    active?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   });
 
   // Work tabs (check/generators/drops) use the wider content cap so the
@@ -526,6 +542,13 @@
     display: flex;
     gap: var(--space-1);
     overflow-x: auto;
+    /* The right-edge fade hints at scrollability — a native scrollbar would
+       double-signal (and eat vertical space on mobile). */
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
   }
 
   /* Right-edge fade hints at more tabs off-canvas (mobile). Applied only

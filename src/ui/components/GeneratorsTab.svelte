@@ -674,18 +674,40 @@
     color: var(--text-secondary);
   }
 
+  /* Standard input surface: elevated background + text color (the page-tone
+     fill used to read as a disabled field inside the elevated cards). */
   textarea,
   input[type='text'],
   input[type='search'],
   input[type='number'],
   select {
-    background: var(--bg);
+    background: var(--bg-elevated);
+    color: var(--text);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-sm);
     font-family: inherit;
     min-height: 40px;
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  textarea:hover,
+  input[type='text']:hover,
+  input[type='search']:hover,
+  input[type='number']:hover,
+  select:hover {
+    border-color: var(--border-strong);
+  }
+
+  textarea:focus,
+  input[type='text']:focus,
+  input[type='search']:focus,
+  input[type='number']:focus,
+  select:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
   textarea {
@@ -790,12 +812,54 @@
     font-size: var(--text-xs);
   }
 
-  .params summary,
   .sets-summary {
     cursor: pointer;
     font-size: var(--text-sm);
     color: var(--text-secondary);
     user-select: none;
+  }
+
+  /* Native <details> disclosure styled like the other collapsibles
+     (History / Zones group toggles): uppercase caption + rotating chevron. */
+  .params summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+    user-select: none;
+    list-style: none;
+    border-radius: var(--radius-sm);
+    transition: color var(--dur) var(--ease);
+  }
+
+  .params summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .params summary::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    flex: none;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      no-repeat center / contain;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .params summary:hover {
+    color: var(--text);
+  }
+
+  .params[open] summary::before {
+    transform: rotate(180deg);
   }
 
   .params-body {

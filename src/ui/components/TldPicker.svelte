@@ -693,10 +693,13 @@
     border-color: var(--border-strong);
     color: var(--text);
   }
+  /* Active preset: indigo fill/border + outer ring, matching the results
+     filter chips' on-state so the selection is obvious in both themes. */
   .preset.active {
     background: var(--accent-soft);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
   .zone-list {
