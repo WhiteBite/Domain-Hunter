@@ -40,6 +40,8 @@ async function bootWithMixedResults(page: Page): Promise<void> {
     },
     { domain: 'zzqxtest1.com', response: { status: 404 } },
   ]);
+  // High-trust 404 is DoH-corroborated now (SPEC §7) — mock the probe.
+  await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
   await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
   // Narrow to .com only, run two mixed-status checks, wait for completion.
@@ -173,6 +175,7 @@ test.describe('Misc coverage', () => {
     });
     // .xyz fixture pricing is a promo trap ($2.04 first year, $12.98 renewal).
     await mockRdap(page, [{ domain: 'zzqxtest1zzqx2.xyz', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1zzqx2.xyz': 'nxdomain' });
     await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
     // Narrow the run to .xyz only.
@@ -241,6 +244,7 @@ test.describe('Misc coverage', () => {
       cloudflare: cloudflarePricing(),
     });
     await mockRdap(page, [{ domain: 'zzqxpromo.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxpromo.com': 'nxdomain' });
     // .com cheapest reg (999¢) below the $10.26 wholesale floor → promo chip.
     const promoSeed = seedPricingTable();
     promoSeed.table.tlds.com = {
@@ -370,6 +374,7 @@ test.describe('Misc coverage', () => {
       ],
     });
     await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
     await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
     await page.click('[data-testid="tld-button-clear"]');
@@ -441,6 +446,7 @@ test.describe('Misc coverage', () => {
       ],
     });
     await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
     await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
     await page.click('[data-testid="tld-button-clear"]');
@@ -513,6 +519,7 @@ test.describe('Misc coverage', () => {
       { domain: 'zzqxpremium.com', response: { status: 404 } },
       { domain: 'zzqxplain.com', response: { status: 404 } },
     ]);
+    await mockDoh(page, { 'zzqxpremium.com': 'nxdomain', 'zzqxplain.com': 'nxdomain' });
     await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
     await page.click('[data-testid="tld-button-clear"]');

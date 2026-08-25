@@ -194,7 +194,7 @@ WHOIS returns unstructured text — a human-readable wall of paragraphs that is 
 ## How it works
 
 1. The browser talks **directly to registry RDAP endpoints** — all endpoints used by Domain Hunter have open CORS, so no server or proxy is required.
-2. **HTTP 200 → taken**, **404 → not in the registry** (then trust rules apply: high-trust gTLDs report `available`; low-trust ccTLDs are double-checked via DNS-over-HTTPS and reported as `probably_available`).
+2. **HTTP 200 → taken**, **404 → not in the registry** (then trust rules apply: high-trust gTLD 404s are corroborated by a DoH NS probe before reporting `available` — NXDOMAIN → available, live NS → taken; low-trust ccTLDs are double-checked via DNS-over-HTTPS and reported as `probably_available`).
 3. **429 / 5xx → retry with backoff**; on persistent network or CORS failures the Cloudflare RDAP aggregator is tried once, then DoH corroboration takes over.
 4. Results are cached locally with a configurable TTL; re-checking is one click, and an "ignore cache" toggle forces fresh lookups.
 

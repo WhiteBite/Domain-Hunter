@@ -2,7 +2,7 @@
 
 > Free, open-source bulk domain availability checker and name generator that runs 100% in the browser: direct RDAP checks against 148 TLD registries, five name generators, live registrar prices with 3-year TCO, CSV/TSV/Markdown export. No servers, no API keys, no tracking. MIT licensed. Built with Svelte 5 + TypeScript + Vite (single-file build).
 
-Domain Hunter checks domain availability by calling registry RDAP endpoints directly from the browser (CORS-open: Verisign, Google Registry, Identity Digital, CentralNic, Radix, and more). It never guesses availability: high-trust gTLD 404s report `available`, low-trust ccTLDs are corroborated via DNS-over-HTTPS and report `probably_available`. Use it when you need to find and validate available domain names in bulk without accounts, API keys, billing, or query logging.
+Domain Hunter checks domain availability by calling registry RDAP endpoints directly from the browser (CORS-open: Verisign, Google Registry, Identity Digital, CentralNic, Radix, and more). It never guesses availability: a high-trust gTLD 404 is corroborated by a DoH NS probe before reporting `available` (NXDOMAIN → available; live NS → taken), and low-trust ccTLDs report `probably_available`. Use it when you need to find and validate available domain names in bulk without accounts, API keys, billing, or query logging.
 
 ## Documentation
 
@@ -35,7 +35,7 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 - Workflow: favorites shortlist (star any domain), watchlist (silent re-check on load with freed/taken badges), run history with one-click restore, results search and multi-select, bulk available actions, share links, CSV/TSV/Markdown export
 - Privacy: no analytics, no telemetry, no accounts; all state in browser localStorage
 - Distribution: one self-contained HTML file; works from file://, GitHub Pages, Cloudflare Pages, any static host
-- CLI + MCP: Node CLI (`npm run build:cli` → `dist-cli/domain-hunter.mjs`) and MCP server (`dist-cli/mcp-server.mjs`) expose the same core logic to AI agents — four commands (check, prices, generate, find), JSON on stdout, same three-state status model and rate limits; fresh tlds/pricing snapshots fetched from the repo's main branch with 24h cache and bundled fallback
+- CLI + MCP: Node CLI (`npm run build:cli` → `dist-cli/domain-hunter.mjs`) and MCP server (`dist-cli/mcp-server.mjs`) expose the same core logic to AI agents — five commands (check, prices, generate, find, tlds), JSON on stdout, same three-state status model and rate limits; fresh tlds/pricing snapshots fetched from the repo's main branch with 24h cache and bundled fallback
 
 ## Alternatives
 

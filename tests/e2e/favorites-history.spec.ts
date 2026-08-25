@@ -89,6 +89,51 @@ async function mockRdap(page: Page, rules: RdapRule[]): Promise<void> {
   });
 }
 
+type DohOutcome = 'nxdomain' | 'noerror' | 'error';
+
+/** Route both DoH providers (cloudflare-dns.com + dns.google). */
+async function mockDoh(
+  page: Page,
+  outcomes: Record<string, DohOutcome>,
+): Promise<void> {
+  const handler = async (route: {
+    request: () => { url: () => string };
+    fulfill: (opts: { status: number; headers?: Record<string, string>; body?: string }) => Promise<void>;
+  }) => {
+    const u = new URL(route.request().url());
+    const domain = u.searchParams.get('name');
+    if (!domain) {
+      await route.fulfill({ status: 400, headers: CORS });
+      return;
+    }
+    const outcome = outcomes[domain];
+    if (!outcome) {
+      await route.fulfill({
+        status: 200,
+        headers: { ...CORS, 'Content-Type': 'application/dns-json' },
+        body: JSON.stringify({ Status: 2 }),
+      });
+      return;
+    }
+    if (outcome === 'error') {
+      await route.fulfill({ status: 500, headers: CORS });
+      return;
+    }
+    const status = outcome === 'nxdomain' ? 3 : 0;
+    const body: Record<string, unknown> = { Status: status };
+    if (outcome === 'noerror') {
+      body.Answer = [{ name: domain, type: 2, TTL: 3600, data: 'ns1.example.com' }];
+    }
+    await route.fulfill({
+      status: 200,
+      headers: { ...CORS, 'Content-Type': 'application/dns-json' },
+      body: JSON.stringify(body),
+    });
+  };
+  await page.route(/https:\/\/cloudflare-dns\.com\/dns-query/, handler);
+  await page.route(/https:\/\/dns\.google\/resolve/, handler);
+}
+
 let leaked: string[] = [];
 
 const ALLOWLIST: RegExp[] = [
@@ -155,6 +200,7 @@ test.describe('Favorites, search, multi-select, history, panel', () => {
     await mockBootstrap(page, ianaBootstrap());
     await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
     await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
     await bootCheckTab(page);
     await runCheck(page, 'google.com\nzzqxtest1.com');
     await expect(row(page, 'google.com')).toBeVisible();
@@ -182,6 +228,7 @@ test.describe('Favorites, search, multi-select, history, panel', () => {
     await mockBootstrap(page, ianaBootstrap());
     await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
     await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
     await bootCheckTab(page);
     await runCheck(page, 'google.com\nzzqxtest1.com');
     await expect(row(page, 'google.com')).toBeVisible();
@@ -200,6 +247,7 @@ test.describe('Favorites, search, multi-select, history, panel', () => {
     await mockBootstrap(page, ianaBootstrap());
     await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
     await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
     await bootCheckTab(page);
     await runCheck(page, 'google.com\nzzqxtest1.com');
     await expect(row(page, 'google.com')).toBeVisible();
@@ -351,6 +399,7 @@ test.describe('Watchlist — silent re-check of favorited domains', () => {
     await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
     // zzqxwatch.com → 404 (high-trust .com → available)
     await mockRdap(page, [{ domain: 'zzqxwatch.com', response: rdapFree() }]);
+    await mockDoh(page, { 'zzqxwatch.com': 'nxdomain' });
     await boot(page);
 
     // Watch banner appears with freed count 1.
@@ -376,6 +425,7 @@ test.describe('Watchlist — silent re-check of favorited domains', () => {
     await mockBootstrap(page, ianaBootstrap());
     await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
     await mockRdap(page, [{ domain: 'zzqxwatch.com', response: rdapFree() }]);
+    await mockDoh(page, { 'zzqxwatch.com': 'nxdomain' });
     await boot(page);
 
     // Wait for the initial watchlist run to finish (banner appears).
@@ -394,6 +444,7 @@ test.describe('Watchlist — silent re-check of favorited domains', () => {
     await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
     // zzqxpricedrop.com → 404 (high-trust .com → available)
     await mockRdap(page, [{ domain: 'zzqxpricedrop.com', response: rdapFree() }]);
+    await mockDoh(page, { 'zzqxpricedrop.com': 'nxdomain' });
     await openApp(page, {
       seed: {
         'dh:v1:pricing': seedPricingTable(),

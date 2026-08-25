@@ -209,6 +209,15 @@ async function setupBaseMocks(page: Page): Promise<void> {
   await assertNoLeaks(page);
   await mockBootstrap(page, ianaBootstrap());
   await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+  // High-trust gTLD 404s are corroborated by a DoH NS probe (SPEC §7 DoH
+  // veto). Mock NXDOMAIN for the unregistered test domains so the DoH
+  // request never falls through to the real network.
+  await mockDoh(page, {
+    'zzqxtest1.com': 'nxdomain',
+    'zzqxtest1.xyz': 'nxdomain',
+    'zzqxtest1.dev': 'nxdomain',
+    'zzqxtest1.de': 'nxdomain',
+  });
 }
 
 /**
