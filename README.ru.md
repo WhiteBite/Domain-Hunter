@@ -99,6 +99,63 @@ npm run dev       # dev-сервер Vite для разработки
 
 Ни бэкенда, ни переменных окружения, ни API-ключей — вообще.
 
+## Для AI-агентов и автоматизации (CLI + MCP)
+
+Domain Hunter поставляет Node CLI и MCP-сервер, которые используют ту же базовую логику, что и браузерное приложение — та же трёхстатусная модель, те же лимиты на инфраструктуру, тот же merge цен. Оба выводят машиночитаемый JSON в stdout; прогресс и логи — только в stderr.
+
+### Сборка
+
+```bash
+npm install && npm run build:cli
+```
+
+Создаёт `dist-cli/domain-hunter.mjs` (и `dist-cli/mcp-server.mjs`, если `cli/mcp/server.ts` присутствует). Требуется Node 20+.
+
+### Команды
+
+```bash
+# Проверить доступность доменов через RDAP (тот же движок, что в браузере)
+node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
+
+# Цены регистраторов для конкретных зон
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+
+# Сгенерировать кандидатов (офлайн-безопасно: combinator, syllables, mutations, themes)
+node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
+
+# Найти свободные домены в бюджете (генерация + проверка + фильтр по цене)
+node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
+```
+
+Коды выхода: `0` успех, `1` ошибка выполнения, `2` ошибка использования. JSON-результат выводится в stdout; `--help` показывает все флаги.
+
+### JSON-контракт
+
+Каждая команда выводит один JSON-объект в stdout с полем `command` (`check` / `prices` / `generate` / `find`) и специфичной полезной нагрузкой. Точные формы — в `cli/contract.ts`. Результат `check` включает `status` на домен (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache` и опционально `price` — те же поля, что в таблице браузера.
+
+### Свежие снапшоты конфигов
+
+CLI загружает свежие `tlds.json` и `pricing.snapshot.json` из ветки `main` этого репозитория (`raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/...`) с 24-часовым TTL-кэшем в `~/.domain-hunter/storage.json`. При любой ошибке загрузки молча откатывается к встроенным копиям из `src/config/`. Живые цены (Porkbun + Cloudflare at-cost) накладываются сверху через тот же `loadPricing`, что и в приложении.
+
+### MCP-сервер
+
+MCP-сервер (Model Context Protocol) предоставляет четыре команды как инструменты, чтобы AI-агенты могли вызывать их напрямую:
+
+```jsonc
+// Конфиг в стиле Claude / opencode
+{
+  "mcpServers": {
+    "domain-hunter": {
+      "command": "node",
+      "args": ["dist-cli/mcp-server.mjs"],
+      "cwd": "/path/to/Domain-Hunter"
+    }
+  }
+}
+```
+
+Соберите сервер командой `npm run build:cli` (он бандлит `cli/mcp/server.ts` в `dist-cli/mcp-server.mjs`, если файл присутствует). Сервер переиспользует `cli/core.ts` — отдельной логики нет, новых сетевых адресов кроме `raw.githubusercontent.com` для снапшотов нет.
+
 ## Деплой своей копии
 
 **GitHub Pages** (проще всего):

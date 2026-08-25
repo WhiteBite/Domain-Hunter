@@ -16,6 +16,9 @@ Domain Hunter is a free, open-source, **100% client-side** bulk domain availabil
 - `npm run test:e2e` — Playwright E2E against `dist/index.html` (all network mocked, build dist first)
 - `npm run test:e2e:ui` — Playwright E2E in interactive UI mode
 - `npm run build:worker` — regenerate the optional Cloudflare CORS proxy `worker.js` from `src/config/tlds.json`
+- `npm run build:cli` — esbuild-bundle the Node CLI (`cli/main.ts` → `dist-cli/domain-hunter.mjs`) and the MCP server (`cli/mcp/server.ts` → `dist-cli/mcp-server.mjs` if present)
+- `npm run cli -- <args>` — build the CLI then run it with the given arguments (e.g. `npm run cli -- check example.com`)
+- `npm run mcp` — build and run the MCP server (if `cli/mcp/server.ts` exists)
 
 ## Project layout
 
@@ -40,6 +43,13 @@ src/
   ui/                   # tokens.css, stores, csv/share/theme/settings, components/
 tests/                  # Vitest suites (pure logic) + e2e/ (Playwright E2E, mocked network)
 scripts/                # CI helpers (price harvest, zone health, worker build)
+cli/
+  main.ts               # CLI entry point: arg parsing, JSON to stdout, exit codes 0/1/2
+  contract.ts           # CLI option/result types — shared with the MCP server
+  core.ts               # runCheckCommand/runPricesCommand/runGenerateCommand/runFindCommand
+  data.ts               # fresh-snapshot fetch (GitHub raw, 24h TTL) + compact pricing expansion
+  shims/storage.ts      # file-backed localStorage polyfill for Node (~/.domain-hunter/storage.json)
+dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs (never edit by hand)
 ```
 
 ## Conventions (must follow)
@@ -49,7 +59,7 @@ scripts/                # CI helpers (price harvest, zone health, worker build)
 - **Zones are data, not code.** Adding/changing a TLD means editing `src/config/tlds.json` only.
 - **Never guess availability.** Honor the three-state model in SPEC §7 (`available` / `probably_available` / `unknown`); DoH-only results never yield bare `available`. A wrong "available" is worse than "unknown".
 - **Be polite to registries.** Per-infra rate profiles, AIMD backoff, honor `Retry-After`, global concurrency cap. Google Registry ≈1 rps is strict.
-- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com, Cloudflare RDAP aggregator (`rdap.cloudflare.com/domain/{domain}`). No CDNs, no webfonts from network, no analytics.
+- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com, Cloudflare RDAP aggregator (`rdap.cloudflare.com/domain/{domain}`). No CDNs, no webfonts from network, no analytics. The CLI additionally fetches `raw.githubusercontent.com` (WhiteBite/Domain-Hunter main branch configs — `tlds.json` and `pricing.snapshot.json`, 24h TTL cache, bundled fallback) — the app runtime allowlist is unchanged.
 - **Security.** Registry-derived text is escaped; external links use `target="_blank" rel="noopener noreferrer"`; keep the CSP meta in `index.html` intact.
 - **Pricing unit is USD cents** internally; display converts via `settings.rates`.
 - **Storage keys** are versioned: `dh:v1:*` (see SPEC §5). Migrate, don't silently break.
@@ -64,5 +74,6 @@ scripts/                # CI helpers (price harvest, zone health, worker build)
 ## Notes
 
 - `dist/` is build output — never edit by hand.
+- `dist-cli/` is CLI/MCP build output — never edit by hand; rebuild with `npm run build:cli`.
 - When adding a dictionary dataset, attribute it in `src/config/dictionaries/LICENSES.md` (name, source URL, license).
 - The app must keep working from `file://` and under a sub-path (`base: './'`) — verify after routing/asset changes.

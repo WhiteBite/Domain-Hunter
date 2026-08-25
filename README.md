@@ -101,6 +101,63 @@ npm run dev       # Vite dev server for development
 
 No backend, no environment variables, no API keys — ever.
 
+## For AI agents & automation (CLI + MCP)
+
+Domain Hunter ships a Node CLI and an MCP server that expose the same core logic as the browser app — same three-state status model, same per-infrastructure rate limiting, same pricing merge. Both output machine-readable JSON to stdout; progress and logs go to stderr only.
+
+### Build
+
+```bash
+npm install && npm run build:cli
+```
+
+This produces `dist-cli/domain-hunter.mjs` (and `dist-cli/mcp-server.mjs` if `cli/mcp/server.ts` is present). Node 20+ is required.
+
+### Commands
+
+```bash
+# Check domain availability via RDAP (same engine as the browser app)
+node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
+
+# Per-registrar pricing for specific TLDs
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+
+# Generate domain name candidates (offline-safe: combinator, syllables, mutations, themes)
+node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
+
+# Find available domains within a budget (generates + checks + filters by price)
+node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
+```
+
+Exit codes: `0` success, `1` runtime error, `2` usage error. The result JSON is printed to stdout; `--help` shows all flags.
+
+### JSON contract
+
+Every command prints a single JSON object to stdout with a `command` field (`check` / `prices` / `generate` / `find`) and command-specific payload. See `cli/contract.ts` for the exact shapes. The `check` outcome includes per-domain `status` (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache`, and optional `price` — the same fields the browser table renders.
+
+### Fresh config snapshots
+
+The CLI fetches fresh `tlds.json` and `pricing.snapshot.json` from the `main` branch of this repository (`raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/...`) with a 24-hour TTL cache stored in `~/.domain-hunter/storage.json`. On any fetch failure it silently falls back to the bundled copies in `src/config/`. Live pricing (Porkbun + Cloudflare at-cost) is layered on top via the same `loadPricing` path the app uses.
+
+### MCP server
+
+An MCP (Model Context Protocol) server exposes the four commands as tools so AI agents can call them directly:
+
+```jsonc
+// Claude / opencode-style config
+{
+  "mcpServers": {
+    "domain-hunter": {
+      "command": "node",
+      "args": ["dist-cli/mcp-server.mjs"],
+      "cwd": "/path/to/Domain-Hunter"
+    }
+  }
+}
+```
+
+Build the server with `npm run build:cli` (it bundles `cli/mcp/server.ts` into `dist-cli/mcp-server.mjs` when present). The server reuses `cli/core.ts` — no separate logic, no new network destinations beyond the CLI's `raw.githubusercontent.com` snapshot fetch.
+
 ## Deploy your own copy
 
 **GitHub Pages** (easiest):

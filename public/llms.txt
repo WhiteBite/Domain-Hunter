@@ -35,6 +35,7 @@ Domain Hunter checks domain availability by calling registry RDAP endpoints dire
 - Workflow: favorites shortlist (star any domain), watchlist (silent re-check on load with freed/taken badges), run history with one-click restore, results search and multi-select, bulk available actions, share links, CSV/TSV/Markdown export
 - Privacy: no analytics, no telemetry, no accounts; all state in browser localStorage
 - Distribution: one self-contained HTML file; works from file://, GitHub Pages, Cloudflare Pages, any static host
+- CLI + MCP: Node CLI (`npm run build:cli` → `dist-cli/domain-hunter.mjs`) and MCP server (`dist-cli/mcp-server.mjs`) expose the same core logic to AI agents — four commands (check, prices, generate, find), JSON on stdout, same three-state status model and rate limits; fresh tlds/pricing snapshots fetched from the repo's main branch with 24h cache and bundled fallback
 
 ## Alternatives
 

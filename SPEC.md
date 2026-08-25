@@ -449,3 +449,33 @@ affiliate link activation (config already affiliate-ready: Porkbun Ambassador + 
   the available filter defaults to TCO sort; coupon-effective first-year price
   with the standard price struck through; heuristic "possible premium" chip on
   available rows.
+
+## 18. Agent access (CLI + MCP)
+
+The CLI and MCP server expose the app's core logic to AI agents and shell
+automation. They are additive surfaces — no app behavior changes.
+
+- **Same core, no duplication.** `cli/core.ts` calls `runQueue`,
+  `getFresh`/`put`, `loadPricing`, and the pure generators directly from
+  `src/`. The CLI does not re-implement any checking, pricing, or generation
+  logic. The MCP server calls `cli/core.ts` — no second layer.
+- **Same status model (§7).** The CLI reports `available` /
+  `probably_available` / `taken` / `unknown` / `error` with the same trust
+  rules and DoH corroboration. A wrong "available" is still worse than
+  "unknown".
+- **Same rate limiting (§8).** The CLI reuses `runQueue` with the same
+  per-infrastructure AIMD backoff, `Retry-After` handling, and global
+  concurrency cap. Google Registry's strict ~1 rps is honored.
+- **Single src addition.** The only `src/` change that enables the CLI is the
+  additive `snapshotOverride` option on `loadPricing` — it lets the CLI pass
+  a freshly fetched snapshot as the baseline instead of the bundled one.
+  The browser app does not pass it; its behavior is unchanged.
+- **CLI-only network addition.** The CLI fetches
+  `raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/src/config/{tlds,pricing.snapshot}.json`
+  with a 24h TTL cache (stored in `~/.domain-hunter/storage.json`) and
+  silent fallback to the bundled copies. The app runtime allowlist (§13) is
+  unchanged.
+- **JSON-on-stdout contract.** Every command prints one JSON object to
+  stdout (exit 0 on success, 1 on runtime error, 2 on usage error). Progress
+  and diagnostics go to stderr only. See `cli/contract.ts` for the exact
+  shapes.
