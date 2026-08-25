@@ -146,6 +146,21 @@ export async function checkDomain(
 
   async function conclude404(note?: string): Promise<CheckResult> {
     if (trust === 'high') {
+      // High-trust RDAP 404 is authoritative, but a registered domain can
+      // be absent from a registry's RDAP view (e.g. PIR .org 404 for a
+      // delegated domain). DoH NS probe corroborates before reporting free.
+      const doh = await queryNs(domain, fetchImpl);
+      if (doh === 'noerror') {
+        return {
+          ...base,
+          status: 'taken',
+          source: 'doh',
+          note: 'RDAP 404 contradicted by live NS delegation',
+          latencyMs: Date.now() - startedAt,
+        };
+      }
+      // nxdomain → available (RDAP authoritative, DNS corroborates).
+      // error    → available (trusted RDAP stands when DoH is unreachable).
       return {
         ...base,
         status: 'available',

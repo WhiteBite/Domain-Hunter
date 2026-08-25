@@ -55,12 +55,13 @@ describe('checkDomain status matrix', () => {
     expect(result.source).toBe('rdap');
   });
 
-  it('404 + trust high → available', async () => {
+  it('404 + trust high + DoH NXDOMAIN → available', async () => {
     const result = await checkDomain('a.test', tldHigh, infraHigh, {
-      fetchImpl: scriptFetch([() => jsonResponse(404)]),
+      fetchImpl: scriptFetch([() => jsonResponse(404), () => jsonResponse(200, { Status: 3 })]),
       sleep: noSleep,
     });
     expect(result.status).toBe('available');
+    expect(result.source).toBe('rdap');
   });
 
   it('404 + trust low + DNS NXDOMAIN → probably_available', async () => {
@@ -166,13 +167,14 @@ describe('checkDomain status matrix', () => {
     expect(result.status).toBe('error');
   });
 
-  it('network failure + proxy 404 + trust high → available', async () => {
+  it('network failure + proxy 404 + trust high + DoH NXDOMAIN → available', async () => {
     const result = await checkDomain('a.test', tldHigh, infraHigh, {
       fetchImpl: scriptFetch([
         throwFetch,
         throwFetch,
         throwFetch,
         () => jsonResponse(200, { status: 404, free: true }),
+        () => jsonResponse(200, { Status: 3 }),
       ]),
       proxyUrl: 'https://proxy.test/',
       sleep: noSleep,
@@ -259,14 +261,15 @@ describe('checkDomain status matrix', () => {
 });
 
 describe('Cloudflare aggregator fallback + cross-check', () => {
-  // (a) transport fallback: direct fetch throws → aggregator 404 + high trust → available
-  it('network failure + aggregator 404 + trust high → available (via cloudflare rdap)', async () => {
+  // (a) transport fallback: direct fetch throws → aggregator 404 + high trust + DoH NXDOMAIN → available
+  it('network failure + aggregator 404 + trust high + DoH NXDOMAIN → available (via cloudflare rdap)', async () => {
     const result = await checkDomain('a.test', tldHigh, infraHigh, {
       fetchImpl: scriptFetch([
         throwFetch,
         throwFetch,
         throwFetch,
         () => jsonResponse(404),
+        () => jsonResponse(200, { Status: 3 }),
       ]),
       sleep: noSleep,
     });
@@ -348,6 +351,54 @@ describe('Cloudflare aggregator fallback + cross-check', () => {
     expect(result.status).toBe('taken');
     expect(result.source).toBe('cloudflare');
     expect(result.note).toBe('via cloudflare rdap');
+  });
+});
+
+describe('DoH veto on high-trust 404', () => {
+  // (a) high-trust 404 + DoH NXDOMAIN → available/rdap (RDAP authoritative, DNS corroborates)
+  it('404 + trust high + DoH NXDOMAIN → available (rdap)', async () => {
+    const result = await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([() => jsonResponse(404), () => jsonResponse(200, { Status: 3 })]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('available');
+    expect(result.source).toBe('rdap');
+    expect(result.note).toBeUndefined();
+  });
+
+  // (b) high-trust 404 + DoH NOERROR → taken/doh + contradiction note
+  it('404 + trust high + DoH NOERROR → taken (doh veto)', async () => {
+    const result = await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([() => jsonResponse(404), () => jsonResponse(200, { Status: 0 })]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('taken');
+    expect(result.source).toBe('doh');
+    expect(result.note).toBe('RDAP 404 contradicted by live NS delegation');
+  });
+
+  // (c) high-trust 404 + DoH error → available/rdap (trusted RDAP stands when DoH is unreachable)
+  it('404 + trust high + DoH error → available (rdap stands)', async () => {
+    const result = await checkDomain('a.test', tldHigh, infraHigh, {
+      fetchImpl: scriptFetch([() => jsonResponse(404), throwFetch, throwFetch]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('available');
+    expect(result.source).toBe('rdap');
+  });
+
+  // (d) low-trust 404 behavior unchanged — guard against regression
+  it('404 + trust low + DoH NXDOMAIN → probably_available (low-trust path unchanged)', async () => {
+    const result = await checkDomain('a.test', tldLow, infraLow, {
+      fetchImpl: scriptFetch([
+        () => jsonResponse(404),
+        () => jsonResponse(200, { Status: 3 }),
+        () => jsonResponse(404),
+      ]),
+      sleep: noSleep,
+    });
+    expect(result.status).toBe('probably_available');
+    expect(result.source).toBe('doh');
   });
 });
 

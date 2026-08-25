@@ -9,7 +9,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { openApp, navigateToTab } from './helpers/setup';
-import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockRdap } from './helpers/mocks';
+import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockDoh, mockRdap } from './helpers/mocks';
 import { DEFAULT_SETTINGS } from '../../src/types';
 import {
   ianaBootstrap,
@@ -328,6 +328,10 @@ test.describe('Misc coverage', () => {
       cloudflare: cloudflarePricing(),
     });
     await mockRdap(page, [{ domain: 'ace.xyz', response: { status: 404 } }]);
+    // High-trust 404 is now corroborated by a DoH NS probe (SPEC §7 DoH
+    // veto): the mock must answer NXDOMAIN for the unregistered name, or
+    // the default noerror turns the row 'taken'.
+    await mockDoh(page, { 'ace.xyz': 'nxdomain' });
     await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
 
     await page.click('[data-testid="tld-button-clear"]');

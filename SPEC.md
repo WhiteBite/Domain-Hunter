@@ -262,13 +262,21 @@ Curated always wins on conflict.
 | RDAP | trust high | trust low |
 |---|---|---|
 | 200 | `taken` | `taken` |
-| 404 | `available` | DoH NS query: NXDOMAIN → `probably_available`; NOERROR → `taken`; other → `unknown` |
+| 404 | DoH NS probe: NXDOMAIN → `available`; NOERROR → `taken` (source `doh`); DoH unreachable → `available` (RDAP stands) | DoH NS query + Cloudflare aggregator: NXDOMAIN → `probably_available`; NOERROR → `taken`; aggregator 200 → `taken` (source `cloudflare`); other → `unknown` |
 | 429 | retry w/ backoff (≤3), then `error` | same |
 | 5xx | retry (≤3), then `error` | same |
 | network/CORS fail | retry direct ×2 (transient TLS resets), then proxy once if set, then DoH corroboration (any trust; outcome never bare `available`), else `error` | same |
 
 DoH: primary `https://cloudflare-dns.com/dns-query?name={d}&type=NS` (`Accept: application/dns-json`),
 fallback `https://dns.google/resolve?name={d}&type=NS`. DoH-only results never yield bare `available`.
+
+**High-trust 404 DoH veto** — a high-trust RDAP 404 is corroborated by a
+DoH NS probe before reporting `available`. Live NS records (NOERROR)
+contradict the 404 and the result becomes `taken` (source `doh`, note
+"RDAP 404 contradicted by live NS delegation") — a taken domain must
+never be reported free. NXDOMAIN strengthens `available` (RDAP
+authoritative, DNS corroborates). DoH unreachable → the trusted RDAP
+result stands (`available`); a DoH outage never downgrades a trusted registry.
 
 **Cloudflare RDAP aggregator** (`rdap.cloudflare.com/domain/{domain}`) is a secondary
 registry-level source used in two places, both honest per the three-state model:
