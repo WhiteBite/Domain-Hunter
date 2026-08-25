@@ -8,6 +8,9 @@
   "engines": {
     "node": ">=20"
   },
+  "bin": {
+    "domain-hunter": "dist-cli/domain-hunter.mjs"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -20,15 +23,21 @@
     "lint": "eslint . && node scripts/lint-hardcode.mjs && node scripts/check-i18n.mjs",
     "prepare": "husky",
     "smoke": "node scripts/smoke.mjs",
-    "build:worker": "node scripts/build-worker.mjs"
+    "build:worker": "node scripts/build-worker.mjs",
+    "build:cli": "node scripts/build-cli.mjs",
+    "cli": "npm run build:cli && node dist-cli/domain-hunter.mjs",
+    "mcp": "npm run build:cli && node dist-cli/mcp-server.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@playwright/test": "^1.62.1",
     "@sveltejs/vite-plugin-svelte": "^6.0.0",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.28.0",
     "eslint": "^9.0.0",
     "eslint-plugin-svelte": "^2.0.0",
     "husky": "^9.0.0",
@@ -40,6 +49,7 @@
     "typescript-eslint": "^8.0.0",
     "vite": "^7.0.0",
     "vite-plugin-singlefile": "^2.0.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "zod": "^4.4.3"
   }
 }

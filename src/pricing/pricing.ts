@@ -224,7 +224,7 @@ async function fetchCloudflare(
  * `force` bypasses cache; `fetchImpl` injects a fetch for testability.
  */
 export async function loadPricing(
-  opts: { force?: boolean; fetchImpl?: typeof fetch } = {},
+  opts: { force?: boolean; fetchImpl?: typeof fetch; snapshotOverride?: PricingTable } = {},
 ): Promise<PricingState> {
   const fetchImpl = opts.fetchImpl ?? globalThis.fetch;
 
@@ -246,8 +246,11 @@ export async function loadPricing(
   const merged: NormalizedPricing = { tlds: {}, coupons: {} };
 
   // Bundled snapshot as offline baseline; live sources overlay it so prices
-  // are never empty even when a live source fails or is slow.
-  mergePricing(merged, { tlds: SNAPSHOT.tlds, coupons: SNAPSHOT.coupons });
+  // are never empty even when a live source fails or is slow. When the caller
+  // supplies a fresh snapshot (e.g. the CLI fetches the latest from GitHub),
+  // it replaces the bundled baseline here.
+  const baseline = opts.snapshotOverride ?? SNAPSHOT;
+  mergePricing(merged, { tlds: baseline.tlds, coupons: baseline.coupons });
 
   if (porkbunRes.status === 'fulfilled') {
     sources.push('porkbun');

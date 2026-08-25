@@ -7,6 +7,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist/**',
+      'dist-cli/**',
       'node_modules/**',
       '.svelte-kit/**',
       'worker.js',
