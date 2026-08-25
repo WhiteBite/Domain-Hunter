@@ -99,6 +99,36 @@ npm run dev       # servidor de desarrollo Vite
 
 Sin backend, sin variables de entorno, sin claves API, nunca.
 
+## Para agentes IA y automatización (CLI + MCP)
+
+Domain Hunter incluye un CLI de Node y un servidor MCP que exponen la misma lógica que la aplicación del navegador. Ambos generan JSON en stdout; el progreso y los logs van únicamente a stderr.
+
+```bash
+npm install && npm run build:cli
+```
+
+```bash
+node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
+node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
+node dist-cli/domain-hunter.mjs tlds --infra verisign
+```
+
+Códigos de salida: `0` éxito, `1` error de ejecución, `2` error de uso. Ver `cli/contract.ts` para las estructuras JSON.
+
+```jsonc
+{
+  "mcpServers": {
+    "domain-hunter": {
+      "command": "node",
+      "args": ["dist-cli/mcp-server.mjs"],
+      "cwd": "/path/to/Domain-Hunter"
+    }
+  }
+}
+```
+
 ## Despliega tu propia copia
 
 **GitHub Pages** (lo más fácil):

@@ -17,7 +17,7 @@ Domain Hunter is a free, open-source, **100% client-side** bulk domain availabil
 - `npm run test:e2e:ui` — Playwright E2E in interactive UI mode
 - `npm run build:worker` — regenerate the optional Cloudflare CORS proxy `worker.js` from `src/config/tlds.json`
 - `npm run build:cli` — esbuild-bundle the Node CLI (`cli/main.ts` → `dist-cli/domain-hunter.mjs`) and the MCP server (`cli/mcp/server.ts` → `dist-cli/mcp-server.mjs` if present)
-- `npm run cli -- <args>` — build the CLI then run it with the given arguments (e.g. `npm run cli -- check example.com`)
+- `npm run cli -- <args>` — build the CLI then run it with the given arguments (e.g. `npm run cli -- check example.com`, `npm run cli -- tlds`)
 - `npm run mcp` — build and run the MCP server (if `cli/mcp/server.ts` exists)
 
 ## Project layout
@@ -46,7 +46,7 @@ scripts/                # CI helpers (price harvest, zone health, worker build)
 cli/
   main.ts               # CLI entry point: arg parsing, JSON to stdout, exit codes 0/1/2
   contract.ts           # CLI option/result types — shared with the MCP server
-  core.ts               # runCheckCommand/runPricesCommand/runGenerateCommand/runFindCommand
+  core.ts               # runCheckCommand/runPricesCommand/runGenerateCommand/runFindCommand/runTldsCommand
   data.ts               # fresh-snapshot fetch (GitHub raw, 24h TTL) + compact pricing expansion
   shims/storage.ts      # file-backed localStorage polyfill for Node (~/.domain-hunter/storage.json)
 dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs (never edit by hand)

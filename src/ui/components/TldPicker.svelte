@@ -63,8 +63,10 @@
   }
 
   onMount(() => {
-    // health.json only exists on hosted builds; file:// fetches are CSP-blocked.
-    if (typeof location !== 'undefined' && location.protocol === 'file:') return;
+    // health.json only exists on https hosted builds (CI publishes it to
+    // Pages). On http://localhost and file:// the fetch is CSP-blocked and
+    // only produces console noise, so skip it entirely.
+    if (typeof location !== 'undefined' && location.protocol !== 'https:') return;
     fetch('./health.json')
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {

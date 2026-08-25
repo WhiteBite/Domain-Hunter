@@ -127,13 +127,16 @@ node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com
 
 # Find available domains within a budget (generates + checks + filters by price)
 node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
+
+# List loaded TLD zones (curated tlds.json + IANA bootstrap)
+node dist-cli/domain-hunter.mjs tlds --infra verisign
 ```
 
 Exit codes: `0` success, `1` runtime error, `2` usage error. The result JSON is printed to stdout; `--help` shows all flags.
 
 ### JSON contract
 
-Every command prints a single JSON object to stdout with a `command` field (`check` / `prices` / `generate` / `find`) and command-specific payload. See `cli/contract.ts` for the exact shapes. The `check` outcome includes per-domain `status` (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache`, and optional `price` — the same fields the browser table renders.
+Every command prints a single JSON object to stdout with a `command` field (`check` / `prices` / `generate` / `find` / `tlds`) and command-specific payload. See `cli/contract.ts` for the exact shapes. The `check` outcome includes per-domain `status` (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache`, and optional `price` — the same fields the browser table renders.
 
 ### Fresh config snapshots
 
@@ -141,7 +144,7 @@ The CLI fetches fresh `tlds.json` and `pricing.snapshot.json` from the `main` br
 
 ### MCP server
 
-An MCP (Model Context Protocol) server exposes the four commands as tools so AI agents can call them directly:
+An MCP (Model Context Protocol) server exposes the five commands as tools so AI agents can call them directly:
 
 ```jsonc
 // Claude / opencode-style config

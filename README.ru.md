@@ -125,13 +125,16 @@ node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com
 
 # Найти свободные домены в бюджете (генерация + проверка + фильтр по цене)
 node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
+
+# Список загруженных зон (curated tlds.json + IANA bootstrap)
+node dist-cli/domain-hunter.mjs tlds --infra verisign
 ```
 
 Коды выхода: `0` успех, `1` ошибка выполнения, `2` ошибка использования. JSON-результат выводится в stdout; `--help` показывает все флаги.
 
 ### JSON-контракт
 
-Каждая команда выводит один JSON-объект в stdout с полем `command` (`check` / `prices` / `generate` / `find`) и специфичной полезной нагрузкой. Точные формы — в `cli/contract.ts`. Результат `check` включает `status` на домен (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache` и опционально `price` — те же поля, что в таблице браузера.
+Каждая команда выводит один JSON-объект в stdout с полем `command` (`check` / `prices` / `generate` / `find` / `tlds`) и специфичной полезной нагрузкой. Точные формы — в `cli/contract.ts`. Результат `check` включает `status` на домен (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache` и опционально `price` — те же поля, что в таблице браузера.
 
 ### Свежие снапшоты конфигов
 
@@ -139,7 +142,7 @@ CLI загружает свежие `tlds.json` и `pricing.snapshot.json` из 
 
 ### MCP-сервер
 
-MCP-сервер (Model Context Protocol) предоставляет четыре команды как инструменты, чтобы AI-агенты могли вызывать их напрямую:
+MCP-сервер (Model Context Protocol) предоставляет пять команд как инструменты, чтобы AI-агенты могли вызывать их напрямую:
 
 ```jsonc
 // Конфиг в стиле Claude / opencode

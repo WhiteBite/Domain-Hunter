@@ -47,6 +47,36 @@ npm run dev       # 開発用 Vite 開発サーバー
 
 バックエンドも環境変数も API キーも一切不要です。
 
+## AIエージェントと自動化用（CLI + MCP）
+
+Domain Hunter は Node CLI と MCP サーバーを同梱し、ブラウザーアプリと同じコアロジックを公開します。どちらも stdout に JSON を出力し、進行状況とログは stderr のみに出力されます。
+
+```bash
+npm install && npm run build:cli
+```
+
+```bash
+node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
+node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
+node dist-cli/domain-hunter.mjs tlds --infra verisign
+```
+
+終了コード：`0` 成功、`1` ランタイムエラー、`2` 使用法エラー。JSON 構造は `cli/contract.ts` を参照してください。
+
+```jsonc
+{
+  "mcpServers": {
+    "domain-hunter": {
+      "command": "node",
+      "args": ["dist-cli/mcp-server.mjs"],
+      "cwd": "/path/to/Domain-Hunter"
+    }
+  }
+}
+```
+
 ## 自分のコピーをデプロイ
 
 **GitHub Pages**（最も簡単）:
