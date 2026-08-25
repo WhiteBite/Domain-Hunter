@@ -15,8 +15,10 @@ import { fetchBootstrap, mergeWithCurated } from '../src/core/bootstrap';
 import { loadPricing } from '../src/pricing/pricing';
 import type {
   Coupon,
+  InfraConfig,
   PriceEntry,
   PricingTable,
+  TldConfig,
   TldRegistry,
 } from '../src/types';
 import type { CliCurrency, CliRates } from './contract';
@@ -87,16 +89,78 @@ async function fetchJsonWithTimeout(
 
 // ---- Registry ----
 
-function isValidRegistryShape(json: unknown): boolean {
-  if (!json || typeof json !== 'object') return false;
+/**
+ * Sanitize a FRESH registry snapshot: drop infras whose rdapBase is not
+ * https:// (and the tlds that reference them, including tlds with their own
+ * non-https rdapBase stealth override). If no infras survive, the snapshot
+ * is rejected wholesale and the caller falls back to the bundled registry.
+ *
+ * Defense-in-depth against a compromised snapshot source exfiltrating
+ * checked domain names via attacker-controlled rdapBase URLs. The bundled
+ * `src/config/tlds.json` is trusted as-is (ships with the code). The IANA
+ * bootstrap merge that follows (parseBootstrapServices in
+ * src/core/bootstrap.ts) already filters its discovered URLs to https://.
+ */
+function sanitizeFreshRegistry(json: unknown): TldRegistry | null {
+  if (!json || typeof json !== 'object') return null;
   const obj = json as Record<string, unknown>;
-  return (
-    'infras' in obj &&
-    typeof obj.infras === 'object' &&
-    obj.infras !== null &&
-    'tlds' in obj &&
-    Array.isArray(obj.tlds)
-  );
+  const infrasIn = obj.infras;
+  const tldsIn = obj.tlds;
+  if (!infrasIn || typeof infrasIn !== 'object') return null;
+  if (!Array.isArray(tldsIn)) return null;
+
+  const infrasOut: Record<string, InfraConfig> = {};
+  const droppedInfraIds = new Set<string>();
+  for (const [id, raw] of Object.entries(infrasIn)) {
+    if (!raw || typeof raw !== 'object') {
+      droppedInfraIds.add(id);
+      continue;
+    }
+    const infra = raw as InfraConfig;
+    if (
+      typeof infra.rdapBase !== 'string' ||
+      !infra.rdapBase.startsWith('https://')
+    ) {
+      droppedInfraIds.add(id);
+      continue;
+    }
+    infrasOut[id] = infra;
+  }
+
+  if (Object.keys(infrasOut).length === 0) return null;
+
+  const tldsOut: TldConfig[] = [];
+  for (const tld of tldsIn) {
+    if (!tld || typeof tld !== 'object') continue;
+    const cfg = tld as TldConfig;
+    if (typeof cfg.tld !== 'string' || typeof cfg.infra !== 'string') continue;
+    if (droppedInfraIds.has(cfg.infra)) continue;
+    if (
+      typeof cfg.rdapBase === 'string' &&
+      !cfg.rdapBase.startsWith('https://')
+    ) {
+      continue;
+    }
+    tldsOut.push(cfg);
+  }
+
+  const hackTldsOut = Array.isArray(obj.hackTlds)
+    ? (obj.hackTlds as unknown[]).filter(
+        (x): x is string => typeof x === 'string',
+      )
+    : [];
+
+  const result: TldRegistry = {
+    infras: infrasOut,
+    tlds: tldsOut,
+    hackTlds: hackTldsOut,
+  };
+  if (Array.isArray(obj.premiumHeavyTlds)) {
+    result.premiumHeavyTlds = (obj.premiumHeavyTlds as unknown[]).filter(
+      (x): x is string => typeof x === 'string',
+    );
+  }
+  return result;
 }
 
 /**
@@ -120,17 +184,19 @@ export async function loadRegistry(opts: {
   if (!opts.offline && fetchImpl != null) {
     const cached = readRawCache(TLDS_CACHE_KEY);
     if (cached && Date.now() - cached.fetchedAt < TTL_MS) {
-      if (isValidRegistryShape(cached.json)) {
-        json = cached.json;
+      const sanitized = sanitizeFreshRegistry(cached.json);
+      if (sanitized) {
+        json = sanitized;
         source = 'fresh';
       }
     } else {
       try {
         const fetched = await fetchJsonWithTimeout(TLDS_URL, fetchImpl);
-        if (isValidRegistryShape(fetched)) {
-          json = fetched;
+        const sanitized = sanitizeFreshRegistry(fetched);
+        if (sanitized) {
+          json = sanitized;
           source = 'fresh';
-          writeRawCache(TLDS_CACHE_KEY, fetched);
+          writeRawCache(TLDS_CACHE_KEY, sanitized);
         }
       } catch {
         // fall back silently to bundled

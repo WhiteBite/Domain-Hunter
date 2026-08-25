@@ -34,9 +34,21 @@ afterAll(() => {
   (globalThis as { localStorage?: Storage }).localStorage = originalLocalStorage;
 });
 
-// Minimal valid registry shape that passes isValidRegistryShape in cli/data.ts
-// (requires `infras` to be an object and `tlds` to be an array).
-const validRegistry = { infras: {}, tlds: [], hackTlds: [] };
+// Minimal valid registry shape that passes sanitizeFreshRegistry in
+// cli/data.ts (requires at least one infra with an https:// rdapBase).
+const validRegistry = {
+  infras: {
+    'test-https': {
+      id: 'test-https',
+      rdapBase: 'https://rdap.example.com/',
+      minPauseMs: 400,
+      maxParallel: 2,
+      trust: 'high',
+    },
+  },
+  tlds: [{ tld: 'test', infra: 'test-https' }],
+  hackTlds: [],
+};
 
 // A compact pricing snapshot with one TLD / one registrar in the
 // [reg, renew, transfer] array form. After expansion the entry should be
@@ -133,6 +145,92 @@ describe('loadRegistry', () => {
     const result = await loadRegistry({ fetchImpl, offline: true });
     expect(result.source).toBe('bundled');
     expect(urls).toHaveLength(0);
+  });
+
+  it('drops infras with non-https rdapBase from a fresh snapshot', async () => {
+    const dir = makeTempDir();
+    installStorage(dir);
+
+    // One https infra (kept) and one http infra (dropped, with its tld).
+    const mixedRegistry = {
+      infras: {
+        'good-https': {
+          id: 'good-https',
+          rdapBase: 'https://rdap.example.com/',
+          minPauseMs: 400,
+          maxParallel: 2,
+          trust: 'high',
+        },
+        'bad-http': {
+          id: 'bad-http',
+          rdapBase: 'http://evil.example.com/',
+          minPauseMs: 400,
+          maxParallel: 2,
+          trust: 'high',
+        },
+      },
+      tlds: [
+        { tld: 'good', infra: 'good-https' },
+        { tld: 'bad', infra: 'bad-http' },
+      ],
+      hackTlds: [],
+    };
+
+    const fetchImpl = (async (url: string) => {
+      if (url.includes('raw.githubusercontent.com')) {
+        return new Response(JSON.stringify(mixedRegistry), { status: 200 });
+      }
+      // IANA bootstrap — reject (non-fatal, bootstrapMerged stays false).
+      throw new TypeError('offline');
+    }) as unknown as typeof fetch;
+
+    const result = await loadRegistry({ fetchImpl });
+    expect(result.source).toBe('fresh');
+    expect(Object.keys(result.registry.infras)).toEqual(['good-https']);
+    expect(result.registry.tlds).toEqual([
+      { tld: 'good', infra: 'good-https' },
+    ]);
+  });
+
+  it('falls back to bundled when every fresh infra has a non-https rdapBase', async () => {
+    const dir = makeTempDir();
+    installStorage(dir);
+
+    const allHttpRegistry = {
+      infras: {
+        'bad1': {
+          id: 'bad1',
+          rdapBase: 'http://evil1.example.com/',
+          minPauseMs: 400,
+          maxParallel: 2,
+          trust: 'high',
+        },
+        'bad2': {
+          id: 'bad2',
+          rdapBase: 'http://evil2.example.com/',
+          minPauseMs: 400,
+          maxParallel: 2,
+          trust: 'high',
+        },
+      },
+      tlds: [
+        { tld: 'bad1', infra: 'bad1' },
+        { tld: 'bad2', infra: 'bad2' },
+      ],
+      hackTlds: [],
+    };
+
+    const fetchImpl = (async (url: string) => {
+      if (url.includes('raw.githubusercontent.com')) {
+        return new Response(JSON.stringify(allHttpRegistry), { status: 200 });
+      }
+      throw new TypeError('offline');
+    }) as unknown as typeof fetch;
+
+    const result = await loadRegistry({ fetchImpl });
+    expect(result.source).toBe('bundled');
+    // Bundled registry has real infras (e.g. verisign).
+    expect(result.registry.infras).toHaveProperty('verisign');
   });
 });
 

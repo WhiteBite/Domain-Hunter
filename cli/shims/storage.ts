@@ -15,6 +15,21 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync, unlinkS
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
+// Augment the ambient node:fs types (tests/e2e/node-fs.d.ts) with the
+// `mode` option for mkdirSync/writeFileSync. The real Node.js API supports
+// it — the ambient types just omit it. See nodejs.org/api/fs.html
+declare module 'node:fs' {
+  export function mkdirSync(
+    path: string,
+    options: { recursive: true; mode?: number },
+  ): string;
+  export function writeFileSync(
+    path: string,
+    data: string,
+    options?: { mode?: number },
+  ): void;
+}
+
 let store: Map<string, string> | null = null;
 let filePath: string | null = null;
 
@@ -27,7 +42,7 @@ function load(): Map<string, string> {
     if (existsSync(filePath)) {
       const raw = readFileSync(filePath, 'utf8');
       const parsed = JSON.parse(raw) as Record<string, unknown>;
-      if (parsed && typeof parsed === 'object') {
+      if (parsed !== null && typeof parsed === 'object') {
         for (const [key, value] of Object.entries(parsed)) {
           if (typeof value === 'string') store.set(key, value);
         }
@@ -46,7 +61,9 @@ function persist(): void {
   if (map == null) return;
   try {
     const tmp = `${filePath}.tmp`;
-    writeFileSync(tmp, JSON.stringify(Object.fromEntries(map)));
+    writeFileSync(tmp, JSON.stringify(Object.fromEntries(map)), {
+      mode: 0o600,
+    });
     renameSync(tmp, filePath);
   } catch {
     // unwritable / disk full — data stays in memory for this session
@@ -69,7 +86,7 @@ export function installStorage(dir?: string): void {
   const storageDir = dir ?? join(homedir(), '.domain-hunter');
   filePath = join(storageDir, 'storage.json');
   try {
-    mkdirSync(storageDir, { recursive: true });
+    mkdirSync(storageDir, { recursive: true, mode: 0o700 });
   } catch {
     // directory creation failed — shim still works in-memory
   }
