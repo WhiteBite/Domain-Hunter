@@ -38,7 +38,7 @@ Global flags:
   --version, -v            Show version
 
 check options:
-  <domain...>              One or more domain names or bare labels
+  <domain...>              One or more domain names or bare labels (max 3000)
   --tlds a,b,c             TLDs to expand bare labels over (default: 15 common)
   --prices                 Attach pricing info to available domains
   --no-cache                Skip the result cache
@@ -74,7 +74,8 @@ tlds options:
   --infra <id>             Filter to a specific infrastructure (e.g. verisign)
   --json                   Output JSON instead of human-readable lines
 
-Output: JSON on stdout, progress on stderr. Exit: 0 success, 1 error, 2 usage.`;
+Output: JSON on stdout, progress on stderr. Exit: 0 success, 1 error/abort, 2 usage.
+Ctrl+C during a check aborts gracefully, writes partial JSON, exits 1.`;
 
 // ---- arg parsing (zero-dependency) ----
 
@@ -210,6 +211,12 @@ async function main(): Promise<number> {
           process.stderr.write('Error: check requires at least one domain\n');
           return 2;
         }
+        if (positionals.length > 3000) {
+          process.stderr.write(
+            `Error: check accepts at most 3000 domains (got ${positionals.length})\n`,
+          );
+          return 2;
+        }
         const outcome = await core.runCheckCommand({
           domains: positionals,
           tlds: parseCsv(flags.tlds),
@@ -219,7 +226,7 @@ async function main(): Promise<number> {
           withPrices: flags.prices === true,
         });
         process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
-        return 0;
+        return outcome.aborted ? 1 : 0;
       }
       case 'prices': {
         const outcome = await core.runPricesCommand({

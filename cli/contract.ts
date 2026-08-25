@@ -3,7 +3,7 @@
  * the command implementations (cli/core.ts), and a future MCP server.
  * Mirrors the browser app's three-state model and pricing units (USD cents).
  */
-import type { CheckStatus, ResultSource } from '../src/types';
+import type { CheckStatus, ResultSource, TldRegistry } from '../src/types';
 
 export interface CliRates {
   RUB: number;
@@ -20,6 +20,13 @@ export interface CheckCommandOptions {
   ignoreCache?: boolean;
   withPrices?: boolean;
   cacheTtlHours?: number;
+  /** Skip loadRegistry and reuse this already-loaded registry. Avoids the
+   *  double fetch when runFindCommand calls runCheckCommand internally. */
+  preloadedRegistry?: {
+    registry: TldRegistry;
+    source: 'bundled' | 'fresh';
+    bootstrapMerged: boolean;
+  };
 }
 
 export interface PriceInfo {
@@ -50,6 +57,9 @@ export interface CheckOutcome {
   counts: Record<CheckStatus, number>;
   results: CheckRow[];
   dataSource: { tlds: 'bundled' | 'fresh'; bootstrapMerged: boolean };
+  /** True when the run was cut short by SIGINT (Ctrl+C). The results array
+   *  carries whatever was checked before the abort; main.ts exits 1. */
+  aborted: boolean;
 }
 
 export interface PricesCommandOptions {

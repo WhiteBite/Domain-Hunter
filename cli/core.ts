@@ -26,6 +26,7 @@ import { findHacks } from '../src/generators/hacks';
 import { mutate } from '../src/generators/mutations';
 import { themes } from '../src/generators/themes';
 import { loadPricingTable, loadRegistry } from './data';
+import process from 'node:process';
 import type {
   CheckCommandOptions,
   CheckOutcome,
@@ -113,12 +114,19 @@ function emptyCounts(): Record<CheckStatus, number> {
  * `cacheTtlHours`) are returned with `fromCache: true` and skip the queue.
  * When `withPrices`, a pricing table is loaded once and `PriceInfo` is
  * attached to `available` / `probably_available` rows.
+ *
+ * SIGINT (Ctrl+C) is wired to the queue's AbortController for the duration
+ * of the check: the first Ctrl+C aborts gracefully — runQueue winds down,
+ * partial results are returned with `aborted: true`, and the caller writes
+ * the partial JSON before exiting 1. The listener is always removed
+ * (try/finally) so it never leaks into subsequent commands.
  */
 export async function runCheckCommand(
   opts: CheckCommandOptions,
 ): Promise<CheckOutcome> {
   const start = Date.now();
-  const { registry, source, bootstrapMerged } = await loadRegistry({});
+  const { registry, source, bootstrapMerged } =
+    opts.preloadedRegistry ?? (await loadRegistry({}));
 
   const selectedTlds = opts.tlds ?? DEFAULT_SETTINGS.defaultTlds;
 
@@ -164,66 +172,81 @@ export async function runCheckCommand(
     }
   };
   const controller = new AbortController();
-  if (toCheck.length > 0) {
-    await runQueue(
-      toCheck,
-      registry,
-      { registry, concurrency: DEFAULT_CONCURRENCY, fetchImpl: globalThis.fetch },
-      emit,
-      controller.signal,
-    );
-  }
-
-  // Build rows + persist fresh results to cache.
-  const results: CheckRow[] = [...cachedRows];
-  for (const r of freshResults) {
-    results.push({
-      domain: r.domain,
-      tld: r.tld,
-      status: r.status,
-      source: r.source,
-      note: r.note,
-      latencyMs: r.latencyMs,
-    });
-    put(r.domain, {
-      status: r.status,
-      source: r.source,
-      ts: r.checkedAt,
-      tld: r.tld,
-    });
-  }
-
-  // Pricing attachment.
-  if (opts.withPrices) {
-    const settings = buildSettings(opts);
-    const pricingState = await loadPricingTable({
-      currency: opts.currency ?? DEFAULT_SETTINGS.currency,
-      rates: opts.rates ?? {
-        RUB: DEFAULT_SETTINGS.rates.RUB,
-        EUR: DEFAULT_SETTINGS.rates.EUR,
-      },
-    });
-    for (const row of results) {
-      if (row.status === 'available' || row.status === 'probably_available') {
-        row.price = buildPriceInfo(pricingState.table, row.tld, settings);
+  const onSigInt = (): void => {
+    controller.abort();
+  };
+  process.on('SIGINT', onSigInt);
+  try {
+    if (toCheck.length > 0) {
+      try {
+        await runQueue(
+          toCheck,
+          registry,
+          { registry, concurrency: DEFAULT_CONCURRENCY, fetchImpl: globalThis.fetch },
+          emit,
+          controller.signal,
+        );
+      } catch (err) {
+        // On abort, swallow — we return partial results below. Any other
+        // error propagates (caught by main.ts → exit 1).
+        if (!controller.signal.aborted) throw err;
       }
     }
-  }
 
-  const counts = emptyCounts();
-  for (const row of results) {
-    counts[row.status] += 1;
-  }
+    // Build rows + persist fresh results to cache.
+    const results: CheckRow[] = [...cachedRows];
+    for (const r of freshResults) {
+      results.push({
+        domain: r.domain,
+        tld: r.tld,
+        status: r.status,
+        source: r.source,
+        note: r.note,
+        latencyMs: r.latencyMs,
+      });
+      put(r.domain, {
+        status: r.status,
+        source: r.source,
+        ts: r.checkedAt,
+        tld: r.tld,
+      });
+    }
 
-  return {
-    command: 'check',
-    checkedAt: Date.now(),
-    durationMs: Date.now() - start,
-    total: results.length,
-    counts,
-    results,
-    dataSource: { tlds: source, bootstrapMerged },
-  };
+    // Pricing attachment.
+    if (opts.withPrices) {
+      const settings = buildSettings(opts);
+      const pricingState = await loadPricingTable({
+        currency: opts.currency ?? DEFAULT_SETTINGS.currency,
+        rates: opts.rates ?? {
+          RUB: DEFAULT_SETTINGS.rates.RUB,
+          EUR: DEFAULT_SETTINGS.rates.EUR,
+        },
+      });
+      for (const row of results) {
+        if (row.status === 'available' || row.status === 'probably_available') {
+          row.price = buildPriceInfo(pricingState.table, row.tld, settings);
+        }
+      }
+    }
+
+    const counts = emptyCounts();
+    for (const row of results) {
+      counts[row.status] += 1;
+    }
+
+    return {
+      command: 'check',
+      checkedAt: Date.now(),
+      durationMs: Date.now() - start,
+      total: results.length,
+      counts,
+      results,
+      dataSource: { tlds: source, bootstrapMerged },
+      aborted: controller.signal.aborted,
+    };
+  } finally {
+    process.off('SIGINT', onSigInt);
+  }
 }
 
 // ---- runPricesCommand ----
@@ -387,7 +410,8 @@ export async function runGenerateCommand(
 export async function runFindCommand(
   opts: FindCommandOptions,
 ): Promise<FindOutcome> {
-  const { registry } = await loadRegistry({});
+  const loaded = await loadRegistry({});
+  const { registry } = loaded;
 
   // Candidate pool.
   const pool = new Set<string>();
@@ -404,13 +428,15 @@ export async function runFindCommand(
   const maxChecks = opts.maxChecks ?? DEFAULT_FIND_MAX_CHECKS;
   const candidates = [...pool].slice(0, maxChecks);
 
-  // Check the pool with prices.
+  // Check the pool with prices. Pass the already-loaded registry so
+  // runCheckCommand does not fetch it a second time.
   const checkOutcome = await runCheckCommand({
     domains: candidates,
     withPrices: true,
     currency: opts.currency,
     rates: opts.rates,
     tlds: opts.tlds,
+    preloadedRegistry: loaded,
   });
 
   // Budget conversion (USD cents).
