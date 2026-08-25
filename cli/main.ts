@@ -297,10 +297,16 @@ async function main(): Promise<number> {
   }
 }
 
+// Exit via process.exitCode and let the loop drain naturally: a hard
+// process.exit() while fetch keep-alive sockets are still open trips a
+// libuv async-handle assertion on Windows (src/win/async.c). Undici's idle
+// sockets do not hold the loop, so natural termination is immediate.
 main()
-  .then((code) => process.exit(code))
+  .then((code) => {
+    process.exitCode = code;
+  })
   .catch((err) => {
     const msg = err instanceof Error ? err.message : String(err);
     process.stderr.write(`Fatal: ${msg}\n`);
-    process.exit(1);
+    process.exitCode = 1;
   });
