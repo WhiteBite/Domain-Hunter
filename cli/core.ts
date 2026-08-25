@@ -41,6 +41,9 @@ import type {
   PricesCommandOptions,
   PricesOutcome,
   PricesRow,
+  TldsCommandOptions,
+  TldsOutcome,
+  TldsZone,
 } from './contract';
 
 const DEFAULT_CONCURRENCY = 6;
@@ -438,5 +441,40 @@ export async function runFindCommand(
     budgetUsdCents,
     checked: checkOutcome.results.length,
     available,
+  };
+}
+
+// ---- runTldsCommand ----
+
+/**
+ * Dump the loaded TLD registry (curated tlds.json merged with the live IANA
+ * bootstrap). Each zone carries its TLD, infrastructure id, and trust level.
+ * Filter by `opts.infra` to limit to one infrastructure. Zones are deduped by
+ * TLD (the bootstrap can echo curated zones) and sorted alphabetically.
+ */
+export async function runTldsCommand(
+  opts: TldsCommandOptions,
+): Promise<TldsOutcome> {
+  const { registry, source, bootstrapMerged } = await loadRegistry({});
+
+  const seen = new Set<string>();
+  const zones: TldsZone[] = [];
+  for (const c of registry.tlds) {
+    if (opts.infra && c.infra !== opts.infra) continue;
+    if (seen.has(c.tld)) continue;
+    seen.add(c.tld);
+    const infra = registry.infras[c.infra];
+    const trust = c.trust ?? infra?.trust ?? 'low';
+    zones.push({ tld: c.tld, infra: c.infra, trust });
+  }
+
+  zones.sort((a, b) => a.tld.localeCompare(b.tld));
+
+  return {
+    command: 'tlds',
+    source,
+    bootstrapMerged,
+    count: zones.length,
+    tlds: zones,
   };
 }

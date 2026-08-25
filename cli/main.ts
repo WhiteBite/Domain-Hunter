@@ -31,6 +31,7 @@ Commands:
   prices                   Show per-registrar pricing for TLDs
   generate <generator>     Generate domain name candidates
   find <seed>              Find available domains within budget
+  tlds                     List loaded TLD zones (curated + IANA bootstrap)
 
 Global flags:
   --help, -h               Show this help
@@ -68,6 +69,10 @@ find options:
   --rate-rub N, --rate-eur N
   --tlds a,b               TLDs to check (default: 15 common)
   --max-checks N           Max candidates to check (default: 30)
+
+tlds options:
+  --infra <id>             Filter to a specific infrastructure (e.g. verisign)
+  --json                   Output JSON instead of human-readable lines
 
 Output: JSON on stdout, progress on stderr. Exit: 0 success, 1 error, 2 usage.`;
 
@@ -266,6 +271,18 @@ async function main(): Promise<number> {
           maxChecks: parseNumber(flags['max-checks']),
         });
         process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        return 0;
+      }
+      case 'tlds': {
+        const outcome = await core.runTldsCommand({
+          infra: parseString(flags.infra),
+        });
+        if (flags.json === true) {
+          process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        } else {
+          const lines = outcome.tlds.map((z) => `${z.tld} (${z.infra}, ${z.trust})`);
+          process.stdout.write(lines.join('\n') + '\n');
+        }
         return 0;
       }
       default:

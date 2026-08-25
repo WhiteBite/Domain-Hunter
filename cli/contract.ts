@@ -112,3 +112,21 @@ export interface FindOutcome {
   checked: number;
   available: FindRow[];
 }
+
+export interface TldsCommandOptions {
+  infra?: string;
+}
+
+export interface TldsZone {
+  tld: string;
+  infra: string;
+  trust: 'high' | 'low';
+}
+
+export interface TldsOutcome {
+  command: 'tlds';
+  source: 'bundled' | 'fresh';
+  bootstrapMerged: boolean;
+  count: number;
+  tlds: TldsZone[];
+}

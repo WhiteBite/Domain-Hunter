@@ -1,8 +1,8 @@
 /**
- * Domain Hunter MCP server — exposes the four CLI commands as MCP tools.
+ * Domain Hunter MCP server — exposes the five CLI commands as MCP tools.
  *
  * Mirrors cli/main.ts: installStorage() runs FIRST (before any module that
- * touches localStorage), then core is loaded via dynamic import. The four
+ * touches localStorage), then core is loaded via dynamic import. The five
  * run*Command functions are wrapped 1:1 as MCP tools; no logic is reimplemented.
  *
  * Transport: stdio. Diagnostics to stderr ONLY — stdout is the MCP transport.
@@ -223,6 +223,32 @@ async function main(): Promise<void> {
           rates: toCliRates(args.rates),
           tlds: args.tlds,
           maxChecks: args.maxChecks,
+        });
+        return textResult(JSON.stringify(outcome, null, 2));
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  // ---- list_zones ----
+  server.registerTool(
+    'list_zones',
+    {
+      title: 'List checkable TLD zones',
+      description:
+        'List the loaded TLD registry (curated tlds.json merged with the ' +
+        'live IANA RDAP bootstrap). Each entry carries the TLD, its registry ' +
+        'infrastructure id, and trust level (high = RDAP 404 authoritatively ' +
+        'means free; low = corroborated via DoH). Filter by infrastructure id.',
+      inputSchema: {
+        infra: z.string().optional(),
+      },
+    },
+    async (args) => {
+      try {
+        const outcome = await core.runTldsCommand({
+          infra: args.infra,
         });
         return textResult(JSON.stringify(outcome, null, 2));
       } catch (err) {
