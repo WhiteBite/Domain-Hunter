@@ -1,0 +1,25 @@
+name: rdk-audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      min_score:
+        description: 'Fail the run when the Discoverability Score is below this value'
+        required: false
+        default: '0'
+  schedule:
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: WhiteBite/repo-aeo/action@main
+        with:
+          min_score: ${{ github.event.inputs.min_score || vars.RDK_MIN_SCORE || 0 }}

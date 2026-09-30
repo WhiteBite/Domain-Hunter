@@ -77,3 +77,9 @@ dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs 
 - `dist-cli/` is CLI/MCP build output — never edit by hand; rebuild with `npm run build:cli`.
 - When adding a dictionary dataset, attribute it in `src/config/dictionaries/LICENSES.md` (name, source URL, license).
 - The app must keep working from `file://` and under a sub-path (`base: './'`) — verify after routing/asset changes.
+
+## Discoverability (RDK)
+
+- `npm run rdk:audit` — Discoverability Score 0-100 and findings; read-only.
+- `npm run rdk:fix` — preview safe autofixes; `npm run rdk:fix -- --apply` writes them.
+- The rdk-audit workflow fails pull requests below `vars.RDK_MIN_SCORE`.
