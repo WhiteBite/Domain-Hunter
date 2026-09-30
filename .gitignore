@@ -10,3 +10,5 @@ test-results/
 
 .playwright-mcp/
 dist-cli/
+build/
+.env

@@ -51,5 +51,21 @@
     "vite-plugin-singlefile": "^2.0.0",
     "vitest": "^3.0.0",
     "zod": "^4.4.3"
+  },
+  "keywords": [
+    "open-source",
+    "developer-tools",
+    "tool",
+    "domain",
+    "hunter",
+    "browser-only",
+    "availability",
+    "checker",
+    "servers",
+    "tracking"
+  ],
+  "repository": "https://github.com/WhiteBite/Domain-Hunter",
+  "bugs": {
+    "url": "https://github.com/WhiteBite/Domain-Hunter/issues"
   }
 }

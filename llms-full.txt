@@ -1,3 +1,14 @@
+<!-- rdk:generated:start -->
+# domain-hunter — full documentation
+
+> Free, open-source, browser-only domain availability checker. No servers, no API keys, no tracking.
+
+This is the concatenated documentation intended for LLM grounding. Regenerate with `rdk fix`.
+
+---
+
+# README
+
 # Domain Hunter — Bulk Domain Availability Checker & Name Generator
 ## Quickstart
 
@@ -316,3 +327,8 @@ npm run dev
 ```bash
 npm run dev
 ```
+<!-- rdk:generated:end -->
+
+## Hand-written notes
+
+<!-- Everything below the end marker is preserved by `rdk fix`. Put hand-written context here; the block above is regenerated from .discoverability/project.yml. -->

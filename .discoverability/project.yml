@@ -1,0 +1,62 @@
+# Docs: https://github.com/WhiteBite/repo-aeo/blob/main/docs/configuration.md
+
+schema_version: 1   # config schema revision; rdk warns on any other value
+
+project:
+  name: "domain-hunter"
+  one_liner: "Free, open-source, browser-only domain availability checker. No servers, no API keys, no tracking."   # 1 sentence, shown as the GitHub description
+  description: "Free, open-source, browser-only domain availability checker. No servers, no API keys, no tracking."
+  category: "tool"   # library | app | template | research | tool | dataset | mcp-server
+  copyright_holder: "WhiteBite"   # name on the LICENSE copyright line; seeded from the git owner
+
+audiences: []
+
+use_cases: []   # 3-7 concrete jobs this project does
+
+keywords:
+  github_topics:
+    - "open-source"
+    - "developer-tools"
+    - "tool"
+    - "domain"
+    - "hunter"
+    - "browser-only"
+    - "availability"
+    - "checker"
+    - "servers"
+    - "tracking"   # 8-20 terms, lowercase with hyphens
+  npm_keywords:
+    - "open-source"
+    - "developer-tools"
+    - "tool"
+    - "domain"
+    - "hunter"
+    - "browser-only"
+    - "availability"
+    - "checker"
+    - "servers"
+    - "tracking"   # 5-15 terms for package.json keywords
+
+links:
+  homepage:
+  docs:
+  demo:
+  issues: "https://github.com/WhiteBite/Domain-Hunter/issues"
+
+quickstart:
+  prerequisites:
+    - "Node.js >= 18"
+  install: "npm install domain-hunter"
+  run: "npm run dev"
+  test: "npm run test"
+
+artifacts:
+  has_npm_package: true
+  has_docs_site: false
+
+differentiators: []   # "why this repo, not the alternatives"
+
+safety:
+  allow_autofix: false          # lets the Action open autofix PRs
+  require_ack_for_publish: true
+  ack:   # optional override of the github-sync ACK string; empty keeps the default
