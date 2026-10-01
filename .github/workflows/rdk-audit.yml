@@ -20,6 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: WhiteBite/repo-aeo/action@main
+      - uses: WhiteBite/repo-aeo/action@v0.3.0
         with:
           min_score: ${{ github.event.inputs.min_score || vars.RDK_MIN_SCORE || 0 }}
