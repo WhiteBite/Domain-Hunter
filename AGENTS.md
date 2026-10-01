@@ -80,6 +80,7 @@ dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs 
 
 ## Discoverability (RDK)
 
+- On-demand only: run these when the user explicitly asks; never proactively.
 - `npm run rdk:audit` — Discoverability Score 0-100 and findings; read-only.
 - `npm run rdk:fix` — preview safe autofixes; `npm run rdk:fix -- --apply` writes them.
 - The rdk-audit workflow fails pull requests below `vars.RDK_MIN_SCORE`.
