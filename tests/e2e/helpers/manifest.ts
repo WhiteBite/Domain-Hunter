@@ -138,6 +138,8 @@ export const ALL_TESTIDS = [
   'settings-select-currency', // currency select
   'settings-input-rate-rub', // RUB rate number input
   'settings-input-rate-eur', // EUR rate number input
+  'settings-button-fx-refresh', // live FX rates refresh button
+  'settings-fx-age', // "live rates from {date}" note
   'settings-range-concurrency', // concurrency range input
   'settings-input-ttl', // cache TTL number input
   'settings-input-proxy', // proxy URL input

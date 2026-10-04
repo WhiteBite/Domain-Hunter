@@ -9,6 +9,7 @@
   import { popover } from './ui/popover';
   import { favorites } from './ui/favorites';
   import { refreshWatchlist } from './ui/watchlist';
+  import { refreshFxIfStale } from './ui/fx';
   import { fetchBootstrap, mergeWithCurated } from './core/bootstrap';
   import type { Locale, Settings } from './types';
   import Flag from './ui/components/Flag.svelte';
@@ -171,10 +172,14 @@
         requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
       }
     ).requestIdleCallback;
+    const runBootTasks = (): void => {
+      runBootstrap();
+      void refreshFxIfStale();
+    };
     if (typeof ric === 'function') {
-      ric(runBootstrap, { timeout: 2000 });
+      ric(runBootTasks, { timeout: 2000 });
     } else {
-      setTimeout(runBootstrap, 500);
+      setTimeout(runBootTasks, 500);
     }
 
     return watchSystemTheme(() => $settings.theme);

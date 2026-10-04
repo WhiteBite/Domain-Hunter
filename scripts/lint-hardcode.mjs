@@ -73,6 +73,8 @@ const NETWORK_ALLOWLIST = [
   // Pricing
   /^api\.porkbun\.com$/,
   /^cfdomainpricing\.com$/,
+  // FX rates (Settings refresh + boot stale-refresh, SPEC §13)
+  /^open\.er-api\.com$/,
   // DigMyName (per-domain buy-link API)
   /^api\.digmyname\.com$/,
   // GitHub (device flow + user API + profile links)

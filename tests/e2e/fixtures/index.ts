@@ -34,3 +34,7 @@ export type { IanaBootstrapJson } from './iana';
 
 // cache.ts
 export { cacheEntries } from './cache';
+
+// fx.ts
+export { erApiRates } from './fx';
+export type { FxResponse } from './fx';

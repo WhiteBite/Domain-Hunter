@@ -17,7 +17,8 @@ disagree, SPEC wins unless the SPEC is factually impossible.
     Porkbun pricing API, cfdomainpricing.com, Cloudflare RDAP aggregator
     (`rdap.cloudflare.com/domain/{domain}`), `api.digmyname.com` (per-domain premium/buy data,
     user-initiated on-demand clicks), `api.github.com` and `github.com` (Social tab GitHub device-flow
-    authentication and username lookups), `www.tiktok.com` (Social tab oEmbed lookup).
+    authentication and username lookups), `www.tiktok.com` (Social tab oEmbed lookup),
+    `open.er-api.com` (FX rates, cached 7 days, §13).
     No CDNs, no fonts from network, no analytics.
 4. Polite to registries: per-infra rate profiles (§8), AIMD backoff, global concurrency cap.
 5. Never guess availability: three-state model (§7). Wrong "available" is worse than "unknown".
@@ -218,7 +219,9 @@ baseline for detecting status flips of favorited domains on app load),
 `dh:v1:watch-changes` (Record<domain, {status: CheckStatus, ts: number}> —
 detected status-flip events for the watchlist UI),
 `dh:v1:gentray` (generator candidate tray, survives tab switches),
-`dh:v1:hint-dismissed` (boolean flag for dismissing the hint banner).
+`dh:v1:hint-dismissed` (boolean flag for dismissing the hint banner),
+`dh:v1:fx` ({rates, fetchedAt} — last live FX fetch from open.er-api.com;
+refreshed at boot when older than 7 days, the Settings button always applies).
 
 ## 6. Zone registry (`src/config/tlds.json`)
 
@@ -393,6 +396,8 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 - Registry responses: only HTTP status + our own config rendered; RDAP bodies never injected into DOM.
 - `worker.js` proxy: only resolves TLDs from its embedded map (generated from tlds.json by
   scripts/build-worker.mjs); no arbitrary URL passthrough (anti-abuse).
+- FX rates: `open.er-api.com/v6/latest/USD` (no key, open CORS, daily upstream refresh),
+  cached in `dh:v1:fx` with a 7-day TTL; on failure the stored or manually entered rates stand.
 
 ## 14. CI/CD
 

@@ -24,6 +24,7 @@ import {
   seedPricingTable,
   porkbunPricing,
   cloudflarePricing,
+  erApiRates,
 } from './fixtures';
 import { DEFAULT_SETTINGS, type Settings } from '../../src/types';
 
@@ -69,6 +70,16 @@ async function mockPricing(
   });
 }
 
+async function mockFx(page: Page, body: unknown): Promise<void> {
+  await page.route(/^https:\/\/open\.er-api\.com\/v6\/latest\//, async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  });
+}
+
 // Catch-all registered FIRST with an allowlist: allowlisted URLs defer via
 // route.fallback() to the specific mocks registered later; anything else is
 // aborted and recorded as a leak. This mirrors the helpers/mocks.ts pattern.
@@ -81,6 +92,7 @@ const ALLOWLIST: RegExp[] = [
   /^https:\/\/cloudflare-dns\.com\/dns-query/,
   /^https:\/\/dns\.google\/resolve/,
   /^https:\/\/api\.porkbun\.com\/api\/json\/v3\/pricing\/get/,
+  /^https:\/\/open\.er-api\.com\/v6\/latest\//,
   /^https:\/\/cfdomainpricing\.com\/prices\.json/,
   /^https:\/\/api\.digmyname\.com\/functions\/v1\/public-api\/check/,
   /^https:\/\/api\.github\.com\//,
@@ -223,6 +235,35 @@ test.describe('Settings tab', () => {
     await rubInput.fill('100');
     await rubInput.blur();
     expect((await readSettings(page)).rates.RUB).toBe(100);
+  });
+
+  // 4b. FX refresh button: fetches live rates, applies them, stores dh:v1:fx
+  test('FX refresh button applies live rates and stores dh:v1:fx', async ({ page }) => {
+    await assertNoLeaks(page);
+    await mockBootstrap(page, ianaBootstrap());
+    await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+    await mockFx(page, erApiRates(80.5, 0.86));
+    await openApp(page, {
+      seed: {
+        'dh:v1:pricing': seedPricingTable(),
+        'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
+        'dh:v1:fx': { rates: { RUB: 1, EUR: 1 }, fetchedAt: 1000 },
+      },
+    });
+    await gotoSettings(page);
+
+    await page.click('[data-testid="settings-button-fx-refresh"]');
+
+    await expect(page.locator('[data-testid="settings-input-rate-rub"]')).toHaveValue('80.5');
+    await expect(page.locator('[data-testid="settings-input-rate-eur"]')).toHaveValue('0.86');
+    const stored = await readSettings(page);
+    expect(stored.rates).toEqual({ RUB: 80.5, EUR: 0.86 });
+    const fxRaw = await page.evaluate(() => localStorage.getItem('dh:v1:fx'));
+    expect(fxRaw).not.toBeNull();
+    const fx = JSON.parse(fxRaw as string) as { rates: { RUB: number }; fetchedAt: number };
+    expect(fx.rates.RUB).toBe(80.5);
+    expect(fx.fetchedAt).toBeGreaterThan(1000);
+    await expect(page.locator('[data-testid="settings-fx-age"]')).toBeVisible();
   });
 
   // 5. Concurrency range changes and persists

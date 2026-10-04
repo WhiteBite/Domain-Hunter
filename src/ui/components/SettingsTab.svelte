@@ -4,6 +4,7 @@
   import { t, LOCALES } from '../../i18n';
   import { settings } from '../store';
   import { clearAllData, KEYS, readJson, writeJson } from '../settings';
+  import { loadFx, refreshFx } from '../fx';
   import { DEFAULT_SETTINGS, type Settings } from '../../types';
   import { githubLoginName, pollDeviceToken, startDeviceFlow } from '../../core/github-auth';
 
@@ -33,6 +34,26 @@
     flashSaved();
   }
 
+  let fxBusy = $state(false);
+  let fxAt = $state<number | null>(null);
+  const fxDate = $derived(fxAt === null ? '' : new Date(fxAt).toISOString().slice(0, 10));
+
+  async function onRefreshFx(): Promise<void> {
+    if (fxBusy) return;
+    fxBusy = true;
+    try {
+      if (await refreshFx(true)) {
+        fxAt = loadFx()?.fetchedAt ?? null;
+        rateError = '';
+        flashSaved();
+      } else {
+        rateError = t('settings.fx.failed');
+      }
+    } finally {
+      fxBusy = false;
+    }
+  }
+
   function resetDefaults(): void {
     settings.set({
       ...DEFAULT_SETTINGS,
@@ -49,6 +70,7 @@
   let ghBusy = $state(false);
 
   onMount(() => {
+    fxAt = loadFx()?.fetchedAt ?? null;
     const token = get(settings).githubToken;
     if (token) void githubLoginName(token).then((n) => (ghUser = n ?? ''));
   });
@@ -200,6 +222,9 @@
     <div class="row">
       <div class="row-info">
         <span class="label">{t('settings.rates')}</span>
+        {#if fxAt !== null}
+          <p class="hint" data-testid="settings-fx-age">{t('settings.fx.age', { date: fxDate })}</p>
+        {/if}
         {#if rateError}
           <p class="error">{rateError}</p>
         {/if}
@@ -227,6 +252,15 @@
             data-testid="settings-input-rate-eur"
           />
         </label>
+        <button
+          class="btn"
+          type="button"
+          onclick={() => void onRefreshFx()}
+          disabled={fxBusy}
+          data-testid="settings-button-fx-refresh"
+        >
+          {t('settings.fx.refresh')}
+        </button>
       </span>
     </div>
   </div>
