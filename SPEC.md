@@ -403,9 +403,11 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 
 - `deploy.yml`: on push to main → node 22 → npm ci → typecheck + vitest → vite build →
   actions/deploy-pages (artifact dist/).
-- `prices.yml`: weekly cron + dispatch → `node scripts/harvest-prices.mjs` → commit
-  `src/config/pricing.snapshot.json` if changed (bot identity). Script must exit 0 on partial
-  source failure; exit 1 only if ALL sources fail.
+- `prices.yml`: 6-hourly cron + dispatch → `node scripts/harvest-prices.mjs` → commit
+  `src/config/pricing.snapshot.json` if changed AND the delta gate passes
+  (scripts/snapshot-gate.mjs: skip when <0.5% of cells changed and the last snapshot
+  commit is <24h old; bot identity). Script must exit 0 on partial source failure;
+  exit 1 only if ALL sources fail.
 - `zone-health.yml`: daily cron → `node scripts/zone-health.mjs` → commit `health.json`
   (tld → {http, cors, ok, directOk, cfOk, ms, ts}; direct RDAP probe with the
   Cloudflare-aggregator fallback); failures visible in repo.
