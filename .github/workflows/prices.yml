@@ -2,7 +2,7 @@ name: Harvest Prices
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -27,10 +27,19 @@ jobs:
 
       - run: node scripts/harvest-prices.mjs --api-only
 
+      # Delta gate: scripts/snapshot-gate.mjs skips commits under 0.5% cell change within 24h.
       - name: Commit snapshot if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/config/pricing.snapshot.json
-          git diff --quiet --cached -- src/config/pricing.snapshot.json || git commit -m "chore: update pricing snapshot (hourly API)"
-          git push
+          if git diff --quiet --cached -- src/config/pricing.snapshot.json; then
+            echo "snapshot unchanged"
+            exit 0
+          fi
+          if node scripts/snapshot-gate.mjs; then
+            git commit -m "chore: update pricing snapshot (6h API)"
+            git push
+          else
+            echo "delta below gate, skipping commit"
+          fi
