@@ -148,8 +148,8 @@ function parseRates(flags: Record<string, string | true>): CliRates | undefined 
   const eur = parseNumber(flags['rate-eur']);
   if (rub == null && eur == null) return undefined;
   return {
-    RUB: rub ?? 97,
-    EUR: eur ?? 0.92,
+    RUB: rub ?? 83.49,
+    EUR: eur ?? 0.8888,
   };
 }
 

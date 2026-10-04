@@ -159,7 +159,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   lang: 'en',
   currency: 'USD',
-  rates: { RUB: 97, EUR: 0.92 },
+  rates: { RUB: 83.49, EUR: 0.8888 },
   concurrency: 6,
   cacheTtlHours: 12,
   proxyUrl: '',
