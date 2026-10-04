@@ -5,6 +5,7 @@
   import { favorites, toggleFavorite } from '../favorites';
   import { filterDrops, type DroppedDomain } from '../../core/dropped';
   import { copyText } from '../clipboard';
+  import { downloadCsv, toSimpleCsv } from '../csv';
   import { createToast, sanitizeId } from '../utils';
   import Toast from './Toast.svelte';
   import Tooltip from './Tooltip.svelte';
@@ -81,6 +82,20 @@
     if (ok) showToast(t('results.copied'));
   }
 
+  function exportCsv(): void {
+    if (filtered.length === 0) return;
+    const date = new Date().toISOString().slice(0, 10);
+    const rows = filtered.map((d) => [`${d.d}.${d.tld}`, d.tld]);
+    const csv = toSimpleCsv(rows, [t('csv.domain'), t('csv.tld')]);
+    downloadCsv(`domain-hunter-drops-${date}.csv`, csv);
+  }
+
+  async function copyList(): Promise<void> {
+    const text = filtered.map((d) => `${d.d}.${d.tld}`).join('\n');
+    const ok = await copyText(text);
+    if (ok) showToast(t('results.copied'));
+  }
+
   // Avoid stale timer across tab unmounts.
   $effect(() => {
     return () => toastCtl.destroy();
@@ -116,6 +131,24 @@
       data-testid="drops-button-add-all"
     >
       {t('drops.addAll')}
+    </button>
+    <button
+      class="btn"
+      type="button"
+      onclick={exportCsv}
+      disabled={filtered.length === 0}
+      data-testid="drops-button-export-csv"
+    >
+      {t('drops.export.csv')}
+    </button>
+    <button
+      class="btn"
+      type="button"
+      onclick={() => void copyList()}
+      disabled={filtered.length === 0}
+      data-testid="drops-button-copy-list"
+    >
+      {t('drops.export.copy')}
     </button>
   </div>
 
@@ -291,7 +324,7 @@
   }
 
   .domain {
-    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
     min-width: 0;
     word-break: break-all;

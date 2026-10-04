@@ -14,9 +14,11 @@ export const pt: Dict = {
 
   'drops.title': 'Domínios expirados',
   'drops.desc':
-    'Domínios expirados recentemente — nomes de marca pelo preço normal de registro. Snapshot semanal de listas públicas de expiração.',
+    'Domínios expirados recentemente — nomes de marca pelo preço normal de registro. Snapshot diário de listas públicas de expiração.',
   'drops.search': 'Filtrar por nome ou zona',
   'drops.addAll': 'Adicionar todos os exibidos à verificação',
+  'drops.export.csv': 'Exportar CSV',
+  'drops.export.copy': 'Copiar lista',
   'drops.empty': 'Nenhum domínio expirado corresponde ao filtro.',
   'drops.snapshot': 'Snapshot: {date}',
   'drops.count': '{n} domínios',

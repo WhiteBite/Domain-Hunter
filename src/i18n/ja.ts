@@ -14,9 +14,11 @@ export const ja: Dict = {
 
   'drops.title': '削除ドメイン',
   'drops.desc':
-    '最近削除されたドメイン — ブランド可能な名前が通常の登録料金で。公開削除リストの週次スナップショット。',
+    '最近削除されたドメイン — ブランド可能な名前が通常の登録料金で。公開削除リストの日次スナップショット。',
   'drops.search': '名前またはゾーンで絞り込み',
   'drops.addAll': '表示中をすべてチェックに追加',
+  'drops.export.csv': 'CSV をエクスポート',
+  'drops.export.copy': 'リストをコピー',
   'drops.empty': 'フィルターに一致する削除ドメインはありません。',
   'drops.snapshot': 'スナップショット: {date}',
   'drops.count': '{n} 件',

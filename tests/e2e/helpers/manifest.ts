@@ -158,6 +158,8 @@ export const ALL_TESTIDS = [
   'drops-input-search', // search input
   'drops-select-tld', // TLD filter select
   'drops-button-add-all', // add-all button
+  'drops-button-export-csv', // export filtered list as CSV file
+  'drops-button-copy-list', // copy filtered list to clipboard
 
   // ---- PricesTab.svelte ----
   'prices-search', // zone filter search input

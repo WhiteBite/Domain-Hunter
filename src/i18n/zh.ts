@@ -14,9 +14,11 @@ export const zh: Dict = {
 
   'drops.title': '过期删除域名',
   'drops.desc':
-    '近期过期删除的域名——以普通注册价格获取的品牌化名称。每周快照来自公开的删除列表。',
+    '近期过期删除的域名——以普通注册价格获取的品牌化名称。每日快照来自公开的删除列表。',
   'drops.search': '按名称或区域筛选',
   'drops.addAll': '将所有显示项加入查询',
+  'drops.export.csv': '导出 CSV',
+  'drops.export.copy': '复制列表',
   'drops.empty': '没有符合筛选条件的过期删除域名。',
   'drops.snapshot': '快照：{date}',
   'drops.count': '{n} 个域名',

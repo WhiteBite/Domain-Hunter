@@ -57,6 +57,35 @@ async function gotoDrops(page: Page): Promise<void> {
   });
 }
 
+async function installBlobSpy(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const w = window as Window & { __csvBytes?: number[] };
+    w.__csvBytes = [];
+    const orig = URL.createObjectURL;
+    URL.createObjectURL = function (blob: Blob | MediaSource): string {
+      if (blob instanceof Blob) {
+        void blob.arrayBuffer().then((buf: ArrayBuffer) => {
+          w.__csvBytes = Array.from(new Uint8Array(buf));
+        });
+      }
+      return orig.call(URL, blob);
+    };
+  });
+}
+
+async function capturedCsv(page: Page): Promise<string> {
+  await page.waitForFunction(
+    () => ((window as Window & { __csvBytes?: number[] }).__csvBytes ?? []).length > 0,
+  );
+  const bytes = await page.evaluate<number[]>(
+    () => (window as Window & { __csvBytes?: number[] }).__csvBytes ?? [],
+  );
+  expect(bytes[0]).toBe(0xef);
+  expect(bytes[1]).toBe(0xbb);
+  expect(bytes[2]).toBe(0xbf);
+  return new TextDecoder().decode(new Uint8Array(bytes));
+}
+
 // ---- Setup / teardown ----
 
 test.beforeEach(async ({ page, context }) => {
@@ -157,5 +186,24 @@ test.describe('Drops tab', () => {
     await expect(page.locator('[data-testid="check-bar-progress"]')).toBeVisible({
       timeout: 15_000,
     });
+  });
+
+  test('copy list button writes the filtered domains to the clipboard', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-search"]', firstLabel);
+    await page.click('[data-testid="drops-button-copy-list"]');
+    await expect
+      .poll(async () => readClipboard(page), { timeout: 5_000 })
+      .toBe(FIRST_DOMAIN);
+  });
+
+  test('export CSV button downloads a BOM-prefixed CSV of the filtered list', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-search"]', firstLabel);
+    await installBlobSpy(page);
+    await page.click('[data-testid="drops-button-export-csv"]');
+    const content = await capturedCsv(page);
+    expect(content).toContain('Domain,TLD');
+    expect(content).toContain(FIRST_DOMAIN);
   });
 });

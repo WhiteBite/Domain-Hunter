@@ -14,9 +14,11 @@ export const de: Dict = {
 
   'drops.title': 'Dropdomains',
   'drops.desc':
-    'Kürzlich freigegebene Domains — Markennamen zum regulären Registrierungspreis. Wöchentliche Momentaufnahme öffentlicher Drop-Listen.',
+    'Kürzlich freigegebene Domains — Markennamen zum regulären Registrierungspreis. Tägliche Momentaufnahme öffentlicher Drop-Listen.',
   'drops.search': 'Nach Name oder Zone filtern',
   'drops.addAll': 'Alle angezeigten zur Prüfung hinzufügen',
+  'drops.export.csv': 'CSV exportieren',
+  'drops.export.copy': 'Liste kopieren',
   'drops.empty': 'Keine Dropdomains entsprechen dem Filter.',
   'drops.snapshot': 'Momentaufnahme: {date}',
   'drops.count': '{n} Domains',

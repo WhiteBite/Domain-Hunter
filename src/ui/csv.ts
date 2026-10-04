@@ -273,3 +273,16 @@ export function toMarkdown(rows: ExportRow[], headers: string[]): string {
   const body = rows.map((row) => `| ${EXPORT_FIELDS.map((f) => escape(row[f])).join(' | ')} |`);
   return [head, sep, ...body].join('\n') + '\n';
 }
+
+/**
+ * Generic CSV file string for plain rows (no fixed shape): BOM prefix, header
+ * row, CRLF endings, RFC 4180 quoting. For exports whose columns differ from
+ * the results table (drops list).
+ */
+export function toSimpleCsv(rows: string[][], headers: string[]): string {
+  const lines: string[] = [headers.map(escapeCsvField).join(',')];
+  for (const row of rows) {
+    lines.push(row.map(escapeCsvField).join(','));
+  }
+  return String.fromCharCode(0xfeff) + lines.join('\r\n') + '\r\n';
+}

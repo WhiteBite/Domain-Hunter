@@ -14,9 +14,11 @@ export const en: Dict = {
 
   'drops.title': 'Dropped domains',
   'drops.desc':
-    'Recently dropped domains — brandable names at plain registration price. Weekly snapshot of public dropped lists.',
+    'Recently dropped domains — brandable names at plain registration price. Daily snapshot of public dropped lists.',
   'drops.search': 'Filter by name or zone',
   'drops.addAll': 'Add all shown to check',
+  'drops.export.csv': 'Export CSV',
+  'drops.export.copy': 'Copy list',
   'drops.empty': 'No dropped domains match the filter.',
   'drops.snapshot': 'Snapshot: {date}',
   'drops.count': '{n} domains',

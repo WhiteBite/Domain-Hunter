@@ -14,9 +14,11 @@ export const fr: Dict = {
 
   'drops.title': 'Domaines expirés',
   'drops.desc':
-    'Domaines récemment expirés — des noms brandables au prix d’enregistrement standard. Instantané hebdomadaire des listes publiques de domaines expirés.',
+    'Domaines récemment expirés — des noms brandables au prix d’enregistrement standard. Instantané quotidien des listes publiques de domaines expirés.',
   'drops.search': 'Filtrer par nom ou zone',
   'drops.addAll': 'Ajouter tout ce qui est affiché à vérifier',
+  'drops.export.csv': 'Exporter en CSV',
+  'drops.export.copy': 'Copier la liste',
   'drops.empty': 'Aucun domaine expiré ne correspond au filtre.',
   'drops.snapshot': 'Instantané : {date}',
   'drops.count': '{n} domaines',
