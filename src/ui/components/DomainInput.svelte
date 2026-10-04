@@ -89,7 +89,7 @@
     background: var(--bg-elevated);
     color: var(--text);
     font-size: var(--text-sm);
-    font-family: var(--font-mono, ui-monospace, 'Cascadia Code', Consolas, monospace);
+    font-family: var(--font-mono);
     line-height: 1.7;
     caret-color: var(--accent);
     resize: vertical;

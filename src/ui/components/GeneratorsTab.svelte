@@ -1149,7 +1149,7 @@
     flex: 0 1 auto;
     min-width: 0;
     margin-left: var(--space-2);
-    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
     color: var(--text);
     user-select: text;

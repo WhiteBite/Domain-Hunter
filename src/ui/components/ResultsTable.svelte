@@ -1639,7 +1639,7 @@
     /* Domain names scan faster in mono (DESIGN.md §3 mono rule). */
     .domain-link,
     .domain-text {
-      font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+      font-family: var(--font-mono);
     }
     td.status-cell {
       grid-area: status;

@@ -587,7 +587,7 @@
   }
 
   .zone-cell {
-    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    font-family: var(--font-mono);
     color: var(--text);
     white-space: nowrap;
   }

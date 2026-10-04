@@ -18,7 +18,8 @@
   /* type */
   --font-sans:
     'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
+    'PingFang SC', 'Hiragino Sans', 'Noto Sans CJK JP', 'Microsoft YaHei', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
