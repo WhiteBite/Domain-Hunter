@@ -224,6 +224,7 @@ export const pt: Dict = {
   'settings.fx.refresh': 'Atualizar taxas',
   'settings.fx.age': 'Taxas ao vivo de {date}',
   'settings.fx.failed': 'Não foi possível obter as taxas ao vivo',
+  'tld.health.indirect': 'Verificação indireta pelo agregador da Cloudflare',
   'settings.engine': 'Motor de verificação',
   'settings.concurrency': 'Verificações paralelas',
   'settings.concurrency.hint': 'Limite global para todas as zonas. Menos = mais gentil com os registros.',

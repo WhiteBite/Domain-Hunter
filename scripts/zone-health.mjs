@@ -2,7 +2,7 @@
 /**
  * Zone health check — for each curated TLD, GET the resolved RDAP base with
  * a random unregistered domain and expect HTTP 404 (domain not found).
- * Records {http, cors, ok, ms, ts} per TLD. Concurrency 4, timeout 8s.
+ * Records {http, cors, ok, directOk, cfOk, ms, ts} per TLD. Concurrency 4, timeout 8s.
  * Writes public/health.json (vite copies it into dist/ so the hosted app can
  * fetch ./health.json; file:// builds skip the probe). Always exits 0.
  */
@@ -15,6 +15,7 @@ const TLDS_PATH = join(__dirname, '..', 'src', 'config', 'tlds.json');
 const HEALTH_PATH = join(__dirname, '..', 'public', 'health.json');
 const TIMEOUT_MS = 8_000;
 const CONCURRENCY = 4;
+const CF_RDAP = 'https://rdap.cloudflare.com/domain/';
 
 function resolveRdapBase(rdapBase, tld) {
   return rdapBase.includes('{tld}') ? rdapBase.replace('{tld}', tld) : rdapBase;
@@ -27,22 +28,37 @@ function randomChars(n) {
   return s;
 }
 
-async function checkTld(tld, infra) {
-  const base = resolveRdapBase(infra.rdapBase, tld);
-  const domain = 'dh-health-' + randomChars(12) + '.' + tld;
-  const url = base + domain;
+async function probe(url) {
   const start = Date.now();
   try {
     const res = await fetchWithTimeout(url, { timeoutMs: TIMEOUT_MS, redirect: 'manual' });
-    const ms = Date.now() - start;
-    const http = res.status;
-    const corsHeader = res.headers.get('access-control-allow-origin');
-    const ok = http === 404;
-    return { http, cors: corsHeader !== null, ok, ms };
+    return {
+      http: res.status,
+      cors: res.headers.get('access-control-allow-origin') !== null,
+      ms: Date.now() - start,
+    };
   } catch (err) {
-    const ms = Date.now() - start;
-    return { http: 0, cors: false, ok: false, ms, error: err?.message ?? 'fetch failed' };
+    return { http: 0, cors: false, ms: Date.now() - start, error: err?.message ?? 'fetch failed' };
   }
+}
+
+async function checkTld(tld, infra) {
+  const domain = 'dh-health-' + randomChars(12) + '.' + tld;
+  const direct = await probe(resolveRdapBase(infra.rdapBase, tld) + domain);
+  const directOk = direct.http === 404;
+  const cf = directOk ? null : await probe(CF_RDAP + domain);
+  const cfOk = cf === null ? null : cf.http === 404;
+  const result = {
+    http: direct.http,
+    cors: direct.cors,
+    ok: directOk || cfOk === true,
+    directOk,
+    cfOk,
+    ms: direct.ms,
+  };
+  if (direct.error !== undefined) result.error = direct.error;
+  if (cf !== null) result.cfHttp = cf.http;
+  return result;
 }
 
 async function runWithConcurrency(items, fn, concurrency) {

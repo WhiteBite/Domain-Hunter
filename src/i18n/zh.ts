@@ -224,6 +224,7 @@ export const zh: Dict = {
   'settings.fx.refresh': '刷新汇率',
   'settings.fx.age': '实时汇率更新于 {date}',
   'settings.fx.failed': '无法获取实时汇率',
+  'tld.health.indirect': '通过 Cloudflare 聚合器间接查询',
   'settings.engine': '查询引擎',
   'settings.concurrency': '并行查询数',
   'settings.concurrency.hint': '所有区域的总体上限。越低 = 对注册局越友好。',

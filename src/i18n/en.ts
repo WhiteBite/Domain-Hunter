@@ -224,6 +224,7 @@ export const en: Dict = {
   'settings.fx.refresh': 'Refresh rates',
   'settings.fx.age': 'Live rates from {date}',
   'settings.fx.failed': 'Could not fetch live rates',
+  'tld.health.indirect': 'Checked indirectly via the Cloudflare aggregator',
   'settings.engine': 'Checking engine',
   'settings.concurrency': 'Parallel checks',
   'settings.concurrency.hint': 'Global limit across all zones. Lower = gentler to registries.',

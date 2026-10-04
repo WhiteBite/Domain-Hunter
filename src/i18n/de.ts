@@ -224,6 +224,7 @@ export const de: Dict = {
   'settings.fx.refresh': 'Kurse aktualisieren',
   'settings.fx.age': 'Live-Kurse vom {date}',
   'settings.fx.failed': 'Live-Kurse konnten nicht abgerufen werden',
+  'tld.health.indirect': 'Indirekte Prüfung über den Cloudflare-Aggregator',
   'settings.engine': 'Prüf-Engine',
   'settings.concurrency': 'Parallele Prüfungen',
   'settings.concurrency.hint': 'Globales Limit über alle Zonen. Niedriger = schonender für Registries.',

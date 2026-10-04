@@ -6,6 +6,7 @@
   import { get } from 'svelte/store';
   import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
+  import { healthNote, type HealthEntry } from '../health';
   import IconChevron from './icons/IconChevron.svelte';
   import IconCheck from './icons/IconCheck.svelte';
 
@@ -13,7 +14,7 @@
 
   let search = $state('');
   let activePreset = $state<Preset | null>(null);
-  let health = $state<Record<string, { ok?: boolean }>>({});
+  let health = $state<Record<string, HealthEntry>>({});
   let popoverOpen = $state(false);
   let popoverEl: HTMLDivElement | null = $state(null);
   let triggerEl: HTMLButtonElement | null = $state(null);
@@ -71,7 +72,7 @@
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         if (json && typeof json === 'object' && (json as { tlds?: unknown }).tlds) {
-          health = (json as { tlds: Record<string, { ok?: boolean }> }).tlds;
+          health = (json as { tlds: Record<string, HealthEntry> }).tlds;
         }
       })
       .catch(() => {});
@@ -80,6 +81,17 @@
   function isUnstable(tld: string): boolean {
     const h = health[tld];
     return h != null && h.ok === false;
+  }
+
+  function isIndirect(tld: string): boolean {
+    return healthNote(health[tld]) === 'indirect';
+  }
+
+  function chipNote(tld: string): string | undefined {
+    const note = healthNote(health[tld]);
+    if (note === 'unverified') return t('check.tlds.unstable');
+    if (note === 'indirect') return t('tld.health.indirect');
+    return undefined;
   }
 
   const allTlds = $derived.by(() => {
@@ -295,11 +307,7 @@
               type="button"
               data-testid={`tld-chip-${cfg.tld}`}
               title={
-                flags?.reputationNote
-                  ? t('check.tlds.spamNote')
-                  : isUnstable(cfg.tld)
-                    ? t('check.tlds.unstable')
-                    : undefined
+                flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
               }
             >
               <span class="zone-check" aria-hidden="true">
@@ -310,6 +318,8 @@
               <span class="tld">.{cfg.tld}</span>
               {#if isUnstable(cfg.tld)}
                 <span class="dot-unstable" aria-hidden="true"></span>
+              {:else if isIndirect(cfg.tld)}
+                <span class="dot-indirect" aria-hidden="true"></span>
               {/if}
               {#if price}
                 <span class="price nums">{price}</span>
@@ -355,11 +365,7 @@
                     type="button"
                     data-testid={`tld-chip-${cfg.tld}`}
                     title={
-                      flags?.reputationNote
-                        ? t('check.tlds.spamNote')
-                        : isUnstable(cfg.tld)
-                          ? t('check.tlds.unstable')
-                          : undefined
+                      flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
                     }
                   >
                     <span class="zone-check" aria-hidden="true">
@@ -370,6 +376,8 @@
                     <span class="tld">.{cfg.tld}</span>
                     {#if isUnstable(cfg.tld)}
                       <span class="dot-unstable" aria-hidden="true"></span>
+                    {:else if isIndirect(cfg.tld)}
+                      <span class="dot-indirect" aria-hidden="true"></span>
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
@@ -418,11 +426,7 @@
                     type="button"
                     data-testid={`tld-chip-${cfg.tld}`}
                     title={
-                      flags?.reputationNote
-                        ? t('check.tlds.spamNote')
-                        : isUnstable(cfg.tld)
-                          ? t('check.tlds.unstable')
-                          : undefined
+                      flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
                     }
                   >
                     <span class="zone-check" aria-hidden="true">
@@ -433,6 +437,8 @@
                     <span class="tld">.{cfg.tld}</span>
                     {#if isUnstable(cfg.tld)}
                       <span class="dot-unstable" aria-hidden="true"></span>
+                    {:else if isIndirect(cfg.tld)}
+                      <span class="dot-indirect" aria-hidden="true"></span>
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
@@ -481,11 +487,7 @@
                     type="button"
                     data-testid={`tld-chip-${cfg.tld}`}
                     title={
-                      flags?.reputationNote
-                        ? t('check.tlds.spamNote')
-                        : isUnstable(cfg.tld)
-                          ? t('check.tlds.unstable')
-                          : undefined
+                      flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
                     }
                   >
                     <span class="zone-check" aria-hidden="true">
@@ -496,6 +498,8 @@
                     <span class="tld">.{cfg.tld}</span>
                     {#if isUnstable(cfg.tld)}
                       <span class="dot-unstable" aria-hidden="true"></span>
+                    {:else if isIndirect(cfg.tld)}
+                      <span class="dot-indirect" aria-hidden="true"></span>
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
@@ -849,6 +853,14 @@
     height: 6px;
     border-radius: 50%;
     background: var(--amber);
+    display: inline-block;
+    flex: none;
+  }
+  .dot-indirect {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-quaternary);
     display: inline-block;
     flex: none;
   }

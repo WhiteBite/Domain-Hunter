@@ -224,6 +224,7 @@ export const ja: Dict = {
   'settings.fx.refresh': 'レートを更新',
   'settings.fx.age': '実勢レート（{date} 時点）',
   'settings.fx.failed': '実勢レートを取得できませんでした',
+  'tld.health.indirect': 'Cloudflare アグリゲーター経由の間接確認',
   'settings.engine': 'チェックエンジン',
   'settings.concurrency': '並列チェック数',
   'settings.concurrency.hint': '全ゾーン共通の上限です。低くするほどレジストリに優しくなります。',

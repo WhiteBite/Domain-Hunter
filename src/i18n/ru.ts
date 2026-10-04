@@ -224,6 +224,7 @@ export const ru: Dict = {
   'settings.fx.refresh': 'Обновить курсы',
   'settings.fx.age': 'Живые курсы от {date}',
   'settings.fx.failed': 'Не удалось получить живые курсы',
+  'tld.health.indirect': 'Проверяется косвенно через агрегатор Cloudflare',
   'settings.engine': 'Движок проверки',
   'settings.concurrency': 'Параллельных проверок',
   'settings.concurrency.hint': 'Общий лимит по всем зонам. Меньше — вежливее к реестрам.',

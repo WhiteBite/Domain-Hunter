@@ -225,6 +225,7 @@ export const fr: Dict = {
   'settings.fx.refresh': 'Actualiser les taux',
   'settings.fx.age': 'Taux en direct du {date}',
   'settings.fx.failed': 'Impossible de récupérer les taux en direct',
+  'tld.health.indirect': 'Vérification indirecte via l’agrégateur Cloudflare',
   'settings.engine': 'Moteur de vérification',
   'settings.concurrency': 'Vérifications en parallèle',
   'settings.concurrency.hint': 'Limite globale sur toutes les zones. Plus bas = plus doux pour les registres.',

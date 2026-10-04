@@ -406,8 +406,9 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 - `prices.yml`: weekly cron + dispatch → `node scripts/harvest-prices.mjs` → commit
   `src/config/pricing.snapshot.json` if changed (bot identity). Script must exit 0 on partial
   source failure; exit 1 only if ALL sources fail.
-- `zone-health.yml`: weekly cron → `node scripts/zone-health.mjs` → commit `health.json`
-  (tld → {rdap, cors, httpStatus, ms, ts}); failures visible in repo.
+- `zone-health.yml`: daily cron → `node scripts/zone-health.mjs` → commit `health.json`
+  (tld → {http, cors, ok, directOk, cfOk, ms, ts}; direct RDAP probe with the
+  Cloudflare-aggregator fallback); failures visible in repo.
 
 ## 15. Acceptance criteria (agent must run through all)
 
