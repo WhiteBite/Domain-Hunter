@@ -2,7 +2,9 @@
 ## Quickstart
 
 ```bash
-npm install domain-hunter
+git clone https://github.com/WhiteBite/Domain-Hunter.git
+cd Domain-Hunter
+npm install
 npm run dev
 ```
 
@@ -58,11 +60,11 @@ Every candidate collects in a persistent tray that survives tab switches and sho
 
 ## Dropped domains at registration price
 
-The **Drops tab** scans expired/dropped domains — the bundled snapshot is refreshed weekly from the WhoisFreaks daily dropped-domains feed — and reports those still available at standard registration price, no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
+The **Drops tab** scans expired/dropped domains — the bundled snapshot is refreshed daily from the WhoisFreaks dropped-domains feed — and reports those still available at standard registration price, no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
 
 ## Social handles
 
-The **Social tab** checks username availability across major platforms (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram) so you can secure a consistent handle everywhere.
+The **Social tab** runs live username checks on GitHub and TikTok; X, YouTube, Instagram, and Reddit show an honest "unknown" plus a profile link (their APIs block anonymous browser checks — an optional self-hosted CORS proxy in Settings covers them).
 
 ## Export, share, and organize
 
@@ -129,7 +131,7 @@ This produces `dist-cli/domain-hunter.mjs` (and `dist-cli/mcp-server.mjs` if `cl
 node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
 
 # Per-registrar pricing for specific TLDs
-node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB
 
 # Generate domain name candidates (offline-safe: combinator, syllables, mutations, themes)
 node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
@@ -297,22 +299,25 @@ If Domain Hunter saved you time, a ⭐ helps others find it too.
 
 ## Use cases
 
-<!-- TODO: 3-7 concrete use cases -->
+- **Validate a shortlist before buying** — paste up to 3,000 names across 148 TLDs, stream results live, and export the available ones with prices and 3-year TCO.
+- **Drop-catching** — scan the daily dropped-domains snapshot at registration price, star candidates, and get freed/taken flags on reload.
+- **Avoid promo traps** — compare first-year, renewal, and 3-year TCO across 42 registrars before committing to a "$0.99 first year" deal.
+- **Brand brainstorming** — five generators (combinator, syllable mixer, thematic sets, TLD-hacks, mutations) collect checkable candidates in one tray.
+- **Automation** — the CLI and MCP server expose the same engine with a stable JSON contract for scripts and AI agents.
 
 ## Why choose this
 
-<!-- TODO: 2-4 differentiators, with numbers -->
+- **One self-contained HTML file** — the whole app compiles into a single `dist/index.html` that works offline from `file://`: no server, no API keys, no tracking.
+- **Honest results** — a three-state model (`available` / `probably_available` / `unknown`): low-trust zones are corroborated via DoH before anything is called free, because a wrong "available" is worse than "unknown".
+- **148 zones, 18 registries** — live registrar prices, promo-trap flags, and 3-year TCO with zero paid APIs.
+- **Tested** — 4,458 unit tests plus 139 Playwright E2E, 8 UI languages, MIT license.
 
 ## Examples
 
-### Example (replace with a real one)
-
 ```bash
-npm run dev
-```
+# Check domains with live prices (after npm run build:cli)
+node dist-cli/domain-hunter.mjs check acme-nova.com --tlds com,io,dev --prices
 
-### Example (replace with a real one)
-
-```bash
-npm run dev
+# Generate and check name candidates within a budget
+node dist-cli/domain-hunter.mjs find mybrand --budget 15 --tlds com,io,dev
 ```
