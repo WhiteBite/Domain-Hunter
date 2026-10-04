@@ -39,7 +39,7 @@ src/
     rdap-client.ts  rate-limiter.ts  queue.ts  doh.ts  idn.ts  cache.ts  bootstrap.ts
   pricing/pricing.ts    # live fetch + merge + TTL + currency + TCO + coupons
   generators/           # combinator, syllables, hacks, mutations, themes (pure functions)
-  i18n/                 # en.ts + ru.ts — flat dot-keys, identical key sets (parity enforced)
+  i18n/                 # 8 locales (en, ru, es, de, pt, fr, zh, ja) — flat dot-keys, identical key sets (parity enforced)
   ui/                   # tokens.css, stores, csv/share/theme/settings, components/
 tests/                  # Vitest suites (pure logic) + e2e/ (Playwright E2E, mocked network)
 scripts/                # CI helpers (price harvest, zone health, worker build)
@@ -55,7 +55,7 @@ dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs 
 ## Conventions (must follow)
 
 - **TypeScript strict.** Shared types live only in `src/types.ts`. No `any`, no `@ts-ignore`.
-- **All user-visible strings go through i18n** (`t(key)`), including tooltips, aria-labels, empty states, and errors. `en.ts` and `ru.ts` key sets must stay identical — a test enforces parity.
+- **All user-visible strings go through i18n** (`t(key)`), including tooltips, aria-labels, empty states, and errors. All eight locale files must keep identical key sets — a test enforces parity.
 - **Zones are data, not code.** Adding/changing a TLD means editing `src/config/tlds.json` only.
 - **Never guess availability.** Honor the three-state model in SPEC §7 (`available` / `probably_available` / `unknown`); DoH-only results never yield bare `available`. A wrong "available" is worse than "unknown".
 - **Be polite to registries.** Per-infra rate profiles, AIMD backoff, honor `Retry-After`, global concurrency cap. Google Registry ≈1 rps is strict.
