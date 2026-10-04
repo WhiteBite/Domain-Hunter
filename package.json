@@ -1,7 +1,6 @@
 {
   "name": "domain-hunter",
   "version": "2.0.0",
-  "private": true,
   "type": "module",
   "description": "Free, open-source, browser-only domain availability checker. No servers, no API keys, no tracking.",
   "license": "MIT",
@@ -11,6 +10,12 @@
   "bin": {
     "domain-hunter": "dist-cli/domain-hunter.mjs"
   },
+  "files": [
+    "dist-cli",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -25,6 +30,8 @@
     "smoke": "node scripts/smoke.mjs",
     "build:worker": "node scripts/build-worker.mjs",
     "build:cli": "node scripts/build-cli.mjs",
+    "prepack": "npm run build:cli",
+    "size": "node scripts/size-limit.mjs",
     "cli": "npm run build:cli && node dist-cli/domain-hunter.mjs",
     "mcp": "npm run build:cli && node dist-cli/mcp-server.mjs",
     "rdk:audit": "rdk audit",
