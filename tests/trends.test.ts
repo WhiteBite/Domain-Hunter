@@ -142,4 +142,20 @@ describe('computeTrends', () => {
   it('returns an empty object for empty history', () => {
     expect(computeTrends({})).toEqual({});
   });
+
+  it('filters to allowed TLDs when a set is given', () => {
+    const history: Record<string, Array<[string, number | null, number | null]>> = {
+      com: [
+        ['2026-01', 100, 100],
+        ['2026-03', 110, 110],
+      ],
+      zzz: [
+        ['2026-01', 500, 500],
+        ['2026-03', 400, 400],
+      ],
+    };
+    const trends = computeTrends(history, new Set(['com']));
+    expect(Object.keys(trends)).toEqual(['com']);
+    expect(trends.com).toEqual({ pct: 10, dir: 'up', spark: [100, 110] });
+  });
 });

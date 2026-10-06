@@ -13,7 +13,7 @@
  * write. Run once locally to bootstrap the history from existing git data.
  *
  * Output shape: { tld: [ [m, reg, renew], ... ] } sorted by month asc.
- * Also writes precomputed per-TLD trends into pricing.snapshot.json (trends field).
+ * Also writes precomputed trends for registry zones into pricing.snapshot.json (trends field).
  */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -22,6 +22,7 @@ import { readJson, writeJson } from './lib/http.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = join(__dirname, '..', 'src', 'config', 'pricing.snapshot.json');
+const TLDS_PATH = join(__dirname, '..', 'src', 'config', 'tlds.json');
 const HISTORY_PATH = join(__dirname, '..', 'src', 'config', 'price-history.json');
 const SNAPSHOT_REL = 'src/config/pricing.snapshot.json';
 const MAX_COMMITS = 200;
@@ -133,9 +134,10 @@ export function sparkValues(rows) {
   return values.length >= 2 ? values : null;
 }
 
-export function computeTrends(history) {
+export function computeTrends(history, allowedTlds = null) {
   const trends = {};
   for (const [tld, rows] of Object.entries(history)) {
+    if (allowedTlds && !allowedTlds.has(tld)) continue;
     const points = rows.map(([m, reg, renew]) => ({ m, reg, renew }));
     const { pct, dir } = summarizeTrendPoints(points);
     const spark = sparkValues(rows);
@@ -146,8 +148,13 @@ export function computeTrends(history) {
 
 async function writeTrendsToSnapshot(history) {
   try {
+    const registry = await readJson(TLDS_PATH);
+    const allowed = new Set([
+      ...registry.tlds.map((c) => c.tld),
+      ...(registry.hackTlds ?? []),
+    ]);
     const snapshot = await readJson(SNAPSHOT_PATH);
-    snapshot.trends = computeTrends(history);
+    snapshot.trends = computeTrends(history, allowed);
     await writeJson(SNAPSHOT_PATH, snapshot);
     console.log(`trends: ${Object.keys(snapshot.trends).length} TLDs -> ${SNAPSHOT_PATH}`);
   } catch (err) {

@@ -28,4 +28,5 @@ export declare function sparkValues(
 
 export declare function computeTrends(
   history: Record<string, Array<[string, number | null, number | null]>>,
+  allowedTlds?: Set<string> | null,
 ): Record<string, TrendEntryLike>;
