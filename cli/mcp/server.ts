@@ -44,16 +44,11 @@ const ratesSchema = z
 
 type RatesInput = { RUB?: number; EUR?: number } | undefined;
 
-/**
- * Map the optional rates shape to CliRates, mirroring cli/main.ts parseRates:
- * when at least one rate is provided, the missing one falls back to the same
- * defaults the CLI uses (RUB 97, EUR 0.92). core.ts buildSettings applies its
- * own DEFAULT_SETTINGS fallback on top, so this is purely for type alignment.
- */
+/** Mirror cli/main.ts parseRates fallbacks; core.ts buildSettings applies DEFAULT_SETTINGS on top. */
 function toCliRates(rates: RatesInput): CliRates | undefined {
   if (rates == null) return undefined;
   if (rates.RUB == null && rates.EUR == null) return undefined;
-  return { RUB: rates.RUB ?? 97, EUR: rates.EUR ?? 0.92 };
+  return { RUB: rates.RUB ?? 83.49, EUR: rates.EUR ?? 0.8888 };
 }
 
 /** Build a text-only CallToolResult. */
