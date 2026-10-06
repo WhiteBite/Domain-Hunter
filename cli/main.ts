@@ -43,8 +43,8 @@ check options:
   --prices                 Attach pricing info to available domains
   --no-cache                Skip the result cache
   --currency USD|RUB|EUR   Display currency for formatted prices (default: USD)
-  --rate-rub N              RUB units per 1 USD (default: 97)
-  --rate-eur N              EUR units per 1 USD (default: 0.92)
+  --rate-rub N              RUB units per 1 USD (default: 83.49)
+  --rate-eur N              EUR units per 1 USD (default: 0.8888)
 
 prices options:
   --tlds a,b,c             Filter to specific TLDs
