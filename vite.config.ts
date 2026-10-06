@@ -25,5 +25,15 @@ export default defineConfig(({ command }) => ({
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/core/**', 'src/pricing/**', 'cli/**'],
+      thresholds: {
+        statements: 62,
+        'src/core/**': { statements: 88 },
+        'src/pricing/**': { statements: 92 },
+        'cli/**': { statements: 29 },
+      },
+    },
   },
 }));

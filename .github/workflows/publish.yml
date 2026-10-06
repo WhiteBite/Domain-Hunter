@@ -21,7 +21,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run typecheck && npm test && npm run lint
+      - run: npm run typecheck && npm run test:coverage && npm run lint
 
       # prepack runs build:cli; NPM_TOKEN is owner-provided; dispatch-only, never agent-triggered.
       - run: npm publish --provenance --access public

@@ -32,7 +32,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-      - run: npx vitest run --passWithNoTests
+      - run: npm run test:coverage -- --passWithNoTests
       - name: Build CLI + MCP bundles
         run: npm run build:cli
       - run: npm run build

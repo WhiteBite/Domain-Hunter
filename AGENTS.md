@@ -13,6 +13,7 @@ Domain Hunter is a free, open-source, **100% client-side** bulk domain availabil
 - `npm run preview` — serve the production build locally
 - `npm run typecheck` — `tsc --noEmit`, must pass before committing
 - `npm test` — Vitest suites in `tests/` (pure logic only: status interpretation, AIMD, queue, punycode, CSV, i18n parity, generators, pricing merge)
+- `npm run test:coverage` — same suites with the v8 coverage ratchet (statement floors for `src/core/**`, `src/pricing/**`, `cli/**` in `vite.config.ts`; raise thresholds as coverage grows, never lower)
 - `npm run test:e2e` — Playwright E2E against `dist/index.html` (all network mocked, build dist first)
 - `npm run test:e2e:ui` — Playwright E2E in interactive UI mode
 - `npm run build:worker` — regenerate the optional Cloudflare CORS proxy `worker.js` from `src/config/tlds.json`
