@@ -15,6 +15,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { installStorage } from './shims/storage.js';
+import { formatOutcome, isOutputFormat, type OutputFormat } from './format.js';
+import { completionScript, isCompletionShell } from './completions.js';
 import type {
   CliCurrency,
   CliRates,
@@ -33,10 +35,13 @@ Commands:
   find <seed>              Find available domains within budget
   tlds                     List loaded TLD zones (curated + IANA bootstrap)
   drops                    List dropped domains from the bundled daily snapshot
+  watch <domain...>        Poll domains until a status flips (exit 10 on flip)
+  completions <shell>      Print shell completions (bash | zsh | fish)
 
 Global flags:
   --help, -h               Show this help
   --version, -v            Show version
+  --format json|table|csv  Output format for check/prices/drops (default: json)
 
 check options:
   <domain...>              One or more domain names or bare labels (max 3000)
@@ -80,7 +85,15 @@ drops options:
   --tld com                Filter to one TLD
   --limit N                Max domains to output (default: 200, max: 2000)
 
-Output: JSON on stdout, progress on stderr. Exit: 0 success, 1 error/abort, 2 usage.
+watch options:
+  <domain...>              Domains or bare labels to poll (same as check)
+  --tlds a,b,c             TLDs to expand bare labels over
+  --interval N             Poll interval in seconds (default: 300, min: 5)
+  --rounds N               Max polling rounds (default: unlimited)
+  --prices                 Attach pricing info to results
+
+Output: JSON on stdout, progress on stderr.
+Exit: 0 success, 1 error/abort, 2 usage, 10 watch flip detected.
 Ctrl+C during a check aborts gracefully, writes partial JSON, exits 1.`;
 
 // ---- arg parsing (zero-dependency) ----
@@ -146,6 +159,13 @@ function parseMode(
   process.stderr.write(
     `Error: invalid mode '${value}' (expected prefix, suffix, or both)\n`,
   );
+  process.exit(2);
+}
+
+function parseFormat(value: string | true | undefined): OutputFormat {
+  if (value == null || value === true) return 'json';
+  if (isOutputFormat(value)) return value;
+  process.stderr.write(`Error: invalid format '${value}' (expected json, table, or csv)\n`);
   process.exit(2);
 }
 
@@ -231,7 +251,7 @@ async function main(): Promise<number> {
           ignoreCache: flags['no-cache'] === true,
           withPrices: flags.prices === true,
         });
-        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        process.stdout.write(formatOutcome(outcome, parseFormat(flags.format)));
         return outcome.aborted ? 1 : 0;
       }
       case 'prices': {
@@ -241,7 +261,7 @@ async function main(): Promise<number> {
           currency: parseCurrency(flags.currency),
           rates: parseRates(flags),
         });
-        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        process.stdout.write(formatOutcome(outcome, parseFormat(flags.format)));
         return 0;
       }
       case 'generate': {
@@ -304,7 +324,36 @@ async function main(): Promise<number> {
           tld: parseString(flags.tld),
           limit: parseNumber(flags.limit),
         });
+        process.stdout.write(formatOutcome(outcome, parseFormat(flags.format)));
+        return 0;
+      }
+      case 'watch': {
+        if (positionals.length === 0) {
+          process.stderr.write('Error: watch requires at least one domain\n');
+          return 2;
+        }
+        const outcome = await core.runWatchCommand({
+          domains: positionals,
+          tlds: parseCsv(flags.tlds),
+          currency: parseCurrency(flags.currency),
+          rates: parseRates(flags),
+          withPrices: flags.prices === true,
+          intervalSec: parseNumber(flags.interval),
+          rounds: parseNumber(flags.rounds),
+        });
         process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        if (outcome.stopped === 'flip') return 10;
+        return outcome.stopped === 'interrupted' ? 1 : 0;
+      }
+      case 'completions': {
+        const shell = positionals[0];
+        if (!isCompletionShell(shell)) {
+          process.stderr.write(
+            'Error: completions requires a shell (bash, zsh, or fish)\n',
+          );
+          return 2;
+        }
+        process.stdout.write(completionScript(shell));
         return 0;
       }
       default:

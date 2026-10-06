@@ -169,3 +169,30 @@ export interface PriceTrendsOutcome {
   command: 'price_trends';
   trends: Record<string, PriceTrendEntry>;
 }
+
+export interface WatchCommandOptions {
+  domains: string[];
+  tlds?: string[];
+  currency?: CliCurrency;
+  rates?: Partial<CliRates>;
+  withPrices?: boolean;
+  /** Poll interval in seconds (default 300, floor 5). */
+  intervalSec?: number;
+  /** Max polling rounds; 0 or omitted means unlimited. */
+  rounds?: number;
+}
+
+export interface FlipEvent {
+  domain: string;
+  from: CheckStatus;
+  to: CheckStatus;
+  round: number;
+}
+
+export interface WatchOutcome {
+  command: 'watch';
+  rounds: number;
+  flips: FlipEvent[];
+  statuses: Record<string, CheckStatus>;
+  stopped: 'flip' | 'rounds' | 'interrupted';
+}

@@ -53,6 +53,9 @@ import type {
   TldsCommandOptions,
   TldsOutcome,
   TldsZone,
+  WatchCommandOptions,
+  WatchOutcome,
+  FlipEvent,
 } from './contract';
 
 const DEFAULT_CONCURRENCY = 6;
@@ -572,4 +575,65 @@ export function runPriceTrendsCommand(
     if (e) out[k] = { pct: e.pct, dir: e.dir };
   }
   return { command: 'price_trends', trends: out };
+}
+
+// ---- runWatchCommand ----
+
+const DEFAULT_WATCH_INTERVAL_SEC = 300;
+const MIN_WATCH_INTERVAL_SEC = 5;
+
+export interface WatchDeps {
+  check?: (opts: CheckCommandOptions) => Promise<CheckOutcome>;
+  sleep?: (ms: number) => Promise<void>;
+}
+
+/**
+ * Poll domains until a status flips between rounds (exit 10 in main), the
+ * round budget is exhausted, or SIGINT aborts a round. Cache is always
+ * ignored — stale statuses would defeat the watch.
+ */
+export async function runWatchCommand(
+  opts: WatchCommandOptions,
+  deps: WatchDeps = {},
+): Promise<WatchOutcome> {
+  const check = deps.check ?? runCheckCommand;
+  const sleep = deps.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const intervalSec = Math.max(opts.intervalSec ?? DEFAULT_WATCH_INTERVAL_SEC, MIN_WATCH_INTERVAL_SEC);
+  const maxRounds = opts.rounds != null && opts.rounds > 0 ? opts.rounds : Infinity;
+
+  const flips: FlipEvent[] = [];
+  let prev: Record<string, CheckRow['status']> | null = null;
+  let statuses: Record<string, CheckRow['status']> = {};
+  let round = 0;
+
+  while (round < maxRounds) {
+    round += 1;
+    const outcome = await check({
+      domains: opts.domains,
+      tlds: opts.tlds,
+      currency: opts.currency,
+      rates: opts.rates,
+      withPrices: opts.withPrices,
+      ignoreCache: true,
+    });
+    if (outcome.aborted) {
+      for (const r of outcome.results) statuses[r.domain] = r.status;
+      return { command: 'watch', rounds: round, flips, statuses, stopped: 'interrupted' };
+    }
+    statuses = {};
+    for (const r of outcome.results) statuses[r.domain] = r.status;
+    if (prev != null) {
+      for (const [domain, to] of Object.entries(statuses)) {
+        const from = prev[domain];
+        if (from != null && from !== to) flips.push({ domain, from, to, round });
+      }
+    }
+    prev = statuses;
+    process.stderr.write(`watch: round ${round} done, ${Object.keys(statuses).length} domains\n`);
+    if (flips.length > 0) {
+      return { command: 'watch', rounds: round, flips, statuses, stopped: 'flip' };
+    }
+    if (round < maxRounds) await sleep(intervalSec * 1000);
+  }
+  return { command: 'watch', rounds: round, flips, statuses, stopped: 'rounds' };
 }
