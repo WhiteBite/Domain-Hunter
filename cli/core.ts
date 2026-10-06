@@ -25,7 +25,7 @@ import { mixSyllables } from '../src/generators/syllables';
 import { findHacks } from '../src/generators/hacks';
 import { mutate } from '../src/generators/mutations';
 import { themes } from '../src/generators/themes';
-import { loadPricingTable, loadRegistry } from './data';
+import { loadPricingTable, loadRegistry, resolveCliRates } from './data';
 import process from 'node:process';
 import type {
   CheckCommandOptions,
@@ -214,13 +214,11 @@ export async function runCheckCommand(
 
     // Pricing attachment.
     if (opts.withPrices) {
-      const settings = buildSettings(opts);
+      const rates = await resolveCliRates(opts.currency, opts.rates);
+      const settings = buildSettings({ currency: opts.currency, rates });
       const pricingState = await loadPricingTable({
         currency: opts.currency ?? DEFAULT_SETTINGS.currency,
-        rates: opts.rates ?? {
-          RUB: DEFAULT_SETTINGS.rates.RUB,
-          EUR: DEFAULT_SETTINGS.rates.EUR,
-        },
+        rates,
       });
       for (const row of results) {
         if (row.status === 'available' || row.status === 'probably_available') {
@@ -260,12 +258,10 @@ export async function runCheckCommand(
 export async function runPricesCommand(
   opts: PricesCommandOptions,
 ): Promise<PricesOutcome> {
+  const rates = await resolveCliRates(opts.currency, opts.rates);
   const pricingState = await loadPricingTable({
     currency: opts.currency ?? DEFAULT_SETTINGS.currency,
-    rates: opts.rates ?? {
-      RUB: DEFAULT_SETTINGS.rates.RUB,
-      EUR: DEFAULT_SETTINGS.rates.EUR,
-    },
+    rates,
   });
   const table = pricingState.table;
 
@@ -430,17 +426,18 @@ export async function runFindCommand(
 
   // Check the pool with prices. Pass the already-loaded registry so
   // runCheckCommand does not fetch it a second time.
+  const rates = await resolveCliRates(opts.currency, opts.rates);
   const checkOutcome = await runCheckCommand({
     domains: candidates,
     withPrices: true,
     currency: opts.currency,
-    rates: opts.rates,
+    rates,
     tlds: opts.tlds,
     preloadedRegistry: loaded,
   });
 
   // Budget conversion (USD cents).
-  const settings = buildSettings(opts);
+  const settings = buildSettings({ currency: opts.currency, rates });
   const budgetUsdCents =
     opts.budget != null ? displayToUsdCents(opts.budget, settings) : null;
 

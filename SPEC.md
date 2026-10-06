@@ -400,6 +400,8 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
   scripts/build-worker.mjs); no arbitrary URL passthrough (anti-abuse).
 - FX rates: `open.er-api.com/v6/latest/USD` (no key, open CORS, daily upstream refresh),
   cached in `dh:v1:fx` with a 7-day TTL; on failure the stored or manually entered rates stand.
+  The CLI/MCP mirror this via `dh:cli:fx` (7d) when RUB/EUR display is requested without
+  explicit rate flags; explicit flags always win.
 
 ## 14. CI/CD
 
@@ -491,7 +493,9 @@ automation. They are additive surfaces — no app behavior changes.
 - **CLI-only network addition.** The CLI fetches
   `raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/src/config/{tlds,pricing.snapshot}.json`
   with a 24h TTL cache (stored in `~/.domain-hunter/storage.json`) and
-  silent fallback to the bundled copies. The app runtime allowlist (§13) is
+  silent fallback to the bundled copies, plus `open.er-api.com` (§13) for
+  display rates when RUB/EUR output is requested without explicit `--rate-*`
+  flags (7d cache, `dh:cli:fx`). The app runtime allowlist (§13) is
   unchanged.
 - **JSON-on-stdout contract.** Every command prints one JSON object to
   stdout (exit 0 on success, 1 on runtime error, 2 on usage error). Progress

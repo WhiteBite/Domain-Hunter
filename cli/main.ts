@@ -43,8 +43,8 @@ check options:
   --prices                 Attach pricing info to available domains
   --no-cache                Skip the result cache
   --currency USD|RUB|EUR   Display currency for formatted prices (default: USD)
-  --rate-rub N              RUB units per 1 USD (default: 83.49)
-  --rate-eur N              EUR units per 1 USD (default: 0.8888)
+  --rate-rub N              RUB units per 1 USD (default: live FX, 7d cache)
+  --rate-eur N              EUR units per 1 USD (default: live FX, 7d cache)
 
 prices options:
   --tlds a,b,c             Filter to specific TLDs
@@ -143,14 +143,14 @@ function parseMode(
   process.exit(2);
 }
 
-function parseRates(flags: Record<string, string | true>): CliRates | undefined {
+function parseRates(flags: Record<string, string | true>): Partial<CliRates> | undefined {
   const rub = parseNumber(flags['rate-rub']);
   const eur = parseNumber(flags['rate-eur']);
   if (rub == null && eur == null) return undefined;
-  return {
-    RUB: rub ?? 83.49,
-    EUR: eur ?? 0.8888,
-  };
+  const partial: Partial<CliRates> = {};
+  if (rub != null) partial.RUB = rub;
+  if (eur != null) partial.EUR = eur;
+  return partial;
 }
 
 function isGeneratorName(s: string): s is GenerateCommandOptions['generator'] {

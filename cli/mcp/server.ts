@@ -16,7 +16,6 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { installStorage } from '../shims/storage.js';
-import type { CliRates } from '../contract.js';
 
 // ---- version (same technique as cli/main.ts) ----
 
@@ -41,15 +40,6 @@ const ratesSchema = z
     EUR: z.number().positive().optional(),
   })
   .optional();
-
-type RatesInput = { RUB?: number; EUR?: number } | undefined;
-
-/** Mirror cli/main.ts parseRates fallbacks; core.ts buildSettings applies DEFAULT_SETTINGS on top. */
-function toCliRates(rates: RatesInput): CliRates | undefined {
-  if (rates == null) return undefined;
-  if (rates.RUB == null && rates.EUR == null) return undefined;
-  return { RUB: rates.RUB ?? 83.49, EUR: rates.EUR ?? 0.8888 };
-}
 
 /** Build a text-only CallToolResult. */
 function textResult(text: string, isError = false): CallToolResult {
@@ -104,7 +94,7 @@ async function main(): Promise<void> {
           domains: args.domains,
           tlds: args.tlds,
           currency: args.currency,
-          rates: toCliRates(args.rates),
+          rates: args.rates,
           ignoreCache: args.ignoreCache,
           withPrices: args.withPrices,
           cacheTtlHours: args.cacheTtlHours,
@@ -139,7 +129,7 @@ async function main(): Promise<void> {
           tlds: args.tlds,
           query: args.query,
           currency: args.currency,
-          rates: toCliRates(args.rates),
+          rates: args.rates,
         });
         return textResult(JSON.stringify(outcome, null, 2));
       } catch (err) {
@@ -215,7 +205,7 @@ async function main(): Promise<void> {
           seedName: args.seedName,
           budget: args.budget,
           currency: args.currency,
-          rates: toCliRates(args.rates),
+          rates: args.rates,
           tlds: args.tlds,
           maxChecks: args.maxChecks,
         });

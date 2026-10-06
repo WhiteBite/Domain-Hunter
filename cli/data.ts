@@ -13,6 +13,8 @@
 import tldsJson from '../src/config/tlds.json';
 import { fetchBootstrap, mergeWithCurated } from '../src/core/bootstrap';
 import { loadPricing } from '../src/pricing/pricing';
+import { fetchFxRates, FX_TTL_MS, type FxRates } from '../src/pricing/fx';
+import { DEFAULT_SETTINGS } from '../src/types';
 import type {
   Coupon,
   InfraConfig,
@@ -312,4 +314,71 @@ export async function loadPricingTable(opts: {
     force: opts.force,
     snapshotOverride,
   });
+}
+
+// ---- Display-rate resolution (live FX, mirrors the app's dh:v1:fx) ----
+
+const FX_CACHE_KEY = 'dh:cli:fx';
+
+interface FxCache {
+  rates: FxRates;
+  fetchedAt: number;
+}
+
+function readFxCache(): FxCache | null {
+  try {
+    const raw = localStorage.getItem(FX_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<FxCache>;
+    const rates = parsed?.rates;
+    if (
+      typeof parsed?.fetchedAt === 'number' &&
+      rates != null &&
+      typeof rates.RUB === 'number' &&
+      typeof rates.EUR === 'number'
+    ) {
+      return { rates: { RUB: rates.RUB, EUR: rates.EUR }, fetchedAt: parsed.fetchedAt };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Fresh cache → network (re-caching) → stale cache → null. Never throws. */
+export async function loadLiveRates(
+  fetchImpl: typeof fetch = globalThis.fetch,
+): Promise<FxRates | null> {
+  const cached = readFxCache();
+  if (cached && Date.now() - cached.fetchedAt <= FX_TTL_MS) return cached.rates;
+  const fresh = await fetchFxRates(fetchImpl);
+  if (fresh) {
+    try {
+      localStorage.setItem(FX_CACHE_KEY, JSON.stringify({ rates: fresh, fetchedAt: Date.now() }));
+    } catch {
+      // unwritable storage — rates still resolved for this run
+    }
+    return fresh;
+  }
+  return cached?.rates ?? null;
+}
+
+/**
+ * Explicit --rate-* flags always win. Missing rates are resolved live only
+ * when the display currency actually needs them (USD never touches the
+ * network); the static DEFAULT_SETTINGS.rates is the last offline resort.
+ */
+export async function resolveCliRates(
+  currency: CliCurrency | undefined,
+  rates: Partial<CliRates> | undefined,
+  fetchImpl: typeof fetch = globalThis.fetch,
+): Promise<CliRates> {
+  let live: FxRates | null = null;
+  if ((currency === 'RUB' && rates?.RUB == null) || (currency === 'EUR' && rates?.EUR == null)) {
+    live = await loadLiveRates(fetchImpl);
+  }
+  return {
+    RUB: rates?.RUB ?? live?.RUB ?? DEFAULT_SETTINGS.rates.RUB,
+    EUR: rates?.EUR ?? live?.EUR ?? DEFAULT_SETTINGS.rates.EUR,
+  };
 }

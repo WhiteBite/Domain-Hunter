@@ -16,7 +16,7 @@ export interface CheckCommandOptions {
   domains: string[];
   tlds?: string[];
   currency?: CliCurrency;
-  rates?: CliRates;
+  rates?: Partial<CliRates>;
   ignoreCache?: boolean;
   withPrices?: boolean;
   cacheTtlHours?: number;
@@ -66,7 +66,7 @@ export interface PricesCommandOptions {
   tlds?: string[];
   query?: string;
   currency?: CliCurrency;
-  rates?: CliRates;
+  rates?: Partial<CliRates>;
 }
 
 export interface PricesRow {
@@ -106,7 +106,7 @@ export interface FindCommandOptions {
   seedName: string;
   budget?: number;
   currency?: CliCurrency;
-  rates?: CliRates;
+  rates?: Partial<CliRates>;
   tlds?: string[];
   maxChecks?: number;
 }
