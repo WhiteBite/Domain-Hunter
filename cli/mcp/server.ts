@@ -1,5 +1,5 @@
 /**
- * Domain Hunter MCP server — exposes the five CLI commands as MCP tools.
+ * Domain Hunter MCP server — exposes the CLI commands as MCP tools.
  *
  * Mirrors cli/main.ts: installStorage() runs FIRST (before any module that
  * touches localStorage), then core is loaded via dynamic import. The five
@@ -234,6 +234,62 @@ async function main(): Promise<void> {
       try {
         const outcome = await core.runTldsCommand({
           infra: args.infra,
+        });
+        return textResult(JSON.stringify(outcome, null, 2));
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  // ---- list_drops ----
+  server.registerTool(
+    'list_drops',
+    {
+      title: 'List dropped domains',
+      description:
+        'List recently dropped domains from the bundled daily snapshot ' +
+        '(registration price only, no aftermarket). Filter by name substring ' +
+        'and/or a single TLD; limit caps the output size (default 200, max 2000).',
+      inputSchema: {
+        query: z.string().optional(),
+        tld: z.string().optional(),
+        limit: z.number().int().min(1).max(2000).optional(),
+      },
+    },
+    async (args) => {
+      try {
+        const outcome = core.runDropsCommand({
+          query: args.query,
+          tld: args.tld,
+          limit: args.limit,
+        });
+        return textResult(JSON.stringify(outcome, null, 2));
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  // ---- price_trends ----
+  server.registerTool(
+    'price_trends',
+    {
+      title: 'Get TLD price trends',
+      description:
+        'Six-month price trend per TLD (percent change and direction) ' +
+        'precomputed weekly from the CI price history. Filter by exact TLDs ' +
+        'and/or substring.',
+      inputSchema: {
+        tlds: z.array(z.string()).optional(),
+        query: z.string().optional(),
+      },
+    },
+    async (args) => {
+      try {
+        const outcome = core.runPriceTrendsCommand({
+          tlds: args.tlds,
+          query: args.query,
         });
         return textResult(JSON.stringify(outcome, null, 2));
       } catch (err) {

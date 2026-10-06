@@ -140,3 +140,32 @@ export interface TldsOutcome {
   count: number;
   tlds: TldsZone[];
 }
+
+export interface DropsCommandOptions {
+  query?: string;
+  tld?: string;
+  limit?: number;
+}
+
+export interface DropsOutcome {
+  command: 'drops';
+  generatedAt: string;
+  source: string;
+  total: number;
+  domains: string[];
+}
+
+export interface PriceTrendsCommandOptions {
+  tlds?: string[];
+  query?: string;
+}
+
+export interface PriceTrendEntry {
+  pct: number | null;
+  dir: 'up' | 'down' | 'flat' | null;
+}
+
+export interface PriceTrendsOutcome {
+  command: 'price_trends';
+  trends: Record<string, PriceTrendEntry>;
+}

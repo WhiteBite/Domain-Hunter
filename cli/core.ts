@@ -25,6 +25,9 @@ import { mixSyllables } from '../src/generators/syllables';
 import { findHacks } from '../src/generators/hacks';
 import { mutate } from '../src/generators/mutations';
 import { themes } from '../src/generators/themes';
+import { filterDrops, type DroppedDomain } from '../src/core/dropped';
+import droppedSnapshot from '../src/config/dropped.snapshot.json';
+import snapshotJson from '../src/config/pricing.snapshot.json';
 import { loadPricingTable, loadRegistry, resolveCliRates } from './data';
 import process from 'node:process';
 import type {
@@ -33,12 +36,17 @@ import type {
   CheckRow,
   CliCurrency,
   CliRates,
+  DropsCommandOptions,
+  DropsOutcome,
   FindCommandOptions,
   FindOutcome,
   FindRow,
   GenerateCommandOptions,
   GenerateOutcome,
   PriceInfo,
+  PriceTrendEntry,
+  PriceTrendsCommandOptions,
+  PriceTrendsOutcome,
   PricesCommandOptions,
   PricesOutcome,
   PricesRow,
@@ -500,4 +508,68 @@ export async function runTldsCommand(
     count: zones.length,
     tlds: zones,
   };
+}
+
+// ---- runDropsCommand ----
+
+const DEFAULT_DROPS_LIMIT = 200;
+const MAX_DROPS_LIMIT = 2000;
+
+interface DropsSnapshot {
+  generatedAt: string;
+  source: string;
+  /** Compact "label tld" strings (same shape the DropsTab consumes). */
+  list: string[];
+}
+
+/**
+ * List dropped domains from the bundled daily snapshot, filtered by name
+ * substring and/or a single TLD (same filterDrops semantics as the Drops tab).
+ */
+export function runDropsCommand(opts: DropsCommandOptions): DropsOutcome {
+  const snap = droppedSnapshot as unknown as DropsSnapshot;
+  const all: DroppedDomain[] = snap.list.map((s) => {
+    const i = s.lastIndexOf(' ');
+    return { d: s.slice(0, i), tld: s.slice(i + 1) };
+  });
+  const filtered = filterDrops(all, opts.query ?? '', opts.tld ?? null);
+  const limit = Math.min(Math.max(opts.limit ?? DEFAULT_DROPS_LIMIT, 1), MAX_DROPS_LIMIT);
+  return {
+    command: 'drops',
+    generatedAt: snap.generatedAt,
+    source: snap.source,
+    total: filtered.length,
+    domains: filtered.slice(0, limit).map((x) => `${x.d}.${x.tld}`),
+  };
+}
+
+// ---- runPriceTrendsCommand ----
+
+interface SnapshotWithTrends {
+  trends?: Record<string, { pct: number | null; dir: 'up' | 'down' | 'flat' | null }>;
+}
+
+/**
+ * Six-month price trends precomputed weekly into the snapshot (SPEC §9).
+ * Filter by exact TLDs and/or substring; keys sorted alphabetically.
+ */
+export function runPriceTrendsCommand(
+  opts: PriceTrendsCommandOptions,
+): PriceTrendsOutcome {
+  const trends = (snapshotJson as SnapshotWithTrends).trends ?? {};
+  let keys = Object.keys(trends);
+  if (opts.tlds) {
+    const set = new Set(opts.tlds);
+    keys = keys.filter((k) => set.has(k));
+  }
+  if (opts.query) {
+    const q = opts.query.toLowerCase();
+    keys = keys.filter((k) => k.includes(q));
+  }
+  const out: Record<string, PriceTrendEntry> = {};
+  for (const k of keys.sort()) {
+    const e = trends[k];
+    if (e) out[k] = { pct: e.pct, dir: e.dir };
+  }
+  return { command: 'price_trends', trends: out };
 }

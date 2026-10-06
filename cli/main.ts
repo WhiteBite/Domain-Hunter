@@ -32,6 +32,7 @@ Commands:
   generate <generator>     Generate domain name candidates
   find <seed>              Find available domains within budget
   tlds                     List loaded TLD zones (curated + IANA bootstrap)
+  drops                    List dropped domains from the bundled daily snapshot
 
 Global flags:
   --help, -h               Show this help
@@ -73,6 +74,11 @@ find options:
 tlds options:
   --infra <id>             Filter to a specific infrastructure (e.g. verisign)
   --json                   Output JSON instead of human-readable lines
+
+drops options:
+  --query substring        Filter by name substring
+  --tld com                Filter to one TLD
+  --limit N                Max domains to output (default: 200, max: 2000)
 
 Output: JSON on stdout, progress on stderr. Exit: 0 success, 1 error/abort, 2 usage.
 Ctrl+C during a check aborts gracefully, writes partial JSON, exits 1.`;
@@ -290,6 +296,15 @@ async function main(): Promise<number> {
           const lines = outcome.tlds.map((z) => `${z.tld} (${z.infra}, ${z.trust})`);
           process.stdout.write(lines.join('\n') + '\n');
         }
+        return 0;
+      }
+      case 'drops': {
+        const outcome = core.runDropsCommand({
+          query: parseString(flags.query),
+          tld: parseString(flags.tld),
+          limit: parseNumber(flags.limit),
+        });
+        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
         return 0;
       }
       default:
