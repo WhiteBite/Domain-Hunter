@@ -264,6 +264,27 @@ test.describe('Generators tab', () => {
     expectNoLeaks(page);
   });
 
+  test('tray sort score orders chips by descending pronounceability badge', async ({ page }) => {
+    await boot(page);
+    await openParamsPanel(page);
+    await page.locator('[data-testid="gen-textarea-affixes"]').fill('app\npro');
+    await setTechniques(page, { combinator: true });
+    await generate(page, 'test');
+    await expect(page.locator('[data-testid^="gen-tray-chip-"]').first()).toBeVisible();
+
+    await page.locator('[data-testid="gen-select-tray-sort"]').selectOption('score');
+
+    const badges = page.locator('[data-testid^="gen-tray-score-"]');
+    const scores = await badges.allTextContents();
+    expect(scores.length).toBeGreaterThan(1);
+    const nums = scores.map((s) => Number.parseFloat(s));
+    for (const n of nums) expect(Number.isFinite(n)).toBe(true);
+    for (let i = 1; i < nums.length; i++) {
+      expect(nums[i - 1] ?? 0).toBeGreaterThanOrEqual(nums[i] ?? 0);
+    }
+    expectNoLeaks(page);
+  });
+
   test('clicking a tray chip remove button removes it', async ({ page }) => {
     await boot(page);
     await openParamsPanel(page);

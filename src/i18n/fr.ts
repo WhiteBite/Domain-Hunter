@@ -202,6 +202,8 @@ export const fr: Dict = {
   'gen.tray.sort': 'Trier',
   'gen.tray.sort.added': 'Par ajout',
   'gen.tray.sort.az': 'A–Z',
+  'gen.tray.sort.score': 'Par score',
+  'gen.tray.score': 'Score de prononciabilité : plus il est élevé, plus le nom semble anglais',
   'gen.sets.load': 'Vers le plateau',
   'gen.wordsets.empty': 'Aucun ensemble de mots enregistré pour l’instant — créez-en un depuis le plateau Thèmes.',
   'gen.themes.cat.animals': 'Animaux',

@@ -201,6 +201,8 @@ export const pt: Dict = {
   'gen.tray.sort': 'Ordenar',
   'gen.tray.sort.added': 'Por adição',
   'gen.tray.sort.az': 'A–Z',
+  'gen.tray.sort.score': 'Por pontuação',
+  'gen.tray.score': 'Pontuação de pronunciabilidade: quanto maior, mais próxima do inglês',
   'gen.sets.load': 'Para a bandeja',
   'gen.wordsets.empty': 'Nenhum conjunto de palavras salvo ainda — crie um a partir da bandeja de Temas.',
   'gen.themes.cat.animals': 'Animais',

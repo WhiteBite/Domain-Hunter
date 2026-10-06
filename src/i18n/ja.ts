@@ -201,6 +201,8 @@ export const ja: Dict = {
   'gen.tray.sort': '並べ替え',
   'gen.tray.sort.added': '追加順',
   'gen.tray.sort.az': 'A–Z',
+  'gen.tray.sort.score': 'スコア順',
+  'gen.tray.score': '発音しやすさスコア：高いほど英語らしい',
   'gen.sets.load': 'トレイへ',
   'gen.wordsets.empty': '保存済みの単語セットはまだありません — テーマのトレイから作成できます。',
   'gen.themes.cat.animals': '動物',

@@ -201,6 +201,8 @@ export const de: Dict = {
   'gen.tray.sort': 'Sortieren',
   'gen.tray.sort.added': 'Nach Hinzufügung',
   'gen.tray.sort.az': 'A–Z',
+  'gen.tray.sort.score': 'Nach Bewertung',
+  'gen.tray.score': 'Aussprechbarkeits-Bewertung: höher bedeutet englischähnlicher',
   'gen.sets.load': 'Zur Ablage',
   'gen.wordsets.empty': 'Noch keine gespeicherten Wortsets — erstelle eines aus der Themen-Ablage.',
   'gen.themes.cat.animals': 'Tiere',

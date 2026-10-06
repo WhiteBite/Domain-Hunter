@@ -201,6 +201,8 @@ export const en: Dict = {
   'gen.tray.sort': 'Sort',
   'gen.tray.sort.added': 'By addition',
   'gen.tray.sort.az': 'A–Z',
+  'gen.tray.sort.score': 'By score',
+  'gen.tray.score': 'Pronounceability score: higher is more English-like',
   'gen.sets.load': 'To tray',
   'gen.wordsets.empty': 'No saved word sets yet — create one from the Themes tray.',
   'gen.themes.cat.animals': 'Animals',

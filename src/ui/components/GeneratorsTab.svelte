@@ -8,6 +8,7 @@
   import { mixSyllables } from '../../generators/syllables';
   import { findHacks } from '../../generators/hacks';
   import { mutate } from '../../generators/mutations';
+  import { scoreWord } from '../../generators/pronounceability';
   import { themes } from '../../generators/themes';
   import { favorites, toggleFavorite } from '../favorites';
   import { popover } from '../popover';
@@ -58,7 +59,21 @@
   }
   let candidates = $derived($genCandidates);
   let trayFilter = $state('');
-  let traySort = $state<'added' | 'az'>('added');
+  let traySort = $state<'added' | 'az' | 'score'>('added');
+
+  const scoreCache = new Map<string, number>();
+  function candScore(n: string): number {
+    let s = scoreCache.get(n);
+    if (s == null) {
+      s = scoreWord(n);
+      scoreCache.set(n, s);
+    }
+    return s;
+  }
+  function scoreLabel(n: string): string {
+    const s = candScore(n);
+    return Number.isFinite(s) ? s.toFixed(1) : '-';
+  }
   let expanded = $state<Record<string, boolean>>({});
   let groupCollapsed = $state<Record<string, boolean>>({});
   let menuOpen = $state(false);
@@ -143,6 +158,9 @@
     const f = trayFilter.trim().toLowerCase();
     let list = f ? candidates.filter((c) => c.n.toLowerCase().includes(f)) : candidates;
     if (traySort === 'az') list = [...list].sort((a, b) => a.n.localeCompare(b.n));
+    else if (traySort === 'score') {
+      list = [...list].sort((a, b) => candScore(b.n) - candScore(a.n) || a.n.localeCompare(b.n));
+    }
     return list;
   });
 
@@ -458,6 +476,7 @@
         <select class="sort" bind:value={traySort} aria-label={t('gen.tray.sort')} data-testid="gen-select-tray-sort">
           <option value="added">{t('gen.tray.sort.added')}</option>
           <option value="az">{t('gen.tray.sort.az')}</option>
+          <option value="score">{t('gen.tray.sort.score')}</option>
         </select>
         <button class="btn primary" type="button" onclick={checkNow} disabled={candidates.length === 0} data-testid="gen-button-check-now">
           {t('gen.output.check')}
@@ -555,6 +574,12 @@
                       </button>
                       <span class="row-name">{cand.n}</span>
                       <span class="row-len nums">{cand.n.length}</span>
+                      <span
+                        class="row-score nums"
+                        title={t('gen.tray.score')}
+                        aria-label={t('gen.tray.score')}
+                        data-testid={`gen-tray-score-${sanitizeId(cand.n)}`}
+                      >{scoreLabel(cand.n)}</span>
                       <button
                         class="row-remove"
                         type="button"
@@ -1163,6 +1188,15 @@
     font-size: var(--text-xs);
     flex: none;
     margin-left: var(--space-2);
+  }
+
+  .row-score {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    flex: none;
+    margin-left: var(--space-2);
+    min-width: 3ch;
+    text-align: right;
   }
 
   .row-remove {

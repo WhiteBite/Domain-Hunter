@@ -205,6 +205,7 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'gen-tray-chip-', // tray chips: gen-tray-chip-{name}
   'gen-tray-fav-', // tray chip favorite stars: gen-tray-fav-{name}
   'gen-tray-remove-', // tray chip remove buttons: gen-tray-remove-{name}
+  'gen-tray-score-', // tray chip pronounceability score badges: gen-tray-score-{name}
   'gen-more-', // tray section show more/less: gen-more-{section}
   'gen-group-toggle-', // tray group collapse toggles: gen-group-toggle-{groupId}
   'gen-theme-chip-', // theme category chips: gen-theme-chip-{id}

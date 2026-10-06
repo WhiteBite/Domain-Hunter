@@ -201,6 +201,8 @@ export const ru: Dict = {
   'gen.tray.sort': 'Сортировка',
   'gen.tray.sort.added': 'По добавлению',
   'gen.tray.sort.az': 'А–Я',
+  'gen.tray.sort.score': 'По оценке',
+  'gen.tray.score': 'Оценка произносимости: выше — больше похоже на английский',
   'gen.sets.load': 'В лоток',
   'gen.wordsets.empty': 'Сохранённых наборов пока нет — создайте его из лотка в «Темах».',
   'gen.themes.cat.animals': 'Животные',

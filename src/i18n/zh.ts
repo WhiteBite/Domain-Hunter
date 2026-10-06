@@ -201,6 +201,8 @@ export const zh: Dict = {
   'gen.tray.sort': '排序',
   'gen.tray.sort.added': '按添加顺序',
   'gen.tray.sort.az': 'A–Z',
+  'gen.tray.sort.score': '按评分',
+  'gen.tray.score': '发音评分：越高越接近英语',
   'gen.sets.load': '加入候选栏',
   'gen.wordsets.empty': '尚无已保存的词集——从“主题”候选栏创建一个。',
   'gen.themes.cat.animals': '动物',
