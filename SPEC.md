@@ -330,9 +330,11 @@ unknown (amber), error (red). Filters: all / available (includes probably) / tak
   sources win per registrar and coupons dedupe fresh-wins — a flaky source never
   erases coverage.
 - Price history: a weekly CI job appends one monthly min-reg/min-renew point per
-  TLD to `src/config/price-history.json` (13-month window); the Prices tab shows
-  a 6-month trend indicator (▲/▼ when |Δ| ≥ 2%, flat otherwise, hidden when
-  history is insufficient).
+  TLD to `src/config/price-history.json` (13-month window, CI-side data source, not
+  bundled) and writes precomputed trends ({pct, dir, spark values} per TLD) into
+  `pricing.snapshot.json` (`trends` field; the 6-hourly harvest carries it over).
+  The Prices tab consumes the precomputed trends: 6-month indicator (▲/▼ when
+  |Δ| ≥ 2%, flat otherwise, hidden when insufficient) + sparkline.
 - Instant "possible premium" heuristic chip on available rows: dictionary words
   and ≤4-char labels in premium-heavy zones (no network call); the on-demand
   DigMyName check remains authoritative.

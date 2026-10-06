@@ -474,6 +474,10 @@ async function main() {
     coupons: merged.coupons,
   };
 
+  // Precomputed trends (weekly, build-price-history.mjs) survive the rewrite.
+  const rawPrev = await readJson(SNAPSHOT_PATH).catch(() => null);
+  if (rawPrev && rawPrev.trends) table.trends = rawPrev.trends;
+
   await writeJson(SNAPSHOT_PATH, table);
 
   const tldCount = Object.keys(merged.tlds).length;

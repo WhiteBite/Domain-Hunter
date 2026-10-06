@@ -13,6 +13,7 @@
  * write. Run once locally to bootstrap the history from existing git data.
  *
  * Output shape: { tld: [ [m, reg, renew], ... ] } sorted by month asc.
+ * Also writes precomputed per-TLD trends into pricing.snapshot.json (trends field).
  */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -100,6 +101,60 @@ function cleanAndSort(history) {
   return sorted;
 }
 
+// ---- Trends (precomputed into the snapshot for the bundle) ----
+
+export function summarizeTrendPoints(points, windowMonths = 6) {
+  const sorted = [...points].sort((a, b) => (a.m < b.m ? -1 : a.m > b.m ? 1 : 0));
+  const withReg = sorted.filter((p) => p.reg != null);
+  if (withReg.length < 2) return { pct: null, dir: null };
+  const latest = withReg[withReg.length - 1];
+  const latestIdx = monthIndex(latest.m);
+  let oldest = null;
+  for (const p of withReg) {
+    if (latestIdx - monthIndex(p.m) <= windowMonths) {
+      oldest = p;
+      break;
+    }
+  }
+  if (!oldest || oldest === latest) return { pct: null, dir: null };
+  if (oldest.reg <= 0) return { pct: null, dir: null };
+  const pct = Math.round(((latest.reg - oldest.reg) / oldest.reg) * 100);
+  const dir = Math.abs(pct) < 2 ? 'flat' : pct > 0 ? 'up' : 'down';
+  return { pct, dir };
+}
+
+export function sparkValues(rows) {
+  const sorted = [...rows].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  const values = [];
+  for (const [, reg] of sorted) {
+    if (reg == null) continue;
+    values.push(reg);
+  }
+  return values.length >= 2 ? values : null;
+}
+
+export function computeTrends(history) {
+  const trends = {};
+  for (const [tld, rows] of Object.entries(history)) {
+    const points = rows.map(([m, reg, renew]) => ({ m, reg, renew }));
+    const { pct, dir } = summarizeTrendPoints(points);
+    const spark = sparkValues(rows);
+    trends[tld] = spark ? { pct, dir, spark } : { pct, dir };
+  }
+  return trends;
+}
+
+async function writeTrendsToSnapshot(history) {
+  try {
+    const snapshot = await readJson(SNAPSHOT_PATH);
+    snapshot.trends = computeTrends(history);
+    await writeJson(SNAPSHOT_PATH, snapshot);
+    console.log(`trends: ${Object.keys(snapshot.trends).length} TLDs -> ${SNAPSHOT_PATH}`);
+  } catch (err) {
+    console.warn('trends not written (snapshot missing or corrupt):', err?.message ?? err);
+  }
+}
+
 // ---- Default mode ----
 
 async function defaultMode() {
@@ -123,6 +178,7 @@ async function defaultMode() {
   console.log(
     `price-history: upserted ${month} for ${Object.keys(points).length} TLDs -> ${HISTORY_PATH} (${tldCount} TLDs total)`,
   );
+  await writeTrendsToSnapshot(history);
 }
 
 // ---- Seed mode ----
@@ -191,19 +247,24 @@ async function seedMode() {
   console.log(
     `price-history: seeded ${monthCount} months across ${tldCount} TLDs from ${sortedMonths.length} git months (${skipped} skipped) -> ${HISTORY_PATH}`,
   );
+  await writeTrendsToSnapshot(cleaned);
 }
 
 // ---- Entry ----
 
 const isSeed = process.argv.includes('--seed');
-if (isSeed) {
-  seedMode().catch((err) => {
-    console.error('seed failed:', err);
-    process.exit(1);
-  });
-} else {
-  defaultMode().catch((err) => {
-    console.error('build-price-history failed:', err);
-    process.exit(1);
-  });
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isMain) {
+  if (isSeed) {
+    seedMode().catch((err) => {
+      console.error('seed failed:', err);
+      process.exit(1);
+    });
+  } else {
+    defaultMode().catch((err) => {
+      console.error('build-price-history failed:', err);
+      process.exit(1);
+    });
+  }
 }

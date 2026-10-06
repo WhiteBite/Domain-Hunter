@@ -33,6 +33,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/config/price-history.json
-          git diff --quiet --cached -- src/config/price-history.json || git commit -m "chore: update price history (weekly)"
+          git add src/config/price-history.json src/config/pricing.snapshot.json
+          git diff --quiet --cached -- src/config/price-history.json src/config/pricing.snapshot.json || git commit -m "chore: update price history + trends (weekly)"
           git push

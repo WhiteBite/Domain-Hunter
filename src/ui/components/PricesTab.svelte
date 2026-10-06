@@ -2,22 +2,28 @@
   import { t } from '../../i18n';
   import { pricing, registry, settings } from '../store';
   import { bestEntry, formatPrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
-  import { pointsFromCompact, sparkSeries, summarizeTrend } from '../../pricing/trends';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
   import type { PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
   import registrarsJson from '../../config/registrars.json';
-  import historyJson from '../../config/price-history.json';
+  import snapshotJson from '../../config/pricing.snapshot.json';
+
+  interface TrendEntry {
+    pct: number | null;
+    dir: 'up' | 'down' | 'flat' | null;
+    spark?: number[];
+  }
+
+  const EMPTY_TREND: TrendEntry = { pct: null, dir: null };
 
   const registrars = registrarsJson as unknown as RegistrarConfig[];
   const registrarName = new Map<string, string>(registrars.map((r) => [r.id, r.name]));
-  const history =
-    historyJson as unknown as Record<string, Array<[string, number | null, number | null]>>;
+  const trends = (snapshotJson as { trends?: Record<string, TrendEntry> }).trends ?? {};
 
   /** Cold start: no CI-harvested snapshots bundled yet → trends are impossible
       and the user gets a one-line explanation instead of empty trend cells. */
-  const hasHistory = Object.keys(history).length > 0;
+  const hasHistory = Object.keys(trends).length > 0;
 
   type SortMode = 'reg' | 'renew' | 'alpha';
 
@@ -107,7 +113,7 @@
   }
 
   // Sparkline geometry: 64×14 viewBox, 1px padding, y inverted (SVG y grows
-  // downward, prices grow upward). Values are raw USD cents from sparkSeries.
+  // downward, prices grow upward). Values are raw USD cents.
   const SPARK_W = 64;
   const SPARK_H = 14;
   const SPARK_PAD = 1;
@@ -275,9 +281,9 @@
           {#each visibleZones as tld (tld)}
             {@const best = bestEntry(table, tld)}
             {@const minRid = best?.registrarId ?? null}
-            {@const trend = summarizeTrend(pointsFromCompact(history[tld] ?? []))}
-            {@const spark = sparkSeries(history[tld] ?? [])}
-            {@const sparkGeo = spark ? sparkGeometry(spark.values) : null}
+            {@const trend = trends[tld] ?? EMPTY_TREND}
+            {@const sparkGeo =
+              trend.spark && trend.spark.length >= 2 ? sparkGeometry(trend.spark) : null}
             <tr data-testid={`prices-row-${tld}`}>
               <td class="zone-cell">{tld}</td>
               {#each columns as rid (rid)}
