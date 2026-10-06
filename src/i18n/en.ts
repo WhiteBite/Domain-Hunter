@@ -352,6 +352,16 @@ export const en: Dict = {
   'watch.badge.priceDrop': 'price drop',
   'tooltip.priceDrop': 'First-year price fell {pct}% since you starred it: {old} → {new}',
   'watch.banner.dismiss': 'Dismiss watchlist banner',
+  'watch.notify.title': 'Domain Hunter watchlist',
+  'settings.watch.interval': 'Watchlist re-check',
+  'settings.watch.interval.hint': 'Silently re-check favorited domains while the tab is open',
+  'settings.watch.off': 'Off',
+  'settings.watch.minutes': '{n} min',
+  'settings.watch.notify': 'Notify on changes',
+  'settings.watch.notify.hint': 'Browser notification when a watched domain is freed, taken, or drops in price',
+  'settings.watch.notify.denied': 'Notifications are blocked by the browser',
+  'settings.watch.notify.on': 'On',
+  'settings.watch.notify.enable': 'Enable',
 
   'prices.title': 'Domain prices',
   'prices.desc':

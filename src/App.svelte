@@ -9,6 +9,7 @@
   import { popover } from './ui/popover';
   import { favorites } from './ui/favorites';
   import { refreshWatchlist } from './ui/watchlist';
+  import { startWatchScheduler } from './ui/watch-scheduler';
   import { refreshFxIfStale } from './ui/fx';
   import { fetchBootstrap, mergeWithCurated } from './core/bootstrap';
   import type { Locale, Settings } from './types';
@@ -182,7 +183,12 @@
       setTimeout(runBootTasks, 500);
     }
 
-    return watchSystemTheme(() => $settings.theme);
+    const stopTheme = watchSystemTheme(() => $settings.theme);
+    const stopWatch = startWatchScheduler();
+    return () => {
+      stopTheme();
+      stopWatch();
+    };
   });
 
   $effect(() => {

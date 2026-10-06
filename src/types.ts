@@ -152,6 +152,10 @@ export interface Settings {
   proxyUrl: string;
   /** Optional user-provided GitHub token (PAT/device flow), stored locally only. */
   githubToken: string;
+  /** Watchlist silent re-check interval in minutes; 0 = disabled. */
+  watchIntervalMin: number;
+  /** Fire a browser notification when a scheduled re-check finds changes. */
+  watchNotify: boolean;
   defaultTlds: string[];
 }
 
@@ -164,6 +168,8 @@ export const DEFAULT_SETTINGS: Settings = {
   cacheTtlHours: 12,
   proxyUrl: '',
   githubToken: '',
+  watchIntervalMin: 0,
+  watchNotify: false,
   defaultTlds: [
     'com',
     'net',

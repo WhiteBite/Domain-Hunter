@@ -353,6 +353,16 @@ export const fr: Dict = {
   'watch.badge.priceDrop': 'baisse de prix',
   'tooltip.priceDrop': 'Le prix de la première année a baissé de {pct}% depuis que vous l\'avez mis en favori : {old} → {new}',
   'watch.banner.dismiss': 'Fermer la notification de liste',
+  'watch.notify.title': 'Liste de suivi Domain Hunter',
+  'settings.watch.interval': 'Revérification de la liste de suivi',
+  'settings.watch.interval.hint': 'Revérifier silencieusement les domaines favoris tant que l’onglet est ouvert',
+  'settings.watch.off': 'Désactivée',
+  'settings.watch.minutes': '{n} min',
+  'settings.watch.notify': 'Notifier les changements',
+  'settings.watch.notify.hint': 'Notification du navigateur lorsqu’un domaine suivi se libère, est pris ou baisse de prix',
+  'settings.watch.notify.denied': 'Les notifications sont bloquées par le navigateur',
+  'settings.watch.notify.on': 'Activée',
+  'settings.watch.notify.enable': 'Activer',
 
   'prices.title': 'Prix des domaines',
   'prices.desc':

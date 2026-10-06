@@ -351,6 +351,16 @@ export const zh: Dict = {
   'watch.badge.priceDrop': '降价',
   'tooltip.priceDrop': '首年价格自您收藏以来下降了 {pct}%：{old} → {new}',
   'watch.banner.dismiss': '关闭关注列表通知',
+  'watch.notify.title': 'Domain Hunter 关注列表',
+  'settings.watch.interval': '关注列表重新检查',
+  'settings.watch.interval.hint': '标签页打开时静默重新检查收藏的域名',
+  'settings.watch.off': '关闭',
+  'settings.watch.minutes': '{n} 分钟',
+  'settings.watch.notify': '变更时通知',
+  'settings.watch.notify.hint': '当关注的域名被释放、被注册或降价时发送浏览器通知',
+  'settings.watch.notify.denied': '浏览器已阻止通知',
+  'settings.watch.notify.on': '已开启',
+  'settings.watch.notify.enable': '开启',
 
   'prices.title': '域名价格',
   'prices.desc':

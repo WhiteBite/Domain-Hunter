@@ -353,6 +353,16 @@ export const ru: Dict = {
   'watch.badge.priceDrop': 'снижение цены',
   'tooltip.priceDrop': 'Цена первого года снизилась на {pct}% с момента добавления в избранное: {old} → {new}',
   'watch.banner.dismiss': 'Закрыть уведомление списка',
+  'watch.notify.title': 'Domain Hunter: список наблюдения',
+  'settings.watch.interval': 'Перепроверка списка наблюдения',
+  'settings.watch.interval.hint': 'Тихо перепроверять избранные домены, пока вкладка открыта',
+  'settings.watch.off': 'Выкл.',
+  'settings.watch.minutes': '{n} мин',
+  'settings.watch.notify': 'Уведомлять об изменениях',
+  'settings.watch.notify.hint': 'Браузерное уведомление, когда домен освобождается, становится занятым или дешевеет',
+  'settings.watch.notify.denied': 'Уведомления заблокированы браузером',
+  'settings.watch.notify.on': 'Вкл.',
+  'settings.watch.notify.enable': 'Включить',
 
   'prices.title': 'Цены на домены',
   'prices.desc':

@@ -101,6 +101,27 @@
     patch('githubToken', '');
   }
 
+  let notifyDenied = $state(false);
+
+  async function toggleNotify(): Promise<void> {
+    if (get(settings).watchNotify) {
+      patch('watchNotify', false);
+      return;
+    }
+    if (typeof Notification === 'undefined') {
+      notifyDenied = true;
+      return;
+    }
+    let perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      notifyDenied = false;
+      patch('watchNotify', true);
+    } else {
+      notifyDenied = true;
+    }
+  }
+
   function download(filename: string, content: string): void {
     const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -299,6 +320,44 @@
         onchange={(e) => patch('cacheTtlHours', Math.max(1, Number(e.currentTarget.value)))}
         data-testid="settings-input-ttl"
       />
+    </div>
+    <div class="row">
+      <div class="row-info">
+        <label for="watch-interval">{t('settings.watch.interval')}</label>
+        <p class="hint">{t('settings.watch.interval.hint')}</p>
+      </div>
+      <select
+        id="watch-interval"
+        value={$settings.watchIntervalMin}
+        onchange={(e) => patch('watchIntervalMin', Number(e.currentTarget.value))}
+        aria-label={t('settings.watch.interval')}
+        data-testid="settings-select-watch-interval"
+      >
+        <option value={0}>{t('settings.watch.off')}</option>
+        {#each [5, 15, 30, 60] as m (m)}
+          <option value={m}>{t('settings.watch.minutes', { n: m })}</option>
+        {/each}
+      </select>
+    </div>
+    <div class="row">
+      <div class="row-info">
+        <label for="watch-notify">{t('settings.watch.notify')}</label>
+        <p class="hint">{t('settings.watch.notify.hint')}</p>
+        {#if notifyDenied}
+          <p class="error" data-testid="settings-watch-notify-denied">{t('settings.watch.notify.denied')}</p>
+        {/if}
+      </div>
+      <button
+        id="watch-notify"
+        class="btn"
+        class:primary={$settings.watchNotify}
+        type="button"
+        onclick={() => void toggleNotify()}
+        aria-pressed={$settings.watchNotify}
+        data-testid="settings-button-watch-notify"
+      >
+        {$settings.watchNotify ? t('settings.watch.notify.on') : t('settings.watch.notify.enable')}
+      </button>
     </div>
     <div class="row">
       <div class="row-info">

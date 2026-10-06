@@ -538,4 +538,57 @@ test.describe('Settings tab', () => {
     // Token persisted to localStorage
     expect((await readSettings(page)).githubToken).toBe('ghp_testtoken');
   });
+
+  test('watch interval select persists to settings', async ({ page }) => {
+    await bootSettingsTab(page);
+
+    const select = page.locator('[data-testid="settings-select-watch-interval"]');
+    await expect(select).toBeVisible();
+    expect(await select.inputValue()).toBe('0');
+
+    await select.selectOption('15');
+    const stored = await readSettings(page);
+    expect(stored.watchIntervalMin).toBe(15);
+  });
+
+  test('watch notify button surfaces the denied hint without permission', async ({ page }) => {
+    await bootSettingsTab(page);
+
+    // Headless Chromium denies Notification permission by default.
+    const btn = page.locator('[data-testid="settings-button-watch-notify"]');
+    await expect(btn).toBeVisible();
+    await btn.click();
+
+    await expect(page.locator('[data-testid="settings-watch-notify-denied"]')).toBeVisible();
+    expect((await readSettings(page)).watchNotify).toBe(false);
+  });
+
+  test('watch notify enables when permission is granted', async ({ page }) => {
+    // file:// is an opaque origin: grantPermissions cannot apply, stub instead.
+    await page.addInitScript(() => {
+      class FakeNotification {
+        static permission = 'granted';
+        static requestPermission(): Promise<string> {
+          return Promise.resolve('granted');
+        }
+        constructor(
+          public title: string,
+          public options?: unknown,
+        ) {}
+      }
+      (window as unknown as { Notification: unknown }).Notification = FakeNotification;
+    });
+    await bootSettingsTab(page);
+
+    const btn = page.locator('[data-testid="settings-button-watch-notify"]');
+    await btn.click();
+
+    await expect(btn).toHaveAttribute('aria-pressed', 'true');
+    expect((await readSettings(page)).watchNotify).toBe(true);
+
+    // Toggling off flips it back.
+    await btn.click();
+    await expect(btn).toHaveAttribute('aria-pressed', 'false');
+    expect((await readSettings(page)).watchNotify).toBe(false);
+  });
 });

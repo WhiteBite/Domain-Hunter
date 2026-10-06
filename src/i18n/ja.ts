@@ -352,6 +352,16 @@ export const ja: Dict = {
   'watch.badge.priceDrop': '値下がり',
   'tooltip.priceDrop': '初年度価格がスターを付けた時から {pct}% 下がりました: {old} → {new}',
   'watch.banner.dismiss': 'ウォッチリスト通知を閉じる',
+  'watch.notify.title': 'Domain Hunter ウォッチリスト',
+  'settings.watch.interval': 'ウォッチリストの再チェック',
+  'settings.watch.interval.hint': 'タブが開いている間、お気に入りのドメインを静かに再チェックします',
+  'settings.watch.off': 'オフ',
+  'settings.watch.minutes': '{n} 分',
+  'settings.watch.notify': '変更時に通知',
+  'settings.watch.notify.hint': '監視中のドメインが解放・取得・値下げされたときにブラウザ通知を表示',
+  'settings.watch.notify.denied': 'ブラウザで通知がブロックされています',
+  'settings.watch.notify.on': 'オン',
+  'settings.watch.notify.enable': '有効にする',
 
   'prices.title': 'ドメイン価格',
   'prices.desc':

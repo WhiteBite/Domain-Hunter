@@ -203,6 +203,8 @@ export interface Settings {
   cacheTtlHours: number;         // default 12
   proxyUrl: string;              // default ''
   githubToken: string;           // optional GitHub PAT/device flow token for Social checks
+  watchIntervalMin: number;      // watchlist silent re-check interval in minutes, 0 = off (default)
+  watchNotify: boolean;          // browser notification on watch changes (default false, opt-in)
   defaultTlds: string[];         // default selection
 }
 ```
@@ -222,6 +224,14 @@ detected status-flip events for the watchlist UI),
 `dh:v1:hint-dismissed` (boolean flag for dismissing the hint banner),
 `dh:v1:fx` ({rates, fetchedAt} — last live FX fetch from open.er-api.com;
 refreshed at boot when older than 7 days, the Settings button always applies).
+
+Watchlist scheduler (`src/ui/watch-scheduler.ts`): when `watchIntervalMin > 0`,
+`refreshWatchlist` re-runs on that interval (floor 1 min) while
+`document.visibilityState === 'visible'`; hidden tabs skip the tick. When
+`watchNotify` is on and a tick produces new `watchChanges`, one browser
+Notification is raised (title `watch.notify.title`, body `watch.banner`).
+Enabling `watchNotify` requests Notification permission first; a denied
+permission keeps the flag off and surfaces a hint.
 
 ## 6. Zone registry (`src/config/tlds.json`)
 
