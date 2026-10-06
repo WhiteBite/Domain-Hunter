@@ -1,6 +1,6 @@
 export type CompletionShell = 'bash' | 'zsh' | 'fish';
 
-const COMMANDS = ['check', 'prices', 'generate', 'find', 'tlds', 'drops', 'watch', 'completions'];
+const COMMANDS = ['check', 'prices', 'generate', 'find', 'tlds', 'drops', 'watch', 'completions', 'keys'];
 
 const GLOBAL_FLAGS = ['--help', '--version', '--format'];
 
@@ -26,6 +26,7 @@ const COMMAND_FLAGS = [
   '--json',
   '--interval',
   '--rounds',
+  '--source',
 ];
 
 export function isCompletionShell(v: string | undefined): v is CompletionShell {

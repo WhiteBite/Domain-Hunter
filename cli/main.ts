@@ -17,6 +17,7 @@ import { dirname, join } from 'node:path';
 import { installStorage } from './shims/storage.js';
 import { formatOutcome, isOutputFormat, type OutputFormat } from './format.js';
 import { completionScript, isCompletionShell } from './completions.js';
+import { isKeyRegistrar } from './keys.js';
 import type {
   CliCurrency,
   CliRates,
@@ -37,6 +38,7 @@ Commands:
   drops                    List dropped domains from the bundled daily snapshot
   watch <domain...>        Poll domains until a status flips (exit 10 on flip)
   completions <shell>      Print shell completions (bash | zsh | fish)
+  keys                     Manage registrar API keys (set | list | remove)
 
 Global flags:
   --help, -h               Show this help
@@ -57,6 +59,7 @@ prices options:
   --query substring        Filter TLDs by substring
   --currency USD|RUB|EUR   Display currency
   --rate-rub N, --rate-eur N
+  --source dynadot         Merge live prices from a keyed registrar source
 
 generate options:
   <generator>              combinator | syllables | hacks | mutations | themes
@@ -91,6 +94,11 @@ watch options:
   --interval N             Poll interval in seconds (default: 300, min: 5)
   --rounds N               Max polling rounds (default: unlimited)
   --prices                 Attach pricing info to results
+
+keys options:
+  keys set <registrar> <key>   Store an API key (supported: dynadot)
+  keys list                    Show stored registrars (keys masked)
+  keys remove <registrar>      Delete a stored key
 
 Output: JSON on stdout, progress on stderr.
 Exit: 0 success, 1 error/abort, 2 usage, 10 watch flip detected.
@@ -260,6 +268,7 @@ async function main(): Promise<number> {
           query: parseString(flags.query),
           currency: parseCurrency(flags.currency),
           rates: parseRates(flags),
+          sources: parseCsv(flags.source),
         });
         process.stdout.write(formatOutcome(outcome, parseFormat(flags.format)));
         return 0;
@@ -354,6 +363,27 @@ async function main(): Promise<number> {
           return 2;
         }
         process.stdout.write(completionScript(shell));
+        return 0;
+      }
+      case 'keys': {
+        const action = positionals[0];
+        if (action !== 'set' && action !== 'list' && action !== 'remove') {
+          process.stderr.write('Error: keys requires an action (set, list, or remove)\n');
+          return 2;
+        }
+        const registrar = positionals[1];
+        if (action !== 'list' && !isKeyRegistrar(registrar)) {
+          process.stderr.write(
+            `Error: unsupported registrar '${registrar ?? ''}' (supported: dynadot)\n`,
+          );
+          return 2;
+        }
+        if (action === 'set' && !parseString(positionals[2])) {
+          process.stderr.write('Error: keys set requires <registrar> <key>\n');
+          return 2;
+        }
+        const outcome = core.runKeysCommand(action, registrar, parseString(positionals[2]));
+        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
         return 0;
       }
       default:

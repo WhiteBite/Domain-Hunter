@@ -29,6 +29,14 @@ import { filterDrops, type DroppedDomain } from '../src/core/dropped';
 import droppedSnapshot from '../src/config/dropped.snapshot.json';
 import snapshotJson from '../src/config/pricing.snapshot.json';
 import { loadPricingTable, loadRegistry, resolveCliRates } from './data';
+import {
+  isKeyRegistrar,
+  loadRegistrarKeys,
+  maskKey,
+  removeRegistrarKey,
+  saveRegistrarKey,
+} from './keys';
+import { fetchDynadotTldPrices, mergeDynadotIntoTable } from './registrar-sources';
 import process from 'node:process';
 import type {
   CheckCommandOptions,
@@ -43,6 +51,7 @@ import type {
   FindRow,
   GenerateCommandOptions,
   GenerateOutcome,
+  KeysOutcome,
   PriceInfo,
   PriceTrendEntry,
   PriceTrendsCommandOptions,
@@ -274,7 +283,23 @@ export async function runPricesCommand(
     currency: opts.currency ?? DEFAULT_SETTINGS.currency,
     rates,
   });
-  const table = pricingState.table;
+  let table = pricingState.table;
+
+  if (opts.sources?.includes('dynadot')) {
+    const apiKey = loadRegistrarKeys().dynadot;
+    if (!apiKey) {
+      throw new Error(
+        'no dynadot API key stored - run: domain-hunter keys set dynadot <key>',
+      );
+    }
+    try {
+      const dynadotPrices = await fetchDynadotTldPrices(apiKey, opts.fetchImpl);
+      table = mergeDynadotIntoTable(table, dynadotPrices);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`warning: dynadot source failed (${msg}); continuing without it\n`);
+    }
+  }
 
   let tldKeys = Object.keys(table.tlds);
   if (opts.tlds) {
@@ -511,6 +536,31 @@ export async function runTldsCommand(
     count: zones.length,
     tlds: zones,
   };
+}
+
+// ---- runKeysCommand ----
+
+export function runKeysCommand(
+  action: 'set' | 'list' | 'remove',
+  registrar?: string,
+  key?: string,
+): KeysOutcome {
+  if (action === 'list') {
+    const entries = Object.entries(loadRegistrarKeys()).map(([id, k]) => ({
+      registrarId: id,
+      masked: maskKey(k ?? ''),
+    }));
+    return { command: 'keys', action, registrars: entries };
+  }
+  if (!isKeyRegistrar(registrar)) {
+    throw new Error(`unsupported registrar '${registrar ?? ''}' (supported: dynadot)`);
+  }
+  if (action === 'set') {
+    if (!key) throw new Error('key must not be empty');
+    saveRegistrarKey(registrar, key);
+    return { command: 'keys', action, registrar };
+  }
+  return { command: 'keys', action, registrar, removed: removeRegistrarKey(registrar) };
 }
 
 // ---- runDropsCommand ----

@@ -67,6 +67,18 @@ export interface PricesCommandOptions {
   query?: string;
   currency?: CliCurrency;
   rates?: Partial<CliRates>;
+  /** Extra keyed pricing sources to merge (currently: 'dynadot'). */
+  sources?: string[];
+  /** Injectable for tests; defaults to globalThis.fetch. */
+  fetchImpl?: typeof fetch;
+}
+
+export interface KeysOutcome {
+  command: 'keys';
+  action: 'set' | 'list' | 'remove';
+  registrar?: string;
+  removed?: boolean;
+  registrars?: { registrarId: string; masked: string }[];
 }
 
 export interface PricesRow {

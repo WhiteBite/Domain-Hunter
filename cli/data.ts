@@ -74,7 +74,7 @@ function writeRawCache(key: string, json: unknown): void {
 
 // ---- fetch with timeout ----
 
-async function fetchJsonWithTimeout(
+export async function fetchJsonWithTimeout(
   url: string,
   fetchImpl: typeof fetch,
 ): Promise<unknown> {
