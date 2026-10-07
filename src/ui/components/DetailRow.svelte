@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { CheckResult, PriceEntry, Settings } from '../../types';
+  import type { RegistrarQuote } from '../registrar-quotes';
   import { formatPrice } from '../../pricing/pricing';
   import { settings } from '../store';
   import { t } from '../../i18n';
@@ -13,15 +14,6 @@
     firstYear: number | null;
     standardFirstYear: number | null;
     renewal: number | null;
-  }
-
-  export interface RegistrarQuote {
-    id: string;
-    name: string;
-    reg: number;
-    renew: number | null;
-    url: string;
-    hasDeepLink: boolean;
   }
 
   interface Props {

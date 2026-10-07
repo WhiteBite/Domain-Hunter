@@ -24,11 +24,32 @@
   import { watchChanges, watchRunning, refreshWatchlist, classifyChange, notePrice } from '../watchlist';
   import { copyText } from '../clipboard';
   import { sanitizeId } from '../utils';
-  import { resultsToCsvRows, buildCsv, downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { applyAffiliate } from '../affiliate';
   import { REGISTRAR_ICONS } from '../registrar-icons';
   import { applyViewFilters, displayToUsdCents, type FilterKey } from '../table-filters';
+  import { pickRegistrar, buildRegistrarQuotes } from '../registrar-quotes';
+  import {
+    detailFor,
+    details,
+    premiumOverrides,
+    premiumChecking,
+    premiumDone,
+    premiumTotal,
+    premiumFound,
+    premiumCheckEligibleOf,
+    toggleDetail,
+    runPremiumCheck,
+  } from '../premium-check';
+  import {
+    availableDomainsOf,
+    copied,
+    availCopied,
+    copyDomainFlash,
+    copyAvailableList,
+    favAllAvailable,
+    downloadAvailableCsv,
+  } from '../bulk-actions';
   import StatusBadge from './StatusBadge.svelte';
   import Tooltip from './Tooltip.svelte';
   import RowMenu from './RowMenu.svelte';
@@ -39,9 +60,6 @@
   import IconStar from './icons/IconStar.svelte';
   import IconExternal from './icons/IconExternal.svelte';
   import IconTag from './icons/IconTag.svelte';
-  import type { RegistrarQuote } from './DetailRow.svelte';
-  import { fetchPremiumDetail, isPremiumPriced, premiumOverrideCents } from '../dig';
-  import type { DigDetail } from '../dig';
 
   import registrarsJson from '../../config/registrars.json';
 
@@ -54,7 +72,6 @@
   let sortKey = $state<SortKey>('name');
   let sortDir = $state<SortDir>('asc');
   let visibleCount = $state(100);
-  let copied = $state<Set<string>>(new Set());
   let rechecking = $state<Set<string>>(new Set());
   // Active per-row recheck engine handles. Tracked so unmount mid-recheck
   // can terminate them (otherwise the workers leak until 'finished'). Capped
@@ -79,10 +96,6 @@
   // Row overflow menu: only one open at a time (keyed by domain).
   let menuFor = $state<string | null>(null);
 
-  // Available-domains bulk actions: copied-flash state (menu is in AvailableMenu).
-  let availCopied = $state(false);
-  let availCopiedTimer: ReturnType<typeof setTimeout> | undefined;
-
   // Search input (focused by "/" shortcut).
   let searchEl: HTMLInputElement | null = $state(null);
 
@@ -92,7 +105,7 @@
     const target = e.target as HTMLElement | null;
     const tag = target?.tagName.toLowerCase();
     const inForm = tag === 'input' || tag === 'textarea' || tag === 'select';
-    const menuOpen = menuFor != null || detailFor != null;
+    const menuOpen = menuFor != null || get(detailFor) != null;
     if (e.isComposing || inForm || menuOpen) {
       // "/" still works from the search box itself — but only if not in a
       // different form control. Let the search input's own "/" pass.
@@ -213,7 +226,7 @@
     const arr: RowData[] = [];
     for (const r of $results.values()) {
       const best = table ? bestEntry(table, r.tld) : null;
-      const override = premiumOverrides[r.domain] ?? null;
+      const override = $premiumOverrides[r.domain] ?? null;
       const stdFirstYear = best?.entry.reg ?? null;
       const stdTco = table ? tco3(table, r.tld) : null;
       const renewalBest = table && pairMode === 'best' ? bestRenewal(table, r.tld) : null;
@@ -358,7 +371,6 @@
   onDestroy(() => {
     observer?.disconnect();
     if (rafId != null) cancelAnimationFrame(rafId);
-    if (availCopiedTimer != null) clearTimeout(availCopiedTimer);
     // Terminate any recheck engines still in flight so unmounting the table
     // (e.g. switching tabs) does not leak workers or keep hitting registries.
     for (const e of recheckEngines) e.destroy();
@@ -417,63 +429,6 @@
     return sortDir === 'asc' ? 'ascending' : 'descending';
   }
 
-  function registrarFor(tld: string): { registrar: RegistrarConfig | null; entry: PriceEntry | null } {
-    const table = $pricing?.table ?? null;
-    if (!table) return { registrar: null, entry: null };
-    const entries = table.tlds[tld];
-    if (!entries) return { registrar: null, entry: null };
-    // Prefer the cheapest registrar whose searchUrl supports a {domain}
-    // deep link; only fall back to a landing-only registrar when no
-    // deep-link registrar has a quote for the zone.
-    let best: { registrar: RegistrarConfig; entry: PriceEntry } | null = null;
-    let fallback: { registrar: RegistrarConfig; entry: PriceEntry } | null = null;
-    for (const r of registrars) {
-      const e = entries[r.id];
-      if (!e || e.reg == null) continue;
-      const hasDeepLink = r.searchUrl.includes('{domain}');
-      const candidate = { registrar: r, entry: e };
-      if (hasDeepLink) {
-        if (!best || e.reg < (best.entry.reg ?? Infinity)) best = candidate;
-      } else {
-        if (!fallback || e.reg < (fallback.entry.reg ?? Infinity)) fallback = candidate;
-      }
-    }
-    return best ?? fallback ?? { registrar: null, entry: null };
-  }
-
-  /** Known-registrar quotes for a zone from the pricing store, sorted by
-   *  registration price asc (renewal as tie-breaker). Unknown ids skipped.
-   *  Each quote carries a buy/search link (deep link when the registrar's
-   *  template supports '{domain}', landing page otherwise) and a
-   *  hasDeepLink flag for the no-deeplink tooltip. */
-  function registrarQuotes(tld: string, domain: string): RegistrarQuote[] {
-    const table = $pricing?.table ?? null;
-    if (!table) return [];
-    const entries = table.tlds[tld];
-    if (!entries) return [];
-    const list: RegistrarQuote[] = [];
-    for (const r of registrars) {
-      const e = entries[r.id];
-      if (!e || e.reg == null) continue;
-      const hasDeepLink = r.searchUrl.includes('{domain}');
-      list.push({
-        id: r.id,
-        name: r.name,
-        reg: e.reg,
-        renew: e.renew,
-        hasDeepLink,
-        url: applyAffiliate(
-          r,
-          hasDeepLink
-            ? r.searchUrl.replace('{domain}', encodeURIComponent(domain))
-            : r.searchUrl,
-        ),
-      });
-    }
-    list.sort((a, b) => a.reg - b.reg || (a.renew ?? Infinity) - (b.renew ?? Infinity));
-    return list;
-  }
-
   function priceColor(cents: number | null): string {
     if (cents == null) return 'var(--text-tertiary)';
     const tier = priceTier(cents);
@@ -488,127 +443,13 @@
     return bestCoupon(table, tld);
   }
 
-  // ---- On-demand per-domain detail (DigMyName: premium + cheapest registrar) ----
-
-  let detailFor = $state<string | null>(null);
-  let details = $state<Record<string, DigDetail>>({});
-
-  /** Per-domain premium price override (USD cents) from the on-demand
-   *  DigMyName check. When present, the row price cell shows this instead
-   *  of the standard first-year price, with the standard price struck
-   *  through. Sorting by price/tco also uses this value. */
-  let premiumOverrides = $state<Record<string, number>>({});
-
-  async function toggleDetail(domain: string): Promise<void> {
-    if (detailFor === domain) {
-      detailFor = null;
-      return;
-    }
-    detailFor = domain;
-    // Close any open row menu when expanding.
-    menuFor = null;
-    const cached = details[domain];
-    if (cached && !cached.failed) return;
-    details = {
-      ...details,
-      [domain]: { loading: true, price: null, registrar: null, regPrice: null, url: null },
-    };
-    const detail = await fetchPremiumDetail(domain);
-    // Store a per-domain override so the row price cell and detail chip
-    // both reflect the registry premium price (single source).
-    if (isPremiumPriced(detail)) {
-      const override = premiumOverrideCents(detail);
-      if (override != null) {
-        premiumOverrides = { ...premiumOverrides, [domain]: override };
-      }
-    }
-    details = { ...details, [domain]: detail };
-  }
-
-  // ---- Bulk "check premium prices" toolbar action ----
-
-  /** Cap on how many domains the bulk premium check will query in one click.
-   *  DigMyName is on-demand and rate-limited client-side; 20 keeps it polite. */
-  const PREMIUM_CHECK_CAP = 20;
-
-  let premiumChecking = $state(false);
-  let premiumDone = $state(0);
-  let premiumTotal = $state(0);
-  let premiumFound = $state(0);
-
-  /** Available/probably_available rows not yet premium-checked, sorted by
-   *  cheapest first-year price asc. A row is "checked" once it has a non-failed
-   *  entry in `details` (premium or not) or an existing `premiumOverrides`
-   *  entry (already known premium). */
-  const premiumCheckEligible = $derived.by(() => {
-    const table = $pricing?.table ?? null;
-    const list: { domain: string; firstYear: number | null }[] = [];
-    for (const r of $results.values()) {
-      if (r.status !== 'available' && r.status !== 'probably_available') continue;
-      if (premiumOverrides[r.domain] != null) continue;
-      const d = details[r.domain];
-      if (d && !d.failed) continue;
-      const best = table ? bestEntry(table, r.tld) : null;
-      list.push({ domain: r.domain, firstYear: best?.entry.reg ?? null });
-    }
-    list.sort((a, b) => (a.firstYear ?? Infinity) - (b.firstYear ?? Infinity));
-    return list;
-  });
-
-  const canPremiumCheck = $derived(
-    $runState.phase === 'done' && !premiumChecking && premiumCheckEligible.length > 0,
+  // Premium-check and bulk-action state live in store-based composables.
+  const premiumCheckEligible = $derived(
+    premiumCheckEligibleOf($results, $pricing?.table ?? null, $details, $premiumOverrides),
   );
-
-  /** Bulk-fetch DigMyName premium data for the cheapest eligible available
-   *  domains (capped at PREMIUM_CHECK_CAP). Concurrency 2 — sequential-friendly
-   *  to DigMyName. Premium results with a numeric price are stored into
-   *  `premiumOverrides` so the price cell shows the real price + strike + chip. */
-  async function runPremiumCheck(): Promise<void> {
-    if (!canPremiumCheck) return;
-    const targets = premiumCheckEligible.slice(0, PREMIUM_CHECK_CAP);
-    premiumChecking = true;
-    premiumDone = 0;
-    premiumTotal = targets.length;
-    premiumFound = 0;
-
-    let idx = 0;
-    const worker = async (): Promise<void> => {
-      while (idx < targets.length) {
-        const i = idx++;
-        const target = targets[i];
-        if (!target) break;
-        const { domain } = target;
-        const detail = await fetchPremiumDetail(domain);
-        details = { ...details, [domain]: detail };
-        if (isPremiumPriced(detail)) {
-          const override = premiumOverrideCents(detail);
-          if (override != null) {
-            premiumOverrides = { ...premiumOverrides, [domain]: override };
-            premiumFound++;
-          }
-        }
-        premiumDone++;
-      }
-    };
-    // Two concurrent workers — simple promise pool, no new deps.
-    await Promise.all([worker(), worker()]);
-
-    premiumChecking = false;
-  }
-
-  async function handleCopy(domain: string) {
-    const ok = await copyText(domain);
-    if (ok) {
-      const next = new Set(copied);
-      next.add(domain);
-      copied = next;
-      setTimeout(() => {
-        const next2 = new Set(copied);
-        next2.delete(domain);
-        copied = next2;
-      }, 1500);
-    }
-  }
+  const canPremiumCheck = $derived(
+    $runState.phase === 'done' && !$premiumChecking && premiumCheckEligible.length > 0,
+  );
 
   function recheck(domain: string) {
     // Cap concurrent rechecks: ignore clicks beyond the limit so a burst of
@@ -696,64 +537,8 @@
     return m;
   });
 
-  const availableTotal = $derived.by(() => {
-    let n = 0;
-    for (const r of $results.values()) {
-      if (r.status === 'available' || r.status === 'probably_available') n += 1;
-    }
-    return n;
-  });
-
   /** Domain names of available/probably_available results, sorted A–Z. */
-  const availableDomains = $derived.by(() => {
-    const list: string[] = [];
-    for (const r of $results.values()) {
-      if (r.status === 'available' || r.status === 'probably_available') list.push(r.domain);
-    }
-    list.sort((a, b) => a.localeCompare(b));
-    return list;
-  });
-
-  function flashAvailCopied(): void {
-    availCopied = true;
-    if (availCopiedTimer != null) clearTimeout(availCopiedTimer);
-    availCopiedTimer = setTimeout(() => {
-      availCopied = false;
-    }, 1500);
-  }
-
-  async function copyAvailableList(): Promise<void> {
-    await copyText(availableDomains.join('\n'));
-    flashAvailCopied();
-  }
-
-  function favAllAvailable(): void {
-    const next = new Set($favorites);
-    for (const d of availableDomains) next.add(d);
-    favorites.set(next);
-  }
-
-  function downloadAvailableCsv(): void {
-    const table = $pricing?.table ?? null;
-    const filtered = new Map<string, CheckResult>();
-    for (const [d, r] of $results) {
-      if (r.status === 'available' || r.status === 'probably_available') filtered.set(d, r);
-    }
-    const rows = resultsToCsvRows(filtered, table, $settings);
-    const headers = [
-      t('csv.domain'),
-      t('csv.status'),
-      t('csv.tld'),
-      t('csv.priceFirstYear'),
-      t('csv.priceRenewal'),
-      t('csv.bestRegistrar'),
-      t('csv.buyUrl'),
-      t('csv.checkedAt'),
-    ];
-    const csv = buildCsv(rows, headers);
-    const date = new Date().toISOString().slice(0, 10);
-    downloadCsv(`domain-hunter-available-${date}.csv`, csv);
-  }
+  const availableDomains = $derived(availableDomainsOf($results));
 
   function registrarName(id: string): string {
     return registrars.find((r) => r.id === id)?.name ?? id;
@@ -891,9 +676,9 @@
             </button>
           {/if}
         </div>
-        {#if $runState.phase === 'done' && ((filter === 'all' && availableTotal > 0) || premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking)}
+        {#if $runState.phase === 'done' && ((filter === 'all' && availableDomains.length > 0) || premiumCheckEligible.length > 0 || $premiumFound > 0 || $premiumChecking)}
           <div class="meta-right">
-            {#if premiumCheckEligible.length > 0 || premiumFound > 0 || premiumChecking}
+            {#if premiumCheckEligible.length > 0 || $premiumFound > 0 || $premiumChecking}
               <Tooltip text={t('results.premium.aria')}>
                 <button
                   class="ghost-btn premium-check"
@@ -905,25 +690,25 @@
                   data-testid="results-premium-check"
                 >
                   <IconTag />
-                  {#if premiumChecking}
-                    {t('results.premium.checking', { done: premiumDone, total: premiumTotal })}
+                  {#if $premiumChecking}
+                    {t('results.premium.checking', { done: $premiumDone, total: $premiumTotal })}
                   {:else}
                     {t('results.premium.check')}
                   {/if}
                 </button>
               </Tooltip>
-              {#if !premiumChecking && premiumFound > 0}
+              {#if !$premiumChecking && $premiumFound > 0}
                 <span class="chip-tag premium" data-testid="results-premium-found">
-                  {t('results.premium.found', { n: premiumFound })}
+                  {t('results.premium.found', { n: $premiumFound })}
                 </span>
               {/if}
             {/if}
-            {#if filter === 'all' && availableTotal > 0}
+            {#if filter === 'all' && availableDomains.length > 0}
               <button class="ghost-btn suggest" type="button" onclick={() => (filter = 'available')} data-testid="results-filter-suggest-available">
-                {t('results.showAvailable', { n: availableTotal })}
+                {t('results.showAvailable', { n: availableDomains.length })}
               </button>
               <AvailableMenu
-                availCopied={availCopied}
+                availCopied={$availCopied}
                 onCopy={() => void copyAvailableList()}
                 onFav={() => favAllAvailable()}
                 onCsv={() => downloadAvailableCsv()}
@@ -989,7 +774,7 @@
           {#each visible as row (row.result.domain)}
             {@const isAvail = row.result.status === 'available' || row.result.status === 'probably_available'}
             {@const isErr = row.result.status === 'error'}
-            {@const buyInfo = registrarFor(row.result.tld)}
+            {@const buyInfo = pickRegistrar(registrars, $pricing?.table ?? null, row.result.tld)}
             {@const buy = buyInfo.registrar
               ? applyAffiliate(
                   buyInfo.registrar,
@@ -1007,8 +792,8 @@
             {@const promo = row.firstYear != null && isBelowFloor(row.result.tld, row.firstYear)}
             {@const isFav = $favorites.has(row.result.domain)}
             {@const sid = sanitizeId(row.result.domain)}
-            {@const isExpanded = detailFor === row.result.domain}
-            {@const quotes = registrarQuotes(row.result.tld, row.result.domain)}
+            {@const isExpanded = $detailFor === row.result.domain}
+            {@const quotes = buildRegistrarQuotes(registrars, $pricing?.table ?? null, row.result.tld, row.result.domain)}
             <tr class="row-in" class:available={isAvail} class:error={isErr} class:row-taken={row.result.status === 'taken'} data-testid={`results-row-${sid}`}>
               <td class="select-cell">
                 <input
@@ -1233,15 +1018,15 @@
                   <RowMenu
                     sid={sid}
                     isOpen={menuFor === row.result.domain}
-                    copied={copied.has(row.result.domain)}
+                    copied={$copied.has(row.result.domain)}
                     rechecking={rechecking.has(row.result.domain)}
                     recheckDisabled={rechecking.size >= MAX_RECHECKS}
                     isExpanded={isExpanded}
                     onTriggerClick={() => toggleMenu(row.result.domain)}
                     onClose={() => (menuFor = null)}
-                    onCopy={() => void handleCopy(row.result.domain)}
+                    onCopy={() => void copyDomainFlash(row.result.domain)}
                     onRecheck={() => recheck(row.result.domain)}
-                    onDetail={() => { void toggleDetail(row.result.domain); }}
+                    onDetail={() => { void toggleDetail(row.result.domain, () => (menuFor = null)); }}
                   />
                 </div>
               </td>
@@ -1252,9 +1037,9 @@
                 {row}
                 {isAvail}
                 {isErr}
-                detail={details[row.result.domain]}
+                detail={$details[row.result.domain]}
                 {quotes}
-                premiumOverride={premiumOverrides[row.result.domain] ?? null}
+                premiumOverride={$premiumOverrides[row.result.domain] ?? null}
               />
             {/if}
           {/each}
