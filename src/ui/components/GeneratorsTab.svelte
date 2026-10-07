@@ -9,6 +9,9 @@
   import { findHacks } from '../../generators/hacks';
   import { mutate } from '../../generators/mutations';
   import { scoreWord } from '../../generators/pronounceability';
+  import { createEngine, type EngineHandle } from '../../core/engine';
+  import { normalizeDomainInput, parseCandidate } from '../../core/idn';
+  import type { CheckStatus } from '../../types';
   import { themes } from '../../generators/themes';
   import { favorites, toggleFavorite } from '../favorites';
   import { popover } from '../popover';
@@ -73,6 +76,51 @@
   function scoreLabel(n: string): string {
     const s = candScore(n);
     return Number.isFinite(s) ? s.toFixed(1) : '-';
+  }
+
+  // ---- Expandable candidate detail + lazy per-zone preview ----
+  let expandedCand = $state<string | null>(null);
+  let previews = $state<
+    Record<string, { loading: boolean; rows: { domain: string; status: CheckStatus }[] }>
+  >({});
+
+  function toggleCand(name: string): void {
+    expandedCand = expandedCand === name ? null : name;
+  }
+
+  async function runPreview(name: string): Promise<void> {
+    if (previews[name]?.loading) return;
+    previews = { ...previews, [name]: { loading: true, rows: [] } };
+    const parsed = normalizeDomainInput(name);
+    const cands: string[] = [];
+    for (const n of parsed.names) cands.push(...parseCandidate(n, get(selectedTlds)));
+    const unique = [...new Set(cands)].slice(0, 20);
+    const rows: { domain: string; status: CheckStatus }[] = [];
+    let engine: EngineHandle | null = null;
+    try {
+      await new Promise<void>((resolve) => {
+        engine = createEngine((event) => {
+          if (event.type === 'result') {
+            rows.push({ domain: event.result.domain, status: event.result.status });
+          } else if (event.type === 'batch') {
+            for (const r of event.results) rows.push({ domain: r.domain, status: r.status });
+          } else if (event.type === 'finished') {
+            engine?.destroy();
+            engine = null;
+            resolve();
+          }
+        });
+        engine.start(unique, {
+          registry: get(registry),
+          concurrency: 2,
+          fetchTimeoutMs: 10000,
+          maxRetries: 1,
+        });
+      });
+    } catch {
+      // best-effort preview: keep whatever rows arrived
+    }
+    previews = { ...previews, [name]: { loading: false, rows } };
   }
   let expanded = $state<Record<string, boolean>>({});
   let groupCollapsed = $state<Record<string, boolean>>({});
@@ -581,6 +629,17 @@
                         data-testid={`gen-tray-score-${sanitizeId(cand.n)}`}
                       >{scoreLabel(cand.n)}</span>
                       <button
+                        class="row-expand"
+                        type="button"
+                        onclick={() => toggleCand(cand.n)}
+                        aria-expanded={expandedCand === cand.n}
+                        aria-label={t('gen.tray.expand.aria', { name: cand.n })}
+                        title={t('gen.tray.expand.aria', { name: cand.n })}
+                        data-testid={`gen-tray-expand-${sanitizeId(cand.n)}`}
+                      >
+                        <IconChevron />
+                      </button>
+                      <button
                         class="row-remove"
                         type="button"
                         onclick={(ev) => { ev.stopPropagation(); removeCandidate(cand.n); }}
@@ -591,6 +650,44 @@
                         <IconX />
                       </button>
                     </div>
+                    {#if expandedCand === cand.n}
+                      <div class="tray-detail" data-testid={`gen-tray-detail-${sanitizeId(cand.n)}`}>
+                        <span class="td-row">
+                          <span class="td-k">{t('gen.tray.detail.source')}</span>
+                          {t(GROUP_LABEL[cand.src])}
+                        </span>
+                        <span class="td-row">
+                          <span class="td-k">{t('drops.col.score')}</span>
+                          <span class="nums">{scoreLabel(cand.n)}</span>
+                        </span>
+                        <button
+                          class="btn sm"
+                          type="button"
+                          onclick={() => void runPreview(cand.n)}
+                          disabled={previews[cand.n]?.loading}
+                          data-testid={`gen-tray-preview-${sanitizeId(cand.n)}`}
+                        >
+                          {previews[cand.n]?.loading
+                            ? t('gen.tray.detail.previewing')
+                            : t('gen.tray.detail.preview')}
+                        </button>
+                        {#if (previews[cand.n]?.rows.length ?? 0) > 0}
+                          <span class="td-chips">
+                            {#each previews[cand.n]?.rows ?? [] as pr (pr.domain)}
+                              <span
+                                class="td-chip"
+                                class:avail={pr.status === 'available' || pr.status === 'probably_available'}
+                                class:taken={pr.status === 'taken'}
+                                data-testid={`gen-tray-pchip-${sanitizeId(pr.domain)}`}
+                              >
+                                <b>.{pr.domain.slice(pr.domain.lastIndexOf('.') + 1)}</b>
+                                {t(`status.${pr.status}`)}
+                              </span>
+                            {/each}
+                          </span>
+                        {/if}
+                      </div>
+                    {/if}
                   {/each}
                   {#if group.items.length > ROWS_PER_GROUP}
                     <button
@@ -1152,6 +1249,85 @@
     margin-left: var(--space-2);
     min-width: 3ch;
     text-align: right;
+  }
+
+  .row-expand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    padding: 0;
+    flex: none;
+    margin-left: var(--space-1);
+  }
+
+  .row-expand:hover {
+    color: var(--text);
+    background: var(--bg-sunken);
+  }
+
+  .row-expand :global(svg) {
+    width: 12px;
+    height: 12px;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .row-expand[aria-expanded='true'] :global(svg) {
+    transform: rotate(180deg);
+  }
+
+  .tray-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    margin: 2px 0 var(--space-1);
+    background: var(--bg-sunken);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .td-row {
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+
+  .td-k {
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  .td-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .td-chip {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: 2px var(--space-2);
+    background: var(--bg-elevated);
+  }
+
+  .td-chip.avail {
+    border-color: var(--green-solid);
+    color: var(--green);
+  }
+
+  .td-chip.taken {
+    opacity: 0.7;
   }
 
   .row-remove {

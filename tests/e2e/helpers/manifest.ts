@@ -214,6 +214,10 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'gen-tray-fav-', // tray chip favorite stars: gen-tray-fav-{name}
   'gen-tray-remove-', // tray chip remove buttons: gen-tray-remove-{name}
   'gen-tray-score-', // tray chip pronounceability score badges: gen-tray-score-{name}
+  'gen-tray-expand-', // tray row expand toggles: gen-tray-expand-{name}
+  'gen-tray-detail-', // tray candidate detail panels: gen-tray-detail-{name}
+  'gen-tray-preview-', // tray zone-preview buttons: gen-tray-preview-{name}
+  'gen-tray-pchip-', // tray preview status chips: gen-tray-pchip-{domain}
   'gen-more-', // tray section show more/less: gen-more-{section}
   'gen-group-toggle-', // tray group collapse toggles: gen-group-toggle-{groupId}
   'gen-theme-chip-', // theme category chips: gen-theme-chip-{id}

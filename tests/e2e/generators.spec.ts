@@ -9,7 +9,7 @@
  */
 import { test, expect, type Page } from '@playwright/test';
 import { openApp, navigateToTab, grantClipboard, readClipboard } from './helpers/setup';
-import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockRdap } from './helpers/mocks';
+import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockDoh, mockRdap } from './helpers/mocks';
 import {
   ianaBootstrap,
   porkbunPricing,
@@ -282,6 +282,40 @@ test.describe('Generators tab', () => {
     for (let i = 1; i < nums.length; i++) {
       expect(nums[i - 1] ?? 0).toBeGreaterThanOrEqual(nums[i] ?? 0);
     }
+    expectNoLeaks(page);
+  });
+
+  test('tray row expands to technique detail with lazy zone preview', async ({ page }) => {
+    await boot(page);
+    await mockRdap(page, []);
+    await mockDoh(page, { 'apptest.com': 'nxdomain' });
+
+    // Single zone so the preview runs exactly one check (selectedTlds is app-wide).
+    await navigateToTab(page, 'check');
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await navigateToTab(page, 'generators');
+
+    await openParamsPanel(page);
+    await page.locator('[data-testid="gen-textarea-affixes"]').fill('app');
+    await setTechniques(page, { combinator: true });
+    await generate(page, 'test');
+    await expect(page.locator('[data-testid="gen-tray-chip-apptest"]')).toBeVisible();
+
+    await page.click('[data-testid="gen-tray-expand-apptest"]');
+    const detail = page.locator('[data-testid="gen-tray-detail-apptest"]');
+    await expect(detail).toBeVisible();
+
+    await page.click('[data-testid="gen-tray-preview-apptest"]');
+    await expect(page.locator('[data-testid="gen-tray-pchip-apptest-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    // Collapse hides the panel again.
+    await page.click('[data-testid="gen-tray-expand-apptest"]');
+    await expect(detail).toBeHidden();
     expectNoLeaks(page);
   });
 
