@@ -51,6 +51,28 @@ export interface TldRegistry {
   premiumHeavyTlds?: string[];
 }
 
+/**
+ * Slim parsed view of an RFC 9083 RDAP domain body (SPEC §7 addendum).
+ * Raw registry bodies are never retained or rendered — only these fields.
+ * All fields degrade to null/[] when absent or unparseable.
+ */
+export interface RdapCard {
+  /** Epoch ms of the 'registration' event; null when absent/invalid. */
+  registeredAt: number | null;
+  /** Epoch ms of the 'expiration' event; null when absent/invalid. */
+  expiresAt: number | null;
+  /** Epoch ms of the 'last changed' event; null when absent/invalid. */
+  changedAt: number | null;
+  /** Whole days since registration at parse time; null without registeredAt. */
+  ageDays: number | null;
+  /** Registrar name from the 'registrar' entity vCard fn; null when absent. */
+  registrar: string | null;
+  /** Raw EPP status strings, trimmed, deduped, capped. */
+  statuses: string[];
+  /** Nameserver hostnames, lowercased, trailing dot stripped, capped. */
+  nameservers: string[];
+}
+
 export interface CheckResult {
   /** Full ASCII domain, e.g. "myapp.dev". */
   domain: string;
@@ -60,6 +82,8 @@ export interface CheckResult {
   checkedAt: number;
   latencyMs?: number;
   note?: string;
+  /** Present on taken domains whose RDAP body carried parseable details. */
+  card?: RdapCard;
 }
 
 // ---- Worker protocol (postMessage) ----
@@ -152,6 +176,10 @@ export interface Settings {
   proxyUrl: string;
   /** Optional user-provided GitHub token (PAT/device flow), stored locally only. */
   githubToken: string;
+  /** Watchlist silent re-check interval in minutes; 0 = disabled. */
+  watchIntervalMin: number;
+  /** Fire a browser notification when a scheduled re-check finds changes. */
+  watchNotify: boolean;
   defaultTlds: string[];
 }
 
@@ -159,11 +187,13 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   lang: 'en',
   currency: 'USD',
-  rates: { RUB: 97, EUR: 0.92 },
+  rates: { RUB: 83.49, EUR: 0.8888 },
   concurrency: 6,
   cacheTtlHours: 12,
   proxyUrl: '',
   githubToken: '',
+  watchIntervalMin: 0,
+  watchNotify: false,
   defaultTlds: [
     'com',
     'net',
@@ -205,6 +235,8 @@ export interface CacheEntry {
   source: ResultSource;
   ts: number;
   tld: string;
+  /** Additive (no storage-key migration): legacy entries simply lack it. */
+  card?: RdapCard;
 }
 
 // ---- Resume snapshot (dh:v1:run) ----

@@ -2,22 +2,28 @@
   import { t } from '../../i18n';
   import { pricing, registry, settings } from '../store';
   import { bestEntry, formatPrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
-  import { pointsFromCompact, sparkSeries, summarizeTrend } from '../../pricing/trends';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
   import type { PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
   import registrarsJson from '../../config/registrars.json';
-  import historyJson from '../../config/price-history.json';
+  import snapshotJson from '../../config/pricing.snapshot.json';
+
+  interface TrendEntry {
+    pct: number | null;
+    dir: 'up' | 'down' | 'flat' | null;
+    spark?: number[];
+  }
+
+  const EMPTY_TREND: TrendEntry = { pct: null, dir: null };
 
   const registrars = registrarsJson as unknown as RegistrarConfig[];
   const registrarName = new Map<string, string>(registrars.map((r) => [r.id, r.name]));
-  const history =
-    historyJson as unknown as Record<string, Array<[string, number | null, number | null]>>;
+  const trends = (snapshotJson as { trends?: Record<string, TrendEntry> }).trends ?? {};
 
   /** Cold start: no CI-harvested snapshots bundled yet → trends are impossible
       and the user gets a one-line explanation instead of empty trend cells. */
-  const hasHistory = Object.keys(history).length > 0;
+  const hasHistory = Object.keys(trends).length > 0;
 
   type SortMode = 'reg' | 'renew' | 'alpha';
 
@@ -107,7 +113,7 @@
   }
 
   // Sparkline geometry: 64×14 viewBox, 1px padding, y inverted (SVG y grows
-  // downward, prices grow upward). Values are raw USD cents from sparkSeries.
+  // downward, prices grow upward). Values are raw USD cents.
   const SPARK_W = 64;
   const SPARK_H = 14;
   const SPARK_PAD = 1;
@@ -275,9 +281,9 @@
           {#each visibleZones as tld (tld)}
             {@const best = bestEntry(table, tld)}
             {@const minRid = best?.registrarId ?? null}
-            {@const trend = summarizeTrend(pointsFromCompact(history[tld] ?? []))}
-            {@const spark = sparkSeries(history[tld] ?? [])}
-            {@const sparkGeo = spark ? sparkGeometry(spark.values) : null}
+            {@const trend = trends[tld] ?? EMPTY_TREND}
+            {@const sparkGeo =
+              trend.spark && trend.spark.length >= 2 ? sparkGeometry(trend.spark) : null}
             <tr data-testid={`prices-row-${tld}`}>
               <td class="zone-cell">{tld}</td>
               {#each columns as rid (rid)}
@@ -388,38 +394,9 @@
     min-height: 40px;
   }
 
+  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
     background: var(--bg);
-    color: var(--text);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: background var(--dur) var(--ease);
-  }
-
-  .btn:hover:not(:disabled) {
-    background: var(--bg-sunken);
-  }
-
-  .btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .btn.primary:hover:not(:disabled) {
-    background: var(--accent-hover);
   }
 
   /* On-state: soft fill + accent border + outer ring so the pressed toggle is
@@ -493,7 +470,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--bg-elevated);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-1);
     max-height: 72vh;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -587,7 +564,7 @@
   }
 
   .zone-cell {
-    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    font-family: var(--font-mono);
     color: var(--text);
     white-space: nowrap;
   }

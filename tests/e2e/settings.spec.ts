@@ -24,6 +24,7 @@ import {
   seedPricingTable,
   porkbunPricing,
   cloudflarePricing,
+  erApiRates,
 } from './fixtures';
 import { DEFAULT_SETTINGS, type Settings } from '../../src/types';
 
@@ -69,6 +70,16 @@ async function mockPricing(
   });
 }
 
+async function mockFx(page: Page, body: unknown): Promise<void> {
+  await page.route(/^https:\/\/open\.er-api\.com\/v6\/latest\//, async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: { ...CORS, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  });
+}
+
 // Catch-all registered FIRST with an allowlist: allowlisted URLs defer via
 // route.fallback() to the specific mocks registered later; anything else is
 // aborted and recorded as a leak. This mirrors the helpers/mocks.ts pattern.
@@ -81,6 +92,7 @@ const ALLOWLIST: RegExp[] = [
   /^https:\/\/cloudflare-dns\.com\/dns-query/,
   /^https:\/\/dns\.google\/resolve/,
   /^https:\/\/api\.porkbun\.com\/api\/json\/v3\/pricing\/get/,
+  /^https:\/\/open\.er-api\.com\/v6\/latest\//,
   /^https:\/\/cfdomainpricing\.com\/prices\.json/,
   /^https:\/\/api\.digmyname\.com\/functions\/v1\/public-api\/check/,
   /^https:\/\/api\.github\.com\//,
@@ -223,6 +235,35 @@ test.describe('Settings tab', () => {
     await rubInput.fill('100');
     await rubInput.blur();
     expect((await readSettings(page)).rates.RUB).toBe(100);
+  });
+
+  // 4b. FX refresh button: fetches live rates, applies them, stores dh:v1:fx
+  test('FX refresh button applies live rates and stores dh:v1:fx', async ({ page }) => {
+    await assertNoLeaks(page);
+    await mockBootstrap(page, ianaBootstrap());
+    await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+    await mockFx(page, erApiRates(80.5, 0.86));
+    await openApp(page, {
+      seed: {
+        'dh:v1:pricing': seedPricingTable(),
+        'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
+        'dh:v1:fx': { rates: { RUB: 1, EUR: 1 }, fetchedAt: 1000 },
+      },
+    });
+    await gotoSettings(page);
+
+    await page.click('[data-testid="settings-button-fx-refresh"]');
+
+    await expect(page.locator('[data-testid="settings-input-rate-rub"]')).toHaveValue('80.5');
+    await expect(page.locator('[data-testid="settings-input-rate-eur"]')).toHaveValue('0.86');
+    const stored = await readSettings(page);
+    expect(stored.rates).toEqual({ RUB: 80.5, EUR: 0.86 });
+    const fxRaw = await page.evaluate(() => localStorage.getItem('dh:v1:fx'));
+    expect(fxRaw).not.toBeNull();
+    const fx = JSON.parse(fxRaw as string) as { rates: { RUB: number }; fetchedAt: number };
+    expect(fx.rates.RUB).toBe(80.5);
+    expect(fx.fetchedAt).toBeGreaterThan(1000);
+    await expect(page.locator('[data-testid="settings-fx-age"]')).toBeVisible();
   });
 
   // 5. Concurrency range changes and persists
@@ -496,5 +537,123 @@ test.describe('Settings tab', () => {
 
     // Token persisted to localStorage
     expect((await readSettings(page)).githubToken).toBe('ghp_testtoken');
+  });
+
+  test('watch interval select persists to settings', async ({ page }) => {
+    await bootSettingsTab(page);
+
+    const select = page.locator('[data-testid="settings-select-watch-interval"]');
+    await expect(select).toBeVisible();
+    expect(await select.inputValue()).toBe('0');
+
+    await select.selectOption('15');
+    const stored = await readSettings(page);
+    expect(stored.watchIntervalMin).toBe(15);
+  });
+
+  test('watch notify button surfaces the denied hint without permission', async ({ page }) => {
+    await bootSettingsTab(page);
+
+    // Headless Chromium denies Notification permission by default.
+    const btn = page.locator('[data-testid="settings-button-watch-notify"]');
+    await expect(btn).toBeVisible();
+    await btn.click();
+
+    await expect(page.locator('[data-testid="settings-watch-notify-denied"]')).toBeVisible();
+    expect((await readSettings(page)).watchNotify).toBe(false);
+  });
+
+  test('watch notify enables when permission is granted', async ({ page }) => {
+    // file:// is an opaque origin: grantPermissions cannot apply, stub instead.
+    await page.addInitScript(() => {
+      class FakeNotification {
+        static permission = 'granted';
+        static requestPermission(): Promise<string> {
+          return Promise.resolve('granted');
+        }
+        constructor(
+          public title: string,
+          public options?: unknown,
+        ) {}
+      }
+      (window as unknown as { Notification: unknown }).Notification = FakeNotification;
+    });
+    await bootSettingsTab(page);
+
+    const btn = page.locator('[data-testid="settings-button-watch-notify"]');
+    await btn.click();
+
+    await expect(btn).toHaveAttribute('aria-pressed', 'true');
+    expect((await readSettings(page)).watchNotify).toBe(true);
+
+    // Toggling off flips it back.
+    await btn.click();
+    await expect(btn).toHaveAttribute('aria-pressed', 'false');
+    expect((await readSettings(page)).watchNotify).toBe(false);
+  });
+
+  test('projects: create, edit, set domains, export CSV/JSON, delete', async ({ page }) => {
+    await bootSettingsTab(page);
+
+    await expect(page.locator('[data-testid="projects-empty"]')).toBeVisible();
+    await page.fill('[data-testid="projects-input-new"]', 'Brand A');
+    await page.click('[data-testid="projects-button-create"]');
+    const row = page.locator('[data-testid="projects-row-0"]');
+    await expect(row).toBeVisible();
+
+    await page.fill('[data-testid="projects-input-domains-0"]', 'alpha.com beta.io alpha.com');
+    await page.locator('[data-testid="projects-input-domains-0"]').blur();
+    await expect(page.locator('[data-testid="projects-count-0"]')).toContainText('2');
+    await expect(page.locator('[data-testid="projects-input-domains-0"]')).toHaveValue(
+      'alpha.com\nbeta.io',
+    );
+
+    // Rename + note (onchange -> patchProject).
+    await page.fill('[data-testid="projects-input-name-0"]', 'Brand A2');
+    await page.locator('[data-testid="projects-input-name-0"]').blur();
+    await page.fill('[data-testid="projects-input-note-0"]', 'shortlist');
+    await page.locator('[data-testid="projects-input-note-0"]').blur();
+
+    // Blob spy captures the last exported text.
+    await page.evaluate(() => {
+      const orig = URL.createObjectURL;
+      URL.createObjectURL = (obj: Blob | MediaSource): string => {
+        if (obj instanceof Blob) {
+          void obj.text().then((text) => {
+            (window as unknown as { __projectExport?: string }).__projectExport = text;
+          });
+        }
+        return orig.call(URL, obj);
+      };
+    });
+
+    await page.click('[data-testid="projects-button-json-0"]');
+    await page.waitForFunction(
+      () => (window as unknown as { __projectExport?: string }).__projectExport !== undefined,
+    );
+    const jsonText = await page.evaluate<string>(
+      () => (window as unknown as { __projectExport: string }).__projectExport,
+    );
+    const parsed = JSON.parse(jsonText) as { name?: string; note?: string; domains?: string[] };
+    expect(parsed.name).toBe('Brand A2');
+    expect(parsed.note).toBe('shortlist');
+    expect(parsed.domains).toEqual(['alpha.com', 'beta.io']);
+
+    await page.evaluate(() => {
+      (window as unknown as { __projectExport?: string }).__projectExport = undefined;
+    });
+    await page.click('[data-testid="projects-button-csv-0"]');
+    await page.waitForFunction(
+      () => (window as unknown as { __projectExport?: string }).__projectExport !== undefined,
+    );
+    const csvText = await page.evaluate<string>(
+      () => (window as unknown as { __projectExport: string }).__projectExport,
+    );
+    expect(csvText).toContain('domain,project');
+    expect(csvText).toContain('alpha.com,Brand A2');
+
+    await page.click('[data-testid="projects-button-delete-0"]');
+    await expect(row).toBeHidden();
+    await expect(page.locator('[data-testid="projects-empty"]')).toBeVisible();
   });
 });

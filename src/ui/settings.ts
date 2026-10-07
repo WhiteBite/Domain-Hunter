@@ -14,6 +14,7 @@ export const KEYS = {
   wordsets: 'dh:v1:wordsets',
   watch: 'dh:v1:watch',
   resultsview: 'dh:v1:resultsview',
+  fx: 'dh:v1:fx',
 } as const;
 
 export function loadSettings(): Settings {

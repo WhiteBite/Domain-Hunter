@@ -17,7 +17,8 @@ disagree, SPEC wins unless the SPEC is factually impossible.
     Porkbun pricing API, cfdomainpricing.com, Cloudflare RDAP aggregator
     (`rdap.cloudflare.com/domain/{domain}`), `api.digmyname.com` (per-domain premium/buy data,
     user-initiated on-demand clicks), `api.github.com` and `github.com` (Social tab GitHub device-flow
-    authentication and username lookups), `www.tiktok.com` (Social tab oEmbed lookup).
+    authentication and username lookups), `www.tiktok.com` (Social tab oEmbed lookup),
+    `open.er-api.com` (FX rates, cached 7 days, §13).
     No CDNs, no fonts from network, no analytics.
 4. Polite to registries: per-infra rate profiles (§8), AIMD backoff, global concurrency cap.
 5. Never guess availability: three-state model (§7). Wrong "available" is worse than "unknown".
@@ -202,6 +203,8 @@ export interface Settings {
   cacheTtlHours: number;         // default 12
   proxyUrl: string;              // default ''
   githubToken: string;           // optional GitHub PAT/device flow token for Social checks
+  watchIntervalMin: number;      // watchlist silent re-check interval in minutes, 0 = off (default)
+  watchNotify: boolean;          // browser notification on watch changes (default false, opt-in)
   defaultTlds: string[];         // default selection
 }
 ```
@@ -218,7 +221,17 @@ baseline for detecting status flips of favorited domains on app load),
 `dh:v1:watch-changes` (Record<domain, {status: CheckStatus, ts: number}> —
 detected status-flip events for the watchlist UI),
 `dh:v1:gentray` (generator candidate tray, survives tab switches),
-`dh:v1:hint-dismissed` (boolean flag for dismissing the hint banner).
+`dh:v1:hint-dismissed` (boolean flag for dismissing the hint banner),
+`dh:v1:fx` ({rates, fetchedAt} — last live FX fetch from open.er-api.com;
+refreshed at boot when older than 7 days, the Settings button always applies).
+
+Watchlist scheduler (`src/ui/watch-scheduler.ts`): when `watchIntervalMin > 0`,
+`refreshWatchlist` re-runs on that interval (floor 1 min) while
+`document.visibilityState === 'visible'`; hidden tabs skip the tick. When
+`watchNotify` is on and a tick produces new `watchChanges`, one browser
+Notification is raised (title `watch.notify.title`, body `watch.banner`).
+Enabling `watchNotify` requests Notification permission first; a denied
+permission keeps the flag off and surfaces a hint.
 
 ## 6. Zone registry (`src/config/tlds.json`)
 
@@ -327,9 +340,11 @@ unknown (amber), error (red). Filters: all / available (includes probably) / tak
   sources win per registrar and coupons dedupe fresh-wins — a flaky source never
   erases coverage.
 - Price history: a weekly CI job appends one monthly min-reg/min-renew point per
-  TLD to `src/config/price-history.json` (13-month window); the Prices tab shows
-  a 6-month trend indicator (▲/▼ when |Δ| ≥ 2%, flat otherwise, hidden when
-  history is insufficient).
+  TLD to `src/config/price-history.json` (13-month window, CI-side data source, not
+  bundled) and writes precomputed trends ({pct, dir, spark values} per registry TLD)
+  into `pricing.snapshot.json` (`trends` field; the 6-hourly harvest carries it over).
+  The Prices tab consumes the precomputed trends: 6-month indicator (▲/▼ when
+  |Δ| ≥ 2%, flat otherwise, hidden when insufficient) + sparkline.
 - Instant "possible premium" heuristic chip on available rows: dictionary words
   and ≤4-char labels in premium-heavy zones (no network call); the on-demand
   DigMyName check remains authoritative.
@@ -393,16 +408,27 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 - Registry responses: only HTTP status + our own config rendered; RDAP bodies never injected into DOM.
 - `worker.js` proxy: only resolves TLDs from its embedded map (generated from tlds.json by
   scripts/build-worker.mjs); no arbitrary URL passthrough (anti-abuse).
+- FX rates: `open.er-api.com/v6/latest/USD` (no key, open CORS, daily upstream refresh),
+  cached in `dh:v1:fx` with a 7-day TTL; on failure the stored or manually entered rates stand.
+  The CLI/MCP mirror this via `dh:cli:fx` (7d) when RUB/EUR display is requested without
+  explicit rate flags; explicit flags always win.
+- Wayback history signal: `archive.org/wayback/available?url={domain}` is fetched lazily —
+  only when a Drops row is expanded — and cached in `dh:v1:wayback` (cap 500 entries, 30-day
+  TTL); link-outs go to `web.archive.org` (target=_blank, noopener). On failure the row
+  simply shows no history; nothing is retried until the next expand.
 
 ## 14. CI/CD
 
 - `deploy.yml`: on push to main → node 22 → npm ci → typecheck + vitest → vite build →
   actions/deploy-pages (artifact dist/).
-- `prices.yml`: weekly cron + dispatch → `node scripts/harvest-prices.mjs` → commit
-  `src/config/pricing.snapshot.json` if changed (bot identity). Script must exit 0 on partial
-  source failure; exit 1 only if ALL sources fail.
-- `zone-health.yml`: weekly cron → `node scripts/zone-health.mjs` → commit `health.json`
-  (tld → {rdap, cors, httpStatus, ms, ts}); failures visible in repo.
+- `prices.yml`: 6-hourly cron + dispatch → `node scripts/harvest-prices.mjs` → commit
+  `src/config/pricing.snapshot.json` if changed AND the delta gate passes
+  (scripts/snapshot-gate.mjs: skip when <0.5% of cells changed and the last snapshot
+  commit is <24h old; bot identity). Script must exit 0 on partial source failure;
+  exit 1 only if ALL sources fail.
+- `zone-health.yml`: daily cron → `node scripts/zone-health.mjs` → commit `health.json`
+  (tld → {http, cors, ok, directOk, cfOk, ms, ts}; direct RDAP probe with the
+  Cloudflare-aggregator fallback); failures visible in repo.
 
 ## 15. Acceptance criteria (agent must run through all)
 
@@ -481,9 +507,23 @@ automation. They are additive surfaces — no app behavior changes.
 - **CLI-only network addition.** The CLI fetches
   `raw.githubusercontent.com/WhiteBite/Domain-Hunter/main/src/config/{tlds,pricing.snapshot}.json`
   with a 24h TTL cache (stored in `~/.domain-hunter/storage.json`) and
-  silent fallback to the bundled copies. The app runtime allowlist (§13) is
-  unchanged.
+  silent fallback to the bundled copies, plus `open.er-api.com` (§13) for
+  display rates when RUB/EUR output is requested without explicit `--rate-*`
+  flags (7d cache, `dh:cli:fx`). Opt-in only: `prices --source dynadot`
+  calls `api.dynadot.com/api3.json?tld_price` with a user-stored API key
+  (`keys set dynadot <key>`, same 0600 storage file, never echoed) and merges
+  the result as an extra registrar over curated zones; a missing key is a
+  hard error, a fetch failure degrades to a stderr warning
+  (`docs/registrar-keys.md`). The app runtime allowlist (§13) is unchanged.
 - **JSON-on-stdout contract.** Every command prints one JSON object to
-  stdout (exit 0 on success, 1 on runtime error, 2 on usage error). Progress
-  and diagnostics go to stderr only. See `cli/contract.ts` for the exact
-  shapes.
+  stdout (exit 0 on success, 1 on runtime error, 2 on usage error, 10 when
+  `watch` detects a status flip). `check`, `prices`, and `drops` also accept
+  `--format table|csv` for human/spreadsheet output. Progress and diagnostics
+  go to stderr only. Commands: `check`, `prices`, `generate`, `find`, `tlds`,
+  `drops`, `watch`, `keys`, `completions`. See `cli/contract.ts` for the
+  exact shapes.
+- **MCP tools.** The server (`cli/mcp/server.ts`) registers `check_availability`,
+  `get_prices`, `generate_names`, `find_domains`, `list_zones`, `list_drops`,
+  and `price_trends` — thin wrappers over `cli/core.ts` with zod input
+  schemas. Long-polling `watch` and secret-handling `keys` are deliberately
+  not exposed as MCP tools.

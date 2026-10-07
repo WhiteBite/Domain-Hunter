@@ -25,7 +25,18 @@ import { mixSyllables } from '../src/generators/syllables';
 import { findHacks } from '../src/generators/hacks';
 import { mutate } from '../src/generators/mutations';
 import { themes } from '../src/generators/themes';
-import { loadPricingTable, loadRegistry } from './data';
+import { filterDrops, type DroppedDomain } from '../src/core/dropped';
+import droppedSnapshot from '../src/config/dropped.snapshot.json';
+import snapshotJson from '../src/config/pricing.snapshot.json';
+import { loadPricingTable, loadRegistry, resolveCliRates } from './data';
+import {
+  isKeyRegistrar,
+  loadRegistrarKeys,
+  maskKey,
+  removeRegistrarKey,
+  saveRegistrarKey,
+} from './keys';
+import { fetchDynadotTldPrices, mergeDynadotIntoTable } from './registrar-sources';
 import process from 'node:process';
 import type {
   CheckCommandOptions,
@@ -33,18 +44,27 @@ import type {
   CheckRow,
   CliCurrency,
   CliRates,
+  DropsCommandOptions,
+  DropsOutcome,
   FindCommandOptions,
   FindOutcome,
   FindRow,
   GenerateCommandOptions,
   GenerateOutcome,
+  KeysOutcome,
   PriceInfo,
+  PriceTrendEntry,
+  PriceTrendsCommandOptions,
+  PriceTrendsOutcome,
   PricesCommandOptions,
   PricesOutcome,
   PricesRow,
   TldsCommandOptions,
   TldsOutcome,
   TldsZone,
+  WatchCommandOptions,
+  WatchOutcome,
+  FlipEvent,
 } from './contract';
 
 const DEFAULT_CONCURRENCY = 6;
@@ -214,13 +234,11 @@ export async function runCheckCommand(
 
     // Pricing attachment.
     if (opts.withPrices) {
-      const settings = buildSettings(opts);
+      const rates = await resolveCliRates(opts.currency, opts.rates);
+      const settings = buildSettings({ currency: opts.currency, rates });
       const pricingState = await loadPricingTable({
         currency: opts.currency ?? DEFAULT_SETTINGS.currency,
-        rates: opts.rates ?? {
-          RUB: DEFAULT_SETTINGS.rates.RUB,
-          EUR: DEFAULT_SETTINGS.rates.EUR,
-        },
+        rates,
       });
       for (const row of results) {
         if (row.status === 'available' || row.status === 'probably_available') {
@@ -260,14 +278,28 @@ export async function runCheckCommand(
 export async function runPricesCommand(
   opts: PricesCommandOptions,
 ): Promise<PricesOutcome> {
+  const rates = await resolveCliRates(opts.currency, opts.rates);
   const pricingState = await loadPricingTable({
     currency: opts.currency ?? DEFAULT_SETTINGS.currency,
-    rates: opts.rates ?? {
-      RUB: DEFAULT_SETTINGS.rates.RUB,
-      EUR: DEFAULT_SETTINGS.rates.EUR,
-    },
+    rates,
   });
-  const table = pricingState.table;
+  let table = pricingState.table;
+
+  if (opts.sources?.includes('dynadot')) {
+    const apiKey = loadRegistrarKeys().dynadot;
+    if (!apiKey) {
+      throw new Error(
+        'no dynadot API key stored - run: domain-hunter keys set dynadot <key>',
+      );
+    }
+    try {
+      const dynadotPrices = await fetchDynadotTldPrices(apiKey, opts.fetchImpl);
+      table = mergeDynadotIntoTable(table, dynadotPrices);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      process.stderr.write(`warning: dynadot source failed (${msg}); continuing without it\n`);
+    }
+  }
 
   let tldKeys = Object.keys(table.tlds);
   if (opts.tlds) {
@@ -430,17 +462,18 @@ export async function runFindCommand(
 
   // Check the pool with prices. Pass the already-loaded registry so
   // runCheckCommand does not fetch it a second time.
+  const rates = await resolveCliRates(opts.currency, opts.rates);
   const checkOutcome = await runCheckCommand({
     domains: candidates,
     withPrices: true,
     currency: opts.currency,
-    rates: opts.rates,
+    rates,
     tlds: opts.tlds,
     preloadedRegistry: loaded,
   });
 
   // Budget conversion (USD cents).
-  const settings = buildSettings(opts);
+  const settings = buildSettings({ currency: opts.currency, rates });
   const budgetUsdCents =
     opts.budget != null ? displayToUsdCents(opts.budget, settings) : null;
 
@@ -503,4 +536,154 @@ export async function runTldsCommand(
     count: zones.length,
     tlds: zones,
   };
+}
+
+// ---- runKeysCommand ----
+
+export function runKeysCommand(
+  action: 'set' | 'list' | 'remove',
+  registrar?: string,
+  key?: string,
+): KeysOutcome {
+  if (action === 'list') {
+    const entries = Object.entries(loadRegistrarKeys()).map(([id, k]) => ({
+      registrarId: id,
+      masked: maskKey(k ?? ''),
+    }));
+    return { command: 'keys', action, registrars: entries };
+  }
+  if (!isKeyRegistrar(registrar)) {
+    throw new Error(`unsupported registrar '${registrar ?? ''}' (supported: dynadot)`);
+  }
+  if (action === 'set') {
+    if (!key) throw new Error('key must not be empty');
+    saveRegistrarKey(registrar, key);
+    return { command: 'keys', action, registrar };
+  }
+  return { command: 'keys', action, registrar, removed: removeRegistrarKey(registrar) };
+}
+
+// ---- runDropsCommand ----
+
+const DEFAULT_DROPS_LIMIT = 200;
+const MAX_DROPS_LIMIT = 2000;
+
+interface DropsSnapshot {
+  generatedAt: string;
+  source: string;
+  /** Compact "label tld" strings (same shape the DropsTab consumes). */
+  list: string[];
+}
+
+/**
+ * List dropped domains from the bundled daily snapshot, filtered by name
+ * substring and/or a single TLD (same filterDrops semantics as the Drops tab).
+ */
+export function runDropsCommand(opts: DropsCommandOptions): DropsOutcome {
+  const snap = droppedSnapshot as unknown as DropsSnapshot;
+  const all: DroppedDomain[] = snap.list.map((s) => {
+    const i = s.lastIndexOf(' ');
+    return { d: s.slice(0, i), tld: s.slice(i + 1) };
+  });
+  const filtered = filterDrops(all, opts.query ?? '', opts.tld ?? null);
+  const limit = Math.min(Math.max(opts.limit ?? DEFAULT_DROPS_LIMIT, 1), MAX_DROPS_LIMIT);
+  return {
+    command: 'drops',
+    generatedAt: snap.generatedAt,
+    source: snap.source,
+    total: filtered.length,
+    domains: filtered.slice(0, limit).map((x) => `${x.d}.${x.tld}`),
+  };
+}
+
+// ---- runPriceTrendsCommand ----
+
+interface SnapshotWithTrends {
+  trends?: Record<string, { pct: number | null; dir: 'up' | 'down' | 'flat' | null }>;
+}
+
+/**
+ * Six-month price trends precomputed weekly into the snapshot (SPEC §9).
+ * Filter by exact TLDs and/or substring; keys sorted alphabetically.
+ */
+export function runPriceTrendsCommand(
+  opts: PriceTrendsCommandOptions,
+): PriceTrendsOutcome {
+  const trends = (snapshotJson as SnapshotWithTrends).trends ?? {};
+  let keys = Object.keys(trends);
+  if (opts.tlds) {
+    const set = new Set(opts.tlds);
+    keys = keys.filter((k) => set.has(k));
+  }
+  if (opts.query) {
+    const q = opts.query.toLowerCase();
+    keys = keys.filter((k) => k.includes(q));
+  }
+  const out: Record<string, PriceTrendEntry> = {};
+  for (const k of keys.sort()) {
+    const e = trends[k];
+    if (e) out[k] = { pct: e.pct, dir: e.dir };
+  }
+  return { command: 'price_trends', trends: out };
+}
+
+// ---- runWatchCommand ----
+
+const DEFAULT_WATCH_INTERVAL_SEC = 300;
+const MIN_WATCH_INTERVAL_SEC = 5;
+
+export interface WatchDeps {
+  check?: (opts: CheckCommandOptions) => Promise<CheckOutcome>;
+  sleep?: (ms: number) => Promise<void>;
+}
+
+/**
+ * Poll domains until a status flips between rounds (exit 10 in main), the
+ * round budget is exhausted, or SIGINT aborts a round. Cache is always
+ * ignored — stale statuses would defeat the watch.
+ */
+export async function runWatchCommand(
+  opts: WatchCommandOptions,
+  deps: WatchDeps = {},
+): Promise<WatchOutcome> {
+  const check = deps.check ?? runCheckCommand;
+  const sleep = deps.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const intervalSec = Math.max(opts.intervalSec ?? DEFAULT_WATCH_INTERVAL_SEC, MIN_WATCH_INTERVAL_SEC);
+  const maxRounds = opts.rounds != null && opts.rounds > 0 ? opts.rounds : Infinity;
+
+  const flips: FlipEvent[] = [];
+  let prev: Record<string, CheckRow['status']> | null = null;
+  let statuses: Record<string, CheckRow['status']> = {};
+  let round = 0;
+
+  while (round < maxRounds) {
+    round += 1;
+    const outcome = await check({
+      domains: opts.domains,
+      tlds: opts.tlds,
+      currency: opts.currency,
+      rates: opts.rates,
+      withPrices: opts.withPrices,
+      ignoreCache: true,
+    });
+    if (outcome.aborted) {
+      for (const r of outcome.results) statuses[r.domain] = r.status;
+      return { command: 'watch', rounds: round, flips, statuses, stopped: 'interrupted' };
+    }
+    statuses = {};
+    for (const r of outcome.results) statuses[r.domain] = r.status;
+    if (prev != null) {
+      for (const [domain, to] of Object.entries(statuses)) {
+        const from = prev[domain];
+        if (from != null && from !== to) flips.push({ domain, from, to, round });
+      }
+    }
+    prev = statuses;
+    process.stderr.write(`watch: round ${round} done, ${Object.keys(statuses).length} domains\n`);
+    if (flips.length > 0) {
+      return { command: 'watch', rounds: round, flips, statuses, stopped: 'flip' };
+    }
+    if (round < maxRounds) await sleep(intervalSec * 1000);
+  }
+  return { command: 'watch', rounds: round, flips, statuses, stopped: 'rounds' };
 }

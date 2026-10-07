@@ -32,6 +32,7 @@
   import ExportMenu from './ExportMenu.svelte';
   import WatchBanner from './WatchBanner.svelte';
   import HintBanner from './HintBanner.svelte';
+  import Drawer from './Drawer.svelte';
   import IconDownload from './icons/IconDownload.svelte';
   import IconChevron from './icons/IconChevron.svelte';
 
@@ -39,6 +40,7 @@
   let shareTimer: ReturnType<typeof setTimeout> | undefined;
   let collapsed = $state(false);
   let historyOpen = $state(false);
+  let historyTriggerEl: HTMLButtonElement | null = $state(null);
   let prevPhase: RunPhase | null = null;
   let unsubRunState: (() => void) | undefined;
 
@@ -66,7 +68,13 @@
     if (e.input == null) return;
     checkInput.set(e.input);
     selectedTlds.set([...e.tlds]);
+    historyOpen = false;
     startRequest.update((n) => n + 1);
+  }
+
+  function closeHistory(): void {
+    historyOpen = false;
+    historyTriggerEl?.focus();
   }
 
   onDestroy(() => {
@@ -287,6 +295,7 @@
               <button
                 class="history-toggle"
                 type="button"
+                bind:this={historyTriggerEl}
                 onclick={() => (historyOpen = !historyOpen)}
                 aria-expanded={historyOpen}
                 data-testid="check-history-toggle"
@@ -304,43 +313,48 @@
                 </button>
               {/if}
             </div>
-            {#if historyOpen}
-              {#if $history.length === 0}
-                <p class="history-empty">{t('check.history.empty')}</p>
-              {:else}
-                <ul class="history-list">
-                  {#each $history as e, i}
-                    <li>
-                      {#if e.input != null}
-                        <button
-                          class="history-entry"
-                          type="button"
-                          data-testid={`history-entry-${i}`}
-                          title={t('check.history.restore')}
-                          aria-label={t('check.history.restore')}
-                          onclick={() => restore(e)}
-                        >
-                          <span class="h-time">{formatTime(e.ts)}</span>
-                          <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
-                          <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
-                        </button>
-                      {:else}
-                        <div
-                          class="history-entry static"
-                          data-testid={`history-entry-${i}`}
-                          aria-label={t('check.history.restore')}
-                        >
-                          <span class="h-time">{formatTime(e.ts)}</span>
-                          <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
-                          <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
-                        </div>
-                      {/if}
-                    </li>
-                  {/each}
-                </ul>
-              {/if}
-            {/if}
           </section>
+          <Drawer
+            open={historyOpen}
+            title={t('check.history.title')}
+            testid="check-history-drawer"
+            onClose={closeHistory}
+          >
+            {#if $history.length === 0}
+              <p class="history-empty">{t('check.history.empty')}</p>
+            {:else}
+              <ul class="history-list">
+                {#each $history as e, i}
+                  <li>
+                    {#if e.input != null}
+                      <button
+                        class="history-entry"
+                        type="button"
+                        data-testid={`history-entry-${i}`}
+                        title={t('check.history.restore')}
+                        aria-label={t('check.history.restore')}
+                        onclick={() => restore(e)}
+                      >
+                        <span class="h-time">{formatTime(e.ts)}</span>
+                        <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
+                        <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
+                      </button>
+                    {:else}
+                      <div
+                        class="history-entry static"
+                        data-testid={`history-entry-${i}`}
+                        aria-label={t('check.history.restore')}
+                      >
+                        <span class="h-time">{formatTime(e.ts)}</span>
+                        <span class="h-query">{queryPreview(e.query)} · {t('check.history.meta', { names: nameCount(e.query), zones: e.tlds.length })}</span>
+                        <span class="h-avail">{t('check.progress.available', { n: e.counts.available })}</span>
+                      </div>
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+            {/if}
+          </Drawer>
       {:else}
         <span class="panel-summary">{nameCount($checkInput)} × {$selectedTlds.length}</span>
       {/if}

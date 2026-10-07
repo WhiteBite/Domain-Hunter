@@ -18,7 +18,8 @@
   /* type */
   --font-sans:
     'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
+    'PingFang SC', 'Hiragino Sans', 'Noto Sans CJK JP', 'Microsoft YaHei', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-base: 0.9375rem;
@@ -95,9 +96,6 @@
   --price-high: var(--red);
 
   /* shadows — tinted, layered */
-  --shadow-sm: 0 1px 2px rgba(23, 32, 54, 0.06);
-  --shadow-md: 0 2px 8px rgba(23, 32, 54, 0.08), 0 1px 2px rgba(23, 32, 54, 0.06);
-  --shadow-lg: 0 8px 28px rgba(23, 32, 54, 0.12);
   --shadow-1: 0 1px 2px rgba(23, 32, 54, 0.06);
   --shadow-2: 0 6px 20px rgba(23, 32, 54, 0.10);
   --shadow-pop: 0 0 0 1px rgba(23, 32, 54, 0.08), 0 8px 24px rgba(23, 32, 54, 0.12);
@@ -165,9 +163,6 @@
   --price-high: var(--red);
 
   /* shadows — tinted black, deeper for dark */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.5);
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-2: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-pop: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.5),
@@ -351,7 +346,7 @@ input[type='range']::-webkit-slider-thumb {
   border-radius: var(--radius-full);
   background: var(--accent);
   border: 2px solid var(--bg-elevated);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-1);
   transition: background var(--dur) var(--ease);
 }
 
@@ -371,7 +366,7 @@ input[type='range']::-moz-range-thumb {
   border-radius: var(--radius-full);
   background: var(--accent);
   border: 2px solid var(--bg-elevated);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-1);
 }
 
 input[type='range']:hover::-moz-range-thumb {

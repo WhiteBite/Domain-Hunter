@@ -1,5 +1,5 @@
 /**
- * Domain Hunter MCP server — exposes the five CLI commands as MCP tools.
+ * Domain Hunter MCP server — exposes the CLI commands as MCP tools.
  *
  * Mirrors cli/main.ts: installStorage() runs FIRST (before any module that
  * touches localStorage), then core is loaded via dynamic import. The five
@@ -16,7 +16,6 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { installStorage } from '../shims/storage.js';
-import type { CliRates } from '../contract.js';
 
 // ---- version (same technique as cli/main.ts) ----
 
@@ -41,20 +40,6 @@ const ratesSchema = z
     EUR: z.number().positive().optional(),
   })
   .optional();
-
-type RatesInput = { RUB?: number; EUR?: number } | undefined;
-
-/**
- * Map the optional rates shape to CliRates, mirroring cli/main.ts parseRates:
- * when at least one rate is provided, the missing one falls back to the same
- * defaults the CLI uses (RUB 97, EUR 0.92). core.ts buildSettings applies its
- * own DEFAULT_SETTINGS fallback on top, so this is purely for type alignment.
- */
-function toCliRates(rates: RatesInput): CliRates | undefined {
-  if (rates == null) return undefined;
-  if (rates.RUB == null && rates.EUR == null) return undefined;
-  return { RUB: rates.RUB ?? 97, EUR: rates.EUR ?? 0.92 };
-}
 
 /** Build a text-only CallToolResult. */
 function textResult(text: string, isError = false): CallToolResult {
@@ -109,7 +94,7 @@ async function main(): Promise<void> {
           domains: args.domains,
           tlds: args.tlds,
           currency: args.currency,
-          rates: toCliRates(args.rates),
+          rates: args.rates,
           ignoreCache: args.ignoreCache,
           withPrices: args.withPrices,
           cacheTtlHours: args.cacheTtlHours,
@@ -144,7 +129,7 @@ async function main(): Promise<void> {
           tlds: args.tlds,
           query: args.query,
           currency: args.currency,
-          rates: toCliRates(args.rates),
+          rates: args.rates,
         });
         return textResult(JSON.stringify(outcome, null, 2));
       } catch (err) {
@@ -220,7 +205,7 @@ async function main(): Promise<void> {
           seedName: args.seedName,
           budget: args.budget,
           currency: args.currency,
-          rates: toCliRates(args.rates),
+          rates: args.rates,
           tlds: args.tlds,
           maxChecks: args.maxChecks,
         });
@@ -249,6 +234,62 @@ async function main(): Promise<void> {
       try {
         const outcome = await core.runTldsCommand({
           infra: args.infra,
+        });
+        return textResult(JSON.stringify(outcome, null, 2));
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  // ---- list_drops ----
+  server.registerTool(
+    'list_drops',
+    {
+      title: 'List dropped domains',
+      description:
+        'List recently dropped domains from the bundled daily snapshot ' +
+        '(registration price only, no aftermarket). Filter by name substring ' +
+        'and/or a single TLD; limit caps the output size (default 200, max 2000).',
+      inputSchema: {
+        query: z.string().optional(),
+        tld: z.string().optional(),
+        limit: z.number().int().min(1).max(2000).optional(),
+      },
+    },
+    async (args) => {
+      try {
+        const outcome = core.runDropsCommand({
+          query: args.query,
+          tld: args.tld,
+          limit: args.limit,
+        });
+        return textResult(JSON.stringify(outcome, null, 2));
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  // ---- price_trends ----
+  server.registerTool(
+    'price_trends',
+    {
+      title: 'Get TLD price trends',
+      description:
+        'Six-month price trend per TLD (percent change and direction) ' +
+        'precomputed weekly from the CI price history. Filter by exact TLDs ' +
+        'and/or substring.',
+      inputSchema: {
+        tlds: z.array(z.string()).optional(),
+        query: z.string().optional(),
+      },
+    },
+    async (args) => {
+      try {
+        const outcome = core.runPriceTrendsCommand({
+          tlds: args.tlds,
+          query: args.query,
         });
         return textResult(JSON.stringify(outcome, null, 2));
       } catch (err) {

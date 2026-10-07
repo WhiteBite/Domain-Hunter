@@ -51,6 +51,7 @@ export function distUrl(hash?: string): string {
  * was in localStorage). Use openApp() with a seed for pre-boot state.
  */
 export async function setupPage(page: Page): Promise<void> {
+  await page.route(/^https:\/\/open\.er-api\.com\//, (route) => route.abort('failed'));
   await page.goto(distUrl());
   await page.waitForSelector('[data-testid="app-shell"]', { timeout: 10_000 });
   await clearDhStorage(page);
@@ -65,6 +66,7 @@ export async function setupPage(page: Page): Promise<void> {
  * ensuring deterministic state. The seed keys must be full localStorage key
  * names (e.g. 'dh:v1:settings', 'dh:v1:cache').
  *
+ * Default-seeds a fresh dh:v1:fx so the boot-time FX refresh stays offline.
  * Note: addInitScript is cumulative — calling openApp() multiple times stacks
  * scripts, but each clears + re-seeds, so the last call's seed wins.
  */
@@ -73,6 +75,13 @@ export async function openApp(
   opts?: { hash?: string; seed?: Record<string, unknown> },
 ): Promise<void> {
   const seed = opts?.seed ?? {};
+  const seeded: Record<string, unknown> =
+    'dh:v1:fx' in seed
+      ? seed
+      : {
+          'dh:v1:fx': { rates: { RUB: 83.49, EUR: 0.8888 }, fetchedAt: Date.now() },
+          ...seed,
+        };
   // addInitScript runs before any page script on every navigation.
   // The function is stringified, so it cannot close over outer variables —
   // the seed is passed as the `arg` parameter (structured-cloned).
@@ -86,7 +95,7 @@ export async function openApp(
     for (const [key, value] of Object.entries(s)) {
       localStorage.setItem(key, JSON.stringify(value));
     }
-  }, seed);
+  }, seeded);
 
   await page.goto(distUrl(opts?.hash));
   await page.waitForSelector('[data-testid="app-shell"]', { timeout: 10_000 });

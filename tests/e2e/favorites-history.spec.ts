@@ -296,6 +296,36 @@ test.describe('Favorites, search, multi-select, history, panel', () => {
     await expect(page.locator('[data-testid="history-clear"]')).toBeHidden();
   });
 
+  test('history drawer opens via toggle and closes via button, scrim, and Escape', async ({
+    page,
+  }) => {
+    await assertNoLeaks(page);
+    await mockBootstrap(page, ianaBootstrap());
+    await mockPricing(page, porkbunPricing().pricing, cloudflarePricing());
+    await bootCheckTab(page);
+
+    const drawer = page.locator('[data-testid="check-history-drawer"]');
+    const toggle = page.locator('[data-testid="check-history-toggle"]');
+
+    await toggle.click();
+    await expect(drawer).toBeVisible();
+    await expect(drawer).toHaveAttribute('role', 'dialog');
+    await expect(drawer).toHaveAttribute('aria-modal', 'true');
+
+    await page.locator('[data-testid="check-history-drawer-close"]').click();
+    await expect(drawer).toBeHidden();
+
+    await toggle.click();
+    await expect(drawer).toBeVisible();
+    await page.locator('[data-testid="check-history-drawer-scrim"]').click();
+    await expect(drawer).toBeHidden();
+
+    await toggle.click();
+    await expect(drawer).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(drawer).toBeHidden();
+  });
+
   test('panel toggle collapses and expands the input column', async ({ page }) => {
     await assertNoLeaks(page);
     await mockBootstrap(page, ianaBootstrap());

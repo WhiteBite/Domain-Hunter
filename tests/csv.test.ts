@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resultsToCsvRows, buildCsv, resultsToExportRows, toCsv, toTsv, toMarkdown, buyUrlFor, resultsToJson } from '../src/ui/csv';
+import { resultsToCsvRows, buildCsv, resultsToExportRows, toCsv, toTsv, toMarkdown, toSimpleCsv, buyUrlFor, resultsToJson } from '../src/ui/csv';
 import type { ExportRow } from '../src/ui/csv';
 import type { CheckResult, PricingTable, Settings } from '../src/types';
 import { DEFAULT_SETTINGS } from '../src/types';
@@ -316,5 +316,26 @@ describe('resultsToJson', () => {
     expect(row?.priceFirstYearCents).toBeNull();
     expect(row?.priceTcoCents).toBeNull();
     expect(row?.buyUrl).toBe('');
+  });
+});
+
+describe('toSimpleCsv', () => {
+  it('starts with BOM and uses CRLF endings', () => {
+    const csv = toSimpleCsv([['a.com', 'com']], ['Domain', 'TLD']);
+    expect(csv.charCodeAt(0)).toBe(0xfeff);
+    expect(csv).toContain('\r\n');
+  });
+
+  it('contains header row and data rows', () => {
+    const csv = toSimpleCsv([['a.com', 'com'], ['b.dev', 'dev']], ['Domain', 'TLD']);
+    expect(csv).toContain('Domain,TLD');
+    expect(csv).toContain('a.com,com');
+    expect(csv).toContain('b.dev,dev');
+  });
+
+  it('quotes fields containing commas or double-quotes', () => {
+    const csv = toSimpleCsv([['a,b.com', 'x"y']], ['A', 'B']);
+    expect(csv).toContain('"a,b.com"');
+    expect(csv).toContain('"x""y"');
   });
 });

@@ -51,7 +51,7 @@ Domain Hunter обращается к **RDAP**-эндпоинтам реестр
 
 ## Социальные сети
 
-**Вкладка Social** проверяет доступность никнеймов на крупных платформах (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram), чтобы вы могли занять одинаковый handle везде.
+**Вкладка Social** проверяет никнеймы вживую на GitHub и TikTok; X, YouTube, Instagram и Reddit показывают честный «неизвестно» со ссылкой на профиль (их API блокируют анонимные запросы из браузера — их покрывает опциональный собственный CORS-прокси в Настройках).
 
 ## Экспорт, шаринг и организация
 
@@ -118,7 +118,7 @@ npm install && npm run build:cli
 node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
 
 # Цены регистраторов для конкретных зон
-node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB
 
 # Сгенерировать кандидатов (офлайн-безопасно: combinator, syllables, mutations, themes)
 node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
@@ -259,7 +259,7 @@ WHOIS возвращает неструктурированный текст —
 @software{domain_hunter_2026,
   author = {WhiteBite},
   title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
-  version = {2.0.0},
+  version = {2.1.0},
   year = {2026},
   url = {https://github.com/WhiteBite/Domain-Hunter},
   license = {MIT}

@@ -6,6 +6,8 @@
   import { get } from 'svelte/store';
   import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
+  import { healthNote, type HealthEntry } from '../health';
+  import { newZones } from '../zones-tracker';
   import IconChevron from './icons/IconChevron.svelte';
   import IconCheck from './icons/IconCheck.svelte';
 
@@ -13,7 +15,7 @@
 
   let search = $state('');
   let activePreset = $state<Preset | null>(null);
-  let health = $state<Record<string, { ok?: boolean }>>({});
+  let health = $state<Record<string, HealthEntry>>({});
   let popoverOpen = $state(false);
   let popoverEl: HTMLDivElement | null = $state(null);
   let triggerEl: HTMLButtonElement | null = $state(null);
@@ -71,7 +73,7 @@
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         if (json && typeof json === 'object' && (json as { tlds?: unknown }).tlds) {
-          health = (json as { tlds: Record<string, { ok?: boolean }> }).tlds;
+          health = (json as { tlds: Record<string, HealthEntry> }).tlds;
         }
       })
       .catch(() => {});
@@ -80,6 +82,17 @@
   function isUnstable(tld: string): boolean {
     const h = health[tld];
     return h != null && h.ok === false;
+  }
+
+  function isIndirect(tld: string): boolean {
+    return healthNote(health[tld]) === 'indirect';
+  }
+
+  function chipNote(tld: string): string | undefined {
+    const note = healthNote(health[tld]);
+    if (note === 'unverified') return t('check.tlds.unstable');
+    if (note === 'indirect') return t('tld.health.indirect');
+    return undefined;
   }
 
   const allTlds = $derived.by(() => {
@@ -144,6 +157,14 @@
     }
   }
 
+  function addNewZones(): void {
+    const fresh = get(newZones);
+    if (fresh.length === 0) return;
+    const current = get(selectedTlds);
+    selectedTlds.set([...current, ...fresh.filter((t) => !current.includes(t))]);
+    newZones.set([]);
+  }
+
   function applyPreset(p: Preset): void {
     activePreset = activePreset === p ? null : p;
     if (activePreset === 'popular') {
@@ -206,6 +227,17 @@
       <span class="trigger-label">{t('check.tlds.title')}</span>
       <span class="trigger-count nums" data-testid="tld-selected-count" aria-live="polite">{$selectedTlds.length}</span>
     </button>
+
+    {#if $newZones.length > 0}
+      <button
+        class="new-zones"
+        type="button"
+        onclick={addNewZones}
+        title={t('tld.newZones.hint')}
+        aria-label={t('tld.newZones.aria', { n: $newZones.length })}
+        data-testid="tld-new-zones"
+      >+{$newZones.length}</button>
+    {/if}
 
     {#if $selectedTlds.length > 0}
       <button
@@ -295,11 +327,7 @@
               type="button"
               data-testid={`tld-chip-${cfg.tld}`}
               title={
-                flags?.reputationNote
-                  ? t('check.tlds.spamNote')
-                  : isUnstable(cfg.tld)
-                    ? t('check.tlds.unstable')
-                    : undefined
+                flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
               }
             >
               <span class="zone-check" aria-hidden="true">
@@ -310,11 +338,16 @@
               <span class="tld">.{cfg.tld}</span>
               {#if isUnstable(cfg.tld)}
                 <span class="dot-unstable" aria-hidden="true"></span>
+              {:else if isIndirect(cfg.tld)}
+                <span class="dot-indirect" aria-hidden="true"></span>
               {/if}
               {#if price}
                 <span class="price nums">{price}</span>
               {:else}
                 <span class="price price-none" aria-hidden="true">—</span>
+              {/if}
+              {#if $newZones.includes(cfg.tld)}
+                <span class="flag new" title={t('tld.newZones.hint')}>{t('check.tlds.newFlag')}</span>
               {/if}
               {#if flags?.experimental}
                 <span class="flag experimental" title={t('check.tlds.experimental')}>{t('check.tlds.experimental')}</span>
@@ -355,11 +388,7 @@
                     type="button"
                     data-testid={`tld-chip-${cfg.tld}`}
                     title={
-                      flags?.reputationNote
-                        ? t('check.tlds.spamNote')
-                        : isUnstable(cfg.tld)
-                          ? t('check.tlds.unstable')
-                          : undefined
+                      flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
                     }
                   >
                     <span class="zone-check" aria-hidden="true">
@@ -370,6 +399,8 @@
                     <span class="tld">.{cfg.tld}</span>
                     {#if isUnstable(cfg.tld)}
                       <span class="dot-unstable" aria-hidden="true"></span>
+                    {:else if isIndirect(cfg.tld)}
+                      <span class="dot-indirect" aria-hidden="true"></span>
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
@@ -418,11 +449,7 @@
                     type="button"
                     data-testid={`tld-chip-${cfg.tld}`}
                     title={
-                      flags?.reputationNote
-                        ? t('check.tlds.spamNote')
-                        : isUnstable(cfg.tld)
-                          ? t('check.tlds.unstable')
-                          : undefined
+                      flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
                     }
                   >
                     <span class="zone-check" aria-hidden="true">
@@ -433,6 +460,8 @@
                     <span class="tld">.{cfg.tld}</span>
                     {#if isUnstable(cfg.tld)}
                       <span class="dot-unstable" aria-hidden="true"></span>
+                    {:else if isIndirect(cfg.tld)}
+                      <span class="dot-indirect" aria-hidden="true"></span>
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
@@ -481,11 +510,7 @@
                     type="button"
                     data-testid={`tld-chip-${cfg.tld}`}
                     title={
-                      flags?.reputationNote
-                        ? t('check.tlds.spamNote')
-                        : isUnstable(cfg.tld)
-                          ? t('check.tlds.unstable')
-                          : undefined
+                      flags?.reputationNote ? t('check.tlds.spamNote') : chipNote(cfg.tld)
                     }
                   >
                     <span class="zone-check" aria-hidden="true">
@@ -496,11 +521,16 @@
                     <span class="tld">.{cfg.tld}</span>
                     {#if isUnstable(cfg.tld)}
                       <span class="dot-unstable" aria-hidden="true"></span>
+                    {:else if isIndirect(cfg.tld)}
+                      <span class="dot-indirect" aria-hidden="true"></span>
                     {/if}
                     {#if price}
                       <span class="price nums">{price}</span>
                     {:else}
                       <span class="price price-none" aria-hidden="true">—</span>
+                    {/if}
+                    {#if $newZones.includes(cfg.tld)}
+                      <span class="flag new" title={t('tld.newZones.hint')}>{t('check.tlds.newFlag')}</span>
                     {/if}
                     {#if flags?.experimental}
                       <span class="flag experimental" title={t('check.tlds.experimental')}>{t('check.tlds.experimental')}</span>
@@ -650,7 +680,7 @@
     border: 1px solid var(--border);
     background: var(--bg-elevated);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-pop);
     z-index: 101;
   }
 
@@ -844,11 +874,37 @@
     background: var(--amber-soft);
     color: var(--amber);
   }
+  .flag.new {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+  }
+  .new-zones {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent-text);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+  }
   .dot-unstable {
     width: 6px;
     height: 6px;
     border-radius: 50%;
     background: var(--amber);
+    display: inline-block;
+    flex: none;
+  }
+  .dot-indirect {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-quaternary);
     display: inline-block;
     flex: none;
   }

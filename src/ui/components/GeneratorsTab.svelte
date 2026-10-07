@@ -8,6 +8,10 @@
   import { mixSyllables } from '../../generators/syllables';
   import { findHacks } from '../../generators/hacks';
   import { mutate } from '../../generators/mutations';
+  import { scoreWord } from '../../generators/pronounceability';
+  import { createEngine, type EngineHandle } from '../../core/engine';
+  import { normalizeDomainInput, parseCandidate } from '../../core/idn';
+  import type { CheckStatus } from '../../types';
   import { themes } from '../../generators/themes';
   import { favorites, toggleFavorite } from '../favorites';
   import { popover } from '../popover';
@@ -58,7 +62,66 @@
   }
   let candidates = $derived($genCandidates);
   let trayFilter = $state('');
-  let traySort = $state<'added' | 'az'>('added');
+  let traySort = $state<'added' | 'az' | 'score'>('added');
+
+  const scoreCache = new Map<string, number>();
+  function candScore(n: string): number {
+    let s = scoreCache.get(n);
+    if (s == null) {
+      s = scoreWord(n);
+      scoreCache.set(n, s);
+    }
+    return s;
+  }
+  function scoreLabel(n: string): string {
+    const s = candScore(n);
+    return Number.isFinite(s) ? s.toFixed(1) : '-';
+  }
+
+  // ---- Expandable candidate detail + lazy per-zone preview ----
+  let expandedCand = $state<string | null>(null);
+  let previews = $state<
+    Record<string, { loading: boolean; rows: { domain: string; status: CheckStatus }[] }>
+  >({});
+
+  function toggleCand(name: string): void {
+    expandedCand = expandedCand === name ? null : name;
+  }
+
+  async function runPreview(name: string): Promise<void> {
+    if (previews[name]?.loading) return;
+    previews = { ...previews, [name]: { loading: true, rows: [] } };
+    const parsed = normalizeDomainInput(name);
+    const cands: string[] = [];
+    for (const n of parsed.names) cands.push(...parseCandidate(n, get(selectedTlds)));
+    const unique = [...new Set(cands)].slice(0, 20);
+    const rows: { domain: string; status: CheckStatus }[] = [];
+    let engine: EngineHandle | null = null;
+    try {
+      await new Promise<void>((resolve) => {
+        engine = createEngine((event) => {
+          if (event.type === 'result') {
+            rows.push({ domain: event.result.domain, status: event.result.status });
+          } else if (event.type === 'batch') {
+            for (const r of event.results) rows.push({ domain: r.domain, status: r.status });
+          } else if (event.type === 'finished') {
+            engine?.destroy();
+            engine = null;
+            resolve();
+          }
+        });
+        engine.start(unique, {
+          registry: get(registry),
+          concurrency: 2,
+          fetchTimeoutMs: 10000,
+          maxRetries: 1,
+        });
+      });
+    } catch {
+      // best-effort preview: keep whatever rows arrived
+    }
+    previews = { ...previews, [name]: { loading: false, rows } };
+  }
   let expanded = $state<Record<string, boolean>>({});
   let groupCollapsed = $state<Record<string, boolean>>({});
   let menuOpen = $state(false);
@@ -143,6 +206,9 @@
     const f = trayFilter.trim().toLowerCase();
     let list = f ? candidates.filter((c) => c.n.toLowerCase().includes(f)) : candidates;
     if (traySort === 'az') list = [...list].sort((a, b) => a.n.localeCompare(b.n));
+    else if (traySort === 'score') {
+      list = [...list].sort((a, b) => candScore(b.n) - candScore(a.n) || a.n.localeCompare(b.n));
+    }
     return list;
   });
 
@@ -458,6 +524,7 @@
         <select class="sort" bind:value={traySort} aria-label={t('gen.tray.sort')} data-testid="gen-select-tray-sort">
           <option value="added">{t('gen.tray.sort.added')}</option>
           <option value="az">{t('gen.tray.sort.az')}</option>
+          <option value="score">{t('gen.tray.sort.score')}</option>
         </select>
         <button class="btn primary" type="button" onclick={checkNow} disabled={candidates.length === 0} data-testid="gen-button-check-now">
           {t('gen.output.check')}
@@ -555,6 +622,23 @@
                       </button>
                       <span class="row-name">{cand.n}</span>
                       <span class="row-len nums">{cand.n.length}</span>
+                      <span
+                        class="row-score nums"
+                        title={t('gen.tray.score')}
+                        aria-label={t('gen.tray.score')}
+                        data-testid={`gen-tray-score-${sanitizeId(cand.n)}`}
+                      >{scoreLabel(cand.n)}</span>
+                      <button
+                        class="row-expand"
+                        type="button"
+                        onclick={() => toggleCand(cand.n)}
+                        aria-expanded={expandedCand === cand.n}
+                        aria-label={t('gen.tray.expand.aria', { name: cand.n })}
+                        title={t('gen.tray.expand.aria', { name: cand.n })}
+                        data-testid={`gen-tray-expand-${sanitizeId(cand.n)}`}
+                      >
+                        <IconChevron />
+                      </button>
                       <button
                         class="row-remove"
                         type="button"
@@ -566,6 +650,44 @@
                         <IconX />
                       </button>
                     </div>
+                    {#if expandedCand === cand.n}
+                      <div class="tray-detail" data-testid={`gen-tray-detail-${sanitizeId(cand.n)}`}>
+                        <span class="td-row">
+                          <span class="td-k">{t('gen.tray.detail.source')}</span>
+                          {t(GROUP_LABEL[cand.src])}
+                        </span>
+                        <span class="td-row">
+                          <span class="td-k">{t('drops.col.score')}</span>
+                          <span class="nums">{scoreLabel(cand.n)}</span>
+                        </span>
+                        <button
+                          class="btn sm"
+                          type="button"
+                          onclick={() => void runPreview(cand.n)}
+                          disabled={previews[cand.n]?.loading}
+                          data-testid={`gen-tray-preview-${sanitizeId(cand.n)}`}
+                        >
+                          {previews[cand.n]?.loading
+                            ? t('gen.tray.detail.previewing')
+                            : t('gen.tray.detail.preview')}
+                        </button>
+                        {#if (previews[cand.n]?.rows.length ?? 0) > 0}
+                          <span class="td-chips">
+                            {#each previews[cand.n]?.rows ?? [] as pr (pr.domain)}
+                              <span
+                                class="td-chip"
+                                class:avail={pr.status === 'available' || pr.status === 'probably_available'}
+                                class:taken={pr.status === 'taken'}
+                                data-testid={`gen-tray-pchip-${sanitizeId(pr.domain)}`}
+                              >
+                                <b>.{pr.domain.slice(pr.domain.lastIndexOf('.') + 1)}</b>
+                                {t(`status.${pr.status}`)}
+                              </span>
+                            {/each}
+                          </span>
+                        {/if}
+                      </div>
+                    {/if}
                   {/each}
                   {#if group.items.length > ROWS_PER_GROUP}
                     <button
@@ -617,7 +739,7 @@
     align-items: start;
   }
 
-  @media (max-width: 980px) {
+  @media (max-width: 860px) {
     .grid {
       grid-template-columns: 1fr;
     }
@@ -716,54 +838,9 @@
     width: 100%;
   }
 
+  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
     background: var(--bg);
-    color: var(--text);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: background var(--dur) var(--ease);
-  }
-
-  .btn:hover:not(:disabled) {
-    background: var(--bg-sunken);
-  }
-
-  .btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .btn.primary:hover:not(:disabled) {
-    background: var(--accent-hover);
-  }
-
-  .btn.big {
-    min-height: 44px;
-    padding: 0 var(--space-5);
-    font-weight: 500;
-  }
-
-  .btn.ghost {
-    background: transparent;
-  }
-
-  .btn.sm {
-    min-height: 32px;
-    padding: 0 var(--space-3);
-    font-size: var(--text-xs);
   }
 
   .btn.danger {
@@ -971,7 +1048,7 @@
     border: 1px solid var(--border);
     background: var(--bg-elevated);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-pop);
     z-index: 50;
     min-width: 220px;
   }
@@ -1149,7 +1226,7 @@
     flex: 0 1 auto;
     min-width: 0;
     margin-left: var(--space-2);
-    font-family: var(--font-mono, ui-monospace, Consolas, monospace);
+    font-family: var(--font-mono);
     font-size: var(--text-sm);
     color: var(--text);
     user-select: text;
@@ -1163,6 +1240,94 @@
     font-size: var(--text-xs);
     flex: none;
     margin-left: var(--space-2);
+  }
+
+  .row-score {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    flex: none;
+    margin-left: var(--space-2);
+    min-width: 3ch;
+    text-align: right;
+  }
+
+  .row-expand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    padding: 0;
+    flex: none;
+    margin-left: var(--space-1);
+  }
+
+  .row-expand:hover {
+    color: var(--text);
+    background: var(--bg-sunken);
+  }
+
+  .row-expand :global(svg) {
+    width: 12px;
+    height: 12px;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .row-expand[aria-expanded='true'] :global(svg) {
+    transform: rotate(180deg);
+  }
+
+  .tray-detail {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    margin: 2px 0 var(--space-1);
+    background: var(--bg-sunken);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .td-row {
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+
+  .td-k {
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  .td-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .td-chip {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: 2px var(--space-2);
+    background: var(--bg-elevated);
+  }
+
+  .td-chip.avail {
+    border-color: var(--green-solid);
+    color: var(--green);
+  }
+
+  .td-chip.taken {
+    opacity: 0.7;
   }
 
   .row-remove {

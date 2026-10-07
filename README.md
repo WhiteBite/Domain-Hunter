@@ -2,7 +2,9 @@
 ## Quickstart
 
 ```bash
-npm install domain-hunter
+git clone https://github.com/WhiteBite/Domain-Hunter.git
+cd Domain-Hunter
+npm install
 npm run dev
 ```
 
@@ -29,14 +31,15 @@ Domain Hunter calls registry **RDAP** endpoints directly from the browser (Veris
 
 Paste up to 3,000 domain names, pick the TLDs you care about, and hit start. Results stream live into a sortable table with status badges, pricing columns, and per-domain buy links. Interrupted runs can be resumed later.
 
-- **148 curated TLD zones** across 18 registry infrastructures (`com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` and more). New gTLDs are discovered automatically via the live IANA RDAP bootstrap. Results stream live into a sortable table with status badges, pricing columns, and per-domain buy links. Interrupted runs can be resumed later. Run history with one-click restore keeps your last search ready after reload.
+- **148 curated TLD zones** across 18 registry infrastructures (`com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` and more). New gTLDs are discovered automatically via the live IANA RDAP bootstrap, and a "+N" chip in the zone picker surfaces zones delegated since your last visit. Results stream live into a sortable table with status badges, pricing columns, and per-domain buy links. Interrupted runs can be resumed later. Run history with one-click restore keeps your last search ready after reload.
 - **Honest three-state results** — `available`, `probably_available`, or `unknown`. For low-trust ccTLDs a 404 is corroborated with DNS-over-HTTPS (Cloudflare + Google DNS) before anything is called available. Domain Hunter never guesses.
+- **RDAP registry card** — every taken domain expands into its registry record: registration and expiry dates, age, registrar, EPP status codes, and nameservers.
 - **Cloudflare RDAP aggregator fallback** — when the primary RDAP fetch fails, `rdap.cloudflare.com/domain/{domain}` is queried once as a transport fallback and as a contradiction cross-check for low-trust zones. A taken domain must never be reported free.
 - **Polite to registries** — per-infrastructure AIMD rate limiting (Google Registry's strict ~1 rps is honored), automatic backoff on HTTP 429 with `Retry-After`, and result caching in `localStorage`.
 
 ## How to compare domain prices across registrars
 
-The **Prices tab** shows a TLD × registrar price matrix with the cheapest cell highlighted, promo-trap flags (renewal ≥ 5× first year), and an exportable CSV. The results table includes a detail row with full **registrar price comparison** and clickable buy/search links for every available domain.
+The **Prices tab** shows a TLD × registrar price matrix with the cheapest cell highlighted, promo-trap flags (renewal ≥ 5× first year), and an exportable CSV. The results table includes a detail row with full **registrar price comparison** and clickable buy/search links for every available domain, plus USPTO/TMview trademark search link-outs.
 
 - **Live prices** from Porkbun and Cloudflare at-cost over an offline snapshot with carry-over, so a flaky source never erases coverage.
 - **Coupons, promo-trap detection**, coupon-aware first-year prices, and 3-year TCO sorting. Prices shown in USD, RUB, or EUR.
@@ -54,15 +57,15 @@ Five generators produce candidates you can check immediately:
 4. **TLD-hacks** — `family` → `fami.ly` style splits using hackable TLDs
 5. **Word mutations** — vowel swaps, consonant shifts, truncation, suffixes
 
-Every candidate collects in a persistent tray that survives tab switches and shows the projected number of checks before you run them.
+Every candidate collects in a persistent tray that survives tab switches and shows the projected number of checks before you run them. Rows expand on demand into technique details and a per-zone availability preview.
 
 ## Dropped domains at registration price
 
-The **Drops tab** scans expired/dropped domains — the bundled snapshot is refreshed weekly from the WhoisFreaks daily dropped-domains feed — and reports those still available at standard registration price, no aftermarket markups. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
+The **Drops tab** scans expired/dropped domains — the bundled snapshot is refreshed daily from the WhoisFreaks dropped-domains feed — and reports those still available at standard registration price, no aftermarket markups. Filter by length, digits, hyphens, and pronounceability; sort by score, price, or length; expand any row for a lazy Wayback Machine history check. Star any domain to add it to your watchlist; the app silently re-checks favorited domains on load and flags freed or taken changes.
 
 ## Social handles
 
-The **Social tab** checks username availability across major platforms (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram) so you can secure a consistent handle everywhere.
+The **Social tab** runs live username checks on GitHub and TikTok; X, YouTube, Instagram, and Reddit show an honest "unknown" plus a profile link (their APIs block anonymous browser checks — an optional self-hosted CORS proxy in Settings covers them).
 
 ## Export, share, and organize
 
@@ -70,7 +73,8 @@ The **Social tab** checks username availability across major platforms (Twitter/
 - **Copy as CSV / Markdown / TSV** — clipboard formats for pasting into spreadsheets, docs, or Notion
 - **Bulk actions for available domains** — copy the list of all available domains, favorite them all at once, or export an available-only CSV
 - **Share links** — `#s=` encodes query + zones and auto-starts the run on open
-- **Favorites with watchlist** — star any domain into a persistent shortlist; freed/taken badges appear on reload
+- **Favorites with watchlist** — star any domain into a persistent shortlist; freed/taken badges appear on reload, and an optional timed re-check (Settings) can raise a browser notification when the watchlist changes
+- **Projects** — group domains into named portfolios with notes and per-project CSV/JSON export
 - **Run history** — recent completed runs are saved locally; click to restore the full search (query, zones, results) in one tap
 - **Last-search restore** — after a page reload the app restores your previous input and zone selection so you can resume instantly
 - **Social checks with GitHub token** — the Social tab supports optional GitHub device-flow authentication for higher-rate username lookups
@@ -129,7 +133,7 @@ This produces `dist-cli/domain-hunter.mjs` (and `dist-cli/mcp-server.mjs` if `cl
 node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
 
 # Per-registrar pricing for specific TLDs
-node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB
 
 # Generate domain name candidates (offline-safe: combinator, syllables, mutations, themes)
 node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
@@ -139,13 +143,29 @@ node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds c
 
 # List loaded TLD zones (curated tlds.json + IANA bootstrap)
 node dist-cli/domain-hunter.mjs tlds --infra verisign
+
+# List dropped domains from the bundled daily snapshot
+node dist-cli/domain-hunter.mjs drops --query brand --tld com --limit 50
+
+# Poll domains until a status flips (exit 10 on flip)
+node dist-cli/domain-hunter.mjs watch mybrand.com --interval 300 --rounds 24
+
+# Human/spreadsheet output instead of JSON
+node dist-cli/domain-hunter.mjs prices --tlds com,io --format table
+
+# Shell completions (bash | zsh | fish)
+node dist-cli/domain-hunter.mjs completions bash
+
+# Optional keyed registrar source (Dynadot; see docs/registrar-keys.md)
+node dist-cli/domain-hunter.mjs keys set dynadot <api-key>
+node dist-cli/domain-hunter.mjs prices --source dynadot --tlds com,io
 ```
 
-Exit codes: `0` success, `1` runtime error, `2` usage error. The result JSON is printed to stdout; `--help` shows all flags.
+Exit codes: `0` success, `1` runtime error, `2` usage error, `10` watch detected a status flip. The result JSON is printed to stdout (`check`/`prices`/`drops` also support `--format table|csv`); `--help` shows all flags.
 
 ### JSON contract
 
-Every command prints a single JSON object to stdout with a `command` field (`check` / `prices` / `generate` / `find` / `tlds`) and command-specific payload. See `cli/contract.ts` for the exact shapes. The `check` outcome includes per-domain `status` (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache`, and optional `price` — the same fields the browser table renders.
+Every command prints a single JSON object to stdout with a `command` field (`check` / `prices` / `generate` / `find` / `tlds` / `drops` / `watch` / `keys`) and command-specific payload. See `cli/contract.ts` for the exact shapes. The `check` outcome includes per-domain `status` (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache`, and optional `price` — the same fields the browser table renders.
 
 ### Fresh config snapshots
 
@@ -153,7 +173,7 @@ The CLI fetches fresh `tlds.json` and `pricing.snapshot.json` from the `main` br
 
 ### MCP server
 
-An MCP (Model Context Protocol) server exposes the five commands as tools so AI agents can call them directly:
+An MCP (Model Context Protocol) server exposes the core commands as tools (`check_availability`, `get_prices`, `generate_names`, `find_domains`, `list_zones`, `list_drops`, `price_trends`) so AI agents can call them directly:
 
 ```jsonc
 // Claude / opencode-style config
@@ -278,7 +298,7 @@ If you reference Domain Hunter in academic or technical work, please use the met
 @software{domain_hunter_2026,
   author = {WhiteBite},
   title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
-  version = {2.0.0},
+  version = {2.1.0},
   year = {2026},
   url = {https://github.com/WhiteBite/Domain-Hunter},
   license = {MIT}
@@ -297,22 +317,26 @@ If Domain Hunter saved you time, a ⭐ helps others find it too.
 
 ## Use cases
 
-<!-- TODO: 3-7 concrete use cases -->
+- **Validate a shortlist before buying** — paste up to 3,000 names across 148 TLDs, stream results live, and export the available ones with prices and 3-year TCO.
+- **Drop-catching** — scan the daily dropped-domains snapshot at registration price, star candidates, and get freed/taken flags on reload.
+- **Avoid promo traps** — compare first-year, renewal, and 3-year TCO across 42 registrars before committing to a "$0.99 first year" deal.
+- **Brand brainstorming** — five generators (combinator, syllable mixer, thematic sets, TLD-hacks, mutations) collect checkable candidates in one tray.
+- **Automation** — the CLI and MCP server expose the same engine with a stable JSON contract for scripts and AI agents.
 
 ## Why choose this
 
-<!-- TODO: 2-4 differentiators, with numbers -->
+- **One self-contained HTML file** — the whole app compiles into a single `dist/index.html` that works offline from `file://`: no server, no API keys, no tracking.
+- **Installable (PWA)** — the hosted build ships a web app manifest and an offline service worker, so it installs to your desktop/home screen and keeps working without a network.
+- **Honest results** — a three-state model (`available` / `probably_available` / `unknown`): low-trust zones are corroborated via DoH before anything is called free, because a wrong "available" is worse than "unknown".
+- **148 zones, 18 registries** — live registrar prices, promo-trap flags, and 3-year TCO with zero paid APIs.
+- **Tested** — 4,640 unit tests plus 155 Playwright E2E, 8 UI languages, MIT license.
 
 ## Examples
 
-### Example (replace with a real one)
-
 ```bash
-npm run dev
-```
+# Check domains with live prices (after npm run build:cli)
+node dist-cli/domain-hunter.mjs check acme-nova.com --tlds com,io,dev --prices
 
-### Example (replace with a real one)
-
-```bash
-npm run dev
+# Generate and check name candidates within a budget
+node dist-cli/domain-hunter.mjs find mybrand --budget 15 --tlds com,io,dev
 ```

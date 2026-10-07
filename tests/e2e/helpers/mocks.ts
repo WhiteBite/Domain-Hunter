@@ -12,6 +12,7 @@
  *   7. GitHub — api.github.com/user (auth) + api.github.com/users/{n} (social)
  *   8. TikTok oembed — www.tiktok.com/oembed (social)
  *   9. Social profile links — github.com, x.com, youtube.com, instagram.com, reddit.com
+ *  10. FX rates — GET open.er-api.com/v6/latest/USD
  *
  * Route precedence: Playwright matches routes in registration order (first
  * registered = first checked). assertNoNetworkLeaks() registers a catch-all
@@ -80,7 +81,7 @@ export interface RdapRule {
   domain: string;
   response: {
     status: 200 | 404 | 429 | 500 | 503;
-    body?: Record<string, unknown>;
+    body?: object;
     headers?: Record<string, string>;
   };
 }
@@ -261,6 +262,26 @@ export async function mockCloudflareRdap(page: Page): Promise<void> {
   });
 }
 
+// ---- mockFx ----
+
+/**
+ * Route the er-api FX endpoint. null → abort (offline default so the boot-time
+ * stale-refresh never reaches the network). Non-null → fulfill with the JSON.
+ */
+export async function mockFx(page: Page, body: unknown): Promise<void> {
+  await page.route(/^https:\/\/open\.er-api\.com\/v6\/latest\//, async (route: Route) => {
+    if (body === null) {
+      await route.abort('failed');
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  });
+}
+
 // ---- mockDigMyName ----
 
 export interface DigMyNameRule {
@@ -322,12 +343,15 @@ export interface MockAllOpts {
   porkbun?: Record<string, unknown> | null;
   cloudflare?: Record<string, unknown> | null;
   digmyname?: DigMyNameRule[];
+  /** null (default) → abort; a payload → fulfill (er-api FX shape). */
+  fx?: unknown;
 }
 
 /** Register all specified mocks in one call. Skip any endpoint not in opts. */
 export async function mockAll(page: Page, opts: MockAllOpts): Promise<void> {
   if (opts.rdap) await mockRdap(page, opts.rdap);
   await mockCloudflareRdap(page);
+  await mockFx(page, opts.fx ?? null);
   if (opts.doh) await mockDoh(page, opts.doh);
   if (opts.bootstrap !== undefined) await mockBootstrap(page, opts.bootstrap);
   if (opts.porkbun !== undefined) await mockPorkbun(page, opts.porkbun);
@@ -369,6 +393,9 @@ function buildAllowlist(): RegExp[] {
   // Porkbun pricing
   patterns.push(/^https:\/\/api\.porkbun\.com\/api\/json\/v3\/pricing\/get/);
 
+  // FX rates (er-api)
+  patterns.push(/^https:\/\/open\.er-api\.com\/v6\/latest\//);
+
   // Cloudflare pricing
   patterns.push(/^https:\/\/cfdomainpricing\.com\/prices\.json/);
 
@@ -377,6 +404,10 @@ function buildAllowlist(): RegExp[] {
 
   // DigMyName
   patterns.push(/^https:\/\/api\.digmyname\.com\/functions\/v1\/public-api\/check/);
+
+  // Wayback availability signal (lazy fetch on drops row expand, SPEC §13)
+  patterns.push(/^https:\/\/archive\.org\/wayback\/available/);
+  patterns.push(/^https:\/\/web\.archive\.org\//);
 
   // GitHub (auth + social + profile links)
   patterns.push(/^https:\/\/api\.github\.com\//);

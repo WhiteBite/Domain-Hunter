@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { CheckResult, PriceEntry, Settings } from '../../types';
+  import type { RegistrarQuote } from '../registrar-quotes';
+  import { trademarkLabel, usptoSearchUrl, tmviewSearchUrl } from '../trademark';
   import { formatPrice } from '../../pricing/pricing';
   import { settings } from '../store';
   import { t } from '../../i18n';
@@ -15,15 +17,6 @@
     renewal: number | null;
   }
 
-  export interface RegistrarQuote {
-    id: string;
-    name: string;
-    reg: number;
-    renew: number | null;
-    url: string;
-    hasDeepLink: boolean;
-  }
-
   interface Props {
     sid: string;
     row: RowData;
@@ -36,6 +29,18 @@
   let { sid, row, isAvail, isErr, detail, quotes, premiumOverride }: Props = $props();
 
   const s: Settings = $derived($settings);
+  const tmLabel = $derived(trademarkLabel(row.result.domain));
+
+  function fmtDate(ms: number): string {
+    return new Date(ms).toISOString().slice(0, 10);
+  }
+
+  function ageLabel(registeredAt: number): string {
+    const days = Math.max(0, Math.floor((Date.now() - registeredAt) / 86_400_000));
+    return days < 365
+      ? t('card.age.days', { n: days })
+      : t('card.age.years', { n: (days / 365.25).toFixed(1) });
+  }
 </script>
 
 <tr
@@ -138,7 +143,72 @@
             </div>
           {/if}
         {/if}
+        <span class="detail-trademark">
+          <a
+            href={usptoSearchUrl(tmLabel)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t('results.detail.tm.hint')}
+            data-testid={`results-row-tm-uspto-${sid}`}
+          >{t('results.detail.tm.uspto')}</a>
+          <a
+            href={tmviewSearchUrl(tmLabel)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t('results.detail.tm.hint')}
+            data-testid={`results-row-tm-tmview-${sid}`}
+          >{t('results.detail.tm.tmview')}</a>
+        </span>
       </div>
+      {#if row.result.card}
+        {@const card = row.result.card}
+        <div class="detail-col detail-card" data-testid={`results-row-card-${sid}`}>
+          <span class="detail-label">{t('card.title')}</span>
+          <div class="card-grid">
+            {#if card.registrar}
+              <div class="detail-cell">
+                <span class="card-k">{t('card.registrar')}</span>
+                <span class="detail-value">{card.registrar}</span>
+              </div>
+            {/if}
+            {#if card.registeredAt != null}
+              <div class="detail-cell">
+                <span class="card-k">{t('card.registered')}</span>
+                <span class="detail-value nums">{fmtDate(card.registeredAt)} · {ageLabel(card.registeredAt)}</span>
+              </div>
+            {/if}
+            {#if card.expiresAt != null}
+              <div class="detail-cell">
+                <span class="card-k">{t('card.expires')}</span>
+                <span class="detail-value nums">{fmtDate(card.expiresAt)}</span>
+              </div>
+            {/if}
+            {#if card.changedAt != null}
+              <div class="detail-cell">
+                <span class="card-k">{t('card.changed')}</span>
+                <span class="detail-value nums">{fmtDate(card.changedAt)}</span>
+              </div>
+            {/if}
+          </div>
+          {#if card.statuses.length > 0}
+            <div class="card-statuses" role="list" aria-label={t('card.statuses.aria')}>
+              {#each card.statuses as st (st)}
+                <span class="chip-tag" role="listitem">{st}</span>
+              {/each}
+            </div>
+          {/if}
+          {#if card.nameservers.length > 0}
+            <div class="card-ns">
+              <span class="card-k">{t('card.ns')}</span>
+              <span class="nums"
+                >{card.nameservers.slice(0, 4).join(', ')}{card.nameservers.length > 4
+                  ? ` +${card.nameservers.length - 4}`
+                  : ''}</span
+              >
+            </div>
+          {/if}
+        </div>
+      {/if}
     </div>
   </td>
 </tr>
@@ -285,6 +355,50 @@
   .detail-buy:hover {
     background: var(--bg-overlay);
     text-decoration: none;
+  }
+
+  .detail-card {
+    max-width: 340px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    gap: 2px var(--space-2);
+    align-items: baseline;
+  }
+
+  .card-k {
+    color: var(--text-tertiary);
+  }
+
+  .card-statuses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .card-ns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    color: var(--text-secondary);
+  }
+
+  .detail-trademark {
+    display: flex;
+    gap: var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .detail-trademark a {
+    color: var(--accent-text);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--border-strong);
+  }
+
+  .detail-trademark a:hover {
+    border-bottom-color: var(--accent);
   }
   /* Shared .chip-tag (+ .premium variant) lives in src/ui/chrome.css. */
 

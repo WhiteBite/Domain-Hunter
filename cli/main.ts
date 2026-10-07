@@ -15,6 +15,9 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { installStorage } from './shims/storage.js';
+import { formatOutcome, isOutputFormat, type OutputFormat } from './format.js';
+import { completionScript, isCompletionShell } from './completions.js';
+import { isKeyRegistrar } from './keys.js';
 import type {
   CliCurrency,
   CliRates,
@@ -32,10 +35,15 @@ Commands:
   generate <generator>     Generate domain name candidates
   find <seed>              Find available domains within budget
   tlds                     List loaded TLD zones (curated + IANA bootstrap)
+  drops                    List dropped domains from the bundled daily snapshot
+  watch <domain...>        Poll domains until a status flips (exit 10 on flip)
+  completions <shell>      Print shell completions (bash | zsh | fish)
+  keys                     Manage registrar API keys (set | list | remove)
 
 Global flags:
   --help, -h               Show this help
   --version, -v            Show version
+  --format json|table|csv  Output format for check/prices/drops (default: json)
 
 check options:
   <domain...>              One or more domain names or bare labels (max 3000)
@@ -43,14 +51,15 @@ check options:
   --prices                 Attach pricing info to available domains
   --no-cache                Skip the result cache
   --currency USD|RUB|EUR   Display currency for formatted prices (default: USD)
-  --rate-rub N              RUB units per 1 USD (default: 97)
-  --rate-eur N              EUR units per 1 USD (default: 0.92)
+  --rate-rub N              RUB units per 1 USD (default: live FX, 7d cache)
+  --rate-eur N              EUR units per 1 USD (default: live FX, 7d cache)
 
 prices options:
   --tlds a,b,c             Filter to specific TLDs
   --query substring        Filter TLDs by substring
   --currency USD|RUB|EUR   Display currency
   --rate-rub N, --rate-eur N
+  --source dynadot         Merge live prices from a keyed registrar source
 
 generate options:
   <generator>              combinator | syllables | hacks | mutations | themes
@@ -74,7 +83,25 @@ tlds options:
   --infra <id>             Filter to a specific infrastructure (e.g. verisign)
   --json                   Output JSON instead of human-readable lines
 
-Output: JSON on stdout, progress on stderr. Exit: 0 success, 1 error/abort, 2 usage.
+drops options:
+  --query substring        Filter by name substring
+  --tld com                Filter to one TLD
+  --limit N                Max domains to output (default: 200, max: 2000)
+
+watch options:
+  <domain...>              Domains or bare labels to poll (same as check)
+  --tlds a,b,c             TLDs to expand bare labels over
+  --interval N             Poll interval in seconds (default: 300, min: 5)
+  --rounds N               Max polling rounds (default: unlimited)
+  --prices                 Attach pricing info to results
+
+keys options:
+  keys set <registrar> <key>   Store an API key (supported: dynadot)
+  keys list                    Show stored registrars (keys masked)
+  keys remove <registrar>      Delete a stored key
+
+Output: JSON on stdout, progress on stderr.
+Exit: 0 success, 1 error/abort, 2 usage, 10 watch flip detected.
 Ctrl+C during a check aborts gracefully, writes partial JSON, exits 1.`;
 
 // ---- arg parsing (zero-dependency) ----
@@ -143,14 +170,21 @@ function parseMode(
   process.exit(2);
 }
 
-function parseRates(flags: Record<string, string | true>): CliRates | undefined {
+function parseFormat(value: string | true | undefined): OutputFormat {
+  if (value == null || value === true) return 'json';
+  if (isOutputFormat(value)) return value;
+  process.stderr.write(`Error: invalid format '${value}' (expected json, table, or csv)\n`);
+  process.exit(2);
+}
+
+function parseRates(flags: Record<string, string | true>): Partial<CliRates> | undefined {
   const rub = parseNumber(flags['rate-rub']);
   const eur = parseNumber(flags['rate-eur']);
   if (rub == null && eur == null) return undefined;
-  return {
-    RUB: rub ?? 97,
-    EUR: eur ?? 0.92,
-  };
+  const partial: Partial<CliRates> = {};
+  if (rub != null) partial.RUB = rub;
+  if (eur != null) partial.EUR = eur;
+  return partial;
 }
 
 function isGeneratorName(s: string): s is GenerateCommandOptions['generator'] {
@@ -225,7 +259,7 @@ async function main(): Promise<number> {
           ignoreCache: flags['no-cache'] === true,
           withPrices: flags.prices === true,
         });
-        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        process.stdout.write(formatOutcome(outcome, parseFormat(flags.format)));
         return outcome.aborted ? 1 : 0;
       }
       case 'prices': {
@@ -234,8 +268,9 @@ async function main(): Promise<number> {
           query: parseString(flags.query),
           currency: parseCurrency(flags.currency),
           rates: parseRates(flags),
+          sources: parseCsv(flags.source),
         });
-        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        process.stdout.write(formatOutcome(outcome, parseFormat(flags.format)));
         return 0;
       }
       case 'generate': {
@@ -290,6 +325,65 @@ async function main(): Promise<number> {
           const lines = outcome.tlds.map((z) => `${z.tld} (${z.infra}, ${z.trust})`);
           process.stdout.write(lines.join('\n') + '\n');
         }
+        return 0;
+      }
+      case 'drops': {
+        const outcome = core.runDropsCommand({
+          query: parseString(flags.query),
+          tld: parseString(flags.tld),
+          limit: parseNumber(flags.limit),
+        });
+        process.stdout.write(formatOutcome(outcome, parseFormat(flags.format)));
+        return 0;
+      }
+      case 'watch': {
+        if (positionals.length === 0) {
+          process.stderr.write('Error: watch requires at least one domain\n');
+          return 2;
+        }
+        const outcome = await core.runWatchCommand({
+          domains: positionals,
+          tlds: parseCsv(flags.tlds),
+          currency: parseCurrency(flags.currency),
+          rates: parseRates(flags),
+          withPrices: flags.prices === true,
+          intervalSec: parseNumber(flags.interval),
+          rounds: parseNumber(flags.rounds),
+        });
+        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
+        if (outcome.stopped === 'flip') return 10;
+        return outcome.stopped === 'interrupted' ? 1 : 0;
+      }
+      case 'completions': {
+        const shell = positionals[0];
+        if (!isCompletionShell(shell)) {
+          process.stderr.write(
+            'Error: completions requires a shell (bash, zsh, or fish)\n',
+          );
+          return 2;
+        }
+        process.stdout.write(completionScript(shell));
+        return 0;
+      }
+      case 'keys': {
+        const action = positionals[0];
+        if (action !== 'set' && action !== 'list' && action !== 'remove') {
+          process.stderr.write('Error: keys requires an action (set, list, or remove)\n');
+          return 2;
+        }
+        const registrar = positionals[1];
+        if (action !== 'list' && !isKeyRegistrar(registrar)) {
+          process.stderr.write(
+            `Error: unsupported registrar '${registrar ?? ''}' (supported: dynadot)\n`,
+          );
+          return 2;
+        }
+        if (action === 'set' && !parseString(positionals[2])) {
+          process.stderr.write('Error: keys set requires <registrar> <key>\n');
+          return 2;
+        }
+        const outcome = core.runKeysCommand(action, registrar, parseString(positionals[2]));
+        process.stdout.write(JSON.stringify(outcome, null, 2) + '\n');
         return 0;
       }
       default:

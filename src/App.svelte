@@ -9,6 +9,9 @@
   import { popover } from './ui/popover';
   import { favorites } from './ui/favorites';
   import { refreshWatchlist } from './ui/watchlist';
+  import { startWatchScheduler } from './ui/watch-scheduler';
+  import { initZonesTracker } from './ui/zones-tracker';
+  import { refreshFxIfStale } from './ui/fx';
   import { fetchBootstrap, mergeWithCurated } from './core/bootstrap';
   import type { Locale, Settings } from './types';
   import Flag from './ui/components/Flag.svelte';
@@ -159,11 +162,13 @@
       void (async () => {
         try {
           const json = await fetchBootstrap();
-          if (json == null) return;
-          registry.set(mergeWithCurated(get(registry), json));
+          if (json != null) {
+            registry.set(mergeWithCurated(get(registry), json));
+          }
         } catch (err) {
           console.warn('bootstrap discovery failed', err);
         }
+        initZonesTracker(get(registry).tlds.map((c) => c.tld));
       })();
     };
     const ric = (
@@ -171,13 +176,22 @@
         requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
       }
     ).requestIdleCallback;
+    const runBootTasks = (): void => {
+      runBootstrap();
+      void refreshFxIfStale();
+    };
     if (typeof ric === 'function') {
-      ric(runBootstrap, { timeout: 2000 });
+      ric(runBootTasks, { timeout: 2000 });
     } else {
-      setTimeout(runBootstrap, 500);
+      setTimeout(runBootTasks, 500);
     }
 
-    return watchSystemTheme(() => $settings.theme);
+    const stopTheme = watchSystemTheme(() => $settings.theme);
+    const stopWatch = startWatchScheduler();
+    return () => {
+      stopTheme();
+      stopWatch();
+    };
   });
 
   $effect(() => {

@@ -36,6 +36,12 @@ const FIRST_ROW_TESTID = `results-row-${FIRST_SID}`;
 // RENDER_CAP in DropsTab.svelte — max visible rows.
 const RENDER_CAP = 300;
 
+// Snapshot labels are short (max ~12); count derived at runtime so daily snapshot refreshes don't break it.
+const MINLEN = 12;
+const MINLEN_COUNT = snapshotList.filter(
+  (row) => (row.split(' ')[0] ?? '').length >= MINLEN,
+).length;
+
 // Pick a TLD among the top-20 select options whose count fits under the
 // render cap, so the select-filter test can assert an exact row count.
 const tldCounts = new Map<string, number>();
@@ -55,6 +61,35 @@ async function gotoDrops(page: Page): Promise<void> {
     state: 'visible',
     timeout: 10_000,
   });
+}
+
+async function installBlobSpy(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const w = window as Window & { __csvBytes?: number[] };
+    w.__csvBytes = [];
+    const orig = URL.createObjectURL;
+    URL.createObjectURL = function (blob: Blob | MediaSource): string {
+      if (blob instanceof Blob) {
+        void blob.arrayBuffer().then((buf: ArrayBuffer) => {
+          w.__csvBytes = Array.from(new Uint8Array(buf));
+        });
+      }
+      return orig.call(URL, blob);
+    };
+  });
+}
+
+async function capturedCsv(page: Page): Promise<string> {
+  await page.waitForFunction(
+    () => ((window as Window & { __csvBytes?: number[] }).__csvBytes ?? []).length > 0,
+  );
+  const bytes = await page.evaluate<number[]>(
+    () => (window as Window & { __csvBytes?: number[] }).__csvBytes ?? [],
+  );
+  expect(bytes[0]).toBe(0xef);
+  expect(bytes[1]).toBe(0xbb);
+  expect(bytes[2]).toBe(0xbf);
+  return new TextDecoder().decode(new Uint8Array(bytes));
 }
 
 // ---- Setup / teardown ----
@@ -157,5 +192,157 @@ test.describe('Drops tab', () => {
     await expect(page.locator('[data-testid="check-bar-progress"]')).toBeVisible({
       timeout: 15_000,
     });
+  });
+
+  test('copy list button writes the filtered domains to the clipboard', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-search"]', firstLabel);
+    await page.click('[data-testid="drops-button-copy-list"]');
+    await expect
+      .poll(async () => readClipboard(page), { timeout: 5_000 })
+      .toBe(FIRST_DOMAIN);
+  });
+
+  test('export CSV button downloads a BOM-prefixed CSV of the filtered list', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-search"]', firstLabel);
+    await installBlobSpy(page);
+    await page.click('[data-testid="drops-button-export-csv"]');
+    const content = await capturedCsv(page);
+    expect(content).toContain('Domain,TLD');
+    expect(content).toContain(FIRST_DOMAIN);
+  });
+
+  test('min-length filter keeps only labels at least that long', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-minlen"]', String(MINLEN));
+
+    const readLabels = (): Promise<string[]> =>
+      page
+        .locator('[data-testid^="drops-row-copy-"]')
+        .evaluateAll((els) =>
+          els.map(
+            (e) => e.closest('li')?.querySelector('.domain')?.getAttribute('aria-label') ?? '',
+          ),
+        );
+
+    const expectedCount = Math.min(MINLEN_COUNT, RENDER_CAP);
+    await expect
+      .poll(
+        async () => {
+          const labels = await readLabels();
+          return (
+            labels.length === expectedCount &&
+            labels.every((f) => f.slice(0, f.lastIndexOf('.')).length >= MINLEN)
+          );
+        },
+        { timeout: 5_000 },
+      )
+      .toBe(true);
+  });
+
+  test('shape filters: max length, no digits, no hyphens, min score compose', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-maxlen"]', '8');
+    await page.click('[data-testid="drops-toggle-nodigits"]');
+    await page.click('[data-testid="drops-toggle-nohyphens"]');
+    await page.selectOption('[data-testid="drops-select-minscore"]', '-4.5');
+
+    const readLabels = (): Promise<string[]> =>
+      page
+        .locator('[data-testid^="drops-row-copy-"]')
+        .evaluateAll((els) =>
+          els.map(
+            (e) => e.closest('li')?.querySelector('.domain')?.getAttribute('aria-label') ?? '',
+          ),
+        );
+
+    await expect
+      .poll(
+        async () => {
+          const labels = await readLabels();
+          return (
+            labels.length > 0 &&
+            labels.every((f) => {
+              const label = f.slice(0, f.lastIndexOf('.'));
+              return label.length <= 8 && !/[0-9]/.test(label) && !label.includes('-');
+            })
+          );
+        },
+        { timeout: 5_000 },
+      )
+      .toBe(true);
+  });
+
+  test('sort by length orders visible rows ascending', async ({ page }) => {
+    await gotoDrops(page);
+    await page.selectOption('[data-testid="drops-select-sort"]', 'length');
+
+    const readLens = (): Promise<number[]> =>
+      page
+        .locator('[data-testid^="drops-row-copy-"]')
+        .evaluateAll((els) =>
+          els.map((e) => {
+            const full =
+              e.closest('li')?.querySelector('.domain')?.getAttribute('aria-label') ?? '';
+            return full.slice(0, full.lastIndexOf('.')).length;
+          }),
+        );
+
+    await expect
+      .poll(
+        async () => {
+          const lens = await readLens();
+          return (
+            lens.length > 1 &&
+            lens.every((v, i) => i === 0 || (lens[i - 1] ?? 0) <= v)
+          );
+        },
+        { timeout: 5_000 },
+      )
+      .toBe(true);
+  });
+
+  test('row expand lazily fetches wayback history once, re-open served from cache', async ({
+    page,
+  }) => {
+    let hits = 0;
+    await page.route(/^https:\/\/archive\.org\/wayback\/available/, async (route) => {
+      hits += 1;
+      await route.fulfill({
+        status: 200,
+        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: FIRST_DOMAIN,
+          archived_snapshots: {
+            closest: {
+              status: '200',
+              available: true,
+              url: `http://web.archive.org/web/20200101000000/https://${FIRST_DOMAIN}/`,
+              timestamp: '20200101000000',
+            },
+          },
+        }),
+      });
+    });
+
+    await gotoDrops(page);
+    await page.click(`[data-testid="drops-row-expand-${FIRST_SID}"]`);
+
+    await expect(page.locator(`[data-testid="drops-row-history-${FIRST_SID}"]`)).toBeVisible();
+    await expect(page.locator(`[data-testid="drops-row-snapshot-${FIRST_SID}"]`)).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.locator(`[data-testid="drops-row-calendar-${FIRST_SID}"]`)).toHaveAttribute(
+      'href',
+      /web\.archive\.org/,
+    );
+    expect(hits).toBe(1);
+
+    // Collapse + re-expand: served from dh:v1:wayback, no second fetch.
+    await page.click(`[data-testid="drops-row-expand-${FIRST_SID}"]`);
+    await page.click(`[data-testid="drops-row-expand-${FIRST_SID}"]`);
+    await expect(page.locator(`[data-testid="drops-row-snapshot-${FIRST_SID}"]`)).toBeVisible();
+    expect(hits).toBe(1);
   });
 });

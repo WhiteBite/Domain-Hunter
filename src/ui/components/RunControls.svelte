@@ -87,6 +87,7 @@
               status: entry.status,
               source: 'cache',
               checkedAt: entry.ts,
+              card: entry.card,
             });
           }
         }
@@ -178,6 +179,7 @@
           source: event.result.source,
           ts: event.result.checkedAt,
           tld: event.result.tld,
+          card: event.result.card,
         });
         completedByEngine.add(event.result.domain);
         const totalDone = cacheHitsCount + completedByEngine.size;
@@ -205,6 +207,7 @@
             source: r.source,
             ts: r.checkedAt,
             tld: r.tld,
+            card: r.card,
           });
           completedByEngine.add(r.domain);
         }
@@ -290,6 +293,7 @@
           status: entry.status,
           source: 'cache',
           checkedAt: entry.ts,
+          card: entry.card,
         });
       } else {
         remaining.push(c);
@@ -428,46 +432,12 @@
     align-items: center;
     gap: var(--space-4);
   }
+  /* Canonical .btn lives in chrome.css; local deltas: weight + hover border. */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: 0 var(--space-4);
-    min-height: 40px;
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-    color: var(--text);
-    border-radius: var(--radius-md);
-    font-size: var(--text-sm);
     font-weight: 500;
-    cursor: pointer;
-    transition: all var(--dur) var(--ease);
   }
-  .btn:hover {
+  .btn:hover:not(:disabled) {
     border-color: var(--border-strong);
-    background: var(--bg-sunken);
-  }
-  .btn svg {
-    width: 14px;
-    height: 14px;
-  }
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-  .btn.primary:hover {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
-  }
-  .btn.stop {
-    background: var(--red);
-    border-color: var(--red);
-    color: var(--on-accent);
-  }
-  .btn.stop:hover {
-    background: color-mix(in srgb, var(--red) 88%, black);
-    border-color: var(--red);
   }
   .checkbox {
     display: inline-flex;

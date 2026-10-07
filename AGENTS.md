@@ -13,9 +13,11 @@ Domain Hunter is a free, open-source, **100% client-side** bulk domain availabil
 - `npm run preview` — serve the production build locally
 - `npm run typecheck` — `tsc --noEmit`, must pass before committing
 - `npm test` — Vitest suites in `tests/` (pure logic only: status interpretation, AIMD, queue, punycode, CSV, i18n parity, generators, pricing merge)
+- `npm run test:coverage` — same suites with the v8 coverage ratchet (statement floors for `src/core/**`, `src/pricing/**`, `cli/**` in `vite.config.ts`; raise thresholds as coverage grows, never lower)
 - `npm run test:e2e` — Playwright E2E against `dist/index.html` (all network mocked, build dist first)
 - `npm run test:e2e:ui` — Playwright E2E in interactive UI mode
 - `npm run build:worker` — regenerate the optional Cloudflare CORS proxy `worker.js` from `src/config/tlds.json`
+- `npm run build:icons` — regenerate PWA icons (`public/icons/icon-{192,512}.png`) via `scripts/build-icons.mjs` (zero-dependency PNG encoder)
 - `npm run build:cli` — esbuild-bundle the Node CLI (`cli/main.ts` → `dist-cli/domain-hunter.mjs`) and the MCP server (`cli/mcp/server.ts` → `dist-cli/mcp-server.mjs` if present)
 - `npm run cli -- <args>` — build the CLI then run it with the given arguments (e.g. `npm run cli -- check example.com`, `npm run cli -- tlds`)
 - `npm run mcp` — build and run the MCP server (if `cli/mcp/server.ts` exists)
@@ -39,15 +41,20 @@ src/
     rdap-client.ts  rate-limiter.ts  queue.ts  doh.ts  idn.ts  cache.ts  bootstrap.ts
   pricing/pricing.ts    # live fetch + merge + TTL + currency + TCO + coupons
   generators/           # combinator, syllables, hacks, mutations, themes (pure functions)
-  i18n/                 # en.ts + ru.ts — flat dot-keys, identical key sets (parity enforced)
-  ui/                   # tokens.css, stores, csv/share/theme/settings, components/
+  i18n/                 # 8 locales (en, ru, es, de, pt, fr, zh, ja) — flat dot-keys, identical key sets (parity enforced)
+  ui/                   # tokens.css, stores, csv/share/theme/settings, watch-scheduler (timed favorites re-check + notifications), components/
 tests/                  # Vitest suites (pure logic) + e2e/ (Playwright E2E, mocked network)
-scripts/                # CI helpers (price harvest, zone health, worker build)
+scripts/                # CI helpers (price harvest, zone health, worker build, icon build)
+public/                 # static assets copied to dist: guides, llms.txt, health.json, PWA (manifest.webmanifest, sw.js, icons/)
 cli/
-  main.ts               # CLI entry point: arg parsing, JSON to stdout, exit codes 0/1/2
+  main.ts               # CLI entry point: arg parsing, JSON/table/csv to stdout, exit codes 0/1/2/10
   contract.ts           # CLI option/result types — shared with the MCP server
-  core.ts               # runCheckCommand/runPricesCommand/runGenerateCommand/runFindCommand/runTldsCommand
-  data.ts               # fresh-snapshot fetch (GitHub raw, 24h TTL) + compact pricing expansion
+  core.ts               # runCheckCommand/runPricesCommand/runGenerateCommand/runFindCommand/runTldsCommand/runDropsCommand/runPriceTrendsCommand/runWatchCommand/runKeysCommand
+  data.ts               # fresh-snapshot fetch (GitHub raw, 24h TTL) + compact pricing expansion + CLI FX resolution
+  format.ts             # --format table|csv renderers (JSON is the default)
+  keys.ts               # registrar API key storage (dh:cli:registrar-keys in the 0600 shim file)
+  registrar-sources.ts  # keyed pricing sources: Dynadot tld_price normalizer + merge
+  completions.ts        # bash/zsh/fish completion scripts
   shims/storage.ts      # file-backed localStorage polyfill for Node (~/.domain-hunter/storage.json)
 dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs (never edit by hand)
 ```
@@ -55,11 +62,11 @@ dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs 
 ## Conventions (must follow)
 
 - **TypeScript strict.** Shared types live only in `src/types.ts`. No `any`, no `@ts-ignore`.
-- **All user-visible strings go through i18n** (`t(key)`), including tooltips, aria-labels, empty states, and errors. `en.ts` and `ru.ts` key sets must stay identical — a test enforces parity.
+- **All user-visible strings go through i18n** (`t(key)`), including tooltips, aria-labels, empty states, and errors. All eight locale files must keep identical key sets — a test enforces parity.
 - **Zones are data, not code.** Adding/changing a TLD means editing `src/config/tlds.json` only.
 - **Never guess availability.** Honor the three-state model in SPEC §7 (`available` / `probably_available` / `unknown`); DoH-only results never yield bare `available`. A wrong "available" is worse than "unknown".
 - **Be polite to registries.** Per-infra rate profiles, AIMD backoff, honor `Retry-After`, global concurrency cap. Google Registry ≈1 rps is strict.
-- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com, Cloudflare RDAP aggregator (`rdap.cloudflare.com/domain/{domain}`). No CDNs, no webfonts from network, no analytics. The CLI additionally fetches `raw.githubusercontent.com` (WhiteBite/Domain-Hunter main branch configs — `tlds.json` and `pricing.snapshot.json`, 24h TTL cache, bundled fallback) — the app runtime allowlist is unchanged.
+- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com, Cloudflare RDAP aggregator (`rdap.cloudflare.com/domain/{domain}`), DigMyName per-domain detail API, open.er-api.com (FX rates, 7-day cache). No CDNs, no webfonts from network, no analytics. The CLI additionally fetches `raw.githubusercontent.com` (WhiteBite/Domain-Hunter main branch configs — `tlds.json` and `pricing.snapshot.json`, 24h TTL cache, bundled fallback) and, only on explicit `prices --source dynadot` with a user-stored key, `api.dynadot.com` (see `docs/registrar-keys.md`) — the app runtime allowlist is unchanged.
 - **Security.** Registry-derived text is escaped; external links use `target="_blank" rel="noopener noreferrer"`; keep the CSP meta in `index.html` intact.
 - **Pricing unit is USD cents** internally; display converts via `settings.rates`.
 - **Storage keys** are versioned: `dh:v1:*` (see SPEC §5). Migrate, don't silently break.

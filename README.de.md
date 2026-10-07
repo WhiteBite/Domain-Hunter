@@ -51,7 +51,7 @@ Der **Drops-Tab** scannt abgelaufene/gelöschte Domänen und meldet diejenigen, 
 
 ## Social Handles
 
-Der **Social-Tab** prüft die Verfügbarkeit von Benutzernamen auf großen Plattformen (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram), damit Sie einen konsistenten Handle überall sichern können.
+Der **Social-Tab** prüft Benutzernamen live auf GitHub und TikTok; X, YouTube, Instagram und Reddit zeigen ehrlich „unbekannt" mit einem Profil-Link (deren APIs blockieren anonyme Browser-Anfragen — ein optionaler eigener CORS-Proxy in den Einstellungen deckt sie ab).
 
 ## Exportieren, teilen und organisieren
 
@@ -109,7 +109,7 @@ npm install && npm run build:cli
 
 ```bash
 node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
-node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB
 node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
 node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
 node dist-cli/domain-hunter.mjs tlds --infra verisign
@@ -237,7 +237,7 @@ Wenn Sie Domain Hunter in akademischen oder technischen Arbeiten referenzieren, 
 @software{domain_hunter_2026,
   author = {WhiteBite},
   title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
-  version = {2.0.0},
+  version = {2.1.0},
   year = {2026},
   url = {https://github.com/WhiteBite/Domain-Hunter},
   license = {MIT}

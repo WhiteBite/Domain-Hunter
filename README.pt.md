@@ -51,7 +51,7 @@ A **aba Drops** escaneia domínios expirados/excluídos e reporta aqueles ainda 
 
 ## Redes sociais
 
-A **aba Social** verifica a disponibilidade de nomes de usuário nas plataformas principais (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram) para que você possa garantir um handle consistente em todos os lugares.
+A **aba Social** verifica nomes de usuário ao vivo no GitHub e no TikTok; X, YouTube, Instagram e Reddit mostram "desconhecido" honestamente com link para o perfil (as APIs deles bloqueiam consultas anônimas do navegador — um proxy CORS próprio e opcional nas Configurações cobre isso).
 
 ## Exportar, compartilhar e organizar
 
@@ -109,7 +109,7 @@ npm install && npm run build:cli
 
 ```bash
 node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
-node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB
 node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
 node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
 node dist-cli/domain-hunter.mjs tlds --infra verisign
@@ -237,7 +237,7 @@ Se você referenciar o Domain Hunter em trabalhos acadêmicos ou técnicos, use 
 @software{domain_hunter_2026,
   author = {WhiteBite},
   title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
-  version = {2.0.0},
+  version = {2.1.0},
   year = {2026},
   url = {https://github.com/WhiteBite/Domain-Hunter},
   license = {MIT}

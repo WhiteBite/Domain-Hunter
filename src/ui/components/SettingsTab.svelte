@@ -4,7 +4,19 @@
   import { t, LOCALES } from '../../i18n';
   import { settings } from '../store';
   import { clearAllData, KEYS, readJson, writeJson } from '../settings';
+  import { loadFx, refreshFx } from '../fx';
   import { DEFAULT_SETTINGS, type Settings } from '../../types';
+  import {
+    projects,
+    addProject,
+    removeProject,
+    patchProject,
+    setProjectDomains,
+    exportProjectCsv,
+    exportProjectJson,
+    PROJECT_COLORS,
+    MAX_PROJECTS,
+  } from '../projects';
   import { githubLoginName, pollDeviceToken, startDeviceFlow } from '../../core/github-auth';
 
   let savedToast = $state(false);
@@ -33,6 +45,26 @@
     flashSaved();
   }
 
+  let fxBusy = $state(false);
+  let fxAt = $state<number | null>(null);
+  const fxDate = $derived(fxAt === null ? '' : new Date(fxAt).toISOString().slice(0, 10));
+
+  async function onRefreshFx(): Promise<void> {
+    if (fxBusy) return;
+    fxBusy = true;
+    try {
+      if (await refreshFx(true)) {
+        fxAt = loadFx()?.fetchedAt ?? null;
+        rateError = '';
+        flashSaved();
+      } else {
+        rateError = t('settings.fx.failed');
+      }
+    } finally {
+      fxBusy = false;
+    }
+  }
+
   function resetDefaults(): void {
     settings.set({
       ...DEFAULT_SETTINGS,
@@ -49,6 +81,7 @@
   let ghBusy = $state(false);
 
   onMount(() => {
+    fxAt = loadFx()?.fetchedAt ?? null;
     const token = get(settings).githubToken;
     if (token) void githubLoginName(token).then((n) => (ghUser = n ?? ''));
   });
@@ -77,6 +110,43 @@
   function disconnectGithub(): void {
     ghUser = '';
     patch('githubToken', '');
+  }
+
+  let notifyDenied = $state(false);
+
+  async function toggleNotify(): Promise<void> {
+    if (get(settings).watchNotify) {
+      patch('watchNotify', false);
+      return;
+    }
+    if (typeof Notification === 'undefined') {
+      notifyDenied = true;
+      return;
+    }
+    let perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      notifyDenied = false;
+      patch('watchNotify', true);
+    } else {
+      notifyDenied = true;
+    }
+  }
+
+  let newProjectName = $state('');
+  let projectError = $state('');
+
+  function onCreateProject(): void {
+    const name = newProjectName.trim();
+    if (name === '') return;
+    const created = addProject(name);
+    if (created) {
+      newProjectName = '';
+      projectError = '';
+      flashSaved();
+    } else {
+      projectError = t('projects.full', { n: MAX_PROJECTS });
+    }
   }
 
   function download(filename: string, content: string): void {
@@ -200,6 +270,9 @@
     <div class="row">
       <div class="row-info">
         <span class="label">{t('settings.rates')}</span>
+        {#if fxAt !== null}
+          <p class="hint" data-testid="settings-fx-age">{t('settings.fx.age', { date: fxDate })}</p>
+        {/if}
         {#if rateError}
           <p class="error">{rateError}</p>
         {/if}
@@ -227,6 +300,15 @@
             data-testid="settings-input-rate-eur"
           />
         </label>
+        <button
+          class="btn"
+          type="button"
+          onclick={() => void onRefreshFx()}
+          disabled={fxBusy}
+          data-testid="settings-button-fx-refresh"
+        >
+          {t('settings.fx.refresh')}
+        </button>
       </span>
     </div>
   </div>
@@ -265,6 +347,44 @@
         onchange={(e) => patch('cacheTtlHours', Math.max(1, Number(e.currentTarget.value)))}
         data-testid="settings-input-ttl"
       />
+    </div>
+    <div class="row">
+      <div class="row-info">
+        <label for="watch-interval">{t('settings.watch.interval')}</label>
+        <p class="hint">{t('settings.watch.interval.hint')}</p>
+      </div>
+      <select
+        id="watch-interval"
+        value={$settings.watchIntervalMin}
+        onchange={(e) => patch('watchIntervalMin', Number(e.currentTarget.value))}
+        aria-label={t('settings.watch.interval')}
+        data-testid="settings-select-watch-interval"
+      >
+        <option value={0}>{t('settings.watch.off')}</option>
+        {#each [5, 15, 30, 60] as m (m)}
+          <option value={m}>{t('settings.watch.minutes', { n: m })}</option>
+        {/each}
+      </select>
+    </div>
+    <div class="row">
+      <div class="row-info">
+        <label for="watch-notify">{t('settings.watch.notify')}</label>
+        <p class="hint">{t('settings.watch.notify.hint')}</p>
+        {#if notifyDenied}
+          <p class="error" data-testid="settings-watch-notify-denied">{t('settings.watch.notify.denied')}</p>
+        {/if}
+      </div>
+      <button
+        id="watch-notify"
+        class="btn"
+        class:primary={$settings.watchNotify}
+        type="button"
+        onclick={() => void toggleNotify()}
+        aria-pressed={$settings.watchNotify}
+        data-testid="settings-button-watch-notify"
+      >
+        {$settings.watchNotify ? t('settings.watch.notify.on') : t('settings.watch.notify.enable')}
+      </button>
     </div>
     <div class="row">
       <div class="row-info">
@@ -326,6 +446,80 @@
         {/if}
       {/if}
     </div>
+  </div>
+
+  <div class="card">
+    <h3>{t('projects.title')}</h3>
+    <p class="hint">{t('projects.desc')}</p>
+    <div class="proj-create">
+      <input
+        type="text"
+        bind:value={newProjectName}
+        placeholder={t('projects.new')}
+        aria-label={t('projects.new')}
+        onkeydown={(e) => { if (e.key === 'Enter') onCreateProject(); }}
+        data-testid="projects-input-new"
+      />
+      <button
+        class="btn primary"
+        type="button"
+        onclick={onCreateProject}
+        disabled={!newProjectName.trim()}
+        data-testid="projects-button-create"
+      >
+        {t('projects.create')}
+      </button>
+    </div>
+    {#if projectError}
+      <p class="error">{projectError}</p>
+    {/if}
+    {#if $projects.length === 0}
+      <p class="hint" data-testid="projects-empty">{t('projects.empty')}</p>
+    {:else}
+      {#each $projects as p, i (p.id)}
+        <div class="proj" data-testid={`projects-row-${i}`}>
+          <div class="proj-head">
+            <span class="proj-dot" style="background: {PROJECT_COLORS[p.color % PROJECT_COLORS.length]}"></span>
+            <input
+              class="proj-name"
+              type="text"
+              value={p.name}
+              onchange={(e) => patchProject(p.id, { name: e.currentTarget.value })}
+              aria-label={t('projects.title')}
+              data-testid={`projects-input-name-${i}`}
+            />
+            <span class="nums proj-count" data-testid={`projects-count-${i}`}>
+              {t('projects.count', { n: p.domains.length })}
+            </span>
+          </div>
+          <textarea
+            class="proj-note"
+            rows="2"
+            placeholder={t('projects.note')}
+            aria-label={t('projects.note')}
+            onchange={(e) => patchProject(p.id, { note: e.currentTarget.value })}
+            data-testid={`projects-input-note-${i}`}>{p.note}</textarea>
+          <textarea
+            class="proj-domains"
+            rows="4"
+            placeholder={t('projects.domains')}
+            aria-label={t('projects.domains')}
+            onchange={(e) => setProjectDomains(p.id, e.currentTarget.value)}
+            data-testid={`projects-input-domains-${i}`}>{p.domains.join('\n')}</textarea>
+          <div class="proj-actions">
+            <button class="btn" type="button" onclick={() => exportProjectCsv(p)} data-testid={`projects-button-csv-${i}`}>
+              {t('projects.export.csv')}
+            </button>
+            <button class="btn" type="button" onclick={() => exportProjectJson(p)} data-testid={`projects-button-json-${i}`}>
+              {t('projects.export.json')}
+            </button>
+            <button class="btn danger" type="button" onclick={() => removeProject(p.id)} data-testid={`projects-button-delete-${i}`}>
+              {t('projects.delete')}
+            </button>
+          </div>
+        </div>
+      {/each}
+    {/if}
   </div>
 
   <div class="card">
@@ -485,23 +679,9 @@
     flex-wrap: wrap;
   }
 
+  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
     background: var(--bg);
-    color: var(--text);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: background var(--dur) var(--ease);
-  }
-
-  .btn:hover {
-    background: var(--bg-sunken);
   }
 
   .btn.danger {
@@ -517,6 +697,93 @@
     margin: 0;
     color: var(--red);
     font-size: var(--text-sm);
+  }
+
+  .proj-create {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .proj-create input {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    min-height: 40px;
+  }
+
+  .proj {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+  }
+
+  .proj-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .proj-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .proj-name {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    color: var(--text);
+  }
+
+  .proj-name:hover,
+  .proj-name:focus {
+    border-color: var(--border);
+    background: var(--bg);
+  }
+
+  .proj-count {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    flex: none;
+  }
+
+  .proj-note,
+  .proj-domains {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  .proj-domains {
+    font-family: var(--font-mono);
+  }
+
+  .proj-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
   }
 
   .gh-box {

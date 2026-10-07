@@ -51,7 +51,7 @@ La **pestaña Drops** escanea dominios caducados/expirados e informa de aquellos
 
 ## Redes sociales
 
-La **pestaña Social** comprueba la disponibilidad de nombres de usuario en plataformas principales (Twitter/X, GitHub, Instagram, YouTube, TikTok, Twitch, Reddit, Telegram) para que puedas asegurar un handle consistente en todas partes.
+La **pestaña Social** comprueba nombres de usuario en vivo en GitHub y TikTok; X, YouTube, Instagram y Reddit muestran un «desconocido» honesto con enlace al perfil (sus APIs bloquean las consultas anónimas del navegador — un proxy CORS propio y opcional en Ajustes las cubre).
 
 ## Exportar, compartir y organizar
 
@@ -109,7 +109,7 @@ npm install && npm run build:cli
 
 ```bash
 node dist-cli/domain-hunter.mjs check example.com mybrand.dev --tlds com,net,io --prices
-node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB --rate-rub 97
+node dist-cli/domain-hunter.mjs prices --tlds com,dev,io --currency RUB
 node dist-cli/domain-hunter.mjs generate combinator --roots brand,app --tlds com,io
 node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds com,io,dev
 node dist-cli/domain-hunter.mjs tlds --infra verisign
@@ -237,7 +237,7 @@ Si haces referencia a Domain Hunter en trabajos académicos o técnicos, utiliza
 @software{domain_hunter_2026,
   author = {WhiteBite},
   title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
-  version = {2.0.0},
+  version = {2.1.0},
   year = {2026},
   url = {https://github.com/WhiteBite/Domain-Hunter},
   license = {MIT}

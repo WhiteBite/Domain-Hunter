@@ -42,6 +42,7 @@ export const ALL_TESTIDS = [
   'check-panel-toggle', // left input panel collapse/expand toggle
   'check-history-toggle', // history section collapsible toggle
   'history-clear', // clear history button
+  'check-history-drawer', // history slide-over drawer panel (Drawer testid prop)
   'check-watch-banner', // watchlist status-flip banner
   'check-watch-dismiss', // watch banner dismiss button
   'check-watch-show', // watch banner "show favorites" button
@@ -77,6 +78,7 @@ export const ALL_TESTIDS = [
   'tld-button-clear', // clear selection button
   'tld-selected-count', // "N selected" live region
   'tld-picker-toggle', // popover trigger button
+  'tld-new-zones', // "+N new zones since last visit" chip
 
   // ---- ResultsTable.svelte ----
   'results-filter-all', // filter: all
@@ -137,7 +139,12 @@ export const ALL_TESTIDS = [
   'settings-select-lang', // language select
   'settings-select-currency', // currency select
   'settings-input-rate-rub', // RUB rate number input
+  'projects-input-new', // new project name input
+  'projects-button-create', // create project button
+  'projects-empty', // projects empty-state paragraph
   'settings-input-rate-eur', // EUR rate number input
+  'settings-button-fx-refresh', // live FX rates refresh button
+  'settings-fx-age', // "live rates from {date}" note
   'settings-range-concurrency', // concurrency range input
   'settings-input-ttl', // cache TTL number input
   'settings-input-proxy', // proxy URL input
@@ -158,6 +165,14 @@ export const ALL_TESTIDS = [
   'drops-input-search', // search input
   'drops-select-tld', // TLD filter select
   'drops-button-add-all', // add-all button
+  'drops-button-export-csv', // export filtered list as CSV file
+  'drops-button-copy-list', // copy filtered list to clipboard
+  'drops-input-minlen', // min label-length filter input
+  'drops-input-maxlen', // max label-length filter input
+  'drops-toggle-nodigits', // no-digits filter chip
+  'drops-toggle-nohyphens', // no-hyphens filter chip
+  'drops-select-minscore', // min pronounceability score select
+  'drops-select-sort', // drops sort select
 
   // ---- PricesTab.svelte ----
   'prices-search', // zone filter search input
@@ -187,6 +202,7 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'results-row-buy-', // buy links: results-row-buy-{domain}
   'results-row-detail-buy-', // detail buy links: results-row-detail-buy-{domain}
   'results-row-expanded-', // expanded detail rows: results-row-expanded-{domain}
+  'results-row-card-', // RDAP registry card inside expanded detail rows: results-row-card-{domain}
   'results-row-registrars-', // registrar price comparison cells: results-row-registrars-{domain}
   'results-row-registrar-', // per-registrar buy links inside the comparison: results-row-registrar-{domain}-{registrarId}
   'results-row-menu-', // row overflow menu triggers: results-row-menu-{domain}
@@ -201,6 +217,21 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'gen-tray-chip-', // tray chips: gen-tray-chip-{name}
   'gen-tray-fav-', // tray chip favorite stars: gen-tray-fav-{name}
   'gen-tray-remove-', // tray chip remove buttons: gen-tray-remove-{name}
+  'gen-tray-score-', // tray chip pronounceability score badges: gen-tray-score-{name}
+  'gen-tray-expand-', // tray row expand toggles: gen-tray-expand-{name}
+  'gen-tray-detail-', // tray candidate detail panels: gen-tray-detail-{name}
+  'gen-tray-preview-', // tray zone-preview buttons: gen-tray-preview-{name}
+  'gen-tray-pchip-', // tray preview status chips: gen-tray-pchip-{domain}
+  'projects-row-', // project rows: projects-row-{index}
+  'projects-input-name-', // project name inputs: projects-input-name-{index}
+  'projects-input-note-', // project note textareas: projects-input-note-{index}
+  'projects-input-domains-', // project domain textareas: projects-input-domains-{index}
+  'projects-count-', // project domain counts: projects-count-{index}
+  'projects-button-csv-', // project CSV export buttons: projects-button-csv-{index}
+  'projects-button-json-', // project JSON export buttons: projects-button-json-{index}
+  'projects-button-delete-', // project delete buttons: projects-button-delete-{index}
+  'results-row-tm-uspto-', // USPTO trademark search links: results-row-tm-uspto-{domain}
+  'results-row-tm-tmview-', // TMview trademark search links: results-row-tm-tmview-{domain}
   'gen-more-', // tray section show more/less: gen-more-{section}
   'gen-group-toggle-', // tray group collapse toggles: gen-group-toggle-{groupId}
   'gen-theme-chip-', // theme category chips: gen-theme-chip-{id}
@@ -212,6 +243,10 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'drops-row-fav-', // drops favorite stars: drops-row-fav-{domain}
   'drops-row-copy-', // drops copy buttons: drops-row-copy-{domain}
   'drops-row-add-', // drops add buttons: drops-row-add-{domain}
+  'drops-row-expand-', // drops row expand toggles: drops-row-expand-{domain}
+  'drops-row-history-', // wayback history panels: drops-row-history-{domain}
+  'drops-row-snapshot-', // wayback snapshot links: drops-row-snapshot-{domain}
+  'drops-row-calendar-', // wayback calendar links: drops-row-calendar-{domain}
 
   // ---- PricesTab.svelte ----
   'prices-row-', // price matrix rows: prices-row-{tld}

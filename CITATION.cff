@@ -9,8 +9,8 @@ abstract: >-
   no API keys, no tracking.
 authors:
   - alias: WhiteBite
-version: 2.0.0
-date-released: "2026-08-17"
+version: 2.1.0
+date-released: "2026-10-07"
 license: MIT
 repository-code: "https://github.com/WhiteBite/Domain-Hunter"
 url: "https://whitebite.github.io/Domain-Hunter/"

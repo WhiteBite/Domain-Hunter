@@ -8,8 +8,11 @@
  * Selectors: data-testid ONLY. All network mocked; zero leaks asserted.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { openApp, navigateToTab } from './helpers/setup';
 import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockDoh, mockRdap } from './helpers/mocks';
+import { rdapTakenFull } from './fixtures/rdap';
 import { DEFAULT_SETTINGS } from '../../src/types';
 import {
   ianaBootstrap,
@@ -421,6 +424,90 @@ test.describe('Misc coverage', () => {
     await expect(
       page.locator('[data-testid="results-row-registrar-zzqxtest1-com-cloudflare"]'),
     ).toHaveAttribute('href', 'https://domains.cloudflare.com/');
+    expectNoLeaks(page);
+  });
+
+  test('detail row shows the RDAP registry card for taken domains', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await mockRdap(page, [
+      { domain: 'zzqxcard1.com', response: rdapTakenFull('zzqxcard1.com') },
+    ]);
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxcard1.com');
+    await page.click('[data-testid="check-button-start"]');
+    await expect(page.locator('[data-testid="results-row-zzqxcard1-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.click('[data-testid="results-row-menu-zzqxcard1-com"]');
+    await page.click('[data-testid="results-row-detail-zzqxcard1-com"]');
+
+    const card = page.locator('[data-testid="results-row-card-zzqxcard1-com"]');
+    await expect(card).toBeVisible({ timeout: 10_000 });
+    await expect(card).toContainText('Test Registrar LLC');
+    await expect(card).toContainText('2015-03-01');
+    await expect(card).toContainText('2030-03-01');
+    await expect(card).toContainText('2026-02-01');
+    await expect(card).toContainText('client transfer prohibited');
+    await expect(card).toContainText('ns1.example.test');
+
+    // Trademark link-outs carry the SLD label into USPTO/TMview searches.
+    await expect(
+      page.locator('[data-testid="results-row-tm-uspto-zzqxcard1-com"]'),
+    ).toHaveAttribute('href', /tmsearch\.uspto\.gov/);
+    await expect(
+      page.locator('[data-testid="results-row-tm-tmview-zzqxcard1-com"]'),
+    ).toHaveAttribute('href', /tmdn\.org/);
+    expectNoLeaks(page);
+  });
+
+  test('new-zones chip announces bootstrap discoveries unseen last visit', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    const boot = ianaBootstrap();
+    boot.services.push([['future'], ['https://rdap.future-registry.test/domain/']]);
+    await mockAll(page, {
+      bootstrap: boot,
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    const curated = (
+      JSON.parse(
+        readFileSync(fileURLToPath(new URL('../../src/config/tlds.json', import.meta.url)), 'utf8'),
+      ) as { tlds: { tld: string }[] }
+    ).tlds.map((z) => z.tld);
+    await openApp(page, {
+      seed: {
+        'dh:v1:pricing': seedPricingTable(),
+        'dh:v1:zones-seen': curated,
+      },
+    });
+
+    const chip = page.locator('[data-testid="tld-new-zones"]');
+    await expect(chip).toBeVisible({ timeout: 15_000 });
+    await expect(chip).toHaveText('+1');
+
+    const countBefore = Number(
+      await page.locator('[data-testid="tld-selected-count"]').textContent(),
+    );
+    await chip.click();
+    await expect(chip).toBeHidden();
+    await expect
+      .poll(
+        async () =>
+          Number(await page.locator('[data-testid="tld-selected-count"]').textContent()),
+        { timeout: 5_000 },
+      )
+      .toBe(countBefore + 1);
     expectNoLeaks(page);
   });
 
