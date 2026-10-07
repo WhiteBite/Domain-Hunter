@@ -1,0 +1,15 @@
+{
+  "name": "Domain Hunter",
+  "short_name": "DomainHunter",
+  "description": "Free, open-source bulk domain availability checker and name generator. Direct RDAP checks across 148+ TLDs, live registrar prices, CSV export. No servers, no API keys, no tracking.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#0b0c0f",
+  "theme_color": "#0b0c0f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

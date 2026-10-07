@@ -30,6 +30,7 @@
     "prepare": "husky",
     "smoke": "node scripts/smoke.mjs",
     "build:worker": "node scripts/build-worker.mjs",
+    "build:icons": "node scripts/build-icons.mjs",
     "build:cli": "node scripts/build-cli.mjs",
     "prepack": "npm run build:cli",
     "size": "node scripts/size-limit.mjs",
