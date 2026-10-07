@@ -75,6 +75,9 @@ const NETWORK_ALLOWLIST = [
   /^cfdomainpricing\.com$/,
   // FX rates (Settings refresh + boot stale-refresh, SPEC §13)
   /^open\.er-api\.com$/,
+  // Wayback history signal for the Drops tab (lazy, on row expand, SPEC §13)
+  /^archive\.org$/,
+  /^web\.archive\.org$/,
   // DigMyName (per-domain buy-link API)
   /^api\.digmyname\.com$/,
   // GitHub (device flow + user API + profile links)
