@@ -1,6 +1,6 @@
 {
   "name": "domain-hunter",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "type": "module",
   "description": "Free, open-source, browser-only domain availability checker. No servers, no API keys, no tracking.",
   "license": "MIT",
