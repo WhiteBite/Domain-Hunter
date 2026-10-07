@@ -591,4 +591,69 @@ test.describe('Settings tab', () => {
     await expect(btn).toHaveAttribute('aria-pressed', 'false');
     expect((await readSettings(page)).watchNotify).toBe(false);
   });
+
+  test('projects: create, edit, set domains, export CSV/JSON, delete', async ({ page }) => {
+    await bootSettingsTab(page);
+
+    await expect(page.locator('[data-testid="projects-empty"]')).toBeVisible();
+    await page.fill('[data-testid="projects-input-new"]', 'Brand A');
+    await page.click('[data-testid="projects-button-create"]');
+    const row = page.locator('[data-testid="projects-row-0"]');
+    await expect(row).toBeVisible();
+
+    await page.fill('[data-testid="projects-input-domains-0"]', 'alpha.com beta.io alpha.com');
+    await page.locator('[data-testid="projects-input-domains-0"]').blur();
+    await expect(page.locator('[data-testid="projects-count-0"]')).toContainText('2');
+    await expect(page.locator('[data-testid="projects-input-domains-0"]')).toHaveValue(
+      'alpha.com\nbeta.io',
+    );
+
+    // Rename + note (onchange -> patchProject).
+    await page.fill('[data-testid="projects-input-name-0"]', 'Brand A2');
+    await page.locator('[data-testid="projects-input-name-0"]').blur();
+    await page.fill('[data-testid="projects-input-note-0"]', 'shortlist');
+    await page.locator('[data-testid="projects-input-note-0"]').blur();
+
+    // Blob spy captures the last exported text.
+    await page.evaluate(() => {
+      const orig = URL.createObjectURL;
+      URL.createObjectURL = (obj: Blob | MediaSource): string => {
+        if (obj instanceof Blob) {
+          void obj.text().then((text) => {
+            (window as unknown as { __projectExport?: string }).__projectExport = text;
+          });
+        }
+        return orig.call(URL, obj);
+      };
+    });
+
+    await page.click('[data-testid="projects-button-json-0"]');
+    await page.waitForFunction(
+      () => (window as unknown as { __projectExport?: string }).__projectExport !== undefined,
+    );
+    const jsonText = await page.evaluate<string>(
+      () => (window as unknown as { __projectExport: string }).__projectExport,
+    );
+    const parsed = JSON.parse(jsonText) as { name?: string; note?: string; domains?: string[] };
+    expect(parsed.name).toBe('Brand A2');
+    expect(parsed.note).toBe('shortlist');
+    expect(parsed.domains).toEqual(['alpha.com', 'beta.io']);
+
+    await page.evaluate(() => {
+      (window as unknown as { __projectExport?: string }).__projectExport = undefined;
+    });
+    await page.click('[data-testid="projects-button-csv-0"]');
+    await page.waitForFunction(
+      () => (window as unknown as { __projectExport?: string }).__projectExport !== undefined,
+    );
+    const csvText = await page.evaluate<string>(
+      () => (window as unknown as { __projectExport: string }).__projectExport,
+    );
+    expect(csvText).toContain('domain,project');
+    expect(csvText).toContain('alpha.com,Brand A2');
+
+    await page.click('[data-testid="projects-button-delete-0"]');
+    await expect(row).toBeHidden();
+    await expect(page.locator('[data-testid="projects-empty"]')).toBeVisible();
+  });
 });

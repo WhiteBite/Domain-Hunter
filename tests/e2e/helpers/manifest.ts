@@ -139,6 +139,9 @@ export const ALL_TESTIDS = [
   'settings-select-lang', // language select
   'settings-select-currency', // currency select
   'settings-input-rate-rub', // RUB rate number input
+  'projects-input-new', // new project name input
+  'projects-button-create', // create project button
+  'projects-empty', // projects empty-state paragraph
   'settings-input-rate-eur', // EUR rate number input
   'settings-button-fx-refresh', // live FX rates refresh button
   'settings-fx-age', // "live rates from {date}" note
@@ -219,6 +222,14 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'gen-tray-detail-', // tray candidate detail panels: gen-tray-detail-{name}
   'gen-tray-preview-', // tray zone-preview buttons: gen-tray-preview-{name}
   'gen-tray-pchip-', // tray preview status chips: gen-tray-pchip-{domain}
+  'projects-row-', // project rows: projects-row-{index}
+  'projects-input-name-', // project name inputs: projects-input-name-{index}
+  'projects-input-note-', // project note textareas: projects-input-note-{index}
+  'projects-input-domains-', // project domain textareas: projects-input-domains-{index}
+  'projects-count-', // project domain counts: projects-count-{index}
+  'projects-button-csv-', // project CSV export buttons: projects-button-csv-{index}
+  'projects-button-json-', // project JSON export buttons: projects-button-json-{index}
+  'projects-button-delete-', // project delete buttons: projects-button-delete-{index}
   'gen-more-', // tray section show more/less: gen-more-{section}
   'gen-group-toggle-', // tray group collapse toggles: gen-group-toggle-{groupId}
   'gen-theme-chip-', // theme category chips: gen-theme-chip-{id}

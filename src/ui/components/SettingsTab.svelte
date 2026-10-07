@@ -6,6 +6,17 @@
   import { clearAllData, KEYS, readJson, writeJson } from '../settings';
   import { loadFx, refreshFx } from '../fx';
   import { DEFAULT_SETTINGS, type Settings } from '../../types';
+  import {
+    projects,
+    addProject,
+    removeProject,
+    patchProject,
+    setProjectDomains,
+    exportProjectCsv,
+    exportProjectJson,
+    PROJECT_COLORS,
+    MAX_PROJECTS,
+  } from '../projects';
   import { githubLoginName, pollDeviceToken, startDeviceFlow } from '../../core/github-auth';
 
   let savedToast = $state(false);
@@ -119,6 +130,22 @@
       patch('watchNotify', true);
     } else {
       notifyDenied = true;
+    }
+  }
+
+  let newProjectName = $state('');
+  let projectError = $state('');
+
+  function onCreateProject(): void {
+    const name = newProjectName.trim();
+    if (name === '') return;
+    const created = addProject(name);
+    if (created) {
+      newProjectName = '';
+      projectError = '';
+      flashSaved();
+    } else {
+      projectError = t('projects.full', { n: MAX_PROJECTS });
     }
   }
 
@@ -422,6 +449,80 @@
   </div>
 
   <div class="card">
+    <h3>{t('projects.title')}</h3>
+    <p class="hint">{t('projects.desc')}</p>
+    <div class="proj-create">
+      <input
+        type="text"
+        bind:value={newProjectName}
+        placeholder={t('projects.new')}
+        aria-label={t('projects.new')}
+        onkeydown={(e) => { if (e.key === 'Enter') onCreateProject(); }}
+        data-testid="projects-input-new"
+      />
+      <button
+        class="btn primary"
+        type="button"
+        onclick={onCreateProject}
+        disabled={!newProjectName.trim()}
+        data-testid="projects-button-create"
+      >
+        {t('projects.create')}
+      </button>
+    </div>
+    {#if projectError}
+      <p class="error">{projectError}</p>
+    {/if}
+    {#if $projects.length === 0}
+      <p class="hint" data-testid="projects-empty">{t('projects.empty')}</p>
+    {:else}
+      {#each $projects as p, i (p.id)}
+        <div class="proj" data-testid={`projects-row-${i}`}>
+          <div class="proj-head">
+            <span class="proj-dot" style="background: {PROJECT_COLORS[p.color % PROJECT_COLORS.length]}"></span>
+            <input
+              class="proj-name"
+              type="text"
+              value={p.name}
+              onchange={(e) => patchProject(p.id, { name: e.currentTarget.value })}
+              aria-label={t('projects.title')}
+              data-testid={`projects-input-name-${i}`}
+            />
+            <span class="nums proj-count" data-testid={`projects-count-${i}`}>
+              {t('projects.count', { n: p.domains.length })}
+            </span>
+          </div>
+          <textarea
+            class="proj-note"
+            rows="2"
+            placeholder={t('projects.note')}
+            aria-label={t('projects.note')}
+            onchange={(e) => patchProject(p.id, { note: e.currentTarget.value })}
+            data-testid={`projects-input-note-${i}`}>{p.note}</textarea>
+          <textarea
+            class="proj-domains"
+            rows="4"
+            placeholder={t('projects.domains')}
+            aria-label={t('projects.domains')}
+            onchange={(e) => setProjectDomains(p.id, e.currentTarget.value)}
+            data-testid={`projects-input-domains-${i}`}>{p.domains.join('\n')}</textarea>
+          <div class="proj-actions">
+            <button class="btn" type="button" onclick={() => exportProjectCsv(p)} data-testid={`projects-button-csv-${i}`}>
+              {t('projects.export.csv')}
+            </button>
+            <button class="btn" type="button" onclick={() => exportProjectJson(p)} data-testid={`projects-button-json-${i}`}>
+              {t('projects.export.json')}
+            </button>
+            <button class="btn danger" type="button" onclick={() => removeProject(p.id)} data-testid={`projects-button-delete-${i}`}>
+              {t('projects.delete')}
+            </button>
+          </div>
+        </div>
+      {/each}
+    {/if}
+  </div>
+
+  <div class="card">
     <h3>{t('settings.data')}</h3>
     <div class="actions">
       <button class="btn" onclick={exportData} data-testid="settings-button-export">{t('settings.export')}</button>
@@ -596,6 +697,93 @@
     margin: 0;
     color: var(--red);
     font-size: var(--text-sm);
+  }
+
+  .proj-create {
+    display: flex;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .proj-create input {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    min-height: 40px;
+  }
+
+  .proj {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+  }
+
+  .proj-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .proj-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .proj-name {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    color: var(--text);
+  }
+
+  .proj-name:hover,
+  .proj-name:focus {
+    border-color: var(--border);
+    background: var(--bg);
+  }
+
+  .proj-count {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    flex: none;
+  }
+
+  .proj-note,
+  .proj-domains {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  .proj-domains {
+    font-family: var(--font-mono);
+  }
+
+  .proj-actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
   }
 
   .gh-box {
