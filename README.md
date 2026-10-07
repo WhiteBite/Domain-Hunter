@@ -190,6 +190,10 @@ An MCP (Model Context Protocol) server exposes the core commands as tools (`chec
 
 Build the server with `npm run build:cli` (it bundles `cli/mcp/server.ts` into `dist-cli/mcp-server.mjs` when present). The server reuses `cli/core.ts` — no separate logic, no new network destinations beyond the CLI's `raw.githubusercontent.com` snapshot fetch.
 
+### Releasing
+
+Publishing to npm is a one-click, tokenless flow: bump `version` in `package.json` (the CLI JSON contract is additive → minor bump, breaking → major), commit to `main`, then open the **Actions** tab → "Publish npm package" → **Run workflow**. Authentication uses OIDC trusted publishing, so no npm tokens live in the repository, and provenance attestations are generated automatically. The workflow runs the full test suite (typecheck, coverage, lint) before publishing; `prepack` rebuilds `dist-cli` from source.
+
 ## Deploy your own copy
 
 **GitHub Pages** (easiest):
