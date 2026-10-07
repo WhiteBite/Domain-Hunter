@@ -5,6 +5,14 @@ Versioning policy: the package version follows the CLI/MCP JSON contract
 a major bump. The browser app ships continuously from `main` and is not
 versioned separately.
 
+## 2.1.3
+
+- Packaging: the web-font package moved to devDependencies — `npm i -g domain-hunter` now installs with zero runtime dependencies.
+
+## 2.1.2
+
+- Pipeline validation release: first version published via OIDC trusted publishing from GitHub Actions (tokenless, provenance attested).
+
 ## 2.1.0
 
 - CLI: `drops`, `watch` (exit 10 on status flip), `keys`, and `completions` (bash/zsh/fish) commands; `--format table|csv` output for `check`/`prices`/`drops`.

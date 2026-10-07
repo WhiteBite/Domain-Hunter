@@ -118,13 +118,24 @@ No backend, no environment variables, no API keys — ever.
 
 Domain Hunter ships a Node CLI and an MCP server that expose the same core logic as the browser app — same three-state status model, same per-infrastructure rate limiting, same pricing merge. Both output machine-readable JSON to stdout; progress and logs go to stderr only.
 
-### Build
+### Install
+
+The package is published on npm with zero runtime dependencies:
+
+```bash
+npm install -g domain-hunter    # CLI + MCP server, one package
+npx domain-hunter check example.com   # or run it without installing
+```
+
+Node 20+ is required.
+
+### Build from source
 
 ```bash
 npm install && npm run build:cli
 ```
 
-This produces `dist-cli/domain-hunter.mjs` (and `dist-cli/mcp-server.mjs` if `cli/mcp/server.ts` is present). Node 20+ is required.
+This produces `dist-cli/domain-hunter.mjs` (and `dist-cli/mcp-server.mjs` if `cli/mcp/server.ts` is present).
 
 ### Commands
 
@@ -338,9 +349,9 @@ If Domain Hunter saved you time, a ⭐ helps others find it too.
 ## Examples
 
 ```bash
-# Check domains with live prices (after npm run build:cli)
-node dist-cli/domain-hunter.mjs check acme-nova.com --tlds com,io,dev --prices
+# Check domains with live prices (npm install -g domain-hunter, or npx)
+domain-hunter check acme-nova.com --tlds com,io,dev --prices
 
 # Generate and check name candidates within a budget
-node dist-cli/domain-hunter.mjs find mybrand --budget 15 --tlds com,io,dev
+domain-hunter find mybrand --budget 15 --tlds com,io,dev
 ```
