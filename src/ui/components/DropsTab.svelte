@@ -472,38 +472,9 @@
     margin-left: auto;
   }
 
+  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
     background: var(--bg);
-    color: var(--text);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: background var(--dur) var(--ease);
-  }
-
-  .btn:hover:not(:disabled) {
-    background: var(--bg-sunken);
-  }
-
-  .btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .btn.primary:hover:not(:disabled) {
-    background: var(--accent-hover);
   }
 
   .grid {

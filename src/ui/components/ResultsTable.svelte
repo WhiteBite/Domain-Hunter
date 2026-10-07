@@ -1372,7 +1372,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--bg-elevated);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-1);
     max-height: 72vh;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -1573,7 +1573,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
       background: var(--bg-elevated);
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-1);
     }
     tbody tr.row-in:last-child {
       border-bottom: 1px solid var(--border);
@@ -1586,14 +1586,14 @@
     }
     tbody tr.row-in.available {
       background: color-mix(in srgb, var(--green-solid) 5%, var(--bg-elevated));
-      box-shadow: var(--shadow-sm), inset 2px 0 0 var(--green-solid);
+      box-shadow: var(--shadow-1), inset 2px 0 0 var(--green-solid);
     }
     tbody tr.row-in.available:hover {
       background: color-mix(in srgb, var(--green-solid) 9%, var(--bg-elevated));
     }
     tbody tr.row-in.error {
       background: color-mix(in srgb, var(--red) 5%, var(--bg-elevated));
-      box-shadow: var(--shadow-sm), inset 2px 0 0 var(--red);
+      box-shadow: var(--shadow-1), inset 2px 0 0 var(--red);
     }
     tbody tr.row-in.error:hover {
       background: color-mix(in srgb, var(--red) 9%, var(--bg-elevated));

@@ -642,7 +642,7 @@
     align-items: start;
   }
 
-  @media (max-width: 980px) {
+  @media (max-width: 860px) {
     .grid {
       grid-template-columns: 1fr;
     }
@@ -741,54 +741,9 @@
     width: 100%;
   }
 
+  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 40px;
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
     background: var(--bg);
-    color: var(--text);
-    font-size: var(--text-sm);
-    cursor: pointer;
-    transition: background var(--dur) var(--ease);
-  }
-
-  .btn:hover:not(:disabled) {
-    background: var(--bg-sunken);
-  }
-
-  .btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .btn.primary:hover:not(:disabled) {
-    background: var(--accent-hover);
-  }
-
-  .btn.big {
-    min-height: 44px;
-    padding: 0 var(--space-5);
-    font-weight: 500;
-  }
-
-  .btn.ghost {
-    background: transparent;
-  }
-
-  .btn.sm {
-    min-height: 32px;
-    padding: 0 var(--space-3);
-    font-size: var(--text-xs);
   }
 
   .btn.danger {
@@ -996,7 +951,7 @@
     border: 1px solid var(--border);
     background: var(--bg-elevated);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-pop);
     z-index: 50;
     min-width: 220px;
   }

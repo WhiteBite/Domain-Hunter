@@ -77,7 +77,7 @@
     padding: 1px var(--space-2);
   }
   .badge[tabindex]:hover {
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-1);
   }
   .dot {
     width: 6px;

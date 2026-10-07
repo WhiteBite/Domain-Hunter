@@ -87,7 +87,7 @@
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-pop);
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-xs);
     color: var(--text-secondary);

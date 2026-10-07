@@ -274,8 +274,9 @@ Centered, `--text-xs`, top border. Not widened.
 ### As-is inventory (extracted from current components)
 
 #### Button variants
-There is no shared `.btn` base in `tokens.css`; each component defines its own.
-This is accepted debt (§7). The variants in use:
+A shared `.btn` base lives in `chrome.css`; components extend it via variant
+classes (`.primary`/`.stop`/`.ghost`/`.sm`/`.big`) or minimal scoped overrides.
+The variants in use:
 
 | Class | Where | Anatomy | States |
 |---|---|---|---|
@@ -412,36 +413,21 @@ preview, price, source technique).
 
 ## 7. Accepted debt
 
-- **`--font-mono` undefined.** Referenced by `GeneratorsTab.tray-chip` and
-  `DropsTab` via `var(--font-mono, ui-monospace, Consolas, monospace)` but never
-  declared in `tokens.css`. Wave 2/3 should add `--font-mono` to `:root` with
-  the same fallback stack so the mono ramp is centralized.
-- **No shared button base.** Each component redefines `.btn` / `.action` /
-  `.action-btn` locally with near-identical rules. A future wave should extract
-  a `.btn` primitive in `tokens.css` (or a shared component) and have variants
-  extend it. Until then, new buttons copy the closest existing variant.
-- **Primary button active state.** The token values for `.btn.primary`
-  (`--accent`, `--on-accent`, `--accent-hover`, `--accent-pressed`) are in
-  place, but the active `translateY(1px) scale(0.99)` transform is not yet
-  applied in any component. Wave 2 should add it to each `.btn.primary` rule.
-- **Shadow naming duplication.** `--shadow-sm/md/lg` (existing) and
-  `--shadow-1/2/pop` (new) overlap in role. `--shadow-1` ≈ `--shadow-sm`,
-  `--shadow-2` ≈ `--shadow-lg`, and `--shadow-pop` is new (popover with border
-  ring). Wave 2 should migrate components to the canonical `--shadow-1/2/pop`
-  names and deprecate the old aliases.
-- **Row-tint migration.** `ResultsTable` uses `color-mix(in srgb,
-  var(--green-soft) 50%/80%, transparent)` for available-row tints. The new
-  `--row-tint-available` / `--row-tint-error` tokens produce similar but not
-  identical values. Wave 2 should migrate row tints to the tokens directly.
+Resolved in the consolidated A–D branch: `--font-mono` token in `:root` (with
+CJK fallback in `--font-sans`); shared `.btn` primitive in `chrome.css`;
+`.btn.primary:active` transform (`translateY(1px) scale(0.99)`); shadow
+migration to the canonical `--shadow-1/2/pop` names (the `--shadow-sm/md/lg`
+aliases are removed); row tints on the `--row-tint-available`/`--row-tint-error`
+tokens; workspace breakpoint unified at 860px (CheckTab + GeneratorsTab).
+
+Still accepted:
+
 - **`.content` padding is uniform.** Work tabs and text tabs use the same
   `--space-5 --space-4 --space-7` padding. Wide work tabs may want larger
-  horizontal gutters at the 1680px cap — deferred to wave 2/3 evaluation.
-- **Layout breakpoints differ per tab.** CheckTab collapses its grid at 860px;
-  GeneratorsTab and DropsTab have their own. Wave 2/3 should converge on a
-  shared workspace breakpoint when formalizing the 340px left rail.
+  horizontal gutters at the 1680px cap — deferred until the 340px left rail
+  is formalized.
 - **`--text-2xl` (1.75rem) is unused.** Reserved for a future hero/landing
   heading; kept in the scale for completeness.
 - **Color-mix usage.** Several components use `color-mix(in srgb, ...)` for
-  hover/zebra tints (e.g. `tr.available` at 50%/80% `--green-soft`). This is
-  fine and consistent; new primitives should prefer the named `-soft` tokens
-  over inventing new mixes.
+  hover/zebra tints. This is fine and consistent; new primitives should prefer
+  the named `-soft` tokens over inventing new mixes.

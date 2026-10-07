@@ -26,7 +26,7 @@
   <div class="card footer-card">
     <p>{t('about.license')}</p>
     <a
-      class="btn"
+      class="btn primary"
       href="https://github.com/WhiteBite/Domain-Hunter"
       target="_blank"
       rel="noopener noreferrer"
@@ -87,22 +87,8 @@
     flex-wrap: wrap;
   }
 
+  /* Canonical .btn/.btn.primary live in chrome.css; local delta: weight. */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    min-height: 40px;
-    padding: 0 var(--space-4);
-    border-radius: var(--radius-md);
-    background: var(--accent);
-    color: var(--on-accent);
-    font-size: var(--text-sm);
     font-weight: 500;
-    text-decoration: none;
-    transition: background var(--dur) var(--ease);
-  }
-
-  .btn:hover {
-    background: var(--accent-hover);
-    text-decoration: none;
   }
 </style>

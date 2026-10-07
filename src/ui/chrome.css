@@ -25,7 +25,7 @@
   border: 1px solid var(--border);
   background: var(--bg-elevated);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-pop);
   z-index: 50;
   min-width: 140px;
 }
@@ -181,7 +181,7 @@
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-2);
   padding: var(--space-2) var(--space-5);
   font-size: var(--text-sm);
   z-index: 200;
@@ -205,5 +205,86 @@
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-1);
+}
+
+/* Shared button primitive (DESIGN §6): extend via .primary/.stop/.ghost/.sm/.big or minimal scoped overrides. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--bg-sunken);
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn.primary:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+
+.btn.stop {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--on-accent);
+}
+
+.btn.stop:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--red) 88%, black);
+  border-color: var(--red);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn.sm {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-xs);
+}
+
+.btn.big {
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  font-weight: 500;
 }

@@ -241,6 +241,39 @@ test.describe('Drops tab', () => {
       .toBe(true);
   });
 
+  test('shape filters: max length, no digits, no hyphens, min score compose', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-maxlen"]', '8');
+    await page.click('[data-testid="drops-toggle-nodigits"]');
+    await page.click('[data-testid="drops-toggle-nohyphens"]');
+    await page.selectOption('[data-testid="drops-select-minscore"]', '-4.5');
+
+    const readLabels = (): Promise<string[]> =>
+      page
+        .locator('[data-testid^="drops-row-copy-"]')
+        .evaluateAll((els) =>
+          els.map(
+            (e) => e.closest('li')?.querySelector('.domain')?.getAttribute('aria-label') ?? '',
+          ),
+        );
+
+    await expect
+      .poll(
+        async () => {
+          const labels = await readLabels();
+          return (
+            labels.length > 0 &&
+            labels.every((f) => {
+              const label = f.slice(0, f.lastIndexOf('.'));
+              return label.length <= 8 && !/[0-9]/.test(label) && !label.includes('-');
+            })
+          );
+        },
+        { timeout: 5_000 },
+      )
+      .toBe(true);
+  });
+
   test('sort by length orders visible rows ascending', async ({ page }) => {
     await gotoDrops(page);
     await page.selectOption('[data-testid="drops-select-sort"]', 'length');
