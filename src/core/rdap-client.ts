@@ -4,6 +4,7 @@
  */
 import type { CheckResult, InfraConfig, TldConfig } from '../types';
 import { queryNs } from './doh';
+import { parseRdapCard } from './rdap-card';
 
 export type OutcomeKind = 'ok' | '429';
 
@@ -309,7 +310,15 @@ export async function checkDomain(
 
     if (resp.status === 200) {
       opts.onOutcome?.('ok');
-      return { ...base, status: 'taken', source: 'rdap', latencyMs: Date.now() - startedAt };
+      const body: unknown = await resp.json().catch(() => null);
+      const card = parseRdapCard(body);
+      return {
+        ...base,
+        status: 'taken',
+        source: 'rdap',
+        latencyMs: Date.now() - startedAt,
+        ...(card != null && { card }),
+      };
     }
     if (resp.status === 404) {
       opts.onOutcome?.('ok');

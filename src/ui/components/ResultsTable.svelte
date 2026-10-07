@@ -639,6 +639,7 @@
         source: r.source,
         ts: r.checkedAt,
         tld: r.tld,
+        card: r.card,
       });
     };
     const e: EngineHandle = createEngine((event) => {

@@ -87,6 +87,7 @@
               status: entry.status,
               source: 'cache',
               checkedAt: entry.ts,
+              card: entry.card,
             });
           }
         }
@@ -178,6 +179,7 @@
           source: event.result.source,
           ts: event.result.checkedAt,
           tld: event.result.tld,
+          card: event.result.card,
         });
         completedByEngine.add(event.result.domain);
         const totalDone = cacheHitsCount + completedByEngine.size;
@@ -205,6 +207,7 @@
             source: r.source,
             ts: r.checkedAt,
             tld: r.tld,
+            card: r.card,
           });
           completedByEngine.add(r.domain);
         }
@@ -290,6 +293,7 @@
           status: entry.status,
           source: 'cache',
           checkedAt: entry.ts,
+          card: entry.card,
         });
       } else {
         remaining.push(c);

@@ -1,5 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { parseRdapCard } from '../src/core/rdap-card';
+import { checkDomain } from '../src/core/rdap-client';
+import { getFresh, put, clearCache } from '../src/core/cache';
+import type { InfraConfig, TldConfig } from '../src/types';
 import takenCom from './fixtures/rdap-card/taken-com.json';
 import takenDev from './fixtures/rdap-card/taken-dev.json';
 import takenIo from './fixtures/rdap-card/taken-io.json';
@@ -128,5 +131,97 @@ describe('parseRdapCard defensiveness', () => {
       NOW,
     );
     expect(card?.registrar).toBe('Second Registrar');
+  });
+});
+
+// ---- checkDomain / cache integration ----
+
+const TLD_COM: TldConfig = { tld: 'com', infra: 'verisign' };
+const INFRA_VERISIGN: InfraConfig = {
+  id: 'verisign',
+  rdapBase: 'https://rdap.verisign.com/{tld}/v1/domain/',
+  minPauseMs: 120,
+  maxParallel: 6,
+  trust: 'high',
+};
+
+function jsonResponse(status: number, body: unknown = {}, jsonThrows = false): Response {
+  return {
+    status,
+    headers: { get: () => null },
+    json: jsonThrows
+      ? async () => {
+          throw new Error('invalid JSON');
+        }
+      : async () => body,
+  } as unknown as Response;
+}
+
+function scriptFetch(responses: Response[]): typeof fetch {
+  let i = 0;
+  return vi.fn().mockImplementation(async () => {
+    const r = responses[Math.min(i, responses.length - 1)];
+    i += 1;
+    return r;
+  }) as unknown as typeof fetch;
+}
+
+const noSleep = async (): Promise<void> => {};
+
+describe('checkDomain attaches cards', () => {
+  it('HTTP 200 taken carries the parsed card', async () => {
+    const r = await checkDomain('google.com', TLD_COM, INFRA_VERISIGN, {
+      fetchImpl: scriptFetch([jsonResponse(200, takenCom)]),
+      sleep: noSleep,
+    });
+    expect(r.status).toBe('taken');
+    expect(r.source).toBe('rdap');
+    expect(r.card?.registrar).toBe('MarkMonitor Inc.');
+    expect(r.card?.registeredAt).toBe(Date.parse('1997-09-15T04:00:00Z'));
+    expect(r.card?.nameservers[0]).toBe('ns1.google.com');
+  });
+
+  it('HTTP 200 with an unparseable body stays taken without a card', async () => {
+    const r = await checkDomain('google.com', TLD_COM, INFRA_VERISIGN, {
+      fetchImpl: scriptFetch([jsonResponse(200, {}, true)]),
+      sleep: noSleep,
+    });
+    expect(r.status).toBe('taken');
+    expect(r.card).toBeUndefined();
+  });
+
+  it('404 available paths carry no card', async () => {
+    const r = await checkDomain('fresh-x9z7q.com', TLD_COM, INFRA_VERISIGN, {
+      fetchImpl: scriptFetch([jsonResponse(404), jsonResponse(200, { Status: 3 })]),
+      sleep: noSleep,
+    });
+    expect(r.status).toBe('available');
+    expect(r.card).toBeUndefined();
+  });
+});
+
+describe('cache card round-trip', () => {
+  beforeEach(() => clearCache());
+
+  it('preserves card through put/getFresh', () => {
+    const card = parseRdapCard(takenDev, NOW);
+    expect(card).not.toBeNull();
+    put('google.dev', {
+      status: 'taken',
+      source: 'rdap',
+      ts: Date.now(),
+      tld: 'dev',
+      card: card ?? undefined,
+    });
+    const entry = getFresh('google.dev', 60_000);
+    expect(entry?.card?.registrar).toBe('MarkMonitor Inc.');
+    expect(entry?.card?.registeredAt).toBe(Date.parse('2018-06-13T22:30:20.594Z'));
+  });
+
+  it('legacy entries without card still load', () => {
+    put('plain.com', { status: 'taken', source: 'rdap', ts: Date.now(), tld: 'com' });
+    const entry = getFresh('plain.com', 60_000);
+    expect(entry?.status).toBe('taken');
+    expect(entry?.card).toBeUndefined();
   });
 });
