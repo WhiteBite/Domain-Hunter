@@ -15,15 +15,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
-          cache: npm
 
       - run: npm ci
 
       - run: npm run typecheck && npm run test:coverage && npm run lint
 
-      # prepack runs build:cli; NPM_TOKEN is owner-provided; dispatch-only, never agent-triggered.
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Tokenless OIDC trusted publishing; Node 24 bundles npm >= 11.5.1 (required). prepack runs build:cli.
+      - run: npm publish --access public
