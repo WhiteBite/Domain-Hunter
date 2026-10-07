@@ -10,6 +10,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { openApp, navigateToTab } from './helpers/setup';
 import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockDoh, mockRdap } from './helpers/mocks';
+import { rdapTakenFull } from './fixtures/rdap';
 import { DEFAULT_SETTINGS } from '../../src/types';
 import {
   ianaBootstrap,
@@ -421,6 +422,42 @@ test.describe('Misc coverage', () => {
     await expect(
       page.locator('[data-testid="results-row-registrar-zzqxtest1-com-cloudflare"]'),
     ).toHaveAttribute('href', 'https://domains.cloudflare.com/');
+    expectNoLeaks(page);
+  });
+
+  test('detail row shows the RDAP registry card for taken domains', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, {
+      bootstrap: ianaBootstrap(),
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    await mockRdap(page, [
+      { domain: 'zzqxcard1.com', response: rdapTakenFull('zzqxcard1.com') },
+    ]);
+    await openApp(page, { seed: { 'dh:v1:pricing': seedPricingTable() } });
+
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxcard1.com');
+    await page.click('[data-testid="check-button-start"]');
+    await expect(page.locator('[data-testid="results-row-zzqxcard1-com"]')).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.click('[data-testid="results-row-menu-zzqxcard1-com"]');
+    await page.click('[data-testid="results-row-detail-zzqxcard1-com"]');
+
+    const card = page.locator('[data-testid="results-row-card-zzqxcard1-com"]');
+    await expect(card).toBeVisible({ timeout: 10_000 });
+    await expect(card).toContainText('Test Registrar LLC');
+    await expect(card).toContainText('2015-03-01');
+    await expect(card).toContainText('2030-03-01');
+    await expect(card).toContainText('2026-02-01');
+    await expect(card).toContainText('client transfer prohibited');
+    await expect(card).toContainText('ns1.example.test');
     expectNoLeaks(page);
   });
 

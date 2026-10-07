@@ -81,7 +81,7 @@ export interface RdapRule {
   domain: string;
   response: {
     status: 200 | 404 | 429 | 500 | 503;
-    body?: Record<string, unknown>;
+    body?: object;
     headers?: Record<string, string>;
   };
 }

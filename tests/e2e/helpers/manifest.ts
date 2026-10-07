@@ -191,6 +191,7 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'results-row-buy-', // buy links: results-row-buy-{domain}
   'results-row-detail-buy-', // detail buy links: results-row-detail-buy-{domain}
   'results-row-expanded-', // expanded detail rows: results-row-expanded-{domain}
+  'results-row-card-', // RDAP registry card inside expanded detail rows: results-row-card-{domain}
   'results-row-registrars-', // registrar price comparison cells: results-row-registrars-{domain}
   'results-row-registrar-', // per-registrar buy links inside the comparison: results-row-registrar-{domain}-{registrarId}
   'results-row-menu-', // row overflow menu triggers: results-row-menu-{domain}

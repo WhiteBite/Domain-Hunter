@@ -41,6 +41,37 @@ export function rdapTaken(domain: string): RdapMockResponse {
   return { status: 200, body };
 }
 
+/** RDAP 200 with full card details: registrar entity, expiration, nameservers. */
+export function rdapTakenFull(domain: string): RdapMockResponse {
+  return {
+    status: 200,
+    body: {
+      objectClassName: 'domain',
+      ldhName: domain,
+      handle: domain,
+      status: ['client transfer prohibited', 'server delete prohibited'],
+      events: [
+        { eventAction: 'registration', eventDate: '2015-03-01T00:00:00Z' },
+        { eventAction: 'expiration', eventDate: '2030-03-01T00:00:00Z' },
+        { eventAction: 'last changed', eventDate: '2026-02-01T00:00:00Z' },
+      ],
+      entities: [
+        {
+          roles: ['registrar'],
+          vcardArray: [
+            'vcard',
+            [
+              ['version', {}, 'text', '4.0'],
+              ['fn', {}, 'text', 'Test Registrar LLC'],
+            ],
+          ],
+        },
+      ],
+      nameservers: [{ ldhName: 'NS1.EXAMPLE.TEST' }, { ldhName: 'ns2.example.test' }],
+    },
+  };
+}
+
 /** RDAP 404 — domain not found in registry (availability depends on trust level). */
 export function rdapFree(): RdapMockResponse {
   return { status: 404 };
