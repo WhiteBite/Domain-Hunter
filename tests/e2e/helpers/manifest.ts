@@ -162,6 +162,12 @@ export const ALL_TESTIDS = [
   'drops-button-add-all', // add-all button
   'drops-button-export-csv', // export filtered list as CSV file
   'drops-button-copy-list', // copy filtered list to clipboard
+  'drops-input-minlen', // min label-length filter input
+  'drops-input-maxlen', // max label-length filter input
+  'drops-toggle-nodigits', // no-digits filter chip
+  'drops-toggle-nohyphens', // no-hyphens filter chip
+  'drops-select-minscore', // min pronounceability score select
+  'drops-select-sort', // drops sort select
 
   // ---- PricesTab.svelte ----
   'prices-search', // zone filter search input
@@ -218,6 +224,10 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'drops-row-fav-', // drops favorite stars: drops-row-fav-{domain}
   'drops-row-copy-', // drops copy buttons: drops-row-copy-{domain}
   'drops-row-add-', // drops add buttons: drops-row-add-{domain}
+  'drops-row-expand-', // drops row expand toggles: drops-row-expand-{domain}
+  'drops-row-history-', // wayback history panels: drops-row-history-{domain}
+  'drops-row-snapshot-', // wayback snapshot links: drops-row-snapshot-{domain}
+  'drops-row-calendar-', // wayback calendar links: drops-row-calendar-{domain}
 
   // ---- PricesTab.svelte ----
   'prices-row-', // price matrix rows: prices-row-{tld}

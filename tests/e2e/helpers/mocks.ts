@@ -405,6 +405,10 @@ function buildAllowlist(): RegExp[] {
   // DigMyName
   patterns.push(/^https:\/\/api\.digmyname\.com\/functions\/v1\/public-api\/check/);
 
+  // Wayback availability signal (lazy fetch on drops row expand, SPEC §13)
+  patterns.push(/^https:\/\/archive\.org\/wayback\/available/);
+  patterns.push(/^https:\/\/web\.archive\.org\//);
+
   // GitHub (auth + social + profile links)
   patterns.push(/^https:\/\/api\.github\.com\//);
   patterns.push(/^https:\/\/github\.com\//);

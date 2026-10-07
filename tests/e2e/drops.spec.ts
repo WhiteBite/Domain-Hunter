@@ -36,6 +36,12 @@ const FIRST_ROW_TESTID = `results-row-${FIRST_SID}`;
 // RENDER_CAP in DropsTab.svelte — max visible rows.
 const RENDER_CAP = 300;
 
+// Snapshot labels are short (max ~12); count derived at runtime so daily snapshot refreshes don't break it.
+const MINLEN = 12;
+const MINLEN_COUNT = snapshotList.filter(
+  (row) => (row.split(' ')[0] ?? '').length >= MINLEN,
+).length;
+
 // Pick a TLD among the top-20 select options whose count fits under the
 // render cap, so the select-filter test can assert an exact row count.
 const tldCounts = new Map<string, number>();
@@ -205,5 +211,105 @@ test.describe('Drops tab', () => {
     const content = await capturedCsv(page);
     expect(content).toContain('Domain,TLD');
     expect(content).toContain(FIRST_DOMAIN);
+  });
+
+  test('min-length filter keeps only labels at least that long', async ({ page }) => {
+    await gotoDrops(page);
+    await page.fill('[data-testid="drops-input-minlen"]', String(MINLEN));
+
+    const readLabels = (): Promise<string[]> =>
+      page
+        .locator('[data-testid^="drops-row-copy-"]')
+        .evaluateAll((els) =>
+          els.map(
+            (e) => e.closest('li')?.querySelector('.domain')?.getAttribute('aria-label') ?? '',
+          ),
+        );
+
+    const expectedCount = Math.min(MINLEN_COUNT, RENDER_CAP);
+    await expect
+      .poll(
+        async () => {
+          const labels = await readLabels();
+          return (
+            labels.length === expectedCount &&
+            labels.every((f) => f.slice(0, f.lastIndexOf('.')).length >= MINLEN)
+          );
+        },
+        { timeout: 5_000 },
+      )
+      .toBe(true);
+  });
+
+  test('sort by length orders visible rows ascending', async ({ page }) => {
+    await gotoDrops(page);
+    await page.selectOption('[data-testid="drops-select-sort"]', 'length');
+
+    const readLens = (): Promise<number[]> =>
+      page
+        .locator('[data-testid^="drops-row-copy-"]')
+        .evaluateAll((els) =>
+          els.map((e) => {
+            const full =
+              e.closest('li')?.querySelector('.domain')?.getAttribute('aria-label') ?? '';
+            return full.slice(0, full.lastIndexOf('.')).length;
+          }),
+        );
+
+    await expect
+      .poll(
+        async () => {
+          const lens = await readLens();
+          return (
+            lens.length > 1 &&
+            lens.every((v, i) => i === 0 || (lens[i - 1] ?? 0) <= v)
+          );
+        },
+        { timeout: 5_000 },
+      )
+      .toBe(true);
+  });
+
+  test('row expand lazily fetches wayback history once, re-open served from cache', async ({
+    page,
+  }) => {
+    let hits = 0;
+    await page.route(/^https:\/\/archive\.org\/wayback\/available/, async (route) => {
+      hits += 1;
+      await route.fulfill({
+        status: 200,
+        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: FIRST_DOMAIN,
+          archived_snapshots: {
+            closest: {
+              status: '200',
+              available: true,
+              url: `http://web.archive.org/web/20200101000000/https://${FIRST_DOMAIN}/`,
+              timestamp: '20200101000000',
+            },
+          },
+        }),
+      });
+    });
+
+    await gotoDrops(page);
+    await page.click(`[data-testid="drops-row-expand-${FIRST_SID}"]`);
+
+    await expect(page.locator(`[data-testid="drops-row-history-${FIRST_SID}"]`)).toBeVisible();
+    await expect(page.locator(`[data-testid="drops-row-snapshot-${FIRST_SID}"]`)).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.locator(`[data-testid="drops-row-calendar-${FIRST_SID}"]`)).toHaveAttribute(
+      'href',
+      /web\.archive\.org/,
+    );
+    expect(hits).toBe(1);
+
+    // Collapse + re-expand: served from dh:v1:wayback, no second fetch.
+    await page.click(`[data-testid="drops-row-expand-${FIRST_SID}"]`);
+    await page.click(`[data-testid="drops-row-expand-${FIRST_SID}"]`);
+    await expect(page.locator(`[data-testid="drops-row-snapshot-${FIRST_SID}"]`)).toBeVisible();
+    expect(hits).toBe(1);
   });
 });

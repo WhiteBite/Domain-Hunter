@@ -1,9 +1,26 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { t } from '../../i18n';
-  import { activeTab, checkInput, pendingShareRun } from '../store';
+  import { activeTab, checkInput, pendingShareRun, pricing, settings } from '../store';
   import { favorites, toggleFavorite } from '../favorites';
   import { filterDrops, type DroppedDomain } from '../../core/dropped';
+  import { bestEntry, formatPrice } from '../../pricing/pricing';
+  import { readJson, writeJson } from '../settings';
+  import {
+    applyDropsFilters,
+    sortDrops,
+    domainScore,
+    waybackAvailableUrl,
+    waybackCalendarUrl,
+    interpretWaybackAvailable,
+    pruneWaybackCache,
+    isWaybackFresh,
+    WAYBACK_CACHE_KEY,
+    type DropsFilters,
+    type DropsSort,
+    type WaybackVerdict,
+    type WaybackCacheEntry,
+  } from '../drops-tools';
   import { copyText } from '../clipboard';
   import { downloadCsv, toSimpleCsv } from '../csv';
   import { createToast, sanitizeId } from '../utils';
@@ -39,10 +56,85 @@
   // ---- UI state ----
   let query = $state('');
   let tldFilter = $state<string>(''); // '' = all
+  let minLen = $state<string | number>('');
+  let maxLen = $state<string | number>('');
+  let noDigits = $state(false);
+  let noHyphens = $state(false);
+  let minScore = $state('');
+  let sortMode = $state<DropsSort>('default');
 
-  const filtered = $derived(filterDrops(allDomains, query, tldFilter || null));
+  // bind:value on type=number yields numbers; typed input yields strings.
+  function lenValue(v: string | number): number | null {
+    const n = typeof v === 'number' ? v : v.trim() === '' ? NaN : Number(v);
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
+  }
+
+  const dropsFilters = $derived<DropsFilters>({
+    minLen: lenValue(minLen),
+    maxLen: lenValue(maxLen),
+    noDigits,
+    noHyphens,
+    minScore: minScore === '' ? null : Number(minScore),
+  });
+
+  const filtered = $derived(
+    sortDrops(
+      applyDropsFilters(filterDrops(allDomains, query, tldFilter || null), dropsFilters),
+      sortMode,
+    ),
+  );
   const RENDER_CAP = 300;
   const visible = $derived(filtered.slice(0, RENDER_CAP));
+
+  const priceByTld = $derived.by(() => {
+    const state = $pricing;
+    const map = new Map<string, string>();
+    if (!state) return map;
+    const s = $settings;
+    for (const dom of visible) {
+      if (map.has(dom.tld)) continue;
+      const best = bestEntry(state.table, dom.tld);
+      map.set(dom.tld, best ? formatPrice(best.entry.reg, s) : '');
+    }
+    return map;
+  });
+
+  // ---- Lazy Wayback history (on row expand only, cached 30d) ----
+  let expandedRow = $state<string | null>(null);
+  let waybackState = $state<
+    Record<string, { loading: boolean; failed?: boolean; v?: WaybackVerdict }>
+  >({});
+
+  function toggleRow(fullName: string): void {
+    if (expandedRow === fullName) {
+      expandedRow = null;
+      return;
+    }
+    expandedRow = fullName;
+    void loadWayback(fullName);
+  }
+
+  async function loadWayback(domain: string): Promise<void> {
+    const cached = readJson<Record<string, WaybackCacheEntry>>(WAYBACK_CACHE_KEY) ?? {};
+    const entry = cached[domain];
+    if (entry && isWaybackFresh(entry, Date.now())) {
+      waybackState = { ...waybackState, [domain]: { loading: false, v: entry.v } };
+      return;
+    }
+    waybackState = { ...waybackState, [domain]: { loading: true } };
+    try {
+      const resp = await fetch(waybackAvailableUrl(domain));
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const v = interpretWaybackAvailable(await resp.json());
+      writeJson(
+        WAYBACK_CACHE_KEY,
+        pruneWaybackCache({ ...cached, [domain]: { v, ts: Date.now() } }, Date.now()),
+      );
+      waybackState = { ...waybackState, [domain]: { loading: false, v } };
+    } catch {
+      waybackState = { ...waybackState, [domain]: { loading: false, failed: true } };
+    }
+  }
 
   const snapshotDate = $derived(
     data.generatedAt ? new Date(data.generatedAt).toISOString().slice(0, 10) : '',
@@ -152,6 +244,76 @@
     </button>
   </div>
 
+  <div class="filters">
+    <label class="inline">
+      {t('drops.filter.minLen')}
+      <input
+        class="len"
+        type="number"
+        min="1"
+        max="63"
+        bind:value={minLen}
+        aria-label={t('drops.filter.minLen')}
+        data-testid="drops-input-minlen"
+      />
+    </label>
+    <label class="inline">
+      {t('drops.filter.maxLen')}
+      <input
+        class="len"
+        type="number"
+        min="1"
+        max="63"
+        bind:value={maxLen}
+        aria-label={t('drops.filter.maxLen')}
+        data-testid="drops-input-maxlen"
+      />
+    </label>
+    <button
+      class="chip-toggle"
+      type="button"
+      class:active={noDigits}
+      aria-pressed={noDigits}
+      onclick={() => (noDigits = !noDigits)}
+      data-testid="drops-toggle-nodigits"
+    >
+      {t('drops.filter.noDigits')}
+    </button>
+    <button
+      class="chip-toggle"
+      type="button"
+      class:active={noHyphens}
+      aria-pressed={noHyphens}
+      onclick={() => (noHyphens = !noHyphens)}
+      data-testid="drops-toggle-nohyphens"
+    >
+      {t('drops.filter.noHyphens')}
+    </button>
+    <label class="inline">
+      {t('drops.filter.minScore')}
+      <select
+        bind:value={minScore}
+        aria-label={t('drops.filter.minScore')}
+        data-testid="drops-select-minscore"
+      >
+        <option value="">{t('drops.filter.scoreOff')}</option>
+        <option value="-5">≥ −5.0</option>
+        <option value="-4.5">≥ −4.5</option>
+        <option value="-4">≥ −4.0</option>
+        <option value="-3.5">≥ −3.5</option>
+      </select>
+    </label>
+    <label class="inline">
+      {t('drops.sort')}
+      <select bind:value={sortMode} aria-label={t('drops.sort')} data-testid="drops-select-sort">
+        <option value="default">{t('drops.sort.default')}</option>
+        <option value="score">{t('drops.sort.score')}</option>
+        <option value="length">{t('drops.sort.length')}</option>
+        <option value="az">{t('drops.sort.az')}</option>
+      </select>
+    </label>
+  </div>
+
   {#if visible.length === 0}
     <p class="muted empty">{t('drops.empty')}</p>
   {:else}
@@ -159,8 +321,10 @@
       {#each visible as dom (dom.d + '.' + dom.tld)}
         {@const fullName = dom.d + '.' + dom.tld}
         {@const sid = sanitizeId(fullName)}
-        <li class="row">
+        <li class="row" class:expanded={expandedRow === fullName}>
           <span class="domain" aria-label={fullName}>{dom.d}<span class="tld">.{dom.tld}</span></span>
+          <span class="row-score nums" title={t('drops.col.score')}>{domainScore(dom.d).toFixed(1)}</span>
+          <span class="row-price nums">{priceByTld.get(dom.tld) || '—'}</span>
           <span class="row-actions">
             <button
               class="icon-btn fav"
@@ -195,7 +359,52 @@
                 <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
               </button>
             </Tooltip>
+            <button
+              class="icon-btn"
+              type="button"
+              onclick={() => toggleRow(fullName)}
+              aria-expanded={expandedRow === fullName}
+              aria-label={t('drops.expand.aria', { domain: fullName })}
+              title={t('drops.expand.aria', { domain: fullName })}
+              data-testid={`drops-row-expand-${sid}`}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </button>
           </span>
+          {#if expandedRow === fullName}
+            {@const wb = waybackState[fullName]}
+            <div class="row-history" data-testid={`drops-row-history-${sid}`}>
+              {#if wb?.loading}
+                <span class="muted">{t('drops.wayback.loading')}</span>
+              {:else if wb?.failed}
+                <span class="muted">{t('drops.wayback.failed')}</span>
+              {:else if wb?.v?.hasHistory}
+                <span>{t('drops.wayback.has')}</span>
+                {#if wb.v.snapshotUrl}
+                  <a
+                    href={wb.v.snapshotUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid={`drops-row-snapshot-${sid}`}
+                  >{t('drops.wayback.snapshot')}</a>
+                {/if}
+                <a
+                  href={waybackCalendarUrl(fullName)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid={`drops-row-calendar-${sid}`}
+                >{t('drops.wayback.calendar')}</a>
+              {:else if wb?.v}
+                <span class="muted">{t('drops.wayback.none')}</span>
+                <a
+                  href={waybackCalendarUrl(fullName)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid={`drops-row-calendar-${sid}`}
+                >{t('drops.wayback.calendar')}</a>
+              {/if}
+            </div>
+          {/if}
         </li>
       {/each}
     </ul>
@@ -341,6 +550,86 @@
     gap: var(--space-1);
     flex: none;
     align-items: center;
+  }
+
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .filters .inline {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .filters input.len {
+    width: 72px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+    font-family: inherit;
+    min-height: 32px;
+  }
+
+  .chip-toggle {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 4px var(--space-3);
+    font-size: var(--text-xs);
+    font-family: inherit;
+    cursor: pointer;
+    min-height: 32px;
+    transition: all var(--dur) var(--ease);
+  }
+
+  .chip-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .row.expanded {
+    flex-wrap: wrap;
+  }
+
+  .row-score,
+  .row-price {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    flex: none;
+    text-align: right;
+  }
+
+  .row-score {
+    min-width: 4.5ch;
+  }
+
+  .row-price {
+    min-width: 6ch;
+  }
+
+  .row-history {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    padding-top: var(--space-1);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .row-history a {
+    color: var(--accent-text);
   }
 
   .icon-btn {

@@ -412,6 +412,10 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
   cached in `dh:v1:fx` with a 7-day TTL; on failure the stored or manually entered rates stand.
   The CLI/MCP mirror this via `dh:cli:fx` (7d) when RUB/EUR display is requested without
   explicit rate flags; explicit flags always win.
+- Wayback history signal: `archive.org/wayback/available?url={domain}` is fetched lazily —
+  only when a Drops row is expanded — and cached in `dh:v1:wayback` (cap 500 entries, 30-day
+  TTL); link-outs go to `web.archive.org` (target=_blank, noopener). On failure the row
+  simply shows no history; nothing is retried until the next expand.
 
 ## 14. CI/CD
 
