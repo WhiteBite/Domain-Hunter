@@ -460,6 +460,14 @@ test.describe('Misc coverage', () => {
     await expect(card).toContainText('2026-02-01');
     await expect(card).toContainText('client transfer prohibited');
     await expect(card).toContainText('ns1.example.test');
+
+    // Trademark link-outs carry the SLD label into USPTO/TMview searches.
+    await expect(
+      page.locator('[data-testid="results-row-tm-uspto-zzqxcard1-com"]'),
+    ).toHaveAttribute('href', /tmsearch\.uspto\.gov/);
+    await expect(
+      page.locator('[data-testid="results-row-tm-tmview-zzqxcard1-com"]'),
+    ).toHaveAttribute('href', /tmdn\.org/);
     expectNoLeaks(page);
   });
 

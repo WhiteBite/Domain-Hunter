@@ -78,6 +78,9 @@ const NETWORK_ALLOWLIST = [
   // Wayback history signal for the Drops tab (lazy, on row expand, SPEC §13)
   /^archive\.org$/,
   /^web\.archive\.org$/,
+  // Trademark link-outs from detail rows (link-only, never fetched)
+  /^tmsearch\.uspto\.gov$/,
+  /^www\.tmdn\.org$/,
   // DigMyName (per-domain buy-link API)
   /^api\.digmyname\.com$/,
   // GitHub (device flow + user API + profile links)

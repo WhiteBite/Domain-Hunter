@@ -230,6 +230,8 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'projects-button-csv-', // project CSV export buttons: projects-button-csv-{index}
   'projects-button-json-', // project JSON export buttons: projects-button-json-{index}
   'projects-button-delete-', // project delete buttons: projects-button-delete-{index}
+  'results-row-tm-uspto-', // USPTO trademark search links: results-row-tm-uspto-{domain}
+  'results-row-tm-tmview-', // TMview trademark search links: results-row-tm-tmview-{domain}
   'gen-more-', // tray section show more/less: gen-more-{section}
   'gen-group-toggle-', // tray group collapse toggles: gen-group-toggle-{groupId}
   'gen-theme-chip-', // theme category chips: gen-theme-chip-{id}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { CheckResult, PriceEntry, Settings } from '../../types';
   import type { RegistrarQuote } from '../registrar-quotes';
+  import { trademarkLabel, usptoSearchUrl, tmviewSearchUrl } from '../trademark';
   import { formatPrice } from '../../pricing/pricing';
   import { settings } from '../store';
   import { t } from '../../i18n';
@@ -28,6 +29,7 @@
   let { sid, row, isAvail, isErr, detail, quotes, premiumOverride }: Props = $props();
 
   const s: Settings = $derived($settings);
+  const tmLabel = $derived(trademarkLabel(row.result.domain));
 
   function fmtDate(ms: number): string {
     return new Date(ms).toISOString().slice(0, 10);
@@ -141,6 +143,22 @@
             </div>
           {/if}
         {/if}
+        <span class="detail-trademark">
+          <a
+            href={usptoSearchUrl(tmLabel)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t('results.detail.tm.hint')}
+            data-testid={`results-row-tm-uspto-${sid}`}
+          >{t('results.detail.tm.uspto')}</a>
+          <a
+            href={tmviewSearchUrl(tmLabel)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t('results.detail.tm.hint')}
+            data-testid={`results-row-tm-tmview-${sid}`}
+          >{t('results.detail.tm.tmview')}</a>
+        </span>
       </div>
       {#if row.result.card}
         {@const card = row.result.card}
@@ -365,6 +383,22 @@
     flex-wrap: wrap;
     gap: var(--space-1);
     color: var(--text-secondary);
+  }
+
+  .detail-trademark {
+    display: flex;
+    gap: var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .detail-trademark a {
+    color: var(--accent-text);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--border-strong);
+  }
+
+  .detail-trademark a:hover {
+    border-bottom-color: var(--accent);
   }
   /* Shared .chip-tag (+ .premium variant) lives in src/ui/chrome.css. */
 
