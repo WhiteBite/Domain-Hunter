@@ -169,7 +169,7 @@ Si vous faites référence à Domain Hunter dans un travail académique ou techn
 @software{domain_hunter_2026,
   author = {WhiteBite},
   title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
-  version = {2.0.0},
+  version = {2.1.0},
   year = {2026},
   url = {https://github.com/WhiteBite/Domain-Hunter},
   license = {MIT}

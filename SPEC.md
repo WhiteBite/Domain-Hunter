@@ -505,9 +505,21 @@ automation. They are additive surfaces — no app behavior changes.
   with a 24h TTL cache (stored in `~/.domain-hunter/storage.json`) and
   silent fallback to the bundled copies, plus `open.er-api.com` (§13) for
   display rates when RUB/EUR output is requested without explicit `--rate-*`
-  flags (7d cache, `dh:cli:fx`). The app runtime allowlist (§13) is
-  unchanged.
+  flags (7d cache, `dh:cli:fx`). Opt-in only: `prices --source dynadot`
+  calls `api.dynadot.com/api3.json?tld_price` with a user-stored API key
+  (`keys set dynadot <key>`, same 0600 storage file, never echoed) and merges
+  the result as an extra registrar over curated zones; a missing key is a
+  hard error, a fetch failure degrades to a stderr warning
+  (`docs/registrar-keys.md`). The app runtime allowlist (§13) is unchanged.
 - **JSON-on-stdout contract.** Every command prints one JSON object to
-  stdout (exit 0 on success, 1 on runtime error, 2 on usage error). Progress
-  and diagnostics go to stderr only. See `cli/contract.ts` for the exact
-  shapes.
+  stdout (exit 0 on success, 1 on runtime error, 2 on usage error, 10 when
+  `watch` detects a status flip). `check`, `prices`, and `drops` also accept
+  `--format table|csv` for human/spreadsheet output. Progress and diagnostics
+  go to stderr only. Commands: `check`, `prices`, `generate`, `find`, `tlds`,
+  `drops`, `watch`, `keys`, `completions`. See `cli/contract.ts` for the
+  exact shapes.
+- **MCP tools.** The server (`cli/mcp/server.ts`) registers `check_availability`,
+  `get_prices`, `generate_names`, `find_domains`, `list_zones`, `list_drops`,
+  and `price_trends` — thin wrappers over `cli/core.ts` with zod input
+  schemas. Long-polling `watch` and secret-handling `keys` are deliberately
+  not exposed as MCP tools.

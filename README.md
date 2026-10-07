@@ -72,7 +72,7 @@ The **Social tab** runs live username checks on GitHub and TikTok; X, YouTube, I
 - **Copy as CSV / Markdown / TSV** — clipboard formats for pasting into spreadsheets, docs, or Notion
 - **Bulk actions for available domains** — copy the list of all available domains, favorite them all at once, or export an available-only CSV
 - **Share links** — `#s=` encodes query + zones and auto-starts the run on open
-- **Favorites with watchlist** — star any domain into a persistent shortlist; freed/taken badges appear on reload
+- **Favorites with watchlist** — star any domain into a persistent shortlist; freed/taken badges appear on reload, and an optional timed re-check (Settings) can raise a browser notification when the watchlist changes
 - **Run history** — recent completed runs are saved locally; click to restore the full search (query, zones, results) in one tap
 - **Last-search restore** — after a page reload the app restores your previous input and zone selection so you can resume instantly
 - **Social checks with GitHub token** — the Social tab supports optional GitHub device-flow authentication for higher-rate username lookups
@@ -141,13 +141,29 @@ node dist-cli/domain-hunter.mjs find mybrand --budget 15 --currency USD --tlds c
 
 # List loaded TLD zones (curated tlds.json + IANA bootstrap)
 node dist-cli/domain-hunter.mjs tlds --infra verisign
+
+# List dropped domains from the bundled daily snapshot
+node dist-cli/domain-hunter.mjs drops --query brand --tld com --limit 50
+
+# Poll domains until a status flips (exit 10 on flip)
+node dist-cli/domain-hunter.mjs watch mybrand.com --interval 300 --rounds 24
+
+# Human/spreadsheet output instead of JSON
+node dist-cli/domain-hunter.mjs prices --tlds com,io --format table
+
+# Shell completions (bash | zsh | fish)
+node dist-cli/domain-hunter.mjs completions bash
+
+# Optional keyed registrar source (Dynadot; see docs/registrar-keys.md)
+node dist-cli/domain-hunter.mjs keys set dynadot <api-key>
+node dist-cli/domain-hunter.mjs prices --source dynadot --tlds com,io
 ```
 
-Exit codes: `0` success, `1` runtime error, `2` usage error. The result JSON is printed to stdout; `--help` shows all flags.
+Exit codes: `0` success, `1` runtime error, `2` usage error, `10` watch detected a status flip. The result JSON is printed to stdout (`check`/`prices`/`drops` also support `--format table|csv`); `--help` shows all flags.
 
 ### JSON contract
 
-Every command prints a single JSON object to stdout with a `command` field (`check` / `prices` / `generate` / `find` / `tlds`) and command-specific payload. See `cli/contract.ts` for the exact shapes. The `check` outcome includes per-domain `status` (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache`, and optional `price` — the same fields the browser table renders.
+Every command prints a single JSON object to stdout with a `command` field (`check` / `prices` / `generate` / `find` / `tlds` / `drops` / `watch` / `keys`) and command-specific payload. See `cli/contract.ts` for the exact shapes. The `check` outcome includes per-domain `status` (`available` / `probably_available` / `taken` / `unknown` / `error`), `source`, `fromCache`, and optional `price` — the same fields the browser table renders.
 
 ### Fresh config snapshots
 
@@ -155,7 +171,7 @@ The CLI fetches fresh `tlds.json` and `pricing.snapshot.json` from the `main` br
 
 ### MCP server
 
-An MCP (Model Context Protocol) server exposes the five commands as tools so AI agents can call them directly:
+An MCP (Model Context Protocol) server exposes the core commands as tools (`check_availability`, `get_prices`, `generate_names`, `find_domains`, `list_zones`, `list_drops`, `price_trends`) so AI agents can call them directly:
 
 ```jsonc
 // Claude / opencode-style config
@@ -280,7 +296,7 @@ If you reference Domain Hunter in academic or technical work, please use the met
 @software{domain_hunter_2026,
   author = {WhiteBite},
   title = {Domain Hunter — Bulk Domain Availability Checker & Name Generator},
-  version = {2.0.0},
+  version = {2.1.0},
   year = {2026},
   url = {https://github.com/WhiteBite/Domain-Hunter},
   license = {MIT}
@@ -308,9 +324,10 @@ If Domain Hunter saved you time, a ⭐ helps others find it too.
 ## Why choose this
 
 - **One self-contained HTML file** — the whole app compiles into a single `dist/index.html` that works offline from `file://`: no server, no API keys, no tracking.
+- **Installable (PWA)** — the hosted build ships a web app manifest and an offline service worker, so it installs to your desktop/home screen and keeps working without a network.
 - **Honest results** — a three-state model (`available` / `probably_available` / `unknown`): low-trust zones are corroborated via DoH before anything is called free, because a wrong "available" is worse than "unknown".
 - **148 zones, 18 registries** — live registrar prices, promo-trap flags, and 3-year TCO with zero paid APIs.
-- **Tested** — 4,458 unit tests plus 139 Playwright E2E, 8 UI languages, MIT license.
+- **Tested** — 4,564 unit tests plus 146 Playwright E2E, 8 UI languages, MIT license.
 
 ## Examples
 
