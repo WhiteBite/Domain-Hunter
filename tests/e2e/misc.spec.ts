@@ -8,6 +8,8 @@
  * Selectors: data-testid ONLY. All network mocked; zero leaks asserted.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { openApp, navigateToTab } from './helpers/setup';
 import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockDoh, mockRdap } from './helpers/mocks';
 import { rdapTakenFull } from './fixtures/rdap';
@@ -458,6 +460,46 @@ test.describe('Misc coverage', () => {
     await expect(card).toContainText('2026-02-01');
     await expect(card).toContainText('client transfer prohibited');
     await expect(card).toContainText('ns1.example.test');
+    expectNoLeaks(page);
+  });
+
+  test('new-zones chip announces bootstrap discoveries unseen last visit', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    const boot = ianaBootstrap();
+    boot.services.push([['future'], ['https://rdap.future-registry.test/domain/']]);
+    await mockAll(page, {
+      bootstrap: boot,
+      porkbun: porkbunPricing().pricing,
+      cloudflare: cloudflarePricing(),
+    });
+    const curated = (
+      JSON.parse(
+        readFileSync(fileURLToPath(new URL('../../src/config/tlds.json', import.meta.url)), 'utf8'),
+      ) as { tlds: { tld: string }[] }
+    ).tlds.map((z) => z.tld);
+    await openApp(page, {
+      seed: {
+        'dh:v1:pricing': seedPricingTable(),
+        'dh:v1:zones-seen': curated,
+      },
+    });
+
+    const chip = page.locator('[data-testid="tld-new-zones"]');
+    await expect(chip).toBeVisible({ timeout: 15_000 });
+    await expect(chip).toHaveText('+1');
+
+    const countBefore = Number(
+      await page.locator('[data-testid="tld-selected-count"]').textContent(),
+    );
+    await chip.click();
+    await expect(chip).toBeHidden();
+    await expect
+      .poll(
+        async () =>
+          Number(await page.locator('[data-testid="tld-selected-count"]').textContent()),
+        { timeout: 5_000 },
+      )
+      .toBe(countBefore + 1);
     expectNoLeaks(page);
   });
 

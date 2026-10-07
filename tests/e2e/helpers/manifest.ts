@@ -78,6 +78,7 @@ export const ALL_TESTIDS = [
   'tld-button-clear', // clear selection button
   'tld-selected-count', // "N selected" live region
   'tld-picker-toggle', // popover trigger button
+  'tld-new-zones', // "+N new zones since last visit" chip
 
   // ---- ResultsTable.svelte ----
   'results-filter-all', // filter: all

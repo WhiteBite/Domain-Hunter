@@ -10,6 +10,7 @@
   import { favorites } from './ui/favorites';
   import { refreshWatchlist } from './ui/watchlist';
   import { startWatchScheduler } from './ui/watch-scheduler';
+  import { initZonesTracker } from './ui/zones-tracker';
   import { refreshFxIfStale } from './ui/fx';
   import { fetchBootstrap, mergeWithCurated } from './core/bootstrap';
   import type { Locale, Settings } from './types';
@@ -161,11 +162,13 @@
       void (async () => {
         try {
           const json = await fetchBootstrap();
-          if (json == null) return;
-          registry.set(mergeWithCurated(get(registry), json));
+          if (json != null) {
+            registry.set(mergeWithCurated(get(registry), json));
+          }
         } catch (err) {
           console.warn('bootstrap discovery failed', err);
         }
+        initZonesTracker(get(registry).tlds.map((c) => c.tld));
       })();
     };
     const ric = (
