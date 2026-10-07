@@ -155,6 +155,7 @@ export const ru: Dict = {
   'card.age.years': '{n} г.',
   'card.ns': 'NS-серверы',
   'card.statuses.aria': 'Коды статуса EPP',
+  'drawer.close': 'Закрыть',
 'results.detail.registrars': 'Цены по регистраторам',
 'results.detail.registrars.more': '+ещё {n}',
   'gen.tray.copy': 'Скопировать список',

@@ -155,6 +155,7 @@ export const de: Dict = {
   'card.age.years': '{n} Jahre',
   'card.ns': 'Nameserver',
   'card.statuses.aria': 'EPP-Statuscodes',
+  'drawer.close': 'Schließen',
 'results.detail.registrars': 'Preise nach Registrar',
 'results.detail.registrars.more': '+{n} weitere',
   'gen.tray.copy': 'Liste kopieren',

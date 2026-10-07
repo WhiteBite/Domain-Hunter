@@ -155,6 +155,7 @@ export const ja: Dict = {
   'card.age.years': '{n}年',
   'card.ns': 'ネームサーバー',
   'card.statuses.aria': 'EPPステータスコード',
+  'drawer.close': '閉じる',
 'results.detail.registrars': 'レジストラ別価格',
 'results.detail.registrars.more': '+{n} 件',
   'gen.tray.copy': 'リストをコピー',

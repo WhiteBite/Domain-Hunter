@@ -155,6 +155,7 @@ export const zh: Dict = {
   'card.age.years': '{n} 年',
   'card.ns': '域名服务器',
   'card.statuses.aria': 'EPP 状态码',
+  'drawer.close': '关闭',
 'results.detail.registrars': '按注册商价格',
 'results.detail.registrars.more': '+{n} 个更多',
   'gen.tray.copy': '复制列表',

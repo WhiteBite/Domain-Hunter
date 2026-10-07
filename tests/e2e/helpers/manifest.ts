@@ -42,6 +42,7 @@ export const ALL_TESTIDS = [
   'check-panel-toggle', // left input panel collapse/expand toggle
   'check-history-toggle', // history section collapsible toggle
   'history-clear', // clear history button
+  'check-history-drawer', // history slide-over drawer panel (Drawer testid prop)
   'check-watch-banner', // watchlist status-flip banner
   'check-watch-dismiss', // watch banner dismiss button
   'check-watch-show', // watch banner "show favorites" button
