@@ -347,10 +347,12 @@ key gain `tabindex="0"` and a hover shadow.
 `--text-xs`, max 280px, `pointer-events: none`, with `.tip-arrow` (45°-rotated
 square). `Escape` dismisses. This is the reference for popover/flyout geometry.
 
-### NEW primitives (to be built in waves 2–3)
+### NEW primitives (waves 2–3 — all built)
 
-These do not exist yet. Later waves implement them against the tokens above and
-the anatomy/states defined here.
+Popover multiselect (TldPicker), row overflow "⋯" menu (RowMenu), slide-over
+drawer (Drawer.svelte, hosts the history list), and expandable candidate rows
+(GeneratorsTab tray) are implemented against the tokens above and the
+anatomy/states defined below.
 
 #### Popover multiselect (wave 2 — TLD picker replacement)
 Replaces the always-visible TLD chip grid with a trigger + floating panel.
