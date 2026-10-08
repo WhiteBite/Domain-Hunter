@@ -1,1043 +1,1352 @@
 {
-  "generatedAt": "2026-10-05T11:08:32.321Z",
+  "generatedAt": "2026-10-08T11:13:10.055Z",
   "tlds": {
     "com": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 172,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 175,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "net": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 132,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 125,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "cc": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 172,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 169,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "tv": {
       "http": 400,
       "cors": true,
-      "ok": false,
-      "ms": 183,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 159,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "dev": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 215,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 158,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "app": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 181,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 226,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "page": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 181,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 173,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "new": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 164,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 152,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "day": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 166,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 150,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "how": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 51,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 62,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "ing": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 61,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 62,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "meme": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 73,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 75,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "zip": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 67,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 105,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "mov": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 58,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 69,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "foo": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 145,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 148,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "dad": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 143,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 153,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "phd": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 144,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 150,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "prof": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 134,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 136,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "esq": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 152,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 148,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "nexus": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 146,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 150,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "rsvp": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 144,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 135,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "soy": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 142,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 155,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "boo": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 136,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 147,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "channel": {
       "http": 429,
       "cors": false,
-      "ok": false,
-      "ms": 151,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 136,
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "io": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 321,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 306,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "ai": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 318,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 275,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "me": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 209,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 202,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "sh": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 175,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 159,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "ac": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 116,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 119,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "pro": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 86,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 79,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "info": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 87,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 272,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "live": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 98,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 82,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "world": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 100,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 110,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "email": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 81,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "studio": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 84,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 83,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "agency": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 97,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 88,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "life": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 110,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 77,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "digital": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 100,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 97,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "guru": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 110,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 90,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "ninja": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 84,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "works": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 92,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 102,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "today": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 86,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 79,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "news": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 81,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 98,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "media": {
       "http": 404,
       "cors": true,
       "ok": true,
+      "directOk": true,
+      "cfOk": null,
       "ms": 85,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "finance": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 99,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "money": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 83,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 79,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "fund": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 109,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 105,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "estate": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 89,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "engineering": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 77,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 97,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "tools": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 82,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "services": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 107,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 77,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "support": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 95,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 88,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "consulting": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 86,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 88,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "business": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 86,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 106,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "company": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 80,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 94,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "group": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 91,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 87,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "network": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 102,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 86,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "systems": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 89,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 82,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "technology": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 79,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 102,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "solutions": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 85,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 94,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "global": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 108,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "community": {
       "http": 404,
       "cors": true,
       "ok": true,
+      "directOk": true,
+      "cfOk": null,
       "ms": 85,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "social": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 87,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 84,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "expert": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 84,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 77,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "academy": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 98,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 102,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "education": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 97,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 107,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "university": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 85,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 84,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "design": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 92,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 73,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "gallery": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 93,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 87,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "video": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 83,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 107,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "events": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 108,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 97,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "market": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 86,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 79,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "pizza": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 100,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 87,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "bar": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 70,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 73,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "casino": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 78,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 96,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "games": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 95,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 86,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "dog": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 82,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 100,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "cat": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 71,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 72,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "wtf": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 88,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "cool": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 101,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 83,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "pink": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 87,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 97,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "blue": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 90,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 86,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "green": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 100,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 328,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "gold": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 84,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 78,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "fitness": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 111,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 85,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "doctor": {
       "http": 404,
       "cors": true,
       "ok": true,
+      "directOk": true,
+      "cfOk": null,
       "ms": 86,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "taxi": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 88,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 101,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "team": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 83,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 86,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "tennis": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 87,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 78,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "soccer": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 92,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 86,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "xyz": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 621,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 557,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "lol": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 588,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 529,
+      "ts": "2026-10-08T11:13:10.054Z"
     },
     "icu": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 540,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 484,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "cyou": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 535,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 440,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "bond": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 426,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 412,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "sbs": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 109,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 111,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "cfd": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 115,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 125,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "art": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 108,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 122,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "lat": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 111,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 132,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "monster": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 106,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 111,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "ooo": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 111,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 106,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "quest": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 117,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 125,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "cam": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 112,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 111,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "help": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 107,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 103,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "mom": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 114,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 149,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "baby": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 115,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 131,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "beauty": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 110,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 114,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "best": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 103,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 111,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "fans": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 118,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 116,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "game": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 110,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 116,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "hair": {
       "http": 404,
       "cors": true,
       "ok": true,
+      "directOk": true,
+      "cfOk": null,
       "ms": 110,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "homes": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 125,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 109,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "inc": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 151,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 177,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "pics": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 110,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 107,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "rent": {
       "http": 404,
       "cors": true,
       "ok": true,
+      "directOk": true,
+      "cfOk": null,
       "ms": 113,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "skin": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 114,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 111,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "tickets": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 113,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 136,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "yachts": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 113,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 115,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "college": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 114,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 109,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "tech": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 122,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 100,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "site": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 91,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 79,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "online": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 78,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 72,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "fun": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 91,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 74,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "space": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 69,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 67,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "store": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 22,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 30,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "website": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 23,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 28,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "press": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 32,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 29,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "host": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 26,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 27,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "uno": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 29,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 30,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "pw": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 31,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 29,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "cloud": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 198,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 181,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "link": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 172,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 171,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "top": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 160,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 158,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "win": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 159,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 169,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "bid": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 56,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 70,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "loan": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 26,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 28,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "men": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 26,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 28,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "de": {
       "http": 404,
       "cors": false,
       "ok": true,
-      "ms": 562,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 614,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "co": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 208,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 236,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "us": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 511,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 321,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "uk": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 579,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 596,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "nl": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 764,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 705,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "fr": {
       "http": 0,
       "cors": false,
-      "ok": false,
-      "ms": 340,
-      "error": "fetch https://rdap.afnic.fr/domain/dh-health-pnkplxpxcejn.fr failed: fetch failed",
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 113,
+      "error": "fetch https://rdap.afnic.fr/domain/dh-health-oplm7g5qxy65.fr failed: fetch failed",
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "ch": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 463,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 478,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "ru": {
       "http": 0,
       "cors": false,
-      "ok": false,
-      "ms": 328,
-      "error": "fetch https://rdap.tcinet.ru/domain/dh-health-dy9vlfj85nvr.ru failed: fetch failed",
-      "ts": "2026-10-05T11:08:32.321Z"
+      "ok": true,
+      "directOk": false,
+      "cfOk": true,
+      "ms": 315,
+      "error": "fetch https://rdap.tcinet.ru/domain/dh-health-bol8gyjudtz1.ru failed: fetch failed",
+      "cfHttp": 404,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "so": {
       "http": 404,
       "cors": false,
       "ok": true,
-      "ms": 890,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 907,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "ly": {
       "http": 404,
       "cors": false,
       "ok": true,
-      "ms": 1021,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 1084,
+      "ts": "2026-10-08T11:13:10.055Z"
     },
     "pl": {
       "http": 404,
       "cors": true,
       "ok": true,
-      "ms": 960,
-      "ts": "2026-10-05T11:08:32.321Z"
+      "directOk": true,
+      "cfOk": null,
+      "ms": 659,
+      "ts": "2026-10-08T11:13:10.055Z"
     }
   }
 }
