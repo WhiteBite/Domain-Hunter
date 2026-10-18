@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-17T08:22:57.675Z",
+  "generatedAt": "2026-10-18T08:42:39.401Z",
   "tlds": {
     "com": {
       "http": 404,
@@ -7,8 +7,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 164,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 168,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "net": {
       "http": 404,
@@ -16,8 +16,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 116,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 132,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "cc": {
       "http": 404,
@@ -25,8 +25,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 153,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 162,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "tv": {
       "http": 400,
@@ -34,9 +34,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 150,
+      "ms": 164,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "dev": {
       "http": 404,
@@ -44,8 +44,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 281,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 232,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "app": {
       "http": 404,
@@ -53,8 +53,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 253,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 286,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "page": {
       "http": 404,
@@ -62,8 +62,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 234,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 207,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "new": {
       "http": 404,
@@ -71,8 +71,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 109,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 93,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "day": {
       "http": 404,
@@ -80,8 +80,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 107,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 99,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "how": {
       "http": 404,
@@ -89,8 +89,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 70,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 63,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "ing": {
       "http": 404,
@@ -99,7 +99,7 @@
       "directOk": true,
       "cfOk": null,
       "ms": 64,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "meme": {
       "http": 404,
@@ -107,8 +107,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 85,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 58,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "zip": {
       "http": 404,
@@ -117,26 +117,26 @@
       "directOk": true,
       "cfOk": null,
       "ms": 70,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "mov": {
-      "http": 404,
-      "cors": true,
-      "ok": true,
-      "directOk": true,
-      "cfOk": null,
-      "ms": 81,
-      "ts": "2026-10-17T08:22:57.675Z"
-    },
-    "foo": {
       "http": 429,
       "cors": false,
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 159,
+      "ms": 187,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
+    },
+    "foo": {
+      "http": 404,
+      "cors": true,
+      "ok": true,
+      "directOk": true,
+      "cfOk": null,
+      "ms": 62,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "dad": {
       "http": 429,
@@ -144,9 +144,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 148,
+      "ms": 137,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "phd": {
       "http": 429,
@@ -154,9 +154,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 156,
+      "ms": 134,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "prof": {
       "http": 429,
@@ -164,9 +164,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 149,
+      "ms": 152,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "esq": {
       "http": 429,
@@ -174,9 +174,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 149,
+      "ms": 134,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "nexus": {
       "http": 429,
@@ -184,9 +184,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 156,
+      "ms": 136,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "rsvp": {
       "http": 429,
@@ -194,9 +194,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 165,
+      "ms": 133,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "soy": {
       "http": 429,
@@ -204,9 +204,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 153,
+      "ms": 150,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "boo": {
       "http": 429,
@@ -214,9 +214,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 144,
+      "ms": 137,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "channel": {
       "http": 429,
@@ -224,9 +224,9 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 163,
+      "ms": 136,
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "io": {
       "http": 404,
@@ -234,8 +234,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 112,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 207,
+      "ts": "2026-10-18T08:42:39.400Z"
     },
     "ai": {
       "http": 404,
@@ -243,8 +243,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 99,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 175,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "me": {
       "http": 404,
@@ -252,8 +252,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 51,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 326,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "sh": {
       "http": 404,
@@ -261,8 +261,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 49,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 368,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "ac": {
       "http": 404,
@@ -270,8 +270,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 35,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 132,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "pro": {
       "http": 404,
@@ -279,8 +279,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 101,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "info": {
       "http": 404,
@@ -288,8 +288,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 54,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 110,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "live": {
       "http": 404,
@@ -297,8 +297,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 32,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 119,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "world": {
       "http": 404,
@@ -306,8 +306,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 31,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 112,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "email": {
       "http": 404,
@@ -315,8 +315,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 32,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 102,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "studio": {
       "http": 404,
@@ -324,8 +324,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 32,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 116,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "agency": {
       "http": 404,
@@ -333,8 +333,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 116,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "life": {
       "http": 404,
@@ -342,8 +342,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 34,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 94,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "digital": {
       "http": 404,
@@ -351,8 +351,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 35,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 100,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "guru": {
       "http": 404,
@@ -360,8 +360,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 41,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 111,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "ninja": {
       "http": 404,
@@ -369,8 +369,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 113,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "works": {
       "http": 404,
@@ -378,8 +378,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 38,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 102,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "today": {
       "http": 404,
@@ -387,8 +387,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 105,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "news": {
       "http": 404,
@@ -396,8 +396,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 39,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 114,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "media": {
       "http": 404,
@@ -405,8 +405,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 37,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 108,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "finance": {
       "http": 404,
@@ -414,8 +414,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 39,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 103,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "money": {
       "http": 404,
@@ -423,8 +423,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 35,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 107,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "fund": {
       "http": 404,
@@ -432,8 +432,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 37,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 118,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "estate": {
       "http": 404,
@@ -441,8 +441,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 39,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 106,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "engineering": {
       "http": 404,
@@ -450,8 +450,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 37,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 113,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "tools": {
       "http": 404,
@@ -459,8 +459,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 34,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 108,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "services": {
       "http": 404,
@@ -468,8 +468,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 34,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 113,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "support": {
       "http": 404,
@@ -477,8 +477,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 39,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 94,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "consulting": {
       "http": 404,
@@ -486,8 +486,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 37,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "business": {
       "http": 404,
@@ -495,8 +495,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "company": {
       "http": 404,
@@ -504,8 +504,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 34,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "group": {
       "http": 404,
@@ -513,8 +513,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 102,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "network": {
       "http": 404,
@@ -522,8 +522,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 31,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "systems": {
       "http": 404,
@@ -531,8 +531,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 40,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 103,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "technology": {
       "http": 404,
@@ -540,8 +540,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 41,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 95,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "solutions": {
       "http": 404,
@@ -549,8 +549,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 32,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 116,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "global": {
       "http": 404,
@@ -558,8 +558,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 105,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "community": {
       "http": 404,
@@ -567,8 +567,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 103,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "social": {
       "http": 404,
@@ -576,8 +576,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 35,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 93,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "expert": {
       "http": 404,
@@ -585,8 +585,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 119,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "academy": {
       "http": 404,
@@ -594,8 +594,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 38,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "education": {
       "http": 404,
@@ -603,8 +603,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 42,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 105,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "university": {
       "http": 404,
@@ -612,8 +612,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 35,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 97,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "design": {
       "http": 404,
@@ -621,8 +621,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 21,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 99,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "gallery": {
       "http": 404,
@@ -630,8 +630,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "video": {
       "http": 404,
@@ -639,8 +639,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 114,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "events": {
       "http": 404,
@@ -648,8 +648,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 94,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "market": {
       "http": 404,
@@ -657,8 +657,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 34,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 113,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "pizza": {
       "http": 404,
@@ -666,8 +666,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 43,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 110,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "bar": {
       "http": 404,
@@ -675,8 +675,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 20,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 91,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "casino": {
       "http": 404,
@@ -684,8 +684,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 100,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "games": {
       "http": 404,
@@ -693,8 +693,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 40,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 110,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "dog": {
       "http": 404,
@@ -702,8 +702,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 34,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 108,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "cat": {
       "http": 404,
@@ -711,8 +711,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 21,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 98,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "wtf": {
       "http": 404,
@@ -720,8 +720,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 37,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 92,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "cool": {
       "http": 404,
@@ -729,8 +729,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 31,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 123,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "pink": {
       "http": 404,
@@ -738,8 +738,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 108,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "blue": {
       "http": 404,
@@ -747,8 +747,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 106,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "green": {
       "http": 404,
@@ -756,8 +756,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 33,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 110,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "gold": {
       "http": 404,
@@ -765,8 +765,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 37,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 113,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "fitness": {
       "http": 404,
@@ -774,8 +774,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 32,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 106,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "doctor": {
       "http": 404,
@@ -783,8 +783,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 36,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 96,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "taxi": {
       "http": 404,
@@ -792,8 +792,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 48,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 128,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "team": {
       "http": 404,
@@ -801,8 +801,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 32,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 107,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "tennis": {
       "http": 404,
@@ -810,8 +810,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 38,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 99,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "soccer": {
       "http": 404,
@@ -819,8 +819,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 34,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 118,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "xyz": {
       "http": 404,
@@ -828,8 +828,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 565,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 410,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "lol": {
       "http": 404,
@@ -837,8 +837,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 542,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 343,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "icu": {
       "http": 404,
@@ -846,8 +846,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 533,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 340,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "cyou": {
       "http": 404,
@@ -855,8 +855,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 560,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 343,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "bond": {
       "http": 404,
@@ -864,8 +864,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 403,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 320,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "sbs": {
       "http": 404,
@@ -873,8 +873,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 141,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 119,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "cfd": {
       "http": 404,
@@ -882,8 +882,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 158,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 289,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "art": {
       "http": 404,
@@ -891,8 +891,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 162,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 106,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "lat": {
       "http": 404,
@@ -900,8 +900,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 148,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 104,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "monster": {
       "http": 404,
@@ -909,8 +909,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 144,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 104,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "ooo": {
       "http": 404,
@@ -918,8 +918,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 139,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 106,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "quest": {
       "http": 404,
@@ -927,8 +927,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 152,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 102,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "cam": {
       "http": 404,
@@ -936,8 +936,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 151,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 108,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "help": {
       "http": 404,
@@ -945,8 +945,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 138,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 107,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "mom": {
       "http": 404,
@@ -954,8 +954,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 151,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 118,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "baby": {
       "http": 404,
@@ -963,8 +963,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 144,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 111,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "beauty": {
       "http": 404,
@@ -972,8 +972,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 152,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 107,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "best": {
       "http": 404,
@@ -981,8 +981,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 142,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 106,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "fans": {
       "http": 404,
@@ -990,8 +990,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 147,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 108,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "game": {
       "http": 404,
@@ -999,8 +999,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 141,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 108,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "hair": {
       "http": 404,
@@ -1008,8 +1008,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 166,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 118,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "homes": {
       "http": 404,
@@ -1017,8 +1017,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 139,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 107,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "inc": {
       "http": 404,
@@ -1026,8 +1026,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 155,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 104,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "pics": {
       "http": 404,
@@ -1035,8 +1035,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 153,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "rent": {
       "http": 404,
@@ -1044,8 +1044,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 145,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 104,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "skin": {
       "http": 404,
@@ -1053,8 +1053,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 150,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 111,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "tickets": {
       "http": 404,
@@ -1062,8 +1062,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 155,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 113,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "yachts": {
       "http": 404,
@@ -1071,8 +1071,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 147,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 104,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "college": {
       "http": 404,
@@ -1080,8 +1080,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 154,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 109,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "tech": {
       "http": 404,
@@ -1089,8 +1089,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 275,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 89,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "site": {
       "http": 404,
@@ -1098,8 +1098,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 193,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 61,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "online": {
       "http": 404,
@@ -1107,8 +1107,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 192,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 68,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "fun": {
       "http": 404,
@@ -1116,8 +1116,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 203,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 57,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "space": {
       "http": 404,
@@ -1125,8 +1125,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 190,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 24,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "store": {
       "http": 404,
@@ -1134,8 +1134,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 70,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 58,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "website": {
       "http": 404,
@@ -1143,8 +1143,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 74,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 26,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "press": {
       "http": 404,
@@ -1152,8 +1152,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 71,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 27,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "host": {
       "http": 404,
@@ -1161,8 +1161,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 74,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 25,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "uno": {
       "http": 404,
@@ -1170,8 +1170,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 71,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 26,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "pw": {
       "http": 404,
@@ -1179,8 +1179,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 75,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 26,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "cloud": {
       "http": 404,
@@ -1188,8 +1188,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 321,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 147,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "link": {
       "http": 404,
@@ -1197,8 +1197,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 311,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 158,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "top": {
       "http": 404,
@@ -1206,8 +1206,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 286,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 132,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "win": {
       "http": 404,
@@ -1215,8 +1215,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 257,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 129,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "bid": {
       "http": 404,
@@ -1224,8 +1224,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 191,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 49,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "loan": {
       "http": 404,
@@ -1233,8 +1233,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 70,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 24,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "men": {
       "http": 404,
@@ -1242,8 +1242,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 74,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 24,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "de": {
       "http": 404,
@@ -1251,8 +1251,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 663,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 742,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "co": {
       "http": 404,
@@ -1260,8 +1260,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 346,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 255,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "us": {
       "http": 404,
@@ -1269,8 +1269,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 538,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 674,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "uk": {
       "http": 404,
@@ -1278,8 +1278,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 769,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 729,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "nl": {
       "http": 404,
@@ -1287,8 +1287,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 730,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 702,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "fr": {
       "http": 0,
@@ -1296,10 +1296,10 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 166,
-      "error": "fetch https://rdap.afnic.fr/domain/dh-health-o5rhzmoxarok.fr failed: fetch failed",
+      "ms": 245,
+      "error": "fetch https://rdap.afnic.fr/domain/dh-health-y4yitercbh34.fr failed: fetch failed",
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "ch": {
       "http": 404,
@@ -1307,8 +1307,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 612,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 476,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "ru": {
       "http": 0,
@@ -1316,10 +1316,10 @@
       "ok": true,
       "directOk": false,
       "cfOk": true,
-      "ms": 270,
-      "error": "fetch https://rdap.tcinet.ru/domain/dh-health-vwjsq0yovpc3.ru failed: fetch failed",
+      "ms": 415,
+      "error": "fetch https://rdap.tcinet.ru/domain/dh-health-ftudpcoibyn5.ru failed: fetch failed",
       "cfHttp": 404,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "so": {
       "http": 404,
@@ -1327,8 +1327,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 1122,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 995,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "ly": {
       "http": 404,
@@ -1336,8 +1336,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 1433,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 1035,
+      "ts": "2026-10-18T08:42:39.401Z"
     },
     "pl": {
       "http": 404,
@@ -1345,8 +1345,8 @@
       "ok": true,
       "directOk": true,
       "cfOk": null,
-      "ms": 1207,
-      "ts": "2026-10-17T08:22:57.675Z"
+      "ms": 1053,
+      "ts": "2026-10-18T08:42:39.401Z"
     }
   }
 }
