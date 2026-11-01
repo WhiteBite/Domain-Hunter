@@ -162,16 +162,41 @@ test.describe('Prices tab', () => {
     const seed = seedPricingTable();
     seed.table.tlds['рф'] = { webhost1: { reg: 235, renew: 495, transfer: null } };
     seed.table.sourceRub = { webhost1: { 'рф': [18900, 39900] } };
-    seed.table.webhost1UpdatedAt = '2026-11-01T19:00:00Z';
+    seed.table.webhost1UpdatedAt = '2026-11-02T01:00:00Z';
+    seed.table.webhost1RenewalUpdatedAt = '2026-11-01T19:00:00Z';
     await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
     await gotoPrices(page);
     await expect(page.getByTestId('prices-webhost1-note')).toContainText('2026-11-01');
-    await expect(page.getByTestId('prices-webhost1-note')).toContainText('indicative');
+    await expect(page.getByTestId('prices-webhost1-note')).toContainText('2026-11-02');
+    await expect(page.getByTestId('prices-webhost1-note')).toContainText('renewals are known only');
     await page.getByTestId('prices-search').fill('рф');
     const row = page.getByTestId('prices-row-рф');
     await expect(row).toContainText('₽189.00');
     await expect(row).toContainText('Renewal: ₽399.00');
     await expect(row).not.toContainText('₽211.50');
+  });
+
+  test('shows AdminVPS annual prices and seller promotion in UI and CSV', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds['рф'] = { adminvps: { reg: 252, renew: 1786, transfer: null } };
+    seed.table.sourceRub = { adminvps: { 'рф': [20300, 143900] } };
+    seed.table.sourcePromotions = { adminvps: ['рф'] };
+    seed.table.adminvpsUpdatedAt = '2026-11-01T21:00:00Z';
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-adminvps-note')).toContainText('2026-11-01');
+    await expect(page.getByTestId('prices-adminvps-note')).toContainText('conditions');
+    await page.getByTestId('prices-search').fill('рф');
+    const row = page.getByTestId('prices-row-рф');
+    await expect(row).toContainText('₽203.00');
+    await expect(row).toContainText('Renewal: ₽1,439.00');
+    await expect(row).toContainText('promo');
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByTestId('prices-export-csv').click();
+    const download = await downloadPromise;
+    const csv = readFileSync((await download.path())!, 'utf8');
+    expect(csv).toContain('Seller-marked promotions');
+    expect(csv).toContain('AdminVPS');
   });
 
   test('shows Sprinthost original RUB, renewal and material conditions', async ({ page }) => {

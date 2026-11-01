@@ -925,6 +925,18 @@
                       <span class="chip-tag" tabindex="0" data-testid={`results-webhost1-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
                     </Tooltip>
                   {/if}
+                  {#if !row.isPremiumOverride && row.best?.registrarId === 'adminvps'}
+                    <Tooltip text={t('prices.adminvps.caveat')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag" tabindex="0" data-testid={`results-adminvps-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                    </Tooltip>
+                  {/if}
+                  {#if !row.isPremiumOverride && row.best && $pricing?.table.sourcePromotions?.[row.best.registrarId]?.includes(row.result.tld)}
+                    <Tooltip text={t('prices.source.sellerPromo')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag promo" tabindex="0" data-testid={`results-seller-promo-${sid}`}>{t('price.promo')}</span>
+                    </Tooltip>
+                  {/if}
                   {#if row.isPremiumOverride}
                     <Tooltip text={t('results.detail.premium', { price: formatPrice(row.firstYear, $settings) })}>
                       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -999,6 +1011,12 @@
                   <Tooltip text={t('prices.webhost1.caveat')}>
                     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
                     <span class="chip-tag" tabindex="0" data-testid={`results-webhost1-renew-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                  </Tooltip>
+                {/if}
+                {#if row.renewalRegistrarId === 'adminvps'}
+                  <Tooltip text={t('prices.adminvps.caveat')}>
+                    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                    <span class="chip-tag" tabindex="0" data-testid={`results-adminvps-renew-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
                   </Tooltip>
                 {/if}
               </td>

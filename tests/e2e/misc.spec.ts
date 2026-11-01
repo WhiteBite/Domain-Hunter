@@ -680,6 +680,33 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
+  test('AdminVPS result prices carry source and seller promotion warnings', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.adminvps = { reg: 252, renew: 1786, transfer: null }; // synthetic zone quote
+    seed.table.sourceRub = { adminvps: { com: [20300, 143900] } };
+    seed.table.sourcePromotions = { adminvps: ['com'] };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row.locator('.price-cell')).toContainText('₽203.00');
+    // Default renewal is the cheapest market renewal; switch to the same seller.
+    await page.getByTestId('results-pair-toggle').click();
+    await expect(row.locator('.renew-cell')).toContainText('₽1,439.00');
+    await expect(row.getByTestId('results-adminvps-estimate-zzqxtest1-com')).toBeVisible();
+    await expect(row.getByTestId('results-adminvps-renew-estimate-zzqxtest1-com')).toBeVisible();
+    await expect(row.getByTestId('results-seller-promo-zzqxtest1-com')).toBeVisible();
+    expectNoLeaks(page);
+  });
+
   test('results use the original HostiMan RUB price when available', async ({ page }) => {
     await assertNoNetworkLeaks(page);
     await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });

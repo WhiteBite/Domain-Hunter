@@ -242,6 +242,12 @@ interface CompactSnapshot {
   sprinthostUpdatedAt?: string | null;
   /** Last successful WebHOST1 price collection or public-page import. */
   webhost1UpdatedAt?: string | null;
+  /** Date of the separately sourced WebHOST1 renewals. */
+  webhost1RenewalUpdatedAt?: string | null;
+  /** Last successful AdminVPS public-price import. */
+  adminvpsUpdatedAt?: string | null;
+  /** Seller-labeled promotions: registrar → zones. */
+  sourcePromotions?: Record<string, string[]>;
   /** Published renewal lower bounds, in RUB, not exact renewal prices. */
   timewebRenewalFromRub?: Record<string, number>;
   /** Original prices in kopecks: registrar → TLD → [registration, renewal]. */
@@ -287,6 +293,9 @@ function expandCompactSnapshot(json: unknown): PricingTable | null {
     timewebUpdatedAt: typeof raw.timewebUpdatedAt === 'string' ? raw.timewebUpdatedAt : null,
     sprinthostUpdatedAt: typeof raw.sprinthostUpdatedAt === 'string' ? raw.sprinthostUpdatedAt : null,
     webhost1UpdatedAt: typeof raw.webhost1UpdatedAt === 'string' ? raw.webhost1UpdatedAt : null,
+    webhost1RenewalUpdatedAt: typeof raw.webhost1RenewalUpdatedAt === 'string' ? raw.webhost1RenewalUpdatedAt : null,
+    adminvpsUpdatedAt: typeof raw.adminvpsUpdatedAt === 'string' ? raw.adminvpsUpdatedAt : null,
+    sourcePromotions: raw.sourcePromotions ?? {},
     timewebRenewalFromRub: raw.timewebRenewalFromRub ?? {},
     sourceRub: raw.sourceRub ?? {},
     coupons: raw.coupons ?? {},

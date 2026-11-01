@@ -11,6 +11,7 @@ import {
   applySuccessfulSource,
   sourceUpdatedAt,
   mergeSourceRub,
+  mergeSourcePromotions,
 } from '../scripts/harvest-prices.mjs';
 
 describe('expandCompactSnapshot', () => {
@@ -288,5 +289,22 @@ describe('WebHOST1 source carry-over', () => {
     expect(old.tlds.com.porkbun.reg).toBe(300);
     expect(mergeSourceRub(previous, { webhost1: fresh }).webhost1).toEqual({ ru: [20000, 40000] });
     expect(sourceUpdatedAt(['webhost1'], 'old', 'webhost1', 'new')).toBe('new');
+  });
+});
+
+
+describe('AdminVPS source and seller promotion carry-over', () => {
+  it('keeps metadata on failure and replaces stale metadata on success', () => {
+    const prev = { adminvps: ['ru', 'com'] };
+    const fresh = { tlds: { ru: { adminvps: { reg: 100, renew: 200, transfer: null } } }, coupons: {}, sourcePromotions: { adminvps: ['ru'] }, sourceRub: { adminvps: { ru: [20000, 40000] as [number, number] } } };
+    expect(mergeSourcePromotions(prev, {})).toEqual(prev);
+    expect(mergeSourcePromotions(prev, { adminvps: fresh })).toEqual({ adminvps: ['ru'] });
+    expect(mergeSourcePromotions(prev, { adminvps: { tlds: {}, coupons: {} } })).toEqual({ adminvps: [] });
+    expect(mergeSourceRub({}, { adminvps: fresh }).adminvps).toEqual({ ru: [20000, 40000] });
+    const old = { tlds: { ru: { adminvps: { reg: 1, renew: 2, transfer: null } }, com: { adminvps: { reg: 3, renew: 4, transfer: null }, porkbun: { reg: 5, renew: 6, transfer: null } } }, coupons: {} };
+    applySuccessfulSource(old, fresh, 'adminvps');
+    expect(old.tlds.com.adminvps).toBeUndefined();
+    expect(old.tlds.com.porkbun.reg).toBe(5);
+    expect(sourceUpdatedAt([], 'old', 'adminvps', 'new')).toBe('old');
   });
 });

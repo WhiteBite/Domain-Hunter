@@ -50,8 +50,9 @@ export function formatOutcome(outcome: Formattable, format: OutputFormat): strin
       cents(r.best?.renew ?? null),
       cents(r.tco3UsdCents),
       r.promoTrap ? 'yes' : '',
+      r.best?.sellerPromotion ? 'yes' : '',
     ]);
-    const headers = ['tld', 'best_registrar', 'reg_usd', 'renew_usd', 'tco3_usd', 'promo_trap'];
+    const headers = ['tld', 'best_registrar', 'reg_usd', 'renew_usd', 'tco3_usd', 'promo_trap', 'seller_promo'];
     if (format === 'csv') return toSimpleCsv(rows, headers);
     return renderTable(headers, rows);
   }

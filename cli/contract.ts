@@ -83,10 +83,10 @@ export interface KeysOutcome {
 
 export interface PricesRow {
   tld: string;
-  best: { registrarId: string; reg: number | null; renew: number | null } | null;
+  best: { registrarId: string; reg: number | null; renew: number | null; sellerPromotion?: boolean } | null;
   tco3UsdCents: number | null;
   promoTrap: boolean;
-  entries: Record<string, { reg: number | null; renew: number | null; transfer: number | null }>;
+  entries: Record<string, { reg: number | null; renew: number | null; transfer: number | null; sellerPromotion?: boolean }>;
 }
 
 export interface PricesOutcome {

@@ -94,7 +94,7 @@ export function replaceRegistrar(target, fresh, registrarId) {
 
 /** Apply an independently successful source without redating stale zone prices. */
 export function applySuccessfulSource(target, fresh, name) {
-  if (name === 'regru' || name === 'hostiman' || name === 'timeweb' || name === 'sprinthost' || name === 'webhost1') replaceRegistrar(target, fresh, name);
+  if (name === 'regru' || name === 'hostiman' || name === 'timeweb' || name === 'sprinthost' || name === 'webhost1' || name === 'adminvps') replaceRegistrar(target, fresh, name);
   else mergePricing(target, fresh);
 }
 
@@ -107,9 +107,19 @@ export function sourceUpdatedAt(sources, previous, name, now = new Date().toISOS
 export function mergeSourceRub(previous, successful) {
   const result = { ...(previous ?? {}) };
   for (const [name, pricing] of Object.entries(successful)) {
-    if (name !== 'hostiman' && name !== 'timeweb' && name !== 'sprinthost' && name !== 'webhost1') continue;
+    if (name !== 'hostiman' && name !== 'timeweb' && name !== 'sprinthost' && name !== 'webhost1' && name !== 'adminvps') continue;
     // Missing metadata on a successful refresh must not preserve old values.
     result[name] = pricing.sourceRub?.[name] ?? {};
+  }
+  return result;
+}
+
+/** Preserve seller-supplied promotion markers unless that source refreshes. */
+export function mergeSourcePromotions(previous, successful) {
+  const result = { ...(previous ?? {}) };
+  for (const [name, pricing] of Object.entries(successful)) {
+    if (name !== 'adminvps' && name !== 'webhost1') continue;
+    result[name] = pricing.sourcePromotions?.[name] ?? [];
   }
   return result;
 }
@@ -432,6 +442,88 @@ export function normalizeWebhost1Observed(rows, rubToUsd = regruRubToUsd) {
     tlds[row.tld] = { webhost1: { reg: Math.round(reg / rubToUsd), renew: Math.round(renew / rubToUsd), transfer: null } };
   }
   if (!tlds.ru || !tlds['рф']) throw new Error('webhost1: missing reviewed quotes');
+  return { tlds, coupons: {}, sourceRub: { webhost1: nativePrices } };
+}
+
+// These normalizers accept sanitized transcriptions from saved pages, not raw
+// HTML or fetch results. Column semantics and account context require review.
+const annualZonePattern = /^[a-zа-яё0-9-]+(?:\.[a-zа-яё0-9-]+)*$/u;
+function annualRubCents(value, source) {
+  if (typeof value !== 'string' || !/^\d+(?:\.\d{1,2})?$/.test(value)) throw new Error(`${source}: invalid RUB price`);
+  const [whole, fraction = ''] = value.split('.');
+  const cents = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+  if (!Number.isSafeInteger(cents) || cents <= 0) throw new Error(`${source}: invalid RUB price`);
+  return cents;
+}
+function annualZone(row, seen, source) {
+  if (!row || typeof row.tld !== 'string' || !annualZonePattern.test(row.tld) || seen.has(row.tld)) {
+    throw new Error(`${source}: invalid or duplicate zone`);
+  }
+  seen.add(row.tld);
+  return row.tld;
+}
+
+/** Normalize a sanitized annual AdminVPS cart table, preserving promo flags. */
+export function normalizeAdminvpsAnnual(data, rubToUsd = regruRubToUsd) {
+  if (!Number.isFinite(rubToUsd) || rubToUsd <= 0) throw new Error('adminvps: invalid RUB/USD rate');
+  if (!data || JSON.stringify(data.headers) !== JSON.stringify(['Домен', 'Регистрация', 'Продление']) ||
+      !Array.isArray(data.rows) || data.rows.length < 700) throw new Error('adminvps: missing annual price table');
+  const seen = new Set();
+  const tlds = {};
+  const nativePrices = {};
+  const promotions = [];
+  for (const row of data.rows) {
+    const zone = annualZone(row, seen, 'adminvps');
+    if (row.registrationYears !== 1 || row.renewalYears !== 1 || typeof row.promotion !== 'boolean') {
+      throw new Error('adminvps: nonannual or ambiguous quote');
+    }
+    const reg = annualRubCents(row.registrationRub, 'adminvps');
+    const renew = annualRubCents(row.renewalRub, 'adminvps');
+    tlds[zone] = { adminvps: { reg: Math.round(reg / rubToUsd), renew: Math.round(renew / rubToUsd), transfer: null } };
+    nativePrices[zone] = [reg, renew];
+    if (row.promotion) promotions.push(zone);
+  }
+  if (!seen.has('ru') || !seen.has('рф') || !seen.has('com')) throw new Error('adminvps: missing required zones');
+  return { tlds, coupons: {}, sourceRub: { adminvps: nativePrices }, sourcePromotions: { adminvps: promotions } };
+}
+
+/** Normalize the registration list; retain older ru/рф renewals only on a price match. */
+export function normalizeWebhost1Annual(data, observations, rubToUsd = regruRubToUsd) {
+  if (!Number.isFinite(rubToUsd) || rubToUsd <= 0) throw new Error('webhost1: invalid RUB/USD rate');
+  if (!data || !Array.isArray(data.rows) || data.rows.length < 200 || !Array.isArray(data.conflicts)) {
+    throw new Error('webhost1: incomplete annual registration list');
+  }
+  const conflicts = new Map();
+  for (const c of data.conflicts) {
+    if (!c || typeof c.tld !== 'string' || !annualZonePattern.test(c.tld) || conflicts.has(c.tld)) throw new Error('webhost1: invalid conflict');
+    const listed = annualRubCents(c.listRub, 'webhost1');
+    const modal = annualRubCents(c.modalRub, 'webhost1');
+    if (listed === modal || typeof c.reason !== 'string' || !c.reason.trim()) throw new Error('webhost1: invalid conflict');
+    conflicts.set(c.tld, listed);
+  }
+  // The saved .com list and modal disagree; do not silently clear the conflict.
+  if (!conflicts.has('com')) throw new Error('webhost1: unresolved .com conflict');
+  const old = normalizeWebhost1Observed(observations, rubToUsd);
+  const seen = new Set();
+  const tlds = {};
+  const nativePrices = {};
+  for (const row of data.rows) {
+    const zone = annualZone(row, seen, 'webhost1');
+    if (row.registrationYears !== 1) throw new Error('webhost1: nonannual registration');
+    // A zero amount alone does not establish a purchasable offer.
+    if (row.registrationRub === '0') continue;
+    const reg = annualRubCents(row.registrationRub, 'webhost1');
+    if (conflicts.has(zone)) {
+      if (conflicts.get(zone) !== reg) throw new Error('webhost1: conflict does not match list');
+      continue;
+    }
+    const prior = old.sourceRub.webhost1[zone];
+    if (prior && prior[0] !== reg) throw new Error('webhost1: old renewal price requires review');
+    const renew = prior?.[1] ?? null;
+    tlds[zone] = { webhost1: { reg: Math.round(reg / rubToUsd), renew: renew === null ? null : Math.round(renew / rubToUsd), transfer: null } };
+    nativePrices[zone] = [reg, renew];
+  }
+  if (!tlds.ru || !tlds['рф'] || [...conflicts.keys()].some((z) => !seen.has(z))) throw new Error('webhost1: missing verified zones');
   return { tlds, coupons: {}, sourceRub: { webhost1: nativePrices } };
 }
 
@@ -814,6 +906,11 @@ async function main() {
     timewebUpdatedAt: sourceUpdatedAt(sources, rawPrev?.timewebUpdatedAt, 'timeweb'),
     sprinthostUpdatedAt: sourceUpdatedAt(sources, rawPrev?.sprinthostUpdatedAt, 'sprinthost'),
     webhost1UpdatedAt: sourceUpdatedAt(sources, rawPrev?.webhost1UpdatedAt, 'webhost1'),
+    webhost1RenewalUpdatedAt: rawPrev?.webhost1RenewalUpdatedAt ?? null,
+    adminvpsUpdatedAt: sourceUpdatedAt(sources, rawPrev?.adminvpsUpdatedAt, 'adminvps'),
+    sourcePromotions: mergeSourcePromotions(rawPrev?.sourcePromotions, Object.fromEntries(
+      results.flatMap((result, i) => result.status === 'fulfilled' ? [[named[i][0], result.value]] : []),
+    )),
     sourceRub: mergeSourceRub(rawPrev?.sourceRub, Object.fromEntries(
       results.flatMap((result, i) => result.status === 'fulfilled' ? [[named[i][0], result.value]] : []),
     )),

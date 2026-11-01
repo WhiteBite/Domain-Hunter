@@ -243,6 +243,10 @@ describe('loadPricingTable', () => {
     expect(state.table.sprinthostUpdatedAt).toMatch(/^2026-11-01T/);
     expect(state.table.sourceRub?.webhost1?.ru).toEqual([18900, 39900]);
     expect(state.table.webhost1UpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.webhost1RenewalUpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.adminvpsUpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.sourceRub?.adminvps?.ru).toEqual([20300, 143900]);
+    expect(state.table.sourcePromotions?.adminvps).toContain('ru');
   });
 
   it('expands compact [reg,renew,transfer] arrays into PriceEntry objects', async () => {

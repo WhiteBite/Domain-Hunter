@@ -1,0 +1,5926 @@
+{
+  "source": "user-saved AdminVPS cart, rendered price rows",
+  "headers": [
+    "Домен",
+    "Регистрация",
+    "Продление"
+  ],
+  "rows": [
+    {
+      "tld": "ru",
+      "registrationRub": "203.00",
+      "renewalRub": "1439.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "xyz",
+      "registrationRub": "366.00",
+      "renewalRub": "4480.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "рф",
+      "registrationRub": "203.00",
+      "renewalRub": "1439.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "com",
+      "registrationRub": "2151.00",
+      "renewalRub": "3383.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "site",
+      "registrationRub": "299.00",
+      "renewalRub": "4499.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "cc",
+      "registrationRub": "5396.00",
+      "renewalRub": "5884.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "fun",
+      "registrationRub": "239.00",
+      "renewalRub": "4427.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "kz",
+      "registrationRub": "3744.00",
+      "renewalRub": "4085.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "net",
+      "registrationRub": "2296.00",
+      "renewalRub": "3700.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "org",
+      "registrationRub": "2085.00",
+      "renewalRub": "3354.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "space",
+      "registrationRub": "239.00",
+      "renewalRub": "3431.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "tech",
+      "registrationRub": "359.00",
+      "renewalRub": "6311.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "website",
+      "registrationRub": "239.00",
+      "renewalRub": "3527.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "рус",
+      "registrationRub": "1463.00",
+      "renewalRub": "2036.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "host",
+      "registrationRub": "419.00",
+      "renewalRub": "6527.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "name",
+      "registrationRub": "1382.00",
+      "renewalRub": "2222.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "online",
+      "registrationRub": "299.00",
+      "renewalRub": "5627.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "pro",
+      "registrationRub": "563.00",
+      "renewalRub": "6406.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "store",
+      "registrationRub": "299.00",
+      "renewalRub": "6635.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "top",
+      "registrationRub": "1052.00",
+      "renewalRub": "1692.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "москва",
+      "registrationRub": "1310.00",
+      "renewalRub": "1428.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "press",
+      "registrationRub": "299.00",
+      "renewalRub": "7667.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "moscow",
+      "registrationRub": "1310.00",
+      "renewalRub": "1428.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "pw",
+      "registrationRub": "419.00",
+      "renewalRub": "2819.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "bar",
+      "registrationRub": "708.00",
+      "renewalRub": "16845.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "uno",
+      "registrationRub": "479.00",
+      "renewalRub": "3119.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "su",
+      "registrationRub": "802.80",
+      "renewalRub": "876.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "info",
+      "registrationRub": "671.00",
+      "renewalRub": "6406.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "shop",
+      "registrationRub": "299.00",
+      "renewalRub": "9264.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "xn--d1acj3b",
+      "registrationRub": "1208.00",
+      "renewalRub": "1318.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "xn--80aswg",
+      "registrationRub": "4960.00",
+      "renewalRub": "7256.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": true
+    },
+    {
+      "tld": "ru.com",
+      "registrationRub": "32010.00",
+      "renewalRub": "46835.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "luxe",
+      "registrationRub": "5531.00",
+      "renewalRub": "9053.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "biz",
+      "registrationRub": "4034.00",
+      "renewalRub": "7926.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "club",
+      "registrationRub": "3993.00",
+      "renewalRub": "6414.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "онлайн",
+      "registrationRub": "4960.00",
+      "renewalRub": "7256.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "me",
+      "registrationRub": "7958.00",
+      "renewalRub": "8535.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "parts",
+      "registrationRub": "6701.00",
+      "renewalRub": "10780.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mobi",
+      "registrationRub": "6280.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "im",
+      "registrationRub": "9129.00",
+      "renewalRub": "9963.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "life",
+      "registrationRub": "491.00",
+      "renewalRub": "9431.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "in",
+      "registrationRub": "3990.00",
+      "renewalRub": "4352.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "studio",
+      "registrationRub": "2399.00",
+      "renewalRub": "10442.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "icu",
+      "registrationRub": "2763.00",
+      "renewalRub": "4044.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vip",
+      "registrationRub": "2993.00",
+      "renewalRub": "4378.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "live",
+      "registrationRub": "491.00",
+      "renewalRub": "8181.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "work",
+      "registrationRub": "4304.00",
+      "renewalRub": "6296.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "team",
+      "registrationRub": "875.00",
+      "renewalRub": "9431.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "direct",
+      "registrationRub": "6701.00",
+      "renewalRub": "10780.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "орг",
+      "registrationRub": "2577.00",
+      "renewalRub": "3094.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "de",
+      "registrationRub": "1712.00",
+      "renewalRub": "2424.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pl",
+      "registrationRub": "4484.00",
+      "renewalRub": "6065.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "coach",
+      "registrationRub": "12561.00",
+      "renewalRub": "20210.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "art",
+      "registrationRub": "611.00",
+      "renewalRub": "6738.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "company",
+      "registrationRub": "503.00",
+      "renewalRub": "5391.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--p1ai",
+      "registrationRub": "203.00",
+      "renewalRub": "1439.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "spb.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "football",
+      "registrationRub": "4187.00",
+      "renewalRub": "6740.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "blog",
+      "registrationRub": "842.00",
+      "renewalRub": "6736.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.uk",
+      "registrationRub": "2067.00",
+      "renewalRub": "2254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "eu",
+      "registrationRub": "2068.00",
+      "renewalRub": "2253.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "io",
+      "registrationRub": "6119.00",
+      "renewalRub": "21308.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nl",
+      "registrationRub": "2963.00",
+      "renewalRub": "3231.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tk",
+      "registrationRub": "2002.00",
+      "renewalRub": "2003.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tw",
+      "registrationRub": "8484.00",
+      "renewalRub": "9252.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "us",
+      "registrationRub": "3147.00",
+      "renewalRub": "3431.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "abkhazia.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ac",
+      "registrationRub": "27075.00",
+      "renewalRub": "29536.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "academy",
+      "registrationRub": "2519.00",
+      "renewalRub": "12125.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "accountant",
+      "registrationRub": "6441.00",
+      "renewalRub": "10362.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "accountants",
+      "registrationRub": "18842.00",
+      "renewalRub": "30317.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "actor",
+      "registrationRub": "7125.00",
+      "renewalRub": "11452.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "adult",
+      "registrationRub": "30194.00",
+      "renewalRub": "48579.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "adygeya.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "adygeya.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ae",
+      "registrationRub": "20460.00",
+      "renewalRub": "22323.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ae.org",
+      "registrationRub": "5404.00",
+      "renewalRub": "5894.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "aero",
+      "registrationRub": "14451.00",
+      "renewalRub": "23241.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "africa",
+      "registrationRub": "5308.00",
+      "renewalRub": "9772.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "agency",
+      "registrationRub": "983.00",
+      "renewalRub": "8084.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "airforce",
+      "registrationRub": "16748.00",
+      "renewalRub": "26951.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "aktyubinsk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "am",
+      "registrationRub": "9263.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "apartments",
+      "registrationRub": "9214.00",
+      "renewalRub": "14822.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "app",
+      "registrationRub": "4715.00",
+      "renewalRub": "6424.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "arkhangelsk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "armenia.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ashgabad.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "asia",
+      "registrationRub": "3298.00",
+      "renewalRub": "5382.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "associates",
+      "registrationRub": "6280.00",
+      "renewalRub": "10106.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "at",
+      "registrationRub": "4413.00",
+      "renewalRub": "4814.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "attorney",
+      "registrationRub": "10059.00",
+      "renewalRub": "16167.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "auction",
+      "registrationRub": "5864.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "audio",
+      "registrationRub": "31371.00",
+      "renewalRub": "51336.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "auto",
+      "registrationRub": "552092.00",
+      "renewalRub": "814253.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "azerbaijan.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "baby",
+      "registrationRub": "3059.00",
+      "renewalRub": "16845.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "balashov.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "band",
+      "registrationRub": "5030.00",
+      "renewalRub": "8086.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bargains",
+      "registrationRub": "4820.00",
+      "renewalRub": "7748.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bashkiria.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bashkiria.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bayern",
+      "registrationRub": "8984.00",
+      "renewalRub": "14442.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "be",
+      "registrationRub": "3027.00",
+      "renewalRub": "3302.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "beauty",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "beer",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "berlin",
+      "registrationRub": "13857.00",
+      "renewalRub": "22276.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "best",
+      "registrationRub": "6280.00",
+      "renewalRub": "5054.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bet",
+      "registrationRub": "6274.00",
+      "renewalRub": "10089.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bid",
+      "registrationRub": "6446.00",
+      "renewalRub": "10362.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bike",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bingo",
+      "registrationRub": "8592.00",
+      "renewalRub": "13810.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bir.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "biz.pl",
+      "registrationRub": "5585.00",
+      "renewalRub": "6090.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "black",
+      "registrationRub": "10468.00",
+      "renewalRub": "16844.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "blackfriday",
+      "registrationRub": "31935.00",
+      "renewalRub": "51335.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "blue",
+      "registrationRub": "5907.00",
+      "renewalRub": "9495.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "boston",
+      "registrationRub": "5180.00",
+      "renewalRub": "8326.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "boutique",
+      "registrationRub": "5234.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "br.com",
+      "registrationRub": "11115.00",
+      "renewalRub": "12128.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "broker",
+      "registrationRub": "8254.00",
+      "renewalRub": "13269.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "brussels",
+      "registrationRub": "7066.00",
+      "renewalRub": "11357.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bryansk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "build",
+      "registrationRub": "16118.00",
+      "renewalRub": "25908.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "builders",
+      "registrationRub": "5658.00",
+      "renewalRub": "9095.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bukhara.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "business",
+      "registrationRub": "3140.00",
+      "renewalRub": "5054.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "buzz",
+      "registrationRub": "7599.00",
+      "renewalRub": "12213.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bz",
+      "registrationRub": "4940.00",
+      "renewalRub": "5392.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "bzh",
+      "registrationRub": "12324.00",
+      "renewalRub": "19810.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cab",
+      "registrationRub": "5234.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cafe",
+      "registrationRub": "8374.00",
+      "renewalRub": "13474.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cam",
+      "registrationRub": "6906.00",
+      "renewalRub": "11102.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "camera",
+      "registrationRub": "9420.00",
+      "renewalRub": "15156.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "camp",
+      "registrationRub": "10059.00",
+      "renewalRub": "16168.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "capetown",
+      "registrationRub": "5279.00",
+      "renewalRub": "10305.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "capital",
+      "registrationRub": "11514.00",
+      "renewalRub": "18526.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "car",
+      "registrationRub": "552092.00",
+      "renewalRub": "814253.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cards",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "care",
+      "registrationRub": "10505.00",
+      "renewalRub": "11453.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "career",
+      "registrationRub": "20586.00",
+      "renewalRub": "33687.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "careers",
+      "registrationRub": "11514.00",
+      "renewalRub": "18526.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cars",
+      "registrationRub": "552092.00",
+      "renewalRub": "888276.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "casa",
+      "registrationRub": "5774.00",
+      "renewalRub": "9448.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cash",
+      "registrationRub": "6280.00",
+      "renewalRub": "10106.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "casino",
+      "registrationRub": "26169.00",
+      "renewalRub": "42108.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cat",
+      "registrationRub": "6077.00",
+      "renewalRub": "9770.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "catering",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cbg.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "center",
+      "registrationRub": "1367.00",
+      "renewalRub": "8421.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cf",
+      "registrationRub": "3676.00",
+      "renewalRub": "3676.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ch",
+      "registrationRub": "6106.00",
+      "renewalRub": "6662.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "chat",
+      "registrationRub": "7328.00",
+      "renewalRub": "11790.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cheap",
+      "registrationRub": "5867.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "chimkent.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "christmas",
+      "registrationRub": "13830.00",
+      "renewalRub": "22234.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "church",
+      "registrationRub": "9420.00",
+      "renewalRub": "15156.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "city",
+      "registrationRub": "1067.00",
+      "renewalRub": "7415.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "claims",
+      "registrationRub": "10468.00",
+      "renewalRub": "16845.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cleaning",
+      "registrationRub": "12154.00",
+      "renewalRub": "19536.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "click",
+      "registrationRub": "2763.00",
+      "renewalRub": "4042.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "clinic",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "clothing",
+      "registrationRub": "5234.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cloud",
+      "registrationRub": "7236.00",
+      "renewalRub": "10587.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "club.tw",
+      "registrationRub": "9222.00",
+      "renewalRub": "10060.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cm",
+      "registrationRub": "30879.00",
+      "renewalRub": "33687.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cn.com",
+      "registrationRub": "9262.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co",
+      "registrationRub": "11502.00",
+      "renewalRub": "12550.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.am",
+      "registrationRub": "9263.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.at",
+      "registrationRub": "5886.00",
+      "renewalRub": "6419.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.bz",
+      "registrationRub": "8483.00",
+      "renewalRub": "9254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.cm",
+      "registrationRub": "28845.00",
+      "renewalRub": "31467.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.com",
+      "registrationRub": "6177.00",
+      "renewalRub": "6737.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.gl",
+      "registrationRub": "9719.00",
+      "renewalRub": "9720.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.gy",
+      "registrationRub": "10809.00",
+      "renewalRub": "11789.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.im",
+      "registrationRub": "9134.00",
+      "renewalRub": "9964.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.in",
+      "registrationRub": "2478.00",
+      "renewalRub": "2705.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.lc",
+      "registrationRub": "16965.00",
+      "renewalRub": "18504.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.nz",
+      "registrationRub": "7035.00",
+      "renewalRub": "7677.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.ve",
+      "registrationRub": "25444.00",
+      "renewalRub": "27765.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "co.za",
+      "registrationRub": "3537.00",
+      "renewalRub": "3537.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "codes",
+      "registrationRub": "11514.00",
+      "renewalRub": "18526.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "coffee",
+      "registrationRub": "6915.00",
+      "renewalRub": "11115.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "college",
+      "registrationRub": "3059.00",
+      "renewalRub": "16844.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cologne",
+      "registrationRub": "7086.00",
+      "renewalRub": "11399.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.af",
+      "registrationRub": "13253.00",
+      "renewalRub": "13254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.am",
+      "registrationRub": "9263.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.bz",
+      "registrationRub": "8483.00",
+      "renewalRub": "9254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.cm",
+      "registrationRub": "28845.00",
+      "renewalRub": "31460.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.co",
+      "registrationRub": "4443.00",
+      "renewalRub": "4848.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.de",
+      "registrationRub": "1665.00",
+      "renewalRub": "1816.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.ec",
+      "registrationRub": "23160.00",
+      "renewalRub": "25266.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.es",
+      "registrationRub": "2705.00",
+      "renewalRub": "2951.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.gl",
+      "registrationRub": "13035.00",
+      "renewalRub": "13034.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.gy",
+      "registrationRub": "7732.00",
+      "renewalRub": "7732.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.hn",
+      "registrationRub": "30261.00",
+      "renewalRub": "33011.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.ht",
+      "registrationRub": "9108.00",
+      "renewalRub": "9944.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.im",
+      "registrationRub": "9134.00",
+      "renewalRub": "9962.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.kz",
+      "registrationRub": "2334.00",
+      "renewalRub": "2547.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.lc",
+      "registrationRub": "16965.00",
+      "renewalRub": "18508.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.ly",
+      "registrationRub": "33964.00",
+      "renewalRub": "37055.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.mu",
+      "registrationRub": "17920.00",
+      "renewalRub": "17920.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.mx",
+      "registrationRub": "9328.00",
+      "renewalRub": "10173.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.nf",
+      "registrationRub": "22055.00",
+      "renewalRub": "24058.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.ng",
+      "registrationRub": "2037.00",
+      "renewalRub": "2225.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.pe",
+      "registrationRub": "11487.00",
+      "renewalRub": "11489.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.ph",
+      "registrationRub": "22774.00",
+      "renewalRub": "24845.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.pl",
+      "registrationRub": "5120.00",
+      "renewalRub": "5583.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.sb",
+      "registrationRub": "25127.00",
+      "renewalRub": "27411.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.sc",
+      "registrationRub": "20764.00",
+      "renewalRub": "20765.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.tw",
+      "registrationRub": "6177.00",
+      "renewalRub": "10443.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.vc",
+      "registrationRub": "10517.00",
+      "renewalRub": "11474.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "com.ve",
+      "registrationRub": "25444.00",
+      "renewalRub": "27756.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "community",
+      "registrationRub": "7328.00",
+      "renewalRub": "11789.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "computer",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "condos",
+      "registrationRub": "9420.00",
+      "renewalRub": "15158.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "construction",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "consulting",
+      "registrationRub": "8801.00",
+      "renewalRub": "14147.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "contractors",
+      "registrationRub": "5658.00",
+      "renewalRub": "9095.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cooking",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cool",
+      "registrationRub": "7328.00",
+      "renewalRub": "11790.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "country",
+      "registrationRub": "707873.00",
+      "renewalRub": "1138918.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "coupons",
+      "registrationRub": "8801.00",
+      "renewalRub": "14146.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "courses",
+      "registrationRub": "8902.00",
+      "renewalRub": "14308.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "credit",
+      "registrationRub": "16748.00",
+      "renewalRub": "26949.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "creditcard",
+      "registrationRub": "26169.00",
+      "renewalRub": "42106.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cricket",
+      "registrationRub": "15656.00",
+      "renewalRub": "25167.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cruises",
+      "registrationRub": "9011.00",
+      "renewalRub": "14483.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cx",
+      "registrationRub": "5090.00",
+      "renewalRub": "5554.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cymru",
+      "registrationRub": "3317.00",
+      "renewalRub": "5334.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cyou",
+      "registrationRub": "2764.00",
+      "renewalRub": "4110.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "cz",
+      "registrationRub": "3736.00",
+      "renewalRub": "11856.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dagestan.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dagestan.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dance",
+      "registrationRub": "4401.00",
+      "renewalRub": "7074.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "date",
+      "registrationRub": "6446.00",
+      "renewalRub": "10365.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dating",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "de.com",
+      "registrationRub": "4989.00",
+      "renewalRub": "5442.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "deals",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "degree",
+      "registrationRub": "8374.00",
+      "renewalRub": "13474.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "delivery",
+      "registrationRub": "10059.00",
+      "renewalRub": "16168.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "democrat",
+      "registrationRub": "5234.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dental",
+      "registrationRub": "12561.00",
+      "renewalRub": "20210.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dentist",
+      "registrationRub": "10468.00",
+      "renewalRub": "16841.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "design",
+      "registrationRub": "9212.00",
+      "renewalRub": "13476.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dev",
+      "registrationRub": "4040.00",
+      "renewalRub": "6605.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "diamonds",
+      "registrationRub": "8801.00",
+      "renewalRub": "14146.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "diet",
+      "registrationRub": "31372.00",
+      "renewalRub": "51334.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "digital",
+      "registrationRub": "491.00",
+      "renewalRub": "10778.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "directory",
+      "registrationRub": "4401.00",
+      "renewalRub": "7071.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "discount",
+      "registrationRub": "4816.00",
+      "renewalRub": "7748.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "dog",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "domains",
+      "registrationRub": "6915.00",
+      "renewalRub": "11116.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "download",
+      "registrationRub": "6446.00",
+      "renewalRub": "10362.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "durban",
+      "registrationRub": "5276.00",
+      "renewalRub": "10302.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "earth",
+      "registrationRub": "4949.00",
+      "renewalRub": "7956.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "east-kazakhstan.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ebiz.tw",
+      "registrationRub": "9222.00",
+      "renewalRub": "10060.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ec",
+      "registrationRub": "19510.00",
+      "renewalRub": "21284.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "eco",
+      "registrationRub": "19061.00",
+      "renewalRub": "30641.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "edu.pl",
+      "registrationRub": "5579.00",
+      "renewalRub": "6089.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "education",
+      "registrationRub": "5657.00",
+      "renewalRub": "9094.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "email",
+      "registrationRub": "5526.00",
+      "renewalRub": "8222.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "energy",
+      "registrationRub": "18842.00",
+      "renewalRub": "30317.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "engineer",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "engineering",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "enterprises",
+      "registrationRub": "5658.00",
+      "renewalRub": "9095.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "equipment",
+      "registrationRub": "4610.00",
+      "renewalRub": "7408.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "es",
+      "registrationRub": "2624.00",
+      "renewalRub": "5051.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "estate",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "eu.com",
+      "registrationRub": "4989.00",
+      "renewalRub": "5442.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "events",
+      "registrationRub": "7328.00",
+      "renewalRub": "11789.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "exchange",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "exnet.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "expert",
+      "registrationRub": "1799.00",
+      "renewalRub": "16167.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "exposed",
+      "registrationRub": "3562.00",
+      "renewalRub": "5724.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "express",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fail",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "faith",
+      "registrationRub": "6446.00",
+      "renewalRub": "10365.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "family",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fan",
+      "registrationRub": "13318.00",
+      "renewalRub": "21408.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fans",
+      "registrationRub": "1677.00",
+      "renewalRub": "2696.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "farm",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fashion",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "feedback",
+      "registrationRub": "55224.00",
+      "renewalRub": "66269.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fi",
+      "registrationRub": "10806.00",
+      "renewalRub": "11790.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "film",
+      "registrationRub": "19571.00",
+      "renewalRub": "31460.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fin.ec",
+      "registrationRub": "11045.00",
+      "renewalRub": "11045.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "finance",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "financial",
+      "registrationRub": "9420.00",
+      "renewalRub": "15158.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "firm.in",
+      "registrationRub": "2478.00",
+      "renewalRub": "2705.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fish",
+      "registrationRub": "7119.00",
+      "renewalRub": "11453.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fishing",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fit",
+      "registrationRub": "11176.00",
+      "renewalRub": "16348.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fitness",
+      "registrationRub": "6701.00",
+      "renewalRub": "10780.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "flights",
+      "registrationRub": "9420.00",
+      "renewalRub": "15158.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "florist",
+      "registrationRub": "5234.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "flowers",
+      "registrationRub": "31906.00",
+      "renewalRub": "51335.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fm",
+      "registrationRub": "26247.00",
+      "renewalRub": "28634.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "forsale",
+      "registrationRub": "5867.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "foundation",
+      "registrationRub": "5448.00",
+      "renewalRub": "8759.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "frl",
+      "registrationRub": "8826.00",
+      "renewalRub": "14190.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fund",
+      "registrationRub": "11514.00",
+      "renewalRub": "18526.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "furniture",
+      "registrationRub": "16748.00",
+      "renewalRub": "26946.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "futbol",
+      "registrationRub": "2723.00",
+      "renewalRub": "4380.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "fyi",
+      "registrationRub": "1047.00",
+      "renewalRub": "1684.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gallery",
+      "registrationRub": "4611.00",
+      "renewalRub": "7410.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "game",
+      "registrationRub": "62268.00",
+      "renewalRub": "157299.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "game.tw",
+      "registrationRub": "9222.00",
+      "renewalRub": "10064.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "games",
+      "registrationRub": "2003.00",
+      "renewalRub": "8758.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "garden",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gb.net",
+      "registrationRub": "7280.00",
+      "renewalRub": "7942.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gen.in",
+      "registrationRub": "2478.00",
+      "renewalRub": "2705.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gent",
+      "registrationRub": "7082.00",
+      "renewalRub": "11385.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "georgia.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gg",
+      "registrationRub": "24393.00",
+      "renewalRub": "26610.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gift",
+      "registrationRub": "5171.00",
+      "renewalRub": "8310.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gifts",
+      "registrationRub": "5864.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gives",
+      "registrationRub": "5448.00",
+      "renewalRub": "8758.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gl",
+      "registrationRub": "13119.60",
+      "renewalRub": "13119.60",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "glass",
+      "registrationRub": "11735.00",
+      "renewalRub": "18863.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "global",
+      "registrationRub": "15701.00",
+      "renewalRub": "25264.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gmbh",
+      "registrationRub": "7328.00",
+      "renewalRub": "11790.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gold",
+      "registrationRub": "16748.00",
+      "renewalRub": "26949.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "golf",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gr.com",
+      "registrationRub": "3494.00",
+      "renewalRub": "3810.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "graphics",
+      "registrationRub": "3772.00",
+      "renewalRub": "6062.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gratis",
+      "registrationRub": "3772.00",
+      "renewalRub": "6065.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "green",
+      "registrationRub": "12993.00",
+      "renewalRub": "20885.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gripe",
+      "registrationRub": "1047.00",
+      "renewalRub": "1684.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "group",
+      "registrationRub": "1391.00",
+      "renewalRub": "6736.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "grozny.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "grozny.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gs",
+      "registrationRub": "9222.00",
+      "renewalRub": "10064.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "guide",
+      "registrationRub": "6706.00",
+      "renewalRub": "10779.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "guitars",
+      "registrationRub": "31935.00",
+      "renewalRub": "51335.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "guru",
+      "registrationRub": "599.00",
+      "renewalRub": "11115.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "gy",
+      "registrationRub": "10809.00",
+      "renewalRub": "11793.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hair",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hamburg",
+      "registrationRub": "12820.00",
+      "renewalRub": "20620.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "haus",
+      "registrationRub": "5445.00",
+      "renewalRub": "8758.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "health",
+      "registrationRub": "17475.00",
+      "renewalRub": "23806.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "healthcare",
+      "registrationRub": "14250.00",
+      "renewalRub": "22905.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "help",
+      "registrationRub": "708.00",
+      "renewalRub": "8421.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hiphop",
+      "registrationRub": "29466.00",
+      "renewalRub": "42093.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hiv",
+      "registrationRub": "46007.00",
+      "renewalRub": "74022.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hn",
+      "registrationRub": "25444.00",
+      "renewalRub": "27759.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hockey",
+      "registrationRub": "9640.00",
+      "renewalRub": "15495.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "holdings",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "holiday",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "horse",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hospital",
+      "registrationRub": "9220.00",
+      "renewalRub": "14820.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hosting",
+      "registrationRub": "94120.00",
+      "renewalRub": "154011.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "house",
+      "registrationRub": "7125.00",
+      "renewalRub": "11452.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "how",
+      "registrationRub": "6561.00",
+      "renewalRub": "10547.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ht",
+      "registrationRub": "28786.00",
+      "renewalRub": "31403.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "hu.net",
+      "registrationRub": "7648.00",
+      "renewalRub": "8343.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "idv.tw",
+      "registrationRub": "9158.00",
+      "renewalRub": "9992.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "immo",
+      "registrationRub": "5658.00",
+      "renewalRub": "9095.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "immobilien",
+      "registrationRub": "6077.00",
+      "renewalRub": "9768.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "in.net",
+      "registrationRub": "1853.00",
+      "renewalRub": "2021.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ind.in",
+      "registrationRub": "2478.00",
+      "renewalRub": "2705.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "industries",
+      "registrationRub": "7328.00",
+      "renewalRub": "11790.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "info.ec",
+      "registrationRub": "11045.00",
+      "renewalRub": "11045.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "info.ht",
+      "registrationRub": "6849.00",
+      "renewalRub": "6848.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "info.pl",
+      "registrationRub": "5584.00",
+      "renewalRub": "6092.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "institute",
+      "registrationRub": "4397.00",
+      "renewalRub": "7071.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "insure",
+      "registrationRub": "11735.00",
+      "renewalRub": "18863.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "international",
+      "registrationRub": "5028.00",
+      "renewalRub": "8085.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "investments",
+      "registrationRub": "20936.00",
+      "renewalRub": "33686.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "irish",
+      "registrationRub": "3562.00",
+      "renewalRub": "5728.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ist",
+      "registrationRub": "3988.00",
+      "renewalRub": "6404.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "istanbul",
+      "registrationRub": "4949.00",
+      "renewalRub": "7956.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ivanovo.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "jambyl.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "je",
+      "registrationRub": "24393.00",
+      "renewalRub": "26615.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "jetzt",
+      "registrationRub": "5252.00",
+      "renewalRub": "8441.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "jewelry",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "jobs",
+      "registrationRub": "25328.00",
+      "renewalRub": "40714.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "joburg",
+      "registrationRub": "5276.00",
+      "renewalRub": "10304.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "jp",
+      "registrationRub": "15130.00",
+      "renewalRub": "16506.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "jp.net",
+      "registrationRub": "2163.00",
+      "renewalRub": "2360.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "jpn.com",
+      "registrationRub": "9263.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "juegos",
+      "registrationRub": "95819.00",
+      "renewalRub": "154014.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kalmykia.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kalmykia.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kaluga.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "karacol.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "karaganda.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "karelia.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kaufen",
+      "registrationRub": "4820.00",
+      "renewalRub": "7748.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "khakassia.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kim",
+      "registrationRub": "3773.00",
+      "renewalRub": "6063.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kitchen",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kiwi",
+      "registrationRub": "6177.00",
+      "renewalRub": "10103.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "koeln",
+      "registrationRub": "7091.00",
+      "renewalRub": "11399.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "krasnodar.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kurgan.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kustanai.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "kustanai.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "la",
+      "registrationRub": "8482.00",
+      "renewalRub": "9255.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "land",
+      "registrationRub": "6701.00",
+      "renewalRub": "10780.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lat",
+      "registrationRub": "8334.00",
+      "renewalRub": "13397.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lawyer",
+      "registrationRub": "10059.00",
+      "renewalRub": "16168.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lc",
+      "registrationRub": "22054.00",
+      "renewalRub": "24058.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lease",
+      "registrationRub": "9011.00",
+      "renewalRub": "14483.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "legal",
+      "registrationRub": "11514.00",
+      "renewalRub": "18526.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lenug.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "li",
+      "registrationRub": "8325.00",
+      "renewalRub": "9088.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lighting",
+      "registrationRub": "3772.00",
+      "renewalRub": "6060.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "limited",
+      "registrationRub": "5864.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "limo",
+      "registrationRub": "8801.00",
+      "renewalRub": "14147.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "link",
+      "registrationRub": "2763.00",
+      "renewalRub": "4042.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "llc",
+      "registrationRub": "9627.00",
+      "renewalRub": "15477.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "loan",
+      "registrationRub": "6446.00",
+      "renewalRub": "10362.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "loans",
+      "registrationRub": "18842.00",
+      "renewalRub": "30317.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lol",
+      "registrationRub": "280.00",
+      "renewalRub": "8421.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "london",
+      "registrationRub": "9056.00",
+      "renewalRub": "14822.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "love",
+      "registrationRub": "7240.00",
+      "renewalRub": "11849.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lt",
+      "registrationRub": "6176.00",
+      "renewalRub": "6737.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ltd",
+      "registrationRub": "1103.00",
+      "renewalRub": "8081.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ltda",
+      "registrationRub": "9210.00",
+      "renewalRub": "14804.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lu",
+      "registrationRub": "10883.00",
+      "renewalRub": "11874.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "luxury",
+      "registrationRub": "125621.00",
+      "renewalRub": "202116.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "lv",
+      "registrationRub": "7718.00",
+      "renewalRub": "14150.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ly",
+      "registrationRub": "55979.00",
+      "renewalRub": "61073.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "maison",
+      "registrationRub": "9220.00",
+      "renewalRub": "14820.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "makeup",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "management",
+      "registrationRub": "4187.00",
+      "renewalRub": "6735.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mangyshlak.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "marine.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "market",
+      "registrationRub": "1391.00",
+      "renewalRub": "11451.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "marketing",
+      "registrationRub": "6701.00",
+      "renewalRub": "10779.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "markets",
+      "registrationRub": "14135.00",
+      "renewalRub": "23135.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mba",
+      "registrationRub": "6280.00",
+      "renewalRub": "10106.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "md",
+      "registrationRub": "18659.00",
+      "renewalRub": "48845.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "med.ec",
+      "registrationRub": "11045.00",
+      "renewalRub": "11045.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "media",
+      "registrationRub": "1679.00",
+      "renewalRub": "11788.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "melbourne",
+      "registrationRub": "11661.00",
+      "renewalRub": "19082.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "memorial",
+      "registrationRub": "8374.00",
+      "renewalRub": "13473.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "men",
+      "registrationRub": "6446.00",
+      "renewalRub": "10361.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "menu",
+      "registrationRub": "8288.00",
+      "renewalRub": "13322.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mex.com",
+      "registrationRub": "3704.00",
+      "renewalRub": "4044.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mg",
+      "registrationRub": "38363.00",
+      "renewalRub": "41850.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "miami",
+      "registrationRub": "5078.00",
+      "renewalRub": "8162.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mn",
+      "registrationRub": "16674.00",
+      "renewalRub": "18190.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "moda",
+      "registrationRub": "6701.00",
+      "renewalRub": "10781.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "moe",
+      "registrationRub": "3980.00",
+      "renewalRub": "6402.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mom",
+      "registrationRub": "280.00",
+      "renewalRub": "8421.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "money",
+      "registrationRub": "5654.00",
+      "renewalRub": "9095.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "monster",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mordovia.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mordovia.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "movie",
+      "registrationRub": "56525.00",
+      "renewalRub": "90953.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ms",
+      "registrationRub": "6880.00",
+      "renewalRub": "6882.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "msk.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "msk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mu",
+      "registrationRub": "23157.00",
+      "renewalRub": "25937.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "murmansk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mx",
+      "registrationRub": "15470.00",
+      "renewalRub": "16877.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "mytis.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nagoya",
+      "registrationRub": "6174.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nalchik.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nalchik.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "navoi.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.af",
+      "registrationRub": "13253.00",
+      "renewalRub": "13254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.am",
+      "registrationRub": "9263.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.bz",
+      "registrationRub": "8483.00",
+      "renewalRub": "9254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.cm",
+      "registrationRub": "28845.00",
+      "renewalRub": "31460.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.co",
+      "registrationRub": "4443.00",
+      "renewalRub": "4847.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.ec",
+      "registrationRub": "15380.00",
+      "renewalRub": "15381.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.gl",
+      "registrationRub": "13035.00",
+      "renewalRub": "13035.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.gy",
+      "registrationRub": "7732.00",
+      "renewalRub": "7732.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.hn",
+      "registrationRub": "25444.00",
+      "renewalRub": "27759.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.ht",
+      "registrationRub": "2430.00",
+      "renewalRub": "2433.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.im",
+      "registrationRub": "9134.00",
+      "renewalRub": "9962.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.in",
+      "registrationRub": "2478.00",
+      "renewalRub": "2705.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.lc",
+      "registrationRub": "16965.00",
+      "renewalRub": "18504.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.mu",
+      "registrationRub": "17920.00",
+      "renewalRub": "17920.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.nf",
+      "registrationRub": "22055.00",
+      "renewalRub": "24058.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.nz",
+      "registrationRub": "7035.00",
+      "renewalRub": "7676.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.pe",
+      "registrationRub": "11487.00",
+      "renewalRub": "11486.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.ph",
+      "registrationRub": "16294.00",
+      "renewalRub": "16294.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.pl",
+      "registrationRub": "5584.00",
+      "renewalRub": "6092.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "731.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.sb",
+      "registrationRub": "25127.00",
+      "renewalRub": "27412.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.sc",
+      "registrationRub": "20764.00",
+      "renewalRub": "20765.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.so",
+      "registrationRub": "22901.00",
+      "renewalRub": "24982.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.vc",
+      "registrationRub": "10517.00",
+      "renewalRub": "11474.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "net.za",
+      "registrationRub": "5285.00",
+      "renewalRub": "5766.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "network",
+      "registrationRub": "5657.00",
+      "renewalRub": "9094.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nf",
+      "registrationRub": "40710.00",
+      "renewalRub": "44414.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ng",
+      "registrationRub": "11873.00",
+      "renewalRub": "12954.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ninja",
+      "registrationRub": "5028.00",
+      "renewalRub": "8084.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nom.co",
+      "registrationRub": "4443.00",
+      "renewalRub": "4848.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nom.es",
+      "registrationRub": "2705.00",
+      "renewalRub": "2951.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "north-kazakhstan.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nov.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nov.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nu",
+      "registrationRub": "10628.00",
+      "renewalRub": "9713.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nyc",
+      "registrationRub": "8243.00",
+      "renewalRub": "13485.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "nz",
+      "registrationRub": "11494.00",
+      "renewalRub": "12542.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "obninsk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "observer",
+      "registrationRub": "2472.00",
+      "renewalRub": "3975.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "one",
+      "registrationRub": "6165.00",
+      "renewalRub": "9909.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "onl",
+      "registrationRub": "5844.00",
+      "renewalRub": "9393.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ooo",
+      "registrationRub": "4186.00",
+      "renewalRub": "6732.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.af",
+      "registrationRub": "13253.00",
+      "renewalRub": "13254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.am",
+      "registrationRub": "9263.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.bz",
+      "registrationRub": "8484.00",
+      "renewalRub": "9254.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.es",
+      "registrationRub": "2705.00",
+      "renewalRub": "2951.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.gl",
+      "registrationRub": "13035.00",
+      "renewalRub": "13035.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.hn",
+      "registrationRub": "30261.00",
+      "renewalRub": "33011.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.ht",
+      "registrationRub": "5109.00",
+      "renewalRub": "5111.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.im",
+      "registrationRub": "9134.00",
+      "renewalRub": "9962.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.in",
+      "registrationRub": "2478.00",
+      "renewalRub": "2705.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.kz",
+      "registrationRub": "2334.00",
+      "renewalRub": "2547.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.lc",
+      "registrationRub": "16965.00",
+      "renewalRub": "18510.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.mu",
+      "registrationRub": "17920.00",
+      "renewalRub": "17924.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.nf",
+      "registrationRub": "22055.00",
+      "renewalRub": "24060.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.nz",
+      "registrationRub": "7035.00",
+      "renewalRub": "7676.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.pe",
+      "registrationRub": "11487.00",
+      "renewalRub": "11486.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.ph",
+      "registrationRub": "16294.00",
+      "renewalRub": "16290.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.pl",
+      "registrationRub": "5584.00",
+      "renewalRub": "6089.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "731.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.sb",
+      "registrationRub": "25127.00",
+      "renewalRub": "27411.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.sc",
+      "registrationRub": "20764.00",
+      "renewalRub": "20765.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.vc",
+      "registrationRub": "10517.00",
+      "renewalRub": "11474.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "org.za",
+      "registrationRub": "5285.00",
+      "renewalRub": "5766.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "page",
+      "registrationRub": "3338.00",
+      "renewalRub": "5368.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "partners",
+      "registrationRub": "11514.00",
+      "renewalRub": "18526.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "party",
+      "registrationRub": "6446.00",
+      "renewalRub": "10361.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pe",
+      "registrationRub": "11488.00",
+      "renewalRub": "11489.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "penza.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pet",
+      "registrationRub": "6052.00",
+      "renewalRub": "9737.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ph",
+      "registrationRub": "22774.00",
+      "renewalRub": "24845.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "photo",
+      "registrationRub": "8298.00",
+      "renewalRub": "13340.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "photography",
+      "registrationRub": "5867.00",
+      "renewalRub": "9431.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "photos",
+      "registrationRub": "4820.00",
+      "renewalRub": "7746.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "physio",
+      "registrationRub": "18879.00",
+      "renewalRub": "30346.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pics",
+      "registrationRub": "280.00",
+      "renewalRub": "8421.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pictures",
+      "registrationRub": "2519.00",
+      "renewalRub": "4043.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pink",
+      "registrationRub": "4187.00",
+      "renewalRub": "6736.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pizza",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "plumbing",
+      "registrationRub": "11735.00",
+      "renewalRub": "18863.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "plus",
+      "registrationRub": "8794.00",
+      "renewalRub": "14148.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "poker",
+      "registrationRub": "10896.00",
+      "renewalRub": "17518.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pokrovsk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "porn",
+      "registrationRub": "30221.00",
+      "renewalRub": "48579.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pp.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "731.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pro.ec",
+      "registrationRub": "11045.00",
+      "renewalRub": "11045.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "productions",
+      "registrationRub": "6496.00",
+      "renewalRub": "10443.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "promo",
+      "registrationRub": "5889.00",
+      "renewalRub": "9462.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "properties",
+      "registrationRub": "6280.00",
+      "renewalRub": "10107.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "property",
+      "registrationRub": "31935.00",
+      "renewalRub": "51335.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "protection",
+      "registrationRub": "418704.00",
+      "renewalRub": "673733.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ps",
+      "registrationRub": "21886.00",
+      "renewalRub": "23873.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pub",
+      "registrationRub": "6491.00",
+      "renewalRub": "10443.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "pyatigorsk.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "qa",
+      "registrationRub": "13898.00",
+      "renewalRub": "15162.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "qpon",
+      "registrationRub": "6906.00",
+      "renewalRub": "11103.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "quebec",
+      "registrationRub": "7206.00",
+      "renewalRub": "11789.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "quest",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "racing",
+      "registrationRub": "6446.00",
+      "renewalRub": "10361.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "radio.am",
+      "registrationRub": "3707.00",
+      "renewalRub": "4042.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "radio.fm",
+      "registrationRub": "3707.00",
+      "renewalRub": "4043.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "realestate",
+      "registrationRub": "21298.00",
+      "renewalRub": "34236.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "realty",
+      "registrationRub": "68114.00",
+      "renewalRub": "109595.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "recipes",
+      "registrationRub": "12561.00",
+      "renewalRub": "20210.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "red",
+      "registrationRub": "3771.00",
+      "renewalRub": "6063.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "rehab",
+      "registrationRub": "5867.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "reisen",
+      "registrationRub": "3353.00",
+      "renewalRub": "5387.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "rent",
+      "registrationRub": "3059.00",
+      "renewalRub": "16844.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "rentals",
+      "registrationRub": "7125.00",
+      "renewalRub": "11453.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "repair",
+      "registrationRub": "5864.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "report",
+      "registrationRub": "3980.00",
+      "renewalRub": "6398.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "rest",
+      "registrationRub": "708.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "restaurant",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "reviews",
+      "registrationRub": "10059.00",
+      "renewalRub": "16170.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "rip",
+      "registrationRub": "3771.00",
+      "renewalRub": "6063.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ro",
+      "registrationRub": "16983.00",
+      "renewalRub": "18530.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "rocks",
+      "registrationRub": "3564.00",
+      "renewalRub": "5729.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "rodeo",
+      "registrationRub": "7886.00",
+      "renewalRub": "12900.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ru.net",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "run",
+      "registrationRub": "4401.00",
+      "renewalRub": "7071.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sa.com",
+      "registrationRub": "92332.00",
+      "renewalRub": "100710.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "saarland",
+      "registrationRub": "5355.00",
+      "renewalRub": "8610.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sale",
+      "registrationRub": "6280.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "salon",
+      "registrationRub": "9220.00",
+      "renewalRub": "14820.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sarl",
+      "registrationRub": "1047.00",
+      "renewalRub": "1684.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sc",
+      "registrationRub": "37049.00",
+      "renewalRub": "40421.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "school",
+      "registrationRub": "5864.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "schule",
+      "registrationRub": "4610.00",
+      "renewalRub": "7408.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "science",
+      "registrationRub": "6446.00",
+      "renewalRub": "10361.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "scot",
+      "registrationRub": "9263.00",
+      "renewalRub": "15160.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "se.net",
+      "registrationRub": "7648.00",
+      "renewalRub": "8345.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "security",
+      "registrationRub": "418704.00",
+      "renewalRub": "673733.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "services",
+      "registrationRub": "6280.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sex",
+      "registrationRub": "30221.00",
+      "renewalRub": "48579.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sexy",
+      "registrationRub": "870320.00",
+      "renewalRub": "1667034.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sh",
+      "registrationRub": "27078.00",
+      "renewalRub": "29536.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "shiksha",
+      "registrationRub": "4398.00",
+      "renewalRub": "7068.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "shoes",
+      "registrationRub": "10468.00",
+      "renewalRub": "16841.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "shop.pl",
+      "registrationRub": "1989.00",
+      "renewalRub": "4419.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "shopping",
+      "registrationRub": "5344.00",
+      "renewalRub": "8590.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "show",
+      "registrationRub": "7119.00",
+      "renewalRub": "11453.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "si",
+      "registrationRub": "6795.00",
+      "renewalRub": "7412.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "singles",
+      "registrationRub": "5448.00",
+      "renewalRub": "8758.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sk",
+      "registrationRub": "14313.00",
+      "renewalRub": "15615.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ski",
+      "registrationRub": "10468.00",
+      "renewalRub": "16844.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "skin",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "so",
+      "registrationRub": "21135.00",
+      "renewalRub": "23056.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "soccer",
+      "registrationRub": "4187.00",
+      "renewalRub": "6735.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sochi.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "social",
+      "registrationRub": "6706.00",
+      "renewalRub": "10779.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "software",
+      "registrationRub": "6701.00",
+      "renewalRub": "10780.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "solar",
+      "registrationRub": "10468.00",
+      "renewalRub": "16841.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "solutions",
+      "registrationRub": "5028.00",
+      "renewalRub": "8084.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "soy",
+      "registrationRub": "5918.00",
+      "renewalRub": "9513.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "spb.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sr",
+      "registrationRub": "37055.00",
+      "renewalRub": "40424.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "srl",
+      "registrationRub": "8518.00",
+      "renewalRub": "13692.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "st",
+      "registrationRub": "7720.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "storage",
+      "registrationRub": "104676.00",
+      "renewalRub": "168434.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "stream",
+      "registrationRub": "6446.00",
+      "renewalRub": "10361.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "study",
+      "registrationRub": "9792.00",
+      "renewalRub": "15741.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sucks",
+      "registrationRub": "62166.00",
+      "renewalRub": "99932.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "supplies",
+      "registrationRub": "3982.00",
+      "renewalRub": "6398.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "supply",
+      "registrationRub": "4187.00",
+      "renewalRub": "6735.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "support",
+      "registrationRub": "4401.00",
+      "renewalRub": "7073.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "surf",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "surgery",
+      "registrationRub": "8801.00",
+      "renewalRub": "14147.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "sx",
+      "registrationRub": "11111.00",
+      "renewalRub": "12125.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "systems",
+      "registrationRub": "5657.00",
+      "renewalRub": "9094.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tashkent.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tatar",
+      "registrationRub": "746.00",
+      "renewalRub": "813.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tattoo",
+      "registrationRub": "9822.00",
+      "renewalRub": "15801.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tax",
+      "registrationRub": "10896.00",
+      "renewalRub": "17516.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "taxi",
+      "registrationRub": "10059.00",
+      "renewalRub": "16168.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "technology",
+      "registrationRub": "4610.00",
+      "renewalRub": "7409.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tel",
+      "registrationRub": "3107.00",
+      "renewalRub": "4997.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tennis",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "termez.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "theater",
+      "registrationRub": "10468.00",
+      "renewalRub": "16841.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "theatre",
+      "registrationRub": "104676.00",
+      "renewalRub": "168434.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tienda",
+      "registrationRub": "9640.00",
+      "renewalRub": "15494.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tips",
+      "registrationRub": "5028.00",
+      "renewalRub": "8084.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tires",
+      "registrationRub": "14655.00",
+      "renewalRub": "23580.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tj",
+      "registrationRub": "5868.00",
+      "renewalRub": "6402.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tl",
+      "registrationRub": "29658.00",
+      "renewalRub": "32362.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tm",
+      "registrationRub": "167938.00",
+      "renewalRub": "183206.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "today",
+      "registrationRub": "491.00",
+      "renewalRub": "7409.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "togliatti.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tokyo",
+      "registrationRub": "6174.00",
+      "renewalRub": "10103.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tools",
+      "registrationRub": "5864.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tours",
+      "registrationRub": "10059.00",
+      "renewalRub": "16169.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "town",
+      "registrationRub": "5867.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "toys",
+      "registrationRub": "10468.00",
+      "renewalRub": "16842.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "trade",
+      "registrationRub": "6446.00",
+      "renewalRub": "10362.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "trading",
+      "registrationRub": "16258.00",
+      "renewalRub": "26603.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "training",
+      "registrationRub": "6701.00",
+      "renewalRub": "10779.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "travel",
+      "registrationRub": "24075.00",
+      "renewalRub": "38738.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "troitsk.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tselinograd.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tube",
+      "registrationRub": "6585.00",
+      "renewalRub": "10586.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tula.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tuva.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "tv",
+      "registrationRub": "7720.00",
+      "renewalRub": "8422.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "uk.com",
+      "registrationRub": "7272.00",
+      "renewalRub": "7934.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "uk.net",
+      "registrationRub": "7272.00",
+      "renewalRub": "7934.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "university",
+      "registrationRub": "10059.00",
+      "renewalRub": "16168.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "us.com",
+      "registrationRub": "5096.00",
+      "renewalRub": "5558.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "us.org",
+      "registrationRub": "5127.00",
+      "renewalRub": "5591.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vacations",
+      "registrationRub": "6280.00",
+      "renewalRub": "10106.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vc",
+      "registrationRub": "10516.00",
+      "renewalRub": "11472.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vegas",
+      "registrationRub": "13125.00",
+      "renewalRub": "21098.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ventures",
+      "registrationRub": "9640.00",
+      "renewalRub": "15495.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vet",
+      "registrationRub": "6706.00",
+      "renewalRub": "10780.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "viajes",
+      "registrationRub": "8906.00",
+      "renewalRub": "14315.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "video",
+      "registrationRub": "5867.00",
+      "renewalRub": "9432.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "villas",
+      "registrationRub": "9640.00",
+      "renewalRub": "15494.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vin",
+      "registrationRub": "9640.00",
+      "renewalRub": "15495.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vision",
+      "registrationRub": "7328.00",
+      "renewalRub": "11790.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vlaanderen",
+      "registrationRub": "7066.00",
+      "renewalRub": "11357.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vladikavkaz.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vladikavkaz.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vladimir.ru",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vladimir.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vodka",
+      "registrationRub": "7970.00",
+      "renewalRub": "12812.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vologda.su",
+      "registrationRub": "268.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "vote",
+      "registrationRub": "14655.00",
+      "renewalRub": "23580.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "voto",
+      "registrationRub": "11316.00",
+      "renewalRub": "18190.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "voyage",
+      "registrationRub": "9420.00",
+      "renewalRub": "15158.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "wales",
+      "registrationRub": "3317.00",
+      "renewalRub": "5333.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "wang",
+      "registrationRub": "2396.00",
+      "renewalRub": "3850.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "watch",
+      "registrationRub": "7119.00",
+      "renewalRub": "11453.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "waw.pl",
+      "registrationRub": "16764.00",
+      "renewalRub": "18269.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "webcam",
+      "registrationRub": "6446.00",
+      "renewalRub": "10362.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "wedding",
+      "registrationRub": "7970.00",
+      "renewalRub": "12809.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "whoswho",
+      "registrationRub": "1180095.00",
+      "renewalRub": "1898655.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "wien",
+      "registrationRub": "10972.00",
+      "renewalRub": "17639.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "win",
+      "registrationRub": "6446.00",
+      "renewalRub": "10361.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "wine",
+      "registrationRub": "9640.00",
+      "renewalRub": "15495.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "works",
+      "registrationRub": "6280.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "world",
+      "registrationRub": "599.00",
+      "renewalRub": "10779.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "ws",
+      "registrationRub": "7461.00",
+      "renewalRub": "8937.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "wtf",
+      "registrationRub": "5864.00",
+      "renewalRub": "9431.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80aa4alnkfho.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80aaaabj8cgc.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80aaap1biwea.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80aalc5bdo.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80aaufgvpw.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80adi0aoagldk8i.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80adio3aejo4j.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80adxhks",
+      "registrationRub": "1310.00",
+      "renewalRub": "1428.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80aeemukg5b.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80ajiildev.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80asehdb",
+      "registrationRub": "4960.00",
+      "renewalRub": "7256.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--80avv4c.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--90ahbrajq7a2g.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--c1avg",
+      "registrationRub": "2930.00",
+      "renewalRub": "4713.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--h1aalsr.xn--p1ai",
+      "registrationRub": "238.80",
+      "renewalRub": "228.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--p1acf",
+      "registrationRub": "1463.00",
+      "renewalRub": "2036.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xxx",
+      "registrationRub": "20447.00",
+      "renewalRub": "32900.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "yoga",
+      "registrationRub": "7970.00",
+      "renewalRub": "12810.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "yokohama",
+      "registrationRub": "6174.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "za.com",
+      "registrationRub": "92313.00",
+      "renewalRub": "100728.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "zone",
+      "registrationRub": "6280.00",
+      "renewalRub": "10104.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "autos",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "boats",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "homes",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "motorcycles",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "wiki",
+      "registrationRub": "4606.00",
+      "renewalRub": "6736.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "yachts",
+      "registrationRub": "280.00",
+      "renewalRub": "4556.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "xn--90a1af.xn--p1ai",
+      "registrationRub": "255.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "дети",
+      "registrationRub": "1208.00",
+      "renewalRub": "1318.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "сайт",
+      "registrationRub": "4960.00",
+      "renewalRub": "7256.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    },
+    {
+      "tld": "спб.рф",
+      "registrationRub": "255.00",
+      "renewalRub": "718.00",
+      "registrationYears": 1,
+      "renewalYears": 1,
+      "promotion": false
+    }
+  ],
+  "excluded": [
+    ".бел N/A N/A",
+    ".desi 0.00 руб. 1 год N/A"
+  ]
+}

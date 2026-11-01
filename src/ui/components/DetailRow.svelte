@@ -108,6 +108,7 @@
                   >
                     <span class="detail-reg-dot" aria-hidden="true"></span>
                     {quote.name} — {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)} / {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}
+                    {#if $pricing?.table.sourcePromotions?.[quote.id]?.includes(row.result.tld)} ({t('price.promo')}){/if}
                   </a>
                 {/each}
                 {#if quotes.length > 4}

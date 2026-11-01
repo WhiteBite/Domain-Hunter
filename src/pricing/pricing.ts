@@ -26,6 +26,12 @@ interface CompactSnapshot {
   sprinthostUpdatedAt?: string | null;
   /** Last successful WebHOST1 price collection or public-page import. */
   webhost1UpdatedAt?: string | null;
+  /** Date of the separately sourced WebHOST1 renewals. */
+  webhost1RenewalUpdatedAt?: string | null;
+  /** Last successful AdminVPS public-price import. */
+  adminvpsUpdatedAt?: string | null;
+  /** Seller-labeled promotions: registrar → zones. */
+  sourcePromotions?: Record<string, string[]>;
   /** Published renewal lower bounds, in RUB, not exact renewal prices. */
   timewebRenewalFromRub?: Record<string, number>;
   /** Original prices in kopecks: registrar → TLD → [registration, renewal]. */
@@ -42,6 +48,9 @@ const SNAPSHOT: PricingTable = {
   timewebUpdatedAt: rawSnap.timewebUpdatedAt ?? null,
   sprinthostUpdatedAt: rawSnap.sprinthostUpdatedAt ?? null,
   webhost1UpdatedAt: rawSnap.webhost1UpdatedAt ?? null,
+  webhost1RenewalUpdatedAt: rawSnap.webhost1RenewalUpdatedAt ?? null,
+  adminvpsUpdatedAt: rawSnap.adminvpsUpdatedAt ?? null,
+  sourcePromotions: rawSnap.sourcePromotions ?? {},
   timewebRenewalFromRub: rawSnap.timewebRenewalFromRub ?? {},
   sourceRub: rawSnap.sourceRub ?? {},
   coupons: rawSnap.coupons,
@@ -303,6 +312,9 @@ export async function loadPricing(
     timewebUpdatedAt: baseline.timewebUpdatedAt ?? null,
     sprinthostUpdatedAt: baseline.sprinthostUpdatedAt ?? null,
     webhost1UpdatedAt: baseline.webhost1UpdatedAt ?? null,
+    webhost1RenewalUpdatedAt: baseline.webhost1RenewalUpdatedAt ?? null,
+    adminvpsUpdatedAt: baseline.adminvpsUpdatedAt ?? null,
+    sourcePromotions: baseline.sourcePromotions ?? {},
     timewebRenewalFromRub: baseline.timewebRenewalFromRub ?? {},
     sourceRub: baseline.sourceRub ?? {},
     tlds: merged.tlds,

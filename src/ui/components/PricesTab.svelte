@@ -69,6 +69,18 @@
       : null,
   );
 
+  const webhost1RenewalDate = $derived(
+    table?.webhost1RenewalUpdatedAt && Number.isFinite(Date.parse(table.webhost1RenewalUpdatedAt))
+      ? new Date(table.webhost1RenewalUpdatedAt).toISOString().slice(0, 10)
+      : null,
+  );
+  const hasAdminvps = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.adminvps) : false);
+  const adminvpsDate = $derived(
+    table?.adminvpsUpdatedAt && Number.isFinite(Date.parse(table.adminvpsUpdatedAt))
+      ? new Date(table.adminvpsUpdatedAt).toISOString().slice(0, 10)
+      : null,
+  );
+
   // Price-only zones need not be available to the domain checker. Include them
   // here without adding unverified RDAP zones to the registry.
   const allZones = $derived([...new Set([
@@ -193,6 +205,7 @@
       t('csv.bestRegistrar'),
       t('csv.priceFirstYear'),
       t('csv.priceRenewal'),
+      t('csv.sellerPromotions'),
       ...columns.map((rid) => registrarName.get(rid) ?? rid),
     ];
     const lines: string[] = [headerLabels.map(escapeCsv).join(',')];
@@ -204,7 +217,10 @@
         const e = entryFor(tld, rid);
         return e?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', e.reg, s) : '';
       });
-      const row = [tld, best ? (registrarName.get(best.registrarId) ?? best.registrarId) : '', first, renewal, ...registrarPrices];
+      const promos = Object.keys(table.tlds[tld] ?? {})
+        .filter((rid) => table.sourcePromotions?.[rid]?.includes(tld))
+        .map((rid) => registrarName.get(rid) ?? rid).join('; ');
+      const row = [tld, best ? (registrarName.get(best.registrarId) ?? best.registrarId) : '', first, renewal, promos, ...registrarPrices];
       lines.push(row.map(escapeCsv).join(','));
     }
     const csv = '\uFEFF' + lines.join('\r\n') + '\r\n';
@@ -247,6 +263,14 @@
     <p class="regru-note" data-testid="prices-webhost1-note">
       {webhost1Date ? t('prices.webhost1.updated', { date: webhost1Date }) : t('prices.webhost1.unknown')}
       {t('prices.webhost1.caveat')}
+      {#if webhost1RenewalDate}{t('prices.webhost1.renewalUpdated', { date: webhost1RenewalDate })}{/if}
+    </p>
+  {/if}
+
+  {#if hasAdminvps}
+    <p class="regru-note" data-testid="prices-adminvps-note">
+      {adminvpsDate ? t('prices.adminvps.updated', { date: adminvpsDate }) : t('prices.adminvps.unknown')}
+      {t('prices.adminvps.caveat')}
     </p>
   {/if}
 
@@ -359,8 +383,11 @@
                   title={cellTitle(entry, isMin, rid, tld, $settings)}
                 >
                   {entry?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', entry.reg, $settings) : '—'}
-                  {#if (rid === 'hostiman' || rid === 'sprinthost' || rid === 'webhost1') && entry?.renew != null}
+                  {#if (rid === 'hostiman' || rid === 'sprinthost' || rid === 'webhost1' || rid === 'adminvps') && entry?.renew != null}
                     <span class="renewal-hint">{t('prices.source.renewal', { price: formatSourcePrice(table, tld, rid, 'renew', entry.renew, $settings) })}</span>
+                  {/if}
+                  {#if entry && table.sourcePromotions?.[rid]?.includes(tld)}
+                    <span class="renewal-hint" title={t('prices.source.sellerPromo')}>{t('price.promo')}</span>
                   {/if}
                   {#if rid === 'timeweb' && entry && table.timewebRenewalFromRub?.[tld] != null}
                     <span class="renewal-hint">{t('prices.timeweb.renewFrom', { price: `${table.timewebRenewalFromRub[tld]} ₽` })}</span>

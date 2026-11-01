@@ -13,6 +13,7 @@ interface ParsedPricing {
   tlds: Record<string, Record<string, PriceEntry>>;
   coupons: Record<string, unknown[]>;
   timewebRenewalFromRub?: Record<string, number>;
+  sourcePromotions?: Record<string, string[]>;
   sourceRub?: Record<string, Record<string, [number | null, number | null]>>;
 }
 
@@ -44,3 +45,7 @@ export declare function normalizeTimeweb(html: string, rubToUsd?: number): Parse
 export declare function fetchTimeweb(fetcher?: (url: string, opts: { timeoutMs: number; headers: Record<string, string> }, retries: { retries: number }) => Promise<Response>): Promise<ParsedPricing>;
 
 export declare function mergeSourceRub(previous: ParsedPricing["sourceRub"], successful: Record<string, ParsedPricing>): NonNullable<ParsedPricing["sourceRub"]>;
+
+export declare function normalizeAdminvpsAnnual(data: unknown, rubToUsd?: number): ParsedPricing;
+export declare function normalizeWebhost1Annual(data: unknown, observations: unknown, rubToUsd?: number): ParsedPricing;
+export declare function mergeSourcePromotions(previous: ParsedPricing["sourcePromotions"], successful: Record<string, ParsedPricing>): NonNullable<ParsedPricing["sourcePromotions"]>;

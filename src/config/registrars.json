@@ -301,6 +301,12 @@
     "searchUrl": "https://sprinthost.ru/tariffs/domains"
   },
   {
+    "id": "adminvps",
+    "name": "AdminVPS",
+    "market": "ru",
+    "searchUrl": "https://adminvps.ru/domains.php"
+  },
+  {
     "id": "webhost1",
     "name": "WebHOST1",
     "market": "ru",

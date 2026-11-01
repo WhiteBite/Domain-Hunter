@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { normalizeWebhost1Observed, normalizeSprinthostAnnual, normalizeSprinthost, fetchTimeweb, normalizeTimeweb, fetchHostiman, normalizeHostiman, fetchRegru, normalizeRegru, normalizeBeget, normalizeDynadotHtml, normalizeSpaceship } from '../scripts/harvest-prices.mjs';
+import { normalizeAdminvpsAnnual, normalizeWebhost1Annual, normalizeWebhost1Observed, normalizeSprinthostAnnual, normalizeSprinthost, fetchTimeweb, normalizeTimeweb, fetchHostiman, normalizeHostiman, fetchRegru, normalizeRegru, normalizeBeget, normalizeDynadotHtml, normalizeSpaceship } from '../scripts/harvest-prices.mjs';
 
+import adminvpsAnnual from './fixtures/adminvps-annual-prices.json';
+import webhost1Annual from './fixtures/webhost1-annual-prices.json';
 import webhost1Observations from './fixtures/webhost1-public-observations.json';
 import sprinthostAnnualHtml from './fixtures/sprinthost-annual-sanitized.html?raw';
 import sprinthostHtml from './fixtures/sprinthost-sanitized.html?raw';
@@ -31,6 +33,56 @@ describe('normalizeWebhost1Observed', () => {
       expect(() => normalizeWebhost1Observed(rows, 80.572954)).toThrow();
     }
     expect(() => normalizeWebhost1Observed(webhost1Observations, 0)).toThrow();
+  });
+});
+
+describe('saved annual price extractions', () => {
+  it('imports 739 AdminVPS annual quotes and preserves explicit seller promotion flags', () => {
+    const result = normalizeAdminvpsAnnual(adminvpsAnnual, 80.572954);
+    expect(Object.keys(result.tlds)).toHaveLength(739);
+    expect(result.sourcePromotions?.adminvps).toHaveLength(31);
+    expect(result.sourcePromotions?.adminvps).toContain('ru');
+    expect(result.sourcePromotions?.adminvps).not.toContain('ru.com');
+    expect(result.sourceRub?.adminvps?.ru).toEqual([20300, 143900]);
+    expect(result.tlds.ru?.adminvps).toEqual({ reg: 252, renew: 1786, transfer: null });
+    expect(result.tlds['бел']).toBeUndefined();
+    expect(result.tlds.desi).toBeUndefined();
+  });
+
+  it('rejects incomplete, duplicate, nonannual and ambiguous AdminVPS records', () => {
+    const rows = adminvpsAnnual.rows;
+    const first = rows[0]!;
+    for (const data of [
+      { ...adminvpsAnnual, headers: ['Домен', 'Продление', 'Регистрация'] },
+      { ...adminvpsAnnual, rows: rows.slice(1, 100) },
+      { ...adminvpsAnnual, rows: [first, ...rows] },
+      { ...adminvpsAnnual, rows: [{ ...first, renewalYears: 2 }, ...rows.slice(1)] },
+      { ...adminvpsAnnual, rows: [{ ...first, registrationRub: '0' }, ...rows.slice(1)] },
+      { ...adminvpsAnnual, rows: [{ ...first, promotion: null }, ...rows.slice(1)] },
+    ]) expect(() => normalizeAdminvpsAnnual(data, 80.572954)).toThrow();
+  });
+
+  it('imports WebHOST1 annual registration separately, retaining only verified prior renewals', () => {
+    const result = normalizeWebhost1Annual(webhost1Annual, webhost1Observations, 80.572954);
+    expect(Object.keys(result.tlds)).toHaveLength(226);
+    expect(result.tlds.com).toBeUndefined(); // conflicting saved card and modal
+    expect(result.sourceRub?.webhost1?.xyz).toEqual([240975, null]);
+    expect(result.sourceRub?.webhost1?.ru).toEqual([18900, 39900]);
+    expect(result.sourceRub?.webhost1?.['рф']).toEqual([18900, 39900]);
+    expect(Object.values(result.tlds).filter((r) => r.webhost1?.renew != null)).toHaveLength(2);
+  });
+
+  it('rejects mismatched old renewal, changed term, duplicates and inconsistent conflicts', () => {
+    const rows = webhost1Annual.rows;
+    const first = rows[0]!;
+    for (const data of [
+      { ...webhost1Annual, rows: rows.slice(0, 10) },
+      { ...webhost1Annual, rows: [first, ...rows] },
+      { ...webhost1Annual, rows: [{ ...first, registrationRub: '190' }, ...rows.slice(1)] },
+      { ...webhost1Annual, rows: [{ ...first, registrationYears: 2 }, ...rows.slice(1)] },
+      { ...webhost1Annual, conflicts: [] },
+      { ...webhost1Annual, conflicts: [{ ...webhost1Annual.conflicts[0]!, listRub: '1' }] },
+    ]) expect(() => normalizeWebhost1Annual(data, webhost1Observations, 80.572954)).toThrow();
   });
 });
 

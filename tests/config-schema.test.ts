@@ -50,6 +50,9 @@ const pricingSnapshot = pricingSnapshotJson as unknown as {
   coupons: Record<string, Coupon[]>;
   sprinthostUpdatedAt?: string;
   webhost1UpdatedAt?: string;
+  webhost1RenewalUpdatedAt?: string;
+  adminvpsUpdatedAt?: string;
+  sourcePromotions?: Record<string, string[]>;
   sourceRub?: Record<string, Record<string, [number | null, number | null]>>;
 };
 
@@ -199,11 +202,31 @@ describe('Sprinthost snapshot provenance', () => {
 describe('WebHOST1 snapshot provenance', () => {
   it('keeps the two dated annual public observations and original RUB', () => {
     const original = pricingSnapshot.sourceRub?.webhost1;
-    expect(Object.keys(original ?? {}).sort()).toEqual(['ru', 'рф']);
+    expect(Object.keys(original ?? {})).toHaveLength(226);
+    expect(original?.com).toBeUndefined();
+    expect(original?.xyz).toEqual([240975, null]);
+    expect(pricingSnapshot.webhost1RenewalUpdatedAt).toMatch(/^2026-11-01T/);
     expect(pricingSnapshot.webhost1UpdatedAt).toMatch(/^2026-11-01T/);
     for (const tld of ['ru', 'рф']) {
       expect(original?.[tld]).toEqual([18900, 39900]);
       expect(pricingSnapshot.tlds[tld]?.webhost1).toEqual([235, 495, null]);
+    }
+  });
+});
+
+
+describe('AdminVPS snapshot provenance', () => {
+  it('contains dated annual prices with original rubles and seller promotion markers', () => {
+    const original = pricingSnapshot.sourceRub?.adminvps;
+    expect(Object.keys(original ?? {})).toHaveLength(739);
+    expect(pricingSnapshot.adminvpsUpdatedAt).toMatch(/^2026-11-01T/);
+    expect(pricingSnapshot.sourcePromotions?.adminvps).toHaveLength(31);
+    expect(pricingSnapshot.sourcePromotions?.adminvps).toContain('ru');
+    expect(original?.ru).toEqual([20300, 143900]);
+    expect(pricingSnapshot.tlds.ru?.adminvps).toEqual([252, 1786, null]);
+    for (const [tld, native] of Object.entries(original ?? {})) {
+      const entry = pricingSnapshot.tlds[tld]?.adminvps;
+      expect(entry).toEqual([Math.round(native[0]! / 80.572954), Math.round(native[1]! / 80.572954), null]);
     }
   });
 });

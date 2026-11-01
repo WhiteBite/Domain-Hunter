@@ -323,13 +323,14 @@ export async function runPricesCommand(
     const entriesForTld = table.tlds[tld] ?? {};
     const entries: Record<
       string,
-      { reg: number | null; renew: number | null; transfer: number | null }
+      { reg: number | null; renew: number | null; transfer: number | null; sellerPromotion?: boolean }
     > = {};
     for (const [rid, entry] of Object.entries(entriesForTld)) {
       entries[rid] = {
         reg: entry.reg,
         renew: entry.renew,
         transfer: entry.transfer,
+        ...(table.sourcePromotions?.[rid]?.includes(tld) ? { sellerPromotion: true } : {}),
       };
     }
     return {
@@ -339,6 +340,7 @@ export async function runPricesCommand(
             registrarId: best.registrarId,
             reg: best.entry.reg,
             renew: best.entry.renew,
+            ...(table.sourcePromotions?.[best.registrarId]?.includes(tld) ? { sellerPromotion: true } : {}),
           }
         : null,
       tco3UsdCents: tco3(table, tld),
