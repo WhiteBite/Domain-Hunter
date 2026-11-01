@@ -189,6 +189,8 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'results-timeweb-estimate-',
   'results-sprinthost-estimate-',
   'results-sprinthost-renew-estimate-',
+  'results-webhost1-estimate-',
+  'results-webhost1-renew-estimate-',
   // ---- App.svelte ----
   'app-tab-', // tab buttons: app-tab-{tabId} (check|generators|drops|prices|social|settings|about)
   'app-lang-', // language menu items: app-lang-{code} (en|ru|es|de|pt)

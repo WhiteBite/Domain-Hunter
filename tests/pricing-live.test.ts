@@ -145,7 +145,7 @@ describe('loadPricing', () => {
 
   it('retains HostiMan source freshness through a snapshot overlay', async () => {
     const table: PricingTable = {
-      generatedAt: '2026-10-30T01:00:00Z', hostimanUpdatedAt: '2026-10-29T01:00:00Z', sprinthostUpdatedAt: '2026-11-01T01:00:00Z', timewebUpdatedAt: '2026-10-28T01:00:00Z', timewebRenewalFromRub: { ru: 399 }, sourceRub: { hostiman: { ru: [20000, 40000] } },
+      generatedAt: '2026-10-30T01:00:00Z', hostimanUpdatedAt: '2026-10-29T01:00:00Z', sprinthostUpdatedAt: '2026-11-01T01:00:00Z', webhost1UpdatedAt: '2026-11-01T02:00:00Z', timewebUpdatedAt: '2026-10-28T01:00:00Z', timewebRenewalFromRub: { ru: 399 }, sourceRub: { hostiman: { ru: [20000, 40000] } },
       sources: ['snapshot'], coupons: {},
       tlds: { ru: { hostiman: { reg: 248, renew: 496, transfer: null } } },
     };
@@ -153,6 +153,7 @@ describe('loadPricing', () => {
       fetchImpl: vi.fn().mockRejectedValue(new Error('offline')) as typeof fetch });
     expect(state.table.hostimanUpdatedAt).toBe('2026-10-29T01:00:00Z');
     expect(state.table.sprinthostUpdatedAt).toBe('2026-11-01T01:00:00Z');
+    expect(state.table.webhost1UpdatedAt).toBe('2026-11-01T02:00:00Z');
     expect(state.table.timewebUpdatedAt).toBe('2026-10-28T01:00:00Z');
     expect(state.table.timewebRenewalFromRub?.ru).toBe(399);
     expect(state.table.sourceRub?.hostiman?.ru).toEqual([20000, 40000]);

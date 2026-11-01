@@ -37,6 +37,7 @@ export declare function dedupeCoupons(coupons: Record<string, unknown[]>): Recor
 
 export declare function applySuccessfulSource(target: ParsedPricing, fresh: ParsedPricing, name: string): void;
 export declare function sourceUpdatedAt(sources: string[], previous: unknown, name: string, now?: string): string | null;
+export declare function normalizeWebhost1Observed(rows: unknown, rubToUsd?: number): ParsedPricing;
 export declare function normalizeSprinthostAnnual(html: string, rubToUsd?: number): ParsedPricing;
 export declare function normalizeSprinthost(html: string, rubToUsd?: number): ParsedPricing;
 export declare function normalizeTimeweb(html: string, rubToUsd?: number): ParsedPricing;

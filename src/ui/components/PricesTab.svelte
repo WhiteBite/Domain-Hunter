@@ -62,6 +62,13 @@
       : null,
   );
 
+  const hasWebhost1 = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.webhost1) : false);
+  const webhost1Date = $derived(
+    table?.webhost1UpdatedAt && Number.isFinite(Date.parse(table.webhost1UpdatedAt))
+      ? new Date(table.webhost1UpdatedAt).toISOString().slice(0, 10)
+      : null,
+  );
+
   // Price-only zones need not be available to the domain checker. Include them
   // here without adding unverified RDAP zones to the registry.
   const allZones = $derived([...new Set([
@@ -236,6 +243,13 @@
     </p>
   {/if}
 
+  {#if hasWebhost1}
+    <p class="regru-note" data-testid="prices-webhost1-note">
+      {webhost1Date ? t('prices.webhost1.updated', { date: webhost1Date }) : t('prices.webhost1.unknown')}
+      {t('prices.webhost1.caveat')}
+    </p>
+  {/if}
+
   <div class="controls">
     <input
       class="search"
@@ -345,7 +359,7 @@
                   title={cellTitle(entry, isMin, rid, tld, $settings)}
                 >
                   {entry?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', entry.reg, $settings) : '—'}
-                  {#if (rid === 'hostiman' || rid === 'sprinthost') && entry?.renew != null}
+                  {#if (rid === 'hostiman' || rid === 'sprinthost' || rid === 'webhost1') && entry?.renew != null}
                     <span class="renewal-hint">{t('prices.source.renewal', { price: formatSourcePrice(table, tld, rid, 'renew', entry.renew, $settings) })}</span>
                   {/if}
                   {#if rid === 'timeweb' && entry && table.timewebRenewalFromRub?.[tld] != null}

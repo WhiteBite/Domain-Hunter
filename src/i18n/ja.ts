@@ -416,6 +416,9 @@ export const ja: Dict = {
   'settings.watch.notify.on': 'オン',
   'settings.watch.notify.enable': '有効にする',
 
+  'prices.webhost1.updated': 'WebHOST1 価格の取得または取込日: {date}。',
+  'prices.webhost1.unknown': 'WebHOST1 価格の日付は不明です。',
+  'prices.webhost1.caveat': 'WebHOST1 の価格は目安です。公開ページから .ru と .рф のみを取り込みました。元のルーブル価格があれば表示し、比較と総費用は米ドル経由です。キャンペーン、プレミアムドメイン、アカウント条件により価格が変わるため、WebHOST1 で確認してください。',
   'prices.sprinthost.updated': 'Sprinthost 価格の取得または取込日: {date}。',
   'prices.sprinthost.unknown': 'Sprinthost 価格の日付は不明です。',
   'prices.sprinthost.caveat': 'Sprinthost の価格は目安です。.ru と .рф は Sprintnames の料金です。外部 DNS を使う更新は 270 ₽ 高くなる場合がありますが、Sprintnames 経由は例外です。ドメイン数やアカウント条件にも左右されます。元のルーブル価格があれば表示し、比較と総費用は米ドル経由です。Sprinthost で確認してください。',

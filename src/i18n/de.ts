@@ -416,6 +416,9 @@ export const de: Dict = {
   'settings.watch.notify.on': 'Ein',
   'settings.watch.notify.enable': 'Aktivieren',
 
+  'prices.webhost1.updated': 'WebHOST1-Preise zuletzt erhoben oder importiert: {date}.',
+  'prices.webhost1.unknown': 'Das Datum der WebHOST1-Preise ist unbekannt.',
+  'prices.webhost1.caveat': 'WebHOST1-Preise sind Richtwerte: Nur .ru und .рф wurden von öffentlichen Seiten importiert. RUB-Originalbeträge werden angezeigt, soweit verfügbar; Vergleiche und TCO laufen über USD. Aktionen, Premium-Domains und Kontobedingungen können den Preis ändern; bei WebHOST1 prüfen.',
   'prices.sprinthost.updated': 'Sprinthost-Preise zuletzt erhoben oder importiert: {date}.',
   'prices.sprinthost.unknown': 'Das Datum der Sprinthost-Preise ist unbekannt.',
   'prices.sprinthost.caveat': 'Sprinthost-Preise sind Richtwerte: .ru und .рф gelten für Sprintnames. Verlängerung mit fremden Nameservern kann 270 ₽ mehr kosten, außer über Sprintnames; auch Domainzahl, Konto und Bedingungen sind relevant. RUB-Originalbeträge werden angezeigt, soweit verfügbar; Vergleiche und TCO werden über USD berechnet. Bei Sprinthost prüfen.',

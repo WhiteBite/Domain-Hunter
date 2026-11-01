@@ -24,6 +24,8 @@ interface CompactSnapshot {
   timewebUpdatedAt?: string | null;
   /** Last successful Sprinthost price collection or public-page import. */
   sprinthostUpdatedAt?: string | null;
+  /** Last successful WebHOST1 price collection or public-page import. */
+  webhost1UpdatedAt?: string | null;
   /** Published renewal lower bounds, in RUB, not exact renewal prices. */
   timewebRenewalFromRub?: Record<string, number>;
   /** Original prices in kopecks: registrar → TLD → [registration, renewal]. */
@@ -39,6 +41,7 @@ const SNAPSHOT: PricingTable = {
   hostimanUpdatedAt: rawSnap.hostimanUpdatedAt ?? null,
   timewebUpdatedAt: rawSnap.timewebUpdatedAt ?? null,
   sprinthostUpdatedAt: rawSnap.sprinthostUpdatedAt ?? null,
+  webhost1UpdatedAt: rawSnap.webhost1UpdatedAt ?? null,
   timewebRenewalFromRub: rawSnap.timewebRenewalFromRub ?? {},
   sourceRub: rawSnap.sourceRub ?? {},
   coupons: rawSnap.coupons,
@@ -299,6 +302,7 @@ export async function loadPricing(
     hostimanUpdatedAt: baseline.hostimanUpdatedAt ?? null,
     timewebUpdatedAt: baseline.timewebUpdatedAt ?? null,
     sprinthostUpdatedAt: baseline.sprinthostUpdatedAt ?? null,
+    webhost1UpdatedAt: baseline.webhost1UpdatedAt ?? null,
     timewebRenewalFromRub: baseline.timewebRenewalFromRub ?? {},
     sourceRub: baseline.sourceRub ?? {},
     tlds: merged.tlds,

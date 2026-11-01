@@ -274,3 +274,19 @@ describe('Sprinthost refresh carry-over', () => {
     expect(sourceUpdatedAt(['sprinthost'], 'old', 'sprinthost', 'new')).toBe('new');
   });
 });
+
+
+describe('WebHOST1 source carry-over', () => {
+  it('retains failed imports and replaces refreshed source prices and rubles atomically', () => {
+    const old = { tlds: { ru: { webhost1: { reg: 235, renew: 495, transfer: null } }, com: { webhost1: { reg: 100, renew: 200, transfer: null }, porkbun: { reg: 300, renew: 400, transfer: null } } }, coupons: {} };
+    const fresh = { tlds: { ru: { webhost1: { reg: 250, renew: 500, transfer: null } } }, coupons: {}, sourceRub: { webhost1: { ru: [20000, 40000] as [number, number] } } };
+    const previous = { webhost1: { ru: [18900, 39900] as [number, number] } };
+    expect(mergeSourceRub(previous, {})).toEqual(previous);
+    expect(sourceUpdatedAt([], 'old', 'webhost1', 'new')).toBe('old');
+    applySuccessfulSource(old, fresh, 'webhost1');
+    expect(old.tlds.com.webhost1).toBeUndefined();
+    expect(old.tlds.com.porkbun.reg).toBe(300);
+    expect(mergeSourceRub(previous, { webhost1: fresh }).webhost1).toEqual({ ru: [20000, 40000] });
+    expect(sourceUpdatedAt(['webhost1'], 'old', 'webhost1', 'new')).toBe('new');
+  });
+});

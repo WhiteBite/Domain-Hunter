@@ -301,6 +301,12 @@
     "searchUrl": "https://sprinthost.ru/tariffs/domains"
   },
   {
+    "id": "webhost1",
+    "name": "WebHOST1",
+    "market": "ru",
+    "searchUrl": "https://webhost1.ru/domains"
+  },
+  {
     "id": "nicru",
     "name": "NIC.ru",
     "market": "ru",

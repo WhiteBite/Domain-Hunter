@@ -49,6 +49,7 @@ const pricingSnapshot = pricingSnapshotJson as unknown as {
   tlds: Record<string, Record<string, (number | null)[]>>;
   coupons: Record<string, Coupon[]>;
   sprinthostUpdatedAt?: string;
+  webhost1UpdatedAt?: string;
   sourceRub?: Record<string, Record<string, [number | null, number | null]>>;
 };
 
@@ -190,6 +191,19 @@ describe('Sprinthost snapshot provenance', () => {
       expect(entry?.[0]).toBe(Math.round(native[0]! / 80.572954));
       expect(entry?.[1]).toBe(Math.round(native[1]! / 80.572954));
       expect(entry?.[2]).toBeNull();
+    }
+  });
+});
+
+
+describe('WebHOST1 snapshot provenance', () => {
+  it('keeps the two dated annual public observations and original RUB', () => {
+    const original = pricingSnapshot.sourceRub?.webhost1;
+    expect(Object.keys(original ?? {}).sort()).toEqual(['ru', 'рф']);
+    expect(pricingSnapshot.webhost1UpdatedAt).toMatch(/^2026-11-01T/);
+    for (const tld of ['ru', 'рф']) {
+      expect(original?.[tld]).toEqual([18900, 39900]);
+      expect(pricingSnapshot.tlds[tld]?.webhost1).toEqual([235, 495, null]);
     }
   });
 });

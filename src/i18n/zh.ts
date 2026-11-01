@@ -415,6 +415,9 @@ export const zh: Dict = {
   'settings.watch.notify.on': '已开启',
   'settings.watch.notify.enable': '开启',
 
+  'prices.webhost1.updated': 'WebHOST1 价格采集或导入日期：{date}。',
+  'prices.webhost1.unknown': 'WebHOST1 价格日期未知。',
+  'prices.webhost1.caveat': 'WebHOST1 价格仅供参考：仅从公开页面导入 .ru 和 .рф。有原始卢布金额时会显示，比较和总持有成本通过美元换算。促销、溢价域名及账户条件可能改变价格，请向 WebHOST1 确认。',
   'prices.sprinthost.updated': 'Sprinthost 价格采集或导入日期：{date}。',
   'prices.sprinthost.unknown': 'Sprinthost 价格日期未知。',
   'prices.sprinthost.caveat': 'Sprinthost 价格仅供参考：.ru 和 .рф 为 Sprintnames 价格。使用第三方 DNS 续费可能多收 270 ₽，通过 Sprintnames 续费除外；域名数量、账户和其他条件也会影响价格。有原始卢布金额时会显示，比较和总持有成本通过美元换算。请向 Sprinthost 确认。',

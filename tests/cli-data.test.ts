@@ -241,6 +241,8 @@ describe('loadPricingTable', () => {
     expect(state.table.sourceRub?.sprinthost?.xyz).toEqual([150000, 170000]);
     expect(state.table.sourceRub?.sprinthost?.['com.ru']).toEqual([34800, 34800]);
     expect(state.table.sprinthostUpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.sourceRub?.webhost1?.ru).toEqual([18900, 39900]);
+    expect(state.table.webhost1UpdatedAt).toMatch(/^2026-11-01T/);
   });
 
   it('expands compact [reg,renew,transfer] arrays into PriceEntry objects', async () => {

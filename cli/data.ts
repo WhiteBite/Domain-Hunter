@@ -240,6 +240,8 @@ interface CompactSnapshot {
   timewebUpdatedAt?: string | null;
   /** Last successful Sprinthost price collection or public-page import. */
   sprinthostUpdatedAt?: string | null;
+  /** Last successful WebHOST1 price collection or public-page import. */
+  webhost1UpdatedAt?: string | null;
   /** Published renewal lower bounds, in RUB, not exact renewal prices. */
   timewebRenewalFromRub?: Record<string, number>;
   /** Original prices in kopecks: registrar → TLD → [registration, renewal]. */
@@ -284,6 +286,7 @@ function expandCompactSnapshot(json: unknown): PricingTable | null {
     hostimanUpdatedAt: typeof raw.hostimanUpdatedAt === 'string' ? raw.hostimanUpdatedAt : null,
     timewebUpdatedAt: typeof raw.timewebUpdatedAt === 'string' ? raw.timewebUpdatedAt : null,
     sprinthostUpdatedAt: typeof raw.sprinthostUpdatedAt === 'string' ? raw.sprinthostUpdatedAt : null,
+    webhost1UpdatedAt: typeof raw.webhost1UpdatedAt === 'string' ? raw.webhost1UpdatedAt : null,
     timewebRenewalFromRub: raw.timewebRenewalFromRub ?? {},
     sourceRub: raw.sourceRub ?? {},
     coupons: raw.coupons ?? {},

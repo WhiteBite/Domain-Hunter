@@ -158,6 +158,22 @@ test.describe('Prices tab', () => {
     await expect(comru).toContainText('Renewal: ₽348.00');
   });
 
+  test('shows WebHOST1 public annual prices, original rubles and import date', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds['рф'] = { webhost1: { reg: 235, renew: 495, transfer: null } };
+    seed.table.sourceRub = { webhost1: { 'рф': [18900, 39900] } };
+    seed.table.webhost1UpdatedAt = '2026-11-01T19:00:00Z';
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-webhost1-note')).toContainText('2026-11-01');
+    await expect(page.getByTestId('prices-webhost1-note')).toContainText('indicative');
+    await page.getByTestId('prices-search').fill('рф');
+    const row = page.getByTestId('prices-row-рф');
+    await expect(row).toContainText('₽189.00');
+    await expect(row).toContainText('Renewal: ₽399.00');
+    await expect(row).not.toContainText('₽211.50');
+  });
+
   test('shows Sprinthost original RUB, renewal and material conditions', async ({ page }) => {
     const seed = seedPricingTable();
     seed.table.tlds['рф'] = { sprinthost: { reg: 222, renew: 421, transfer: null } };

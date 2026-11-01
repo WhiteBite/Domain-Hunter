@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { normalizeSprinthostAnnual, normalizeSprinthost, fetchTimeweb, normalizeTimeweb, fetchHostiman, normalizeHostiman, fetchRegru, normalizeRegru, normalizeBeget, normalizeDynadotHtml, normalizeSpaceship } from '../scripts/harvest-prices.mjs';
+import { normalizeWebhost1Observed, normalizeSprinthostAnnual, normalizeSprinthost, fetchTimeweb, normalizeTimeweb, fetchHostiman, normalizeHostiman, fetchRegru, normalizeRegru, normalizeBeget, normalizeDynadotHtml, normalizeSpaceship } from '../scripts/harvest-prices.mjs';
 
+import webhost1Observations from './fixtures/webhost1-public-observations.json';
 import sprinthostAnnualHtml from './fixtures/sprinthost-annual-sanitized.html?raw';
 import sprinthostHtml from './fixtures/sprinthost-sanitized.html?raw';
 import timewebHtml from './fixtures/timeweb-sanitized.html?raw';
@@ -10,6 +11,28 @@ import regruSanitizedHtml from './fixtures/regru-sanitized.html?raw';
 import begetHtml from './fixtures/beget.html?raw';
 import dynadotHtml from './fixtures/dynadot.html?raw';
 import spaceshipHtml from './fixtures/spaceship.html?raw';
+
+describe('normalizeWebhost1Observed', () => {
+  it('converts two reviewed annual quotes while retaining original rubles', () => {
+    const result = normalizeWebhost1Observed(webhost1Observations, 80.572954);
+    expect(Object.keys(result.tlds).sort()).toEqual(['ru', 'рф']);
+    for (const tld of ['ru', 'рф']) {
+      expect(result.tlds[tld]?.webhost1).toEqual({ reg: 235, renew: 495, transfer: null });
+      expect(result.sourceRub?.webhost1?.[tld]).toEqual([18900, 39900]);
+    }
+  });
+
+  it('rejects incomplete, duplicated, mis-sourced or nonannual observations', () => {
+    const first = webhost1Observations[0]!;
+    const second = webhost1Observations[1]!;
+    for (const rows of [[], [first], [first, first], [first, { ...second, source: first.source }],
+      [first, { ...second, registrationYears: 2 }], [first, { ...second, renewalYears: 2 }],
+      [first, { ...second, renewalRub: -1 }], [first, { ...second, registrationRub: 189.001 }]]) {
+      expect(() => normalizeWebhost1Observed(rows, 80.572954)).toThrow();
+    }
+    expect(() => normalizeWebhost1Observed(webhost1Observations, 0)).toThrow();
+  });
+});
 
 describe('normalizeRegru', () => {
   it('parses TLDs from __NUXT_DATA__ with RUB→USD conversion', () => {

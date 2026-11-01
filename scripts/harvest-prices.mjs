@@ -94,7 +94,7 @@ export function replaceRegistrar(target, fresh, registrarId) {
 
 /** Apply an independently successful source without redating stale zone prices. */
 export function applySuccessfulSource(target, fresh, name) {
-  if (name === 'regru' || name === 'hostiman' || name === 'timeweb' || name === 'sprinthost') replaceRegistrar(target, fresh, name);
+  if (name === 'regru' || name === 'hostiman' || name === 'timeweb' || name === 'sprinthost' || name === 'webhost1') replaceRegistrar(target, fresh, name);
   else mergePricing(target, fresh);
 }
 
@@ -107,7 +107,7 @@ export function sourceUpdatedAt(sources, previous, name, now = new Date().toISOS
 export function mergeSourceRub(previous, successful) {
   const result = { ...(previous ?? {}) };
   for (const [name, pricing] of Object.entries(successful)) {
-    if (name !== 'hostiman' && name !== 'timeweb' && name !== 'sprinthost') continue;
+    if (name !== 'hostiman' && name !== 'timeweb' && name !== 'sprinthost' && name !== 'webhost1') continue;
     // Missing metadata on a successful refresh must not preserve old values.
     result[name] = pricing.sourceRub?.[name] ?? {};
   }
@@ -406,6 +406,33 @@ export function normalizeTimeweb(html, rubToUsd = regruRubToUsd) {
   }
   if (!tlds.ru || !tlds['рф']) throw new Error('timeweb: missing verified zones');
   return { tlds, coupons: {}, timewebRenewalFromRub, sourceRub: { timeweb: nativePrices } };
+}
+
+/** Normalize manually transcribed public annual quotes, not HTML or a fetcher. */
+export function normalizeWebhost1Observed(rows, rubToUsd = regruRubToUsd) {
+  if (!Number.isFinite(rubToUsd) || rubToUsd <= 0) throw new Error('webhost1: invalid RUB/USD rate');
+  if (!Array.isArray(rows) || rows.length !== 2) throw new Error('webhost1: expected two reviewed quotes');
+  const paths = { ru: 'https://webhost1.ru/domains/ru', 'рф': 'https://webhost1.ru/domains/rf' };
+  const nativePrices = {};
+  const tlds = {};
+  for (const row of rows) {
+    if (!row || typeof row.tld !== 'string' || !Object.hasOwn(paths, row.tld) ||
+        row.source !== paths[row.tld] || tlds[row.tld] || row.registrationYears !== 1 || row.renewalYears !== 1) {
+      throw new Error('webhost1: invalid or duplicate annual quote');
+    }
+    const cents = (value) => {
+      if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return null;
+      const result = Math.round(value * 100);
+      return Number.isSafeInteger(result) && Math.abs(result / 100 - value) < 1e-8 ? result : null;
+    };
+    const reg = cents(row.registrationRub);
+    const renew = cents(row.renewalRub);
+    if (reg === null || renew === null) throw new Error(`webhost1: invalid price for ${row.tld}`);
+    nativePrices[row.tld] = [reg, renew];
+    tlds[row.tld] = { webhost1: { reg: Math.round(reg / rubToUsd), renew: Math.round(renew / rubToUsd), transfer: null } };
+  }
+  if (!tlds.ru || !tlds['рф']) throw new Error('webhost1: missing reviewed quotes');
+  return { tlds, coupons: {}, sourceRub: { webhost1: nativePrices } };
 }
 
 /**
@@ -786,6 +813,7 @@ async function main() {
     hostimanUpdatedAt: sourceUpdatedAt(sources, rawPrev?.hostimanUpdatedAt, 'hostiman'),
     timewebUpdatedAt: sourceUpdatedAt(sources, rawPrev?.timewebUpdatedAt, 'timeweb'),
     sprinthostUpdatedAt: sourceUpdatedAt(sources, rawPrev?.sprinthostUpdatedAt, 'sprinthost'),
+    webhost1UpdatedAt: sourceUpdatedAt(sources, rawPrev?.webhost1UpdatedAt, 'webhost1'),
     sourceRub: mergeSourceRub(rawPrev?.sourceRub, Object.fromEntries(
       results.flatMap((result, i) => result.status === 'fulfilled' ? [[named[i][0], result.value]] : []),
     )),

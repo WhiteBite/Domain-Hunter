@@ -657,6 +657,29 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
+  test('WebHOST1 result prices and renewals carry the conditions warning', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.webhost1 = { reg: 235, renew: 495, transfer: null }; // synthetic quote
+    seed.table.sourceRub = { webhost1: { com: [18900, 39900] } };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row.locator('.price-cell')).toContainText('₽189.00');
+    await expect(row.locator('.renew-cell')).toContainText('₽399.00');
+    await expect(row.getByTestId('results-webhost1-estimate-zzqxtest1-com')).toBeVisible();
+    await expect(row.getByTestId('results-webhost1-renew-estimate-zzqxtest1-com')).toBeVisible();
+    expectNoLeaks(page);
+  });
+
   test('results use the original HostiMan RUB price when available', async ({ page }) => {
     await assertNoNetworkLeaks(page);
     await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });

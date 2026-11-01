@@ -919,6 +919,12 @@
                       <span class="chip-tag" tabindex="0" data-testid={`results-sprinthost-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
                     </Tooltip>
                   {/if}
+                  {#if !row.isPremiumOverride && row.best?.registrarId === 'webhost1'}
+                    <Tooltip text={t('prices.webhost1.caveat')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag" tabindex="0" data-testid={`results-webhost1-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                    </Tooltip>
+                  {/if}
                   {#if row.isPremiumOverride}
                     <Tooltip text={t('results.detail.premium', { price: formatPrice(row.firstYear, $settings) })}>
                       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -987,6 +993,12 @@
                   <Tooltip text={t('prices.sprinthost.caveat')}>
                     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
                     <span class="chip-tag" tabindex="0" data-testid={`results-sprinthost-renew-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                  </Tooltip>
+                {/if}
+                {#if row.renewalRegistrarId === 'webhost1'}
+                  <Tooltip text={t('prices.webhost1.caveat')}>
+                    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                    <span class="chip-tag" tabindex="0" data-testid={`results-webhost1-renew-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
                   </Tooltip>
                 {/if}
               </td>
