@@ -1,11 +1,11 @@
 <script lang="ts">
   import { t } from '../../i18n';
   import { pricing, registry, settings } from '../store';
-  import { bestEntry, formatPrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
+  import { bestEntry, formatPrice, formatSourcePrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
-  import type { PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
+  import type { PriceEntry, RegistrarConfig, Settings } from '../../types';
   import registrarsJson from '../../config/registrars.json';
   import snapshotJson from '../../config/pricing.snapshot.json';
 
@@ -31,16 +31,47 @@
   let sortMode = $state<SortMode>('reg');
   let visibleCount = $state(100);
   let hideUnpriced = $state(false);
+  let showAllRegistrars = $state(false);
 
   const table = $derived($pricing?.table ?? null);
-
-  const allZones = $derived($registry.tlds.map((tc) => tc.tld));
-
-  const columns = $derived((table ? matrixColumns(table, 6) : []) as string[]);
-
-  const extraRegs = $derived(
-    table ? Math.max(0, countRegistrars(table) - columns.length) : 0,
+  const hasRegru = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.regru) : false);
+  const regruDate = $derived(
+    table?.regruUpdatedAt && Number.isFinite(Date.parse(table.regruUpdatedAt))
+      ? new Date(table.regruUpdatedAt).toISOString().slice(0, 10)
+      : null,
   );
+
+  const hasHostiman = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.hostiman) : false);
+  const hostimanDate = $derived(
+    table?.hostimanUpdatedAt && Number.isFinite(Date.parse(table.hostimanUpdatedAt))
+      ? new Date(table.hostimanUpdatedAt).toISOString().slice(0, 10)
+      : null,
+  );
+
+  const hasTimeweb = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.timeweb) : false);
+  const timewebDate = $derived(
+    table?.timewebUpdatedAt && Number.isFinite(Date.parse(table.timewebUpdatedAt))
+      ? new Date(table.timewebUpdatedAt).toISOString().slice(0, 10)
+      : null,
+  );
+
+  const hasSprinthost = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.sprinthost) : false);
+  const sprinthostDate = $derived(
+    table?.sprinthostUpdatedAt && Number.isFinite(Date.parse(table.sprinthostUpdatedAt))
+      ? new Date(table.sprinthostUpdatedAt).toISOString().slice(0, 10)
+      : null,
+  );
+
+  // Price-only zones need not be available to the domain checker. Include them
+  // here without adding unverified RDAP zones to the registry.
+  const allZones = $derived([...new Set([
+    ...$registry.tlds.map((tc) => tc.tld),
+    ...Object.keys(table?.tlds ?? {}),
+  ])]);
+
+  const allColumns = $derived(table ? matrixColumns(table, Number.POSITIVE_INFINITY) : []);
+  const columns = $derived(showAllRegistrars ? allColumns : allColumns.slice(0, 6));
+  const extraRegs = $derived(Math.max(0, allColumns.length - 6));
 
   const filteredZones = $derived.by(() => {
     const q = query.trim().toLowerCase();
@@ -79,21 +110,13 @@
   const visibleZones = $derived(sortedZones.slice(0, visibleCount));
   const remaining = $derived(Math.max(0, sortedZones.length - visibleCount));
 
-  function countRegistrars(tbl: PricingTable): number {
-    const ids = new Set<string>();
-    for (const regs of Object.values(tbl.tlds)) {
-      for (const rid of Object.keys(regs)) ids.add(rid);
-    }
-    return ids.size;
-  }
-
   function entryFor(tld: string, registrarId: string): PriceEntry | null {
     return table?.tlds[tld]?.[registrarId] ?? null;
   }
 
-  function promoTrapTitle(entry: PriceEntry, s: Settings): string {
-    const first = formatPrice(entry.reg, s);
-    const renew = formatPrice(entry.renew, s);
+  function promoTrapTitle(entry: PriceEntry, tld: string, registrarId: string, s: Settings): string {
+    const first = formatSourcePrice(table, tld, registrarId, 'reg', entry.reg, s);
+    const renew = formatSourcePrice(table, tld, registrarId, 'renew', entry.renew, s);
     const times =
       entry.reg != null && entry.reg > 0 && entry.renew != null
         ? Math.round(entry.renew / entry.reg)
@@ -105,9 +128,10 @@
     entry: PriceEntry | null,
     isMin: boolean,
     registrarId: string,
+    tld: string,
     s: Settings,
   ): string {
-    if (entry && isPromoTrap(entry)) return promoTrapTitle(entry, s);
+    if (entry && isPromoTrap(entry)) return promoTrapTitle(entry, tld, registrarId, s);
     if (isMin) return t('prices.min.title', { registrar: registrarName.get(registrarId) ?? registrarId });
     return '';
   }
@@ -167,16 +191,13 @@
     const lines: string[] = [headerLabels.map(escapeCsv).join(',')];
     for (const tld of sortedZones) {
       const best = bestEntry(table, tld);
-      const row = [
-        tld,
-        best ? (registrarName.get(best.registrarId) ?? best.registrarId) : '',
-        best && best.entry.reg != null ? formatPrice(best.entry.reg, s) : '',
-        best && best.entry.renew != null ? formatPrice(best.entry.renew, s) : '',
-        ...columns.map((rid) => {
-          const e = entryFor(tld, rid);
-          return e?.reg != null ? formatPrice(e.reg, s) : '';
-        }),
-      ];
+      const first = best?.entry.reg != null ? formatSourcePrice(table, tld, best.registrarId, 'reg', best.entry.reg, s) : '';
+      const renewal = best?.entry.renew != null ? formatSourcePrice(table, tld, best.registrarId, 'renew', best.entry.renew, s) : '';
+      const registrarPrices = columns.map((rid) => {
+        const e = entryFor(tld, rid);
+        return e?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', e.reg, s) : '';
+      });
+      const row = [tld, best ? (registrarName.get(best.registrarId) ?? best.registrarId) : '', first, renewal, ...registrarPrices];
       lines.push(row.map(escapeCsv).join(','));
     }
     const csv = '\uFEFF' + lines.join('\r\n') + '\r\n';
@@ -187,6 +208,33 @@
 <section class="prices">
   <h2>{t('prices.title')}</h2>
   <p class="desc">{t('prices.desc')}</p>
+  {#if hasRegru}
+    <p class="regru-note" data-testid="prices-regru-note">
+      {regruDate ? t('prices.regru.updated', { date: regruDate }) : t('prices.regru.unknown')}
+      {t('prices.regru.caveat')}
+    </p>
+  {/if}
+
+  {#if hasHostiman}
+    <p class="regru-note" data-testid="prices-hostiman-note">
+      {hostimanDate ? t('prices.hostiman.updated', { date: hostimanDate }) : t('prices.hostiman.unknown')}
+      {t('prices.hostiman.caveat')}
+    </p>
+  {/if}
+
+  {#if hasTimeweb}
+    <p class="regru-note" data-testid="prices-timeweb-note">
+      {timewebDate ? t('prices.timeweb.updated', { date: timewebDate }) : t('prices.timeweb.unknown')}
+      {t('prices.timeweb.caveat')}
+    </p>
+  {/if}
+
+  {#if hasSprinthost}
+    <p class="regru-note" data-testid="prices-sprinthost-note">
+      {sprinthostDate ? t('prices.sprinthost.updated', { date: sprinthostDate }) : t('prices.sprinthost.unknown')}
+      {t('prices.sprinthost.caveat')}
+    </p>
+  {/if}
 
   <div class="controls">
     <input
@@ -294,13 +342,19 @@
                   class="price-cell nums"
                   class:min={isMin}
                   class:trap={isTrap}
-                  title={cellTitle(entry, isMin, rid, $settings)}
+                  title={cellTitle(entry, isMin, rid, tld, $settings)}
                 >
-                  {entry?.reg != null ? formatPrice(entry.reg, $settings) : '—'}
+                  {entry?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', entry.reg, $settings) : '—'}
+                  {#if (rid === 'hostiman' || rid === 'sprinthost') && entry?.renew != null}
+                    <span class="renewal-hint">{t('prices.source.renewal', { price: formatSourcePrice(table, tld, rid, 'renew', entry.renew, $settings) })}</span>
+                  {/if}
+                  {#if rid === 'timeweb' && entry && table.timewebRenewalFromRub?.[tld] != null}
+                    <span class="renewal-hint">{t('prices.timeweb.renewFrom', { price: `${table.timewebRenewalFromRub[tld]} ₽` })}</span>
+                  {/if}
                 </td>
               {/each}
               <td class="price-cell nums best-cell">
-                {best?.entry.renew != null ? formatPrice(best.entry.renew, $settings) : '—'}
+                {best?.entry.renew != null ? formatSourcePrice(table, tld, best.registrarId, 'renew', best.entry.renew, $settings) : '—'}
               </td>
               <td class="price-cell nums best-cell">
                 {formatPrice(tco3(table, tld), $settings)}
@@ -339,7 +393,10 @@
       </table>
     </div>
     {#if extraRegs > 0}
-      <p class="muted more-regs">{t('prices.moreRegs', { n: extraRegs })}</p>
+      <button class="btn" type="button" onclick={() => (showAllRegistrars = !showAllRegistrars)}
+        aria-pressed={showAllRegistrars} data-testid="prices-toggle-registrars">
+        {showAllRegistrars ? t('prices.fewerRegistrars') : t('prices.showRegistrars', { n: extraRegs })}
+      </button>
     {/if}
     {#if remaining > 0}
       <button class="btn more-btn" type="button" onclick={showMore} data-testid="prices-more">
@@ -368,6 +425,18 @@
   .desc {
     margin: 0;
     color: var(--text-secondary);
+  }
+
+  .renewal-hint {
+    display: block;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .regru-note {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
   }
 
   .controls {

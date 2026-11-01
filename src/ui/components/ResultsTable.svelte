@@ -2,14 +2,15 @@
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
   import { results, settings, pricing, registry, runState, exportRows, requestFavoritesView, sharedView, loadResultsView, saveResultsView, type ResultsView } from '../store';
-  import type { CheckResult, EngineOptions, PriceEntry, RegistrarConfig } from '../../types';
+  import type { CheckResult, EngineOptions, PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
   import {
     bestEntry,
     formatPrice,
+    formatSourcePrice,
     priceTier,
     isBelowFloor,
     isPromoTrap,
-    bestCoupon,
+    couponForRegistrar,
     tco3,
     couponDiscountCents,
     bestRenewal,
@@ -221,6 +222,17 @@
     isPremiumOverride: boolean;
   }
 
+  function displayFirstYear(row: RowData, table: PricingTable | null, s: Settings): string {
+    if (!row.isPremiumOverride && row.standardFirstYear == null && row.best) {
+      return formatSourcePrice(table, row.result.tld, row.best.registrarId, 'reg', row.firstYear, s);
+    }
+    return formatPrice(row.firstYear, s);
+  }
+
+  function displayRenewal(row: RowData, table: PricingTable | null, s: Settings): string {
+    return formatSourcePrice(table, row.result.tld, row.renewalRegistrarId, 'renew', row.renewal, s);
+  }
+
   const rows = $derived.by(() => {
     const table = $pricing?.table ?? null;
     const arr: RowData[] = [];
@@ -230,7 +242,7 @@
       const stdFirstYear = best?.entry.reg ?? null;
       const stdTco = table ? tco3(table, r.tld) : null;
       const renewalBest = table && pairMode === 'best' ? bestRenewal(table, r.tld) : null;
-      const coupon = table ? bestCoupon(table, r.tld) : null;
+      const coupon = table ? couponForRegistrar(table, r.tld, best?.registrarId ?? null) : null;
       const couponPrice = couponEffectivePrice(stdFirstYear, coupon);
       const couponApplies =
         couponPrice != null && stdFirstYear != null && couponPrice < stdFirstYear;
@@ -384,8 +396,8 @@
     const list = sorted.map((r) => ({
       domain: r.result.domain,
       status: r.result.status,
-      priceFirstYear: r.firstYear != null ? formatPrice(r.firstYear, s) : '',
-      priceRenewal: r.renewal != null ? formatPrice(r.renewal, s) : '',
+      priceFirstYear: r.firstYear != null ? displayFirstYear(r, $pricing?.table ?? null, s) : '',
+      priceRenewal: r.renewal != null ? displayRenewal(r, $pricing?.table ?? null, s) : '',
       priceTco: r.tco != null ? formatPrice(r.tco, s) : '',
     }));
     exportRows.set(list);
@@ -437,10 +449,10 @@
     return 'var(--price-high)';
   }
 
-  function couponFor(tld: string) {
+  function couponFor(tld: string, registrarId: string | null) {
     const table = $pricing?.table;
     if (!table) return null;
-    return bestCoupon(table, tld);
+    return couponForRegistrar(table, tld, registrarId);
   }
 
   // Premium-check and bulk-action state live in store-based composables.
@@ -787,7 +799,7 @@
                 )
               : null}
             {@const buyHasDeepLink = buyInfo.registrar?.searchUrl.includes('{domain}') ?? false}
-            {@const coupon = couponFor(row.result.tld)}
+            {@const coupon = couponFor(row.result.tld, row.best?.registrarId ?? null)}
             {@const trap = row.best ? isPromoTrap(row.best.entry) : false}
             {@const promo = row.firstYear != null && isBelowFloor(row.result.tld, row.firstYear)}
             {@const isFav = $favorites.has(row.result.domain)}
@@ -851,14 +863,14 @@
               <td class="price-cell nums">
                 <div class="price-stack">
                   {#if row.standardFirstYear != null}
-                    <span class="price-strike">{formatPrice(row.standardFirstYear, $settings)}</span>
+                    <span class="price-strike">{formatSourcePrice($pricing?.table ?? null, row.result.tld, row.best?.registrarId ?? null, 'reg', row.standardFirstYear, $settings)}</span>
                   {/if}
                   <span class="price-line">
                     <span
                       class="price"
                       style="color: {row.standardFirstYear != null ? 'var(--amber)' : priceColor(row.firstYear)}"
                     >
-                      {formatPrice(row.firstYear, $settings)}
+                      {displayFirstYear(row, $pricing?.table ?? null, $settings)}
                     </span>
                     {#if !row.isPremiumOverride && row.best}
                       {@const rid = row.best.registrarId}
@@ -883,6 +895,30 @@
                       {/if}
                     {/if}
                   </span>
+                  {#if !row.isPremiumOverride && row.best?.registrarId === 'regru'}
+                    <Tooltip text={t('prices.regru.caveat')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag" tabindex="0" data-testid={`results-regru-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                    </Tooltip>
+                  {/if}
+                  {#if !row.isPremiumOverride && row.best?.registrarId === 'hostiman'}
+                    <Tooltip text={t('prices.hostiman.caveat')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag" tabindex="0" data-testid={`results-hostiman-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                    </Tooltip>
+                  {/if}
+                  {#if !row.isPremiumOverride && row.best?.registrarId === 'timeweb'}
+                    <Tooltip text={t('prices.timeweb.caveat')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag" tabindex="0" data-testid={`results-timeweb-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                    </Tooltip>
+                  {/if}
+                  {#if !row.isPremiumOverride && row.best?.registrarId === 'sprinthost'}
+                    <Tooltip text={t('prices.sprinthost.caveat')}>
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <span class="chip-tag" tabindex="0" data-testid={`results-sprinthost-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                    </Tooltip>
+                  {/if}
                   {#if row.isPremiumOverride}
                     <Tooltip text={t('results.detail.premium', { price: formatPrice(row.firstYear, $settings) })}>
                       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -898,8 +934,8 @@
                   {#if trap && row.best}
                     {@const reg = row.best.entry.reg ?? 0}
                     {@const renew = row.best.entry.renew ?? 0}
-                    {@const first = formatPrice(reg, $settings)}
-                    {@const renewal = formatPrice(renew, $settings)}
+                    {@const first = formatSourcePrice($pricing?.table ?? null, row.result.tld, row.best.registrarId, 'reg', reg, $settings)}
+                    {@const renewal = formatSourcePrice($pricing?.table ?? null, row.result.tld, row.best.registrarId, 'renew', renew, $settings)}
                     {@const times = reg > 0 ? Math.round(renew / reg) : 0}
                     <Tooltip text={t('tooltip.promoTrap', { first, renew: renewal, times })}>
                       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -923,7 +959,7 @@
               <td class="renew-cell nums">
                 <span class="renew-line">
                   <!-- Renewal stays neutral (tier colors live on the 1st-year column only). -->
-                  <span class="renew">{formatPrice(row.renewal, $settings)}</span>
+                  <span class="renew">{displayRenewal(row, $pricing?.table ?? null, $settings)}</span>
                   {#if row.renewalRegistrarId}
                     {@const rid = row.renewalRegistrarId}
                     {@const icon = REGISTRAR_ICONS[rid]}
@@ -947,6 +983,12 @@
                     {/if}
                   {/if}
                 </span>
+                {#if row.renewalRegistrarId === 'sprinthost'}
+                  <Tooltip text={t('prices.sprinthost.caveat')}>
+                    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                    <span class="chip-tag" tabindex="0" data-testid={`results-sprinthost-renew-estimate-${sid}`}>{t('prices.regru.estimate')}</span>
+                  </Tooltip>
+                {/if}
               </td>
               <td class="actions-cell">
                 <div class="actions">
@@ -985,7 +1027,7 @@
                           buyInfo.entry?.reg != null
                             ? t('results.buy.at', {
                                 registrar: buyInfo.registrar?.name ?? '',
-                                price: formatPrice(buyInfo.entry.reg, $settings),
+                                price: formatSourcePrice($pricing?.table ?? null, row.result.tld, buyInfo.registrar?.id ?? null, 'reg', buyInfo.entry.reg, $settings),
                               })
                             : t('results.buy')
                         }

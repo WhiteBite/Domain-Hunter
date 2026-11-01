@@ -17,6 +17,17 @@ type CompactReg = [number | null, number | null, number | null];
 interface CompactSnapshot {
   generatedAt: string;
   sources: string[];
+  regruUpdatedAt?: string | null;
+  /** Last successful HostiMan price collection or public-page import. */
+  hostimanUpdatedAt?: string | null;
+  /** Last successful Timeweb price collection or public-page import. */
+  timewebUpdatedAt?: string | null;
+  /** Last successful Sprinthost price collection or public-page import. */
+  sprinthostUpdatedAt?: string | null;
+  /** Published renewal lower bounds, in RUB, not exact renewal prices. */
+  timewebRenewalFromRub?: Record<string, number>;
+  /** Original prices in kopecks: registrar → TLD → [registration, renewal]. */
+  sourceRub?: Record<string, Record<string, [number | null, number | null]>>;
   tlds: Record<string, Record<string, CompactReg>>;
   coupons: PricingTable['coupons'];
 }
@@ -24,6 +35,12 @@ const rawSnap = snapshot as unknown as CompactSnapshot;
 const SNAPSHOT: PricingTable = {
   generatedAt: rawSnap.generatedAt,
   sources: rawSnap.sources,
+  regruUpdatedAt: rawSnap.regruUpdatedAt ?? null,
+  hostimanUpdatedAt: rawSnap.hostimanUpdatedAt ?? null,
+  timewebUpdatedAt: rawSnap.timewebUpdatedAt ?? null,
+  sprinthostUpdatedAt: rawSnap.sprinthostUpdatedAt ?? null,
+  timewebRenewalFromRub: rawSnap.timewebRenewalFromRub ?? {},
+  sourceRub: rawSnap.sourceRub ?? {},
   coupons: rawSnap.coupons,
   tlds: Object.fromEntries(
     Object.entries(rawSnap.tlds).map(([tld, regs]) => [
@@ -150,6 +167,15 @@ interface CachedPricing {
   fetchedAt: number;
 }
 
+// Old snapshots and persisted caches used a promotional oldPrice as renewal.
+// Do not trust it until a verified renewal source is integrated.
+function sanitizeRegru(table: PricingTable): PricingTable {
+  const tlds = Object.fromEntries(Object.entries(table.tlds).map(([tld, entries]) => [
+    tld, entries.regru ? { ...entries, regru: { ...entries.regru, renew: null } } : entries,
+  ]));
+  return { ...table, tlds };
+}
+
 function readCache(): CachedPricing | null {
   try {
     const raw = localStorage.getItem(PRICING_KEY);
@@ -232,7 +258,7 @@ export async function loadPricing(
   if (!opts.force) {
     const cached = readCache();
     if (cached && Date.now() - cached.fetchedAt < FRESH_MS) {
-      return { table: cached.table, fetchedAt: cached.fetchedAt, fromCache: true };
+      return { table: sanitizeRegru(cached.table), fetchedAt: cached.fetchedAt, fromCache: true };
     }
   }
 
@@ -249,7 +275,7 @@ export async function loadPricing(
   // are never empty even when a live source fails or is slow. When the caller
   // supplies a fresh snapshot (e.g. the CLI fetches the latest from GitHub),
   // it replaces the bundled baseline here.
-  const baseline = opts.snapshotOverride ?? SNAPSHOT;
+  const baseline = sanitizeRegru(opts.snapshotOverride ?? SNAPSHOT);
   mergePricing(merged, { tlds: baseline.tlds, coupons: baseline.coupons });
 
   if (porkbunRes.status === 'fulfilled') {
@@ -269,6 +295,12 @@ export async function loadPricing(
   const table: PricingTable = {
     generatedAt: new Date().toISOString(),
     sources,
+    regruUpdatedAt: baseline.regruUpdatedAt ?? null,
+    hostimanUpdatedAt: baseline.hostimanUpdatedAt ?? null,
+    timewebUpdatedAt: baseline.timewebUpdatedAt ?? null,
+    sprinthostUpdatedAt: baseline.sprinthostUpdatedAt ?? null,
+    timewebRenewalFromRub: baseline.timewebRenewalFromRub ?? {},
+    sourceRub: baseline.sourceRub ?? {},
     tlds: merged.tlds,
     coupons: merged.coupons,
   };
@@ -387,6 +419,25 @@ export function bestCoupon(table: PricingTable, tld: string): Coupon | null {
   return best;
 }
 
+/** Snapshot and live coupon lists come from Porkbun, not other registrars. */
+export function couponForRegistrar(table: PricingTable, tld: string, registrarId: string | null): Coupon | null {
+  if (registrarId !== 'porkbun') return null;
+  const coupons = table.coupons[tld];
+  if (!coupons?.length) return null;
+  const reg = table.tlds[tld]?.porkbun?.reg;
+  if (reg == null) return null;
+  let best: Coupon | null = null;
+  let bestDiscount = -1;
+  for (const coupon of coupons) {
+    const discount = couponDiscountCents(coupon, reg);
+    if (discount > bestDiscount) {
+      best = coupon;
+      bestDiscount = discount;
+    }
+  }
+  return best;
+}
+
 /**
  * Registrar IDs present in the merged table, ordered by coverage (number of
  * zones with a non-null reg price) descending, capped at maxColumns.
@@ -427,6 +478,27 @@ export function formatPrice(centsUsd: number | null, settings: Settings, locale 
     maximumFractionDigits: 2,
   }).format(value);
   return `${CURRENCY_SYMBOL[settings.currency]}${formatted}`;
+}
+
+/** Display original RUB only for an unchanged source quote; fall back safely
+ * for legacy data, other currencies, coupons, premium prices and missing data. */
+export function formatSourcePrice(
+  table: PricingTable | null,
+  tld: string,
+  registrarId: string | null,
+  field: 'reg' | 'renew',
+  centsUsd: number | null,
+  settings: Settings,
+  locale = 'en',
+): string {
+  if (settings.currency === 'RUB' && table && registrarId && centsUsd != null &&
+      table.tlds[tld]?.[registrarId]?.[field] === centsUsd) {
+    const kopecks = table.sourceRub?.[registrarId]?.[tld]?.[field === 'reg' ? 0 : 1];
+    if (typeof kopecks === 'number' && Number.isSafeInteger(kopecks) && kopecks >= 0) {
+      return `₽${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kopecks / 100)}`;
+    }
+  }
+  return formatPrice(centsUsd, settings, locale);
 }
 
 export function freshnessLabel(

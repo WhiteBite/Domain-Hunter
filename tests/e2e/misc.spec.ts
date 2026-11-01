@@ -546,13 +546,11 @@ test.describe('Misc coverage', () => {
       timeout: 15_000,
     });
 
-    // Before opening details, the row shows the coupon-effective first-year
-    // price ($10.44 − $0.95 AWESOME2026 = $9.49) with the standard price
-    // struck through.
+    // Cloudflare is cheapest; the Porkbun coupon must not be applied to it.
     const priceCell = page.locator('[data-testid="results-row-zzqxtest1-com"] .price-cell');
-    await expect(priceCell).toContainText('$9.49');
-    await expect(priceCell.locator('.price-strike')).toHaveCount(1);
-    await expect(priceCell.locator('.price-strike')).toContainText('$10.44');
+    await expect(priceCell).toContainText('$10.44');
+    await expect(priceCell.locator('.price-strike')).toHaveCount(0);
+    await expect(priceCell.locator('.coupon')).toHaveCount(0);
 
     // Open details (triggers the on-demand DigMyName premium check).
     await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
@@ -569,6 +567,136 @@ test.describe('Misc coverage', () => {
       priceCell.locator('[data-testid="results-chip-premium-zzqxtest1-com"]'),
     ).toBeVisible();
 
+    expectNoLeaks(page);
+  });
+
+  test('Porkbun coupon is applied when the selected registrar is Porkbun', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.porkbun!.reg = 900;
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row).toBeVisible();
+    await expect(row.locator('.price-cell')).toContainText('$8.05');
+    await expect(row.locator('.price-cell .coupon')).toContainText('AWESOME2026');
+    expectNoLeaks(page);
+  });
+
+  test('REG.RU estimates are labeled and never receive another registrar coupon', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.regru = { reg: 200, renew: null, transfer: null };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row).toBeVisible();
+    await expect(row.getByTestId('results-regru-estimate-zzqxtest1-com')).toBeVisible();
+    await expect(row.locator('.price-cell')).toContainText('$2.00');
+    await expect(row.locator('.price-cell .coupon')).toHaveCount(0);
+    expectNoLeaks(page);
+  });
+
+  test('HostiMan estimates are labeled and do not receive Porkbun coupons', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.hostiman = { reg: 200, renew: 400, transfer: null };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row.getByTestId('results-hostiman-estimate-zzqxtest1-com')).toBeVisible();
+    await expect(row.locator('.price-cell')).toContainText('$2.00');
+    await expect(row.locator('.price-cell .coupon')).toHaveCount(0);
+    expectNoLeaks(page);
+  });
+
+  test('Sprinthost result prices and renewals carry the conditions warning', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.sprinthost = { reg: 222, renew: 421, transfer: null };
+    seed.table.sourceRub = { sprinthost: { com: [17900, 33900] } }; // synthetic quote
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row.locator('.price-cell')).toContainText('₽179.00');
+    await expect(row.locator('.renew-cell')).toContainText('₽339.00');
+    await expect(page.getByTestId('results-sprinthost-estimate-zzqxtest1-com')).toBeVisible();
+    await expect(page.getByTestId('results-sprinthost-renew-estimate-zzqxtest1-com')).toBeVisible();
+    expectNoLeaks(page);
+  });
+
+  test('results use the original HostiMan RUB price when available', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.hostiman = { reg: 248, renew: 496, transfer: null };
+    seed.table.sourceRub = { hostiman: { com: [20000, 40000] } }; // synthetic quote
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row.locator('.price-cell')).toContainText('₽200.00');
+    await expect(row.locator('.renew-cell')).toContainText('₽400.00');
+    expectNoLeaks(page);
+  });
+
+  test('Timeweb estimates are labeled and do not receive Porkbun coupons', async ({ page }) => {
+    await assertNoNetworkLeaks(page);
+    await mockAll(page, { bootstrap: ianaBootstrap(), porkbun: porkbunPricing().pricing, cloudflare: cloudflarePricing() });
+    await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404 } }]);
+    await mockDoh(page, { 'zzqxtest1.com': 'nxdomain' });
+    const seed = seedPricingTable();
+    // Synthetic .com quote to exercise the results view, not a claimed Timeweb tariff.
+    seed.table.tlds.com!.timeweb = { reg: 200, renew: null, transfer: null };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await page.click('[data-testid="tld-button-clear"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.click('[data-testid="tld-chip-com"]');
+    await page.click('[data-testid="tld-picker-toggle"]');
+    await page.fill('[data-testid="check-input-domains"]', 'zzqxtest1.com');
+    await page.click('[data-testid="check-button-start"]');
+    const row = page.getByTestId('results-row-zzqxtest1-com');
+    await expect(row.getByTestId('results-timeweb-estimate-zzqxtest1-com')).toBeVisible();
+    await expect(row.locator('.price-cell')).toContainText('$2.00');
+    await expect(row.locator('.price-cell .coupon')).toHaveCount(0);
     expectNoLeaks(page);
   });
 
@@ -631,14 +759,13 @@ test.describe('Misc coverage', () => {
     await expect(btn).toBeEnabled();
     await expect(page.locator('[data-testid="results-premium-found"]')).toHaveCount(0);
 
-    // Before bulk check: premium row shows the coupon-effective first-year
-    // price with the standard price struck through (AWESOME2026 applies to .com).
+    // Cloudflare is cheapest; the Porkbun coupon does not apply to this price.
     const premCell = page.locator(
       '[data-testid="results-row-zzqxpremium-com"] .price-cell',
     );
-    await expect(premCell).toContainText('$9.49');
-    await expect(premCell.locator('.price-strike')).toHaveCount(1);
-    await expect(premCell.locator('.price-strike')).toContainText('$10.44');
+    await expect(premCell).toContainText('$10.44');
+    await expect(premCell.locator('.price-strike')).toHaveCount(0);
+    await expect(premCell.locator('.coupon')).toHaveCount(0);
 
     // Click the bulk premium check button.
     await btn.click();
@@ -650,11 +777,12 @@ test.describe('Misc coverage', () => {
     await expect(premCell.locator('.price-strike')).toContainText('$10.44');
     await expect(premCell.locator('.chip-tag.premium')).toBeVisible();
 
-    // Non-premium row keeps the coupon-effective price (strike stays visible).
+    // Non-premium row keeps the Cloudflare price without a Porkbun coupon.
     const plainCell = page.locator(
       '[data-testid="results-row-zzqxplain-com"] .price-cell',
     );
-    await expect(plainCell.locator('.price-strike')).toHaveCount(1);
+    await expect(plainCell.locator('.price-strike')).toHaveCount(0);
+    await expect(plainCell).toContainText('$10.44');
 
     // Found chip shows "premium: 1".
     const found = page.locator('[data-testid="results-premium-found"]');

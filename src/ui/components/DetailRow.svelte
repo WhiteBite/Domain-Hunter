@@ -2,8 +2,8 @@
   import type { CheckResult, PriceEntry, Settings } from '../../types';
   import type { RegistrarQuote } from '../registrar-quotes';
   import { trademarkLabel, usptoSearchUrl, tmviewSearchUrl } from '../trademark';
-  import { formatPrice } from '../../pricing/pricing';
-  import { settings } from '../store';
+  import { formatPrice, formatSourcePrice } from '../../pricing/pricing';
+  import { settings, pricing } from '../store';
   import { t } from '../../i18n';
   import Tooltip from './Tooltip.svelte';
   import type { DigDetail } from '../dig';
@@ -15,6 +15,7 @@
     firstYear: number | null;
     standardFirstYear: number | null;
     renewal: number | null;
+    renewalRegistrarId: string | null;
   }
 
   interface Props {
@@ -55,7 +56,7 @@
       <div class="detail-col">
         <div class="detail-cell">
           <span class="detail-label">{t('price.renewal')}</span>
-          <span class="detail-value nums">{formatPrice(row.renewal, s)}</span>
+          <span class="detail-value nums">{formatSourcePrice($pricing?.table ?? null, row.result.tld, row.renewalRegistrarId, 'renew', row.renewal, s)}</span>
         </div>
         {#if row.result.note}
           <div class="detail-note">{row.result.note}</div>
@@ -106,7 +107,7 @@
                     data-testid={`results-row-registrar-${sid}-${quote.id}`}
                   >
                     <span class="detail-reg-dot" aria-hidden="true"></span>
-                    {quote.name} — {formatPrice(quote.reg, s)} / {formatPrice(quote.renew, s)}
+                    {quote.name} — {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)} / {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}
                   </a>
                 {/each}
                 {#if quotes.length > 4}

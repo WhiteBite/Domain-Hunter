@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { tco3, bestCoupon, couponDiscountCents, bestRenewal, couponEffectivePrice, premiumLikely, currentFloor, isBelowFloor } from '../src/pricing/pricing';
-import type { Coupon, PriceEntry, PricingTable } from '../src/types';
+import { formatSourcePrice, tco3, bestCoupon, couponForRegistrar, couponDiscountCents, bestRenewal, couponEffectivePrice, premiumLikely, currentFloor, isBelowFloor } from '../src/pricing/pricing';
+import { DEFAULT_SETTINGS, type Coupon, type PriceEntry, type PricingTable } from '../src/types';
 
 function table(
   tlds: Record<string, Record<string, PriceEntry>>,
@@ -357,5 +357,57 @@ describe('currentFloor / scheduled floors', () => {
     // $10.50 is above the current floor but below the post-hike floor.
     expect(isBelowFloor('com', 1050, beforeHike)).toBe(false);
     expect(isBelowFloor('com', 1050, afterHike)).toBe(true);
+  });
+});
+
+describe('couponForRegistrar', () => {
+  it('ranks coupons against the Porkbun price even if another registrar is cheaper', () => {
+    const tbl = table({ com: {
+      porkbun: { reg: 1100, renew: 1100, transfer: null },
+      regru: { reg: 800, renew: null, transfer: null },
+    } }, { com: [coupon('AMOUNT', 'amount', 900), coupon('PERCENT', 'percentage', 90)] });
+    expect(couponForRegistrar(tbl, 'com', 'porkbun')?.code).toBe('PERCENT');
+    expect(couponForRegistrar(tbl, 'net', 'porkbun')).toBeNull();
+  });
+
+  it('uses Porkbun coupons only for Porkbun, never for REG.RU or Cloudflare', () => {
+    const tbl = table({ com: {
+      porkbun: { reg: 1100, renew: 1100, transfer: null },
+      regru: { reg: 800, renew: null, transfer: null },
+      cloudflare: { reg: 1000, renew: 1000, transfer: null },
+    } }, { com: [coupon('PB', 'amount', 100)] });
+    expect(couponForRegistrar(tbl, 'com', 'porkbun')?.code).toBe('PB');
+    expect(couponForRegistrar(tbl, 'com', 'regru')).toBeNull();
+    expect(couponForRegistrar(tbl, 'com', 'cloudflare')).toBeNull();
+    expect(couponForRegistrar(tbl, 'com', null)).toBeNull();
+  });
+});
+
+
+describe('formatSourcePrice', () => {
+  const tbl: PricingTable = {
+    generatedAt: '2026-10-30T00:00:00Z', sources: ['snapshot'], coupons: {},
+    tlds: { ru: { hostiman: { reg: 248, renew: 496, transfer: null }, timeweb: { reg: 248, renew: null, transfer: null } } },
+    sourceRub: { hostiman: { ru: [20000, 40000] }, timeweb: { ru: [20000, null] } },
+  };
+  const rub = { ...DEFAULT_SETTINGS, currency: 'RUB' as const, rates: { RUB: 90, EUR: 0.9 } };
+  it('renders original RUB registration and renewal instead of double conversion', () => {
+    expect(formatSourcePrice(tbl, 'ru', 'hostiman', 'reg', 248, rub)).toBe('₽200.00');
+    expect(formatSourcePrice(tbl, 'ru', 'hostiman', 'renew', 496, rub)).toBe('₽400.00');
+    expect(formatSourcePrice(tbl, 'ru', 'timeweb', 'reg', 248, rub)).toBe('₽200.00');
+    expect(formatSourcePrice(tbl, 'ru', 'timeweb', 'renew', null, rub)).toBe('—');
+  });
+  it('uses existing conversion for USD and EUR and for a modified price', () => {
+    expect(formatSourcePrice(tbl, 'ru', 'hostiman', 'reg', 248, { ...rub, currency: 'USD' })).toBe('$2.48');
+    expect(formatSourcePrice(tbl, 'ru', 'hostiman', 'reg', 248, { ...rub, currency: 'EUR' })).toBe('€2.23');
+    expect(formatSourcePrice(tbl, 'ru', 'hostiman', 'reg', 100, rub)).toBe('₽90.00');
+  });
+  it('falls back when metadata is absent, invalid or the source price is unknown', () => {
+    const legacy = { ...tbl, sourceRub: undefined };
+    expect(formatSourcePrice(legacy, 'ru', 'hostiman', 'reg', 248, rub)).toBe('₽223.20');
+    const bad: PricingTable = { ...tbl, sourceRub: { hostiman: { ru: [NaN, -2] } } };
+    expect(formatSourcePrice(bad, 'ru', 'hostiman', 'reg', 248, rub)).toBe('₽223.20');
+    expect(formatSourcePrice(bad, 'ru', 'hostiman', 'renew', 496, rub)).toBe('₽446.40');
+    expect(formatSourcePrice(tbl, 'ru', 'timeweb', 'renew', null, rub)).toBe('—');
   });
 });

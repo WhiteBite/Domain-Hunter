@@ -119,6 +119,46 @@ describe('loadPricing', () => {
     expect(state.table.tlds.com?.porkbun?.reg).toBe(999);
   });
 
+  it('removes unverified REG.RU renewal from a legacy cache', async () => {
+    const table: PricingTable = {
+      generatedAt: '2026-01-01T00:00:00.000Z', sources: ['snapshot'], coupons: {},
+      tlds: { ru: { regru: { reg: 200, renew: 268, transfer: null } } },
+    };
+    localStorage.setItem('dh:v1:pricing', JSON.stringify({ table, fetchedAt: Date.now() }));
+    const state = await loadPricing();
+    expect(state.fromCache).toBe(true);
+    expect(state.table.tlds.ru?.regru).toEqual({ reg: 200, renew: null, transfer: null });
+  });
+
+  it('keeps the REG.RU source date and sanitizes an older snapshot override', async () => {
+    const table: PricingTable = {
+      generatedAt: '2026-10-20T00:00:00.000Z', regruUpdatedAt: '2026-10-18T00:00:00.000Z',
+      sources: ['snapshot'], coupons: {},
+      tlds: { ru: { regru: { reg: 200, renew: 268, transfer: null } } },
+    };
+    const state = await loadPricing({ force: true, snapshotOverride: table,
+      fetchImpl: vi.fn().mockRejectedValue(new Error('offline')) as typeof fetch });
+    expect(state.table.regruUpdatedAt).toBe('2026-10-18T00:00:00.000Z');
+    expect(state.table.tlds.ru?.regru?.renew).toBeNull();
+    expect(table.tlds.ru?.regru?.renew).toBe(268); // no mutation of the baseline
+  });
+
+  it('retains HostiMan source freshness through a snapshot overlay', async () => {
+    const table: PricingTable = {
+      generatedAt: '2026-10-30T01:00:00Z', hostimanUpdatedAt: '2026-10-29T01:00:00Z', sprinthostUpdatedAt: '2026-11-01T01:00:00Z', timewebUpdatedAt: '2026-10-28T01:00:00Z', timewebRenewalFromRub: { ru: 399 }, sourceRub: { hostiman: { ru: [20000, 40000] } },
+      sources: ['snapshot'], coupons: {},
+      tlds: { ru: { hostiman: { reg: 248, renew: 496, transfer: null } } },
+    };
+    const state = await loadPricing({ force: true, snapshotOverride: table,
+      fetchImpl: vi.fn().mockRejectedValue(new Error('offline')) as typeof fetch });
+    expect(state.table.hostimanUpdatedAt).toBe('2026-10-29T01:00:00Z');
+    expect(state.table.sprinthostUpdatedAt).toBe('2026-11-01T01:00:00Z');
+    expect(state.table.timewebUpdatedAt).toBe('2026-10-28T01:00:00Z');
+    expect(state.table.timewebRenewalFromRub?.ru).toBe(399);
+    expect(state.table.sourceRub?.hostiman?.ru).toEqual([20000, 40000]);
+    expect(state.table.tlds.ru?.hostiman?.renew).toBe(496);
+  });
+
   it('refetches when cache is stale and force is true', async () => {
     const staleTable: PricingTable = {
       generatedAt: '2020-01-01T00:00:00.000Z',

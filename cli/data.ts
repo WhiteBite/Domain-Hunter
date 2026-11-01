@@ -233,6 +233,17 @@ type CompactReg = [number | null, number | null, number | null];
 interface CompactSnapshot {
   generatedAt: string;
   sources: string[];
+  regruUpdatedAt?: string | null;
+  /** Last successful HostiMan price collection or public-page import. */
+  hostimanUpdatedAt?: string | null;
+  /** Last successful Timeweb price collection or public-page import. */
+  timewebUpdatedAt?: string | null;
+  /** Last successful Sprinthost price collection or public-page import. */
+  sprinthostUpdatedAt?: string | null;
+  /** Published renewal lower bounds, in RUB, not exact renewal prices. */
+  timewebRenewalFromRub?: Record<string, number>;
+  /** Original prices in kopecks: registrar → TLD → [registration, renewal]. */
+  sourceRub?: Record<string, Record<string, [number | null, number | null]>>;
   tlds: Record<string, Record<string, CompactReg>>;
   coupons: Record<string, Coupon[]>;
 }
@@ -269,6 +280,12 @@ function expandCompactSnapshot(json: unknown): PricingTable | null {
   return {
     generatedAt: raw.generatedAt,
     sources: raw.sources,
+    regruUpdatedAt: typeof raw.regruUpdatedAt === 'string' ? raw.regruUpdatedAt : null,
+    hostimanUpdatedAt: typeof raw.hostimanUpdatedAt === 'string' ? raw.hostimanUpdatedAt : null,
+    timewebUpdatedAt: typeof raw.timewebUpdatedAt === 'string' ? raw.timewebUpdatedAt : null,
+    sprinthostUpdatedAt: typeof raw.sprinthostUpdatedAt === 'string' ? raw.sprinthostUpdatedAt : null,
+    timewebRenewalFromRub: raw.timewebRenewalFromRub ?? {},
+    sourceRub: raw.sourceRub ?? {},
     coupons: raw.coupons ?? {},
     tlds,
   };

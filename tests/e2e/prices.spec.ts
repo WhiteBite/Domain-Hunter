@@ -12,6 +12,7 @@
  * zone, satisfying the "2+ registrars per zone" fixture requirement.
  */
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { openApp } from './helpers/setup';
 import { assertNoNetworkLeaks, getLeakedRequests, mockAll } from './helpers/mocks';
 import { ianaBootstrap, porkbunPricing, cloudflarePricing, seedPricingTable } from './fixtures';
@@ -67,6 +68,137 @@ test.describe('Prices tab', () => {
     const comRow = page.locator('[data-testid="prices-row-com"]');
     const minCell = comRow.locator('td.min');
     await expect(minCell).toHaveCount(1);
+  });
+
+  test('can reveal registrar columns beyond the first six', async ({ page }) => {
+    const seed = seedPricingTable();
+    for (const id of ['dynadot', 'regru', 'beget', 'timeweb', 'namesilo']) {
+      seed.table.tlds.com![id] = { reg: 2000, renew: 2500, transfer: null };
+    }
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    const headers = page.locator('thead th');
+    await expect(headers).toHaveCount(9); // zone + 6 sellers + 2 totals
+    const toggle = page.getByTestId('prices-toggle-registrars');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await toggle.click();
+    await expect(headers).toHaveCount(10);
+    await expect(page.locator('thead')).toContainText('NameSilo');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await toggle.click();
+    await expect(headers).toHaveCount(9);
+  });
+
+  test('marks legacy REG.RU prices as undated and does not present oldPrice as renewal', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.regru = { reg: 200, renew: 268, transfer: null };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-regru-note')).toContainText('collection date is unknown');
+    await expect(page.getByTestId('prices-regru-note')).toContainText('Renewal is unverified');
+    const com = page.getByTestId('prices-row-com');
+    await expect(com.locator('td.best-cell').first()).toHaveText('—');
+  });
+
+  test('shows the REG.RU collection date rather than the table generation date', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.regru = { reg: 200, renew: null, transfer: null };
+    seed.table.regruUpdatedAt = '2026-02-10T00:00:00.000Z';
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-regru-note')).toContainText('2026-02-10');
+    await expect(page.getByTestId('prices-regru-note')).toContainText('exchange rates');
+  });
+
+  test('shows HostiMan source date and annual renewal in its price column', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.hostiman = { reg: 3351, renew: 3351, transfer: null };
+    seed.table.tlds['рф'] = { hostiman: { reg: 248, renew: 496, transfer: null } };
+    seed.table.hostimanUpdatedAt = '2026-10-30T00:00:00.000Z';
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-hostiman-note')).toContainText('2026-10-30');
+    await expect(page.getByTestId('prices-hostiman-note')).toContainText('converted through USD');
+    await expect(page.locator('thead')).toContainText('HostiMan');
+    await expect(page.getByTestId('prices-row-com')).toContainText('Renewal: $33.51');
+    await page.getByTestId('prices-search').fill('рф');
+    await expect(page.getByTestId('prices-row-рф')).toContainText('Renewal: $4.96');
+  });
+
+  test('shows Timeweb annual registration and the renewal lower bound without treating it as exact', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds['рф'] = { timeweb: { reg: 248, renew: null, transfer: null } };
+    seed.table.timewebUpdatedAt = '2026-10-30T00:00:00.000Z';
+    seed.table.timewebRenewalFromRub = { 'рф': 399 };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-timeweb-note')).toContainText('2026-10-30');
+    await expect(page.getByTestId('prices-timeweb-note')).toContainText('excluded from TCO');
+    await page.getByTestId('prices-search').fill('рф');
+    const row = page.getByTestId('prices-row-рф');
+    await expect(row).toContainText('Renewal from 399 ₽');
+    await expect(row.locator('td.best-cell').first()).toHaveText('—');
+    await expect(row.locator('td.best-cell').nth(1)).toHaveText('—');
+  });
+
+  test('bundled Sprinthost annual snapshot displays newly added and price-only zones', async ({ page }) => {
+    await openApp(page, { seed: { 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-sprinthost-note')).toContainText('2026-11-01');
+    const toggle = page.getByTestId('prices-toggle-registrars');
+    if (await toggle.count()) await toggle.click();
+    await expect(page.locator('thead')).toContainText('Sprinthost');
+    await page.getByTestId('prices-search').fill('xyz');
+    const xyz = page.getByTestId('prices-row-xyz');
+    await expect(xyz).toContainText('₽1,500.00');
+    await expect(xyz).toContainText('Renewal: ₽1,700.00');
+    await page.getByTestId('prices-search').fill('com.ru');
+    const comru = page.getByTestId('prices-row-com.ru');
+    await expect(comru).toContainText('₽348.00');
+    await expect(comru).toContainText('Renewal: ₽348.00');
+  });
+
+  test('shows Sprinthost original RUB, renewal and material conditions', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds['рф'] = { sprinthost: { reg: 222, renew: 421, transfer: null } };
+    seed.table.sourceRub = { sprinthost: { 'рф': [17900, 33900] } };
+    seed.table.sprinthostUpdatedAt = '2026-11-01T17:00:00Z';
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-sprinthost-note')).toContainText('2026-11-01');
+    await expect(page.getByTestId('prices-sprinthost-note')).toContainText('270 ₽');
+    await expect(page.getByTestId('prices-sprinthost-note')).toContainText('Sprintnames');
+    await page.getByTestId('prices-search').fill('рф');
+    const row = page.getByTestId('prices-row-рф');
+    await expect(row).toContainText('₽179.00');
+    await expect(row).toContainText('Renewal: ₽339.00');
+    await expect(row).not.toContainText('₽199.80');
+  });
+
+  test('shows original RUB source amounts despite different display FX rates', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds['рф'] = {
+      hostiman: { reg: 248, renew: 496, transfer: null },
+      timeweb: { reg: 248, renew: null, transfer: null },
+    };
+    seed.table.sourceRub = { hostiman: { 'рф': [20000, 40000] }, timeweb: { 'рф': [20000, null] } };
+    seed.table.timewebRenewalFromRub = { 'рф': 399 };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed, 'dh:v1:settings': { currency: 'RUB', rates: { RUB: 90, EUR: 0.9 } } } });
+    await gotoPrices(page);
+    await page.getByTestId('prices-search').fill('рф');
+    const row = page.getByTestId('prices-row-рф');
+    await expect(row).toContainText('₽200.00');
+    await expect(row).toContainText('Renewal: ₽400.00');
+    await expect(row).toContainText('Renewal from 399 ₽');
+    await expect(row).not.toContainText('₽223.20');
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByTestId('prices-export-csv').click();
+    const path = await (await downloadPromise).path();
+    expect(path).toBeTruthy();
+    const csv = readFileSync(path!, 'utf8');
+    expect(csv).toContain('₽200.00');
+    expect(csv).not.toContain('₽223.20');
+    // TCO remains USD-based and may differ; its amount is not claimed as exact RUB.
   });
 
   test('search input filters zones by substring', async ({ page }) => {

@@ -48,6 +48,8 @@ const wholesale = wholesaleJson as unknown as {
 const pricingSnapshot = pricingSnapshotJson as unknown as {
   tlds: Record<string, Record<string, (number | null)[]>>;
   coupons: Record<string, Coupon[]>;
+  sprinthostUpdatedAt?: string;
+  sourceRub?: Record<string, Record<string, [number | null, number | null]>>;
 };
 
 const infraKeys = new Set(Object.keys(tldsConfig.infras));
@@ -167,6 +169,27 @@ describe('pricing.snapshot.json', () => {
         expect(['amount', 'percentage']).toContain(c.type);
         expect(typeof c.amount).toBe('number');
       }
+    }
+  });
+});
+
+
+describe('Sprinthost snapshot provenance', () => {
+  it('contains dated annual prices and original rubles for the verified 88 annual prices', () => {
+    const original = pricingSnapshot.sourceRub?.sprinthost;
+    expect(original && Object.keys(original)).toHaveLength(88);
+    expect(original?.ru).toEqual([17900, 33900]);
+    expect(original?.['рф']).toEqual([17900, 33900]);
+    expect(original?.com).toEqual([154800, 154800]);
+    expect(original?.xyz).toEqual([150000, 170000]);
+    expect(original?.['com.ru']).toEqual([34800, 34800]);
+    expect(pricingSnapshot.sprinthostUpdatedAt).toMatch(/^2026-11-01T/);
+    for (const [tld, native] of Object.entries(original ?? {})) {
+      const entry = pricingSnapshot.tlds[tld]?.sprinthost;
+      expect(entry).toBeDefined();
+      expect(entry?.[0]).toBe(Math.round(native[0]! / 80.572954));
+      expect(entry?.[1]).toBe(Math.round(native[1]! / 80.572954));
+      expect(entry?.[2]).toBeNull();
     }
   });
 });
