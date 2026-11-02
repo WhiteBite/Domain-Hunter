@@ -58,7 +58,7 @@ describe('snapshot publication workflows', () => {
     expect(deploy).not.toContain("- 'src/config/pricing.snapshot.json'");
     expect(deploy).not.toContain("- 'src/config/price-history.json'");
     expect(deploy).not.toContain("- 'src/config/dropped.snapshot.json'");
-    expect(deploy).toContain('group: pages');
+    expect(deploy).toContain("group: ${{ inputs.dry_run && format('pages-test-{0}', github.run_id) || 'pages' }}");
     expect(deploy).toContain('if: ${{ !inputs.dry_run }}');
   });
 

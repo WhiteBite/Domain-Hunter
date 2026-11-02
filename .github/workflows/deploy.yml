@@ -22,7 +22,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: ${{ inputs.dry_run && format('pages-test-{0}', github.run_id) || 'pages' }}
   cancel-in-progress: false
 
 jobs:
