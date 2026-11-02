@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { settings } from '../src/ui/store';
 import { watchChanges, type WatchChange } from '../src/ui/watchlist';
 import {
@@ -57,16 +57,16 @@ describe('summarizeChanges', () => {
 
 describe('startWatchScheduler', () => {
   interface TestDeps {
-    refresh: ReturnType<typeof vi.fn>;
-    visibility: ReturnType<typeof vi.fn>;
-    notify: ReturnType<typeof vi.fn>;
+    refresh: Mock<() => Promise<void>>;
+    visibility: Mock<() => DocumentVisibilityState>;
+    notify: Mock<(title: string, body: string) => void>;
   }
 
   function deps(overrides: Partial<TestDeps> = {}): TestDeps {
     return {
-      refresh: vi.fn().mockResolvedValue(undefined),
-      visibility: vi.fn().mockReturnValue('visible' as DocumentVisibilityState),
-      notify: vi.fn(),
+      refresh: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+      visibility: vi.fn<() => DocumentVisibilityState>().mockReturnValue('visible'),
+      notify: vi.fn<(title: string, body: string) => void>(),
       ...overrides,
     };
   }
@@ -96,7 +96,7 @@ describe('startWatchScheduler', () => {
 
   it('skips ticks while the tab is hidden', async () => {
     settings.update((s) => ({ ...s, watchIntervalMin: 1 }));
-    const d = deps({ visibility: vi.fn().mockReturnValue('hidden' as DocumentVisibilityState) });
+    const d = deps({ visibility: vi.fn<() => DocumentVisibilityState>().mockReturnValue('hidden') });
     const stop = startWatchScheduler(d);
     await vi.advanceTimersByTimeAsync(180_000);
     expect(d.refresh).not.toHaveBeenCalled();
@@ -167,7 +167,7 @@ describe('startWatchScheduler', () => {
     let releaseFirst = (): void => {};
     const d = deps({
       refresh: vi
-        .fn()
+        .fn<() => Promise<void>>()
         .mockImplementationOnce(
           () => new Promise<void>((r) => (releaseFirst = r)),
         )

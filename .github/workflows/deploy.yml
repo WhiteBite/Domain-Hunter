@@ -3,8 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - 'src/config/dropped.snapshot.json'
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -12,6 +10,11 @@ on:
         description: Ref to publish after a data update
         required: true
         type: string
+      dry_run:
+        description: Build and validate without publishing
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -19,7 +22,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: ${{ inputs.dry_run && format('pages-test-{0}', github.run_id) || 'pages' }}
   cancel-in-progress: false
 
 jobs:
@@ -69,6 +72,7 @@ jobs:
 
   deploy:
     needs: build
+    if: ${{ !inputs.dry_run }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages

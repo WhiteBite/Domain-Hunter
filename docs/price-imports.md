@@ -5,10 +5,11 @@ remains disabled. The owner must first confirm each seller permits regular
 collection and that the runner can reach the allowed source; robots.txt alone
 is not explicit permission. AdminVPS's `/cart` is disallowed. Do not bypass
 bot protection or fetch authenticated/account-specific pages. No browser
-requests to these sellers are added. The source-reachability workflow performs HEAD-only checks of public pages
-from its GitHub runner on a manual dispatch or changes to the check itself;
-these checks do not follow redirects or collect prices, and do not establish
-permission or guarantee a usable GET response.
+requests to these sellers are added. The source-reachability workflow performs
+one-off HEAD and GET checks of public pages from its GitHub runner on manual
+dispatch or changes to the check itself. It does not follow redirects, bypass
+protection, retain page bodies or publish prices. Status and keyword checks do
+not establish permission, validity or completeness of a price table.
 
 Until then, an operator can prepare a replacement from a **manually obtained,
 reviewed** source file, without any network access:

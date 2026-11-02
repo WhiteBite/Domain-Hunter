@@ -14,6 +14,11 @@ import { results, runState, pricing } from '../src/ui/store';
 import type { CheckResult, PricingTable } from '../src/types';
 import type { DigDetail } from '../src/ui/dig';
 
+vi.mock('../src/ui/dig', async (importOriginal) => {
+  const orig = await importOriginal<typeof import('../src/ui/dig')>();
+  return { ...orig, fetchPremiumDetail: async () => detail({ premium: true, price: 25 }) };
+});
+
 function result(domain: string, status: CheckResult['status']): CheckResult {
   const tld = domain.slice(domain.lastIndexOf('.') + 1);
   return { domain, tld, status, source: 'rdap', checkedAt: 0 };
@@ -87,10 +92,6 @@ describe('toggleDetail', () => {
   });
 
   it('seeds a loading entry and applies the fetched detail', async () => {
-    vi.mock('../src/ui/dig', async (importOriginal) => {
-      const orig = await importOriginal<typeof import('../src/ui/dig')>();
-      return { ...orig, fetchPremiumDetail: async () => detail({ premium: true, price: 25 }) };
-    });
     await toggleDetail('a.com');
     const d = get(details)['a.com'];
     expect(d?.premium).toBe(true);

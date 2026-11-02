@@ -55,8 +55,9 @@ describe('runPriceTrendsCommand', () => {
     const keys = Object.keys(out.trends);
     expect(keys.length).toBe(Object.keys(trends).length);
     expect(keys).toEqual([...keys].sort());
-    for (const e of Object.values(out.trends)) {
-      expect(e).toEqual({ pct: expect.anything(), dir: expect.anything() });
+    for (const [tld, e] of Object.entries(out.trends)) {
+      const original = trends[tld];
+      expect(e).toEqual({ pct: original?.pct, dir: original?.dir });
       expect(e).not.toHaveProperty('spark');
     }
   });
