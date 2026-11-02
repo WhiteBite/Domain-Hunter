@@ -4,10 +4,14 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - 'src/config/pricing.snapshot.json'
       - 'src/config/dropped.snapshot.json'
-      - 'src/config/price-history.json'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      checkout_ref:
+        description: Ref to publish after a data update
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -23,6 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref || github.sha }}
 
       - uses: actions/setup-node@v4
         with:

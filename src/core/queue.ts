@@ -86,9 +86,10 @@ export async function runQueue(
     if (!limiter || !infra) return;
     for (const domain of domains) {
       if (signal.aborted) return;
-      while (inFlightGlobal >= globalMax && !signal.aborted) await sleep(5);
-      if (signal.aborted) return;
       await limiter.acquire();
+      // Another infra can reserve the last global slot while this limiter waits.
+      // Check and reserve only after the await, with no yield between the two.
+      while (inFlightGlobal >= globalMax && !signal.aborted) await sleep(5);
       if (signal.aborted) {
         // Aborted before the request ran — release the slot without
         // recording an outcome (reportOk would inflate consecutiveOk and
@@ -120,6 +121,9 @@ export async function runQueue(
           },
           signal,
         );
+      } catch (err) {
+        limiter.release();
+        throw err;
       } finally {
         inFlightGlobal -= 1;
       }

@@ -152,6 +152,7 @@ test.describe('Prices tab', () => {
     await gotoPrices(page);
     await expect(page.getByTestId('prices-regru-note')).toContainText('collection date is unknown');
     await expect(page.getByTestId('prices-regru-note')).toContainText('Renewal is unverified');
+    await expect(page.locator('th').filter({ hasText: 'REG.RU' }).locator('span.reg-badge')).toHaveText('RR');
     const com = page.getByTestId('prices-row-com');
     await expect(com.locator('td.best-cell').first()).toContainText('$10.44');
     await expect(com.locator('td.best-cell').first()).toContainText('Cloudflare');

@@ -49,6 +49,42 @@ describe('runQueue', () => {
     }
   });
 
+  it('never exceeds the global concurrency limit across infras', async () => {
+    let active = 0;
+    let peak = 0;
+    const slow = (async () => {
+      active++;
+      peak = Math.max(peak, active);
+      await new Promise((resolve) => setTimeout(resolve, 15));
+      active--;
+      return new Response(null, { status: 404 });
+    }) as unknown as typeof fetch;
+    const events: EngineEvent[] = [];
+    await runQueue(['x.aaa', 'y.bbb', 'z.aaa', 'w.bbb'], registry,
+      { registry, concurrency: 1, fetchImpl: slow }, (e) => events.push(e), new AbortController().signal);
+    expect(peak).toBe(1);
+    expect(collectResults(events)).toHaveLength(4);
+  });
+
+  it('does not start a request waiting for a global slot after abort', async () => {
+    const controller = new AbortController();
+    let calls = 0;
+    let release!: () => void;
+    const started = new Promise<void>((resolve) => { release = resolve; });
+    const slow = (async () => {
+      calls++;
+      controller.abort();
+      release();
+      await new Promise((resolve) => setTimeout(resolve, 15));
+      return new Response('{}', { status: 200 });
+    }) as unknown as typeof fetch;
+    const run = runQueue(['x.aaa', 'y.bbb'], registry,
+      { registry, concurrency: 1, fetchImpl: slow }, () => {}, controller.signal);
+    await started;
+    await run;
+    expect(calls).toBe(1);
+  });
+
   it('marks unknown TLDs as errors', async () => {
     const events: EngineEvent[] = [];
     const controller = new AbortController();
