@@ -424,7 +424,10 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
 - `prices.yml`: 6-hourly cron + dispatch → `node scripts/harvest-prices.mjs` → commit
   `src/config/pricing.snapshot.json` if changed AND the delta gate passes
   (scripts/snapshot-gate.mjs: skip when <0.5% of cells changed and the last snapshot
-  commit is <24h old; bot identity). Script must exit 0 on partial source failure;
+  commit is <24h old; bot identity). After a successful changed-data push to main,
+  API harvest, full harvest and price-history workflows call the Pages deployment
+  directly; bot pushes do not trigger push workflows. No-op or failed pushes do not
+  deploy. Manual price-only pushes to main trigger deployment normally. Script must exit 0 on partial source failure;
   exit 1 only if ALL sources fail.
 - `zone-health.yml`: daily cron → `node scripts/zone-health.mjs` → commit `health.json`
   (tld → {http, cors, ok, directOk, cfOk, ms, ts}; direct RDAP probe with the
@@ -510,7 +513,7 @@ automation. They are additive surfaces — no app behavior changes.
   silent fallback to the bundled copies, plus `open.er-api.com` (§13) for
   display rates when RUB/EUR output is requested without explicit `--rate-*`
   flags (7d cache, `dh:cli:fx`). Opt-in only: `prices --source dynadot`
-  calls `api.dynadot.com/api3.json?tld_price` with a user-stored API key
+  calls the documented legacy `api.dynadot.com/api3.json?command=tld_price&currency=USD` with a user-stored API key
   (`keys set dynadot <key>`, same 0600 storage file, never echoed) and merges
   the result as an extra registrar over curated zones; a missing key is a
   hard error, a fetch failure degrades to a stderr warning

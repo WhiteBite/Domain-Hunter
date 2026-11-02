@@ -25,61 +25,62 @@ beforeEach(() => {
 });
 
 const FIXTURE = {
-  Status: 'success',
-  TldPrice: [
-    { Name: 'com', USD: { register: '10.99', renew: '11.48', transfer: '10.99', restore: '80.00' } },
-    { Name: '.DEV', USD: { register: '14.00', renew: '', transfer: '14.00' } },
-    { Name: 'bad', USD: { register: 'abc', renew: '-3', transfer: null } },
-    { USD: { register: '1.00' } },
-    null,
-    'garbage',
-  ],
+  TldPriceResponse: {
+    ResponseCode: 0, Status: 'success', Currency: 'USD',
+    TldPrice: [
+      { Tld: 'com', minDuration: 1, Price: { Unit: '(Price/1 year)', Register: '10.99', Renew: '11.48', Transfer: '10.99' } },
+      { Tld: '.DEV', minDuration: 1, Price: { Unit: '(Price/1 year)', Register: '14.00', Renew: '', Transfer: '14.00' } },
+      { Tld: 'car', minDuration: 1, Price: { Unit: '(Price/1 year)', Register: '2,060.25', Renew: '2.00junk', Transfer: '0.00' } },
+      { Tld: 'ai', minDuration: 2, Price: { Unit: '(Price/1 year)', Register: '50.00', Renew: '60.00', Transfer: '60.00' } },
+      { Tld: 'unknown', Price: { Unit: '(Price/1 year)', Register: '3.00', Renew: '4.00' } },
+      { Tld: 'bad', minDuration: 1, Price: { Unit: '(Price/1 year)', Register: 'abc', Renew: '-3', Transfer: null } },
+      { Tld: 'month', minDuration: 1, Price: { Unit: '(Price/1 month)', Register: '1.00' } },
+      { Price: { Register: '1.00' } }, null, 'garbage',
+    ],
+  },
 };
 
 describe('normalizeDynadotTldPrice', () => {
-  it('converts USD strings to cents and lowercases/strips dot from names', () => {
+  it('reads the documented nested USD response and preserves zero and grouped prices', () => {
     const out = normalizeDynadotTldPrice(FIXTURE);
     expect(out.com).toEqual({ reg: 1099, renew: 1148, transfer: 1099 });
     expect(out.dev).toEqual({ reg: 1400, renew: null, transfer: 1400 });
+    expect(out.car).toEqual({ reg: 206025, renew: null, transfer: 0 });
   });
 
-  it('maps unparseable or negative prices to null', () => {
-    expect(normalizeDynadotTldPrice(FIXTURE).bad).toEqual({
-      reg: null,
-      renew: null,
-      transfer: null,
-    });
-  });
-
-  it('skips items without a usable Name', () => {
+  it('does not imply a one-year registration where the minimum term is different or unknown', () => {
     const out = normalizeDynadotTldPrice(FIXTURE);
-    expect(Object.keys(out).sort()).toEqual(['bad', 'com', 'dev']);
+    expect(out.ai).toEqual({ reg: null, renew: 6000, transfer: 6000 });
+    expect(out.unknown).toEqual({ reg: null, renew: 400, transfer: null });
+    expect(out.bad).toBeUndefined();
+    expect(out.month).toBeUndefined();
   });
 
-  it('returns {} for non-success, non-object, or missing TldPrice', () => {
-    expect(normalizeDynadotTldPrice({ Status: 'fail', TldPrice: [] })).toEqual({});
+  it('rejects ambiguous duplicate zones', () => {
+    const entry = { Tld: 'com', minDuration: 1, Price: { Unit: '(Price/1 year)', Register: '1.00' } };
+    expect(normalizeDynadotTldPrice({ TldPriceResponse: { Status: 'success', Currency: 'USD', TldPrice: [entry, entry, entry] } })).toEqual({});
+  });
+
+  it('rejects invalid structures, non-USD currency and failure codes', () => {
     expect(normalizeDynadotTldPrice(null)).toEqual({});
-    expect(normalizeDynadotTldPrice('x')).toEqual({});
-    expect(normalizeDynadotTldPrice({ Status: 'success' })).toEqual({});
-    expect(normalizeDynadotTldPrice({ Status: 'success', TldPrice: 'nope' })).toEqual({});
+    expect(normalizeDynadotTldPrice({ Status: 'success', TldPrice: [] })).toEqual({});
+    expect(normalizeDynadotTldPrice({ TldPriceResponse: { ...FIXTURE.TldPriceResponse, Currency: 'EUR' } })).toEqual({});
+    expect(normalizeDynadotTldPrice({ TldPriceResponse: { ...FIXTURE.TldPriceResponse, ResponseCode: -1 } })).toEqual({});
   });
 });
 
 describe('fetchDynadotTldPrices', () => {
   function mockFetch(json: unknown, ok = true, status = 200): typeof fetch {
-    return vi.fn().mockResolvedValue({
-      ok,
-      status,
-      json: async () => json,
-    }) as unknown as typeof fetch;
+    return vi.fn().mockResolvedValue({ ok, status, json: async () => json }) as unknown as typeof fetch;
   }
 
-  it('requests the tld_price endpoint with the encoded key', async () => {
+  it('requests the documented command and USD currency with the encoded key', async () => {
     const f = mockFetch(FIXTURE);
     await fetchDynadotTldPrices('key with space&x', f);
-    const url = (f as unknown as { mock: { calls: string[][] } }).mock.calls[0]?.[0] ?? '';
-    expect(url).toContain('api.dynadot.com/api3.json?tld_price&key=');
-    expect(url).toContain(encodeURIComponent('key with space&x'));
+    const url = new URL((f as unknown as { mock: { calls: string[][] } }).mock.calls[0]?.[0] ?? '');
+    expect(url.searchParams.get('command')).toBe('tld_price');
+    expect(url.searchParams.get('currency')).toBe('USD');
+    expect(url.searchParams.get('key')).toBe('key with space&x');
   });
 
   it('normalizes a success response', async () => {
@@ -87,16 +88,17 @@ describe('fetchDynadotTldPrices', () => {
     expect(out.com).toEqual({ reg: 1099, renew: 1148, transfer: 1099 });
   });
 
-  it('throws on a non-success API status', async () => {
-    await expect(
-      fetchDynadotTldPrices('k', mockFetch({ Status: 'fail', Error: 'invalid key' })),
-    ).rejects.toThrow(/Status=fail/);
+  it('fails safely on API errors, wrong currency, malformed lists and HTTP errors', async () => {
+    await expect(fetchDynadotTldPrices('k', mockFetch({ TldPriceResponse: { Status: 'error' } }))).rejects.toThrow(/unsuccessful/);
+    await expect(fetchDynadotTldPrices('k', mockFetch({ TldPriceResponse: { ...FIXTURE.TldPriceResponse, Currency: 'EUR' } }))).rejects.toThrow(/invalid USD/);
+    await expect(fetchDynadotTldPrices('k', mockFetch({ TldPriceResponse: { ...FIXTURE.TldPriceResponse, TldPrice: null } }))).rejects.toThrow(/invalid USD/);
+    await expect(fetchDynadotTldPrices('k', mockFetch({}, false, 500))).rejects.toThrow(/HTTP 500/);
   });
 
-  it('throws on HTTP errors', async () => {
-    await expect(fetchDynadotTldPrices('k', mockFetch({}, false, 500))).rejects.toThrow(
-      /HTTP 500/,
-    );
+  it('does not leak the key in transport error messages', async () => {
+    const secret = 'private-key-123';
+    const f = vi.fn().mockRejectedValue(new Error(`failed at ?key=${secret}`)) as unknown as typeof fetch;
+    await expect(fetchDynadotTldPrices(secret, f)).rejects.toThrow('dynadot request failed');
   });
 });
 

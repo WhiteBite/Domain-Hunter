@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: harvest-prices
@@ -14,6 +16,10 @@ concurrency:
 
 jobs:
   harvest:
+    permissions:
+      contents: write
+    outputs:
+      updated: ${{ steps.commit.outputs.updated }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +35,7 @@ jobs:
 
       # Delta gate: scripts/snapshot-gate.mjs skips commits under 0.5% cell change within 24h.
       - name: Commit snapshot if changed
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -40,6 +47,18 @@ jobs:
           if node scripts/snapshot-gate.mjs; then
             git commit -m "chore: update pricing snapshot (6h API)"
             git push
+            echo "updated=true" >> "$GITHUB_OUTPUT"
           else
             echo "delta below gate, skipping commit"
           fi
+
+  publish:
+    needs: harvest
+    if: needs.harvest.outputs.updated == 'true' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      checkout_ref: main

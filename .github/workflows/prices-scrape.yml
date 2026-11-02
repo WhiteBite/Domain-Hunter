@@ -7,13 +7,40 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: harvest-prices
   cancel-in-progress: false
 
 jobs:
+  # Manual, non-collecting reachability check. Do not request disallowed cart
+  # pages, follow redirects or bypass anti-bot controls. A HEAD response does
+  # not grant scraping permission or prove that parsing a GET will succeed.
+  source-reachability:
+    if: github.event_name == 'workflow_dispatch'
+    permissions: {}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check public endpoints
+        run: |
+          for url in \
+            https://my.hostiman.ru/domain/register \
+            https://timeweb.com/ru/services/domains/ \
+            https://sprinthost.ru/tariffs/domain-prices \
+            https://webhost1.ru/domains/ru \
+            https://adminvps.ru/domains/xyz.php; do
+            echo "HEAD $url"
+            curl --head --silent --show-error --max-time 20 --output /dev/null \
+              --write-out 'HTTP %{http_code}\n' "$url" || echo 'unreachable'
+          done
+
   harvest:
+    permissions:
+      contents: write
+    outputs:
+      updated: ${{ steps.commit.outputs.updated }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,9 +55,24 @@ jobs:
       - run: node scripts/harvest-prices.mjs
 
       - name: Commit snapshot if changed
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/config/pricing.snapshot.json
-          git diff --quiet --cached -- src/config/pricing.snapshot.json || git commit -m "chore: update pricing snapshot (daily full scrape)"
-          git push
+          if ! git diff --quiet --cached -- src/config/pricing.snapshot.json; then
+            git commit -m "chore: update pricing snapshot (daily full scrape)"
+            git push
+            echo "updated=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: harvest
+    if: needs.harvest.outputs.updated == 'true' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      checkout_ref: main

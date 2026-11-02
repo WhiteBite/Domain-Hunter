@@ -42,6 +42,7 @@ Paste up to 3,000 domain names, pick the TLDs you care about, and hit start. Res
 The **Prices tab** shows a TLD × registrar price matrix with the cheapest cell highlighted, promo-trap flags (renewal ≥ 5× first year), and an exportable CSV. The results table includes a detail row with full **registrar price comparison** and clickable buy/search links for every available domain, plus USPTO/TMview trademark search link-outs.
 
 - **Live prices** from Porkbun and Cloudflare at-cost over an offline snapshot with carry-over, so a flaky source never erases coverage. REG.RU prices are approximate, cover only the scraped zones, and have no verified renewal price; see [REG.RU pricing limitations](docs/regru-pricing.md). HostiMan prices use a dated public-page import; original RUB prices are shown when available, while comparison and TCO use USD conversion; automatic collection is not yet enabled; see [HostiMan pricing](docs/hostiman-pricing.md). Timeweb includes only .ru and .рф registration from a dated public-page import; renewal lower bounds are excluded from TCO. See [Timeweb pricing](docs/timeweb-pricing.md). Sprinthost includes 88 dated public prices subject to registrar, DNS and account terms; automatic collection is not enabled. See [Sprinthost pricing](docs/sprinthost-pricing.md). WebHOST1 includes 226 dated annual registration prices and two independently dated renewals; automatic collection is disabled. See [WebHOST1 pricing](docs/webhost1-pricing.md). AdminVPS includes 739 annual quotes from a user-saved cart, including seller-marked promotions; automated collection is disabled. See [AdminVPS pricing](docs/adminvps-pricing.md).
+- Maintainers can prepare validated offline updates from reviewed seller data; see [price imports](docs/price-imports.md).
 - **Coupons, promo-trap detection**, coupon-aware first-year prices, and 3-year TCO sorting. Prices shown in USD, RUB, or EUR.
 - **Price trends** (▲/▼ over six months) from CI-harvested snapshot history, and instant **possible-premium hints** for dictionary words and short labels in premium-heavy zones.
 - **Coverage-aware buy links** target the cheapest registrar that has a deep-link template, not merely the cheapest price in the table.
@@ -78,7 +79,7 @@ The **Social tab** runs live username checks on GitHub and TikTok; X, YouTube, I
 - **Run history** — recent completed runs are saved locally; click to restore the full search (query, zones, results) in one tap
 - **Last-search restore** — after a page reload the app restores your previous input and zone selection so you can resume instantly
 - **Social checks with GitHub token** — the Social tab supports optional GitHub device-flow authentication for higher-rate username lookups
-- **Registrar favicon badges** — price cells show registrar logos alongside prices for quick visual scanning
+- **Registrar badges** — price cells show embedded logos or monograms alongside prices for quick visual scanning
 
 ## Keyboard shortcuts
 

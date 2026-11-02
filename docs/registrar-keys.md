@@ -47,12 +47,19 @@ zones stay data-driven (`src/config/tlds.json`).
 
 | Registrar | Bulk TLD pricing | Status |
 |---|---|---|
-| Dynadot | `api.dynadot.com/api3.json?tld_price&key=` — full TLD price list, key from Dynadot → Tools → API | Supported |
-| Namecheap | No bulk pricing API. `namecheap.domains.getinfo` is per-domain XML, requires an IP allowlist and account thresholds | Not possible |
+| Dynadot | [Legacy `tld_price` API](https://www.dynadot.com/domain/api-commands#tld_price), key from Dynadot → Tools → API | Supported in CLI; legacy API scheduled for retirement |
+| Namecheap | [`namecheap.users.getPricing`](https://www.namecheap.com/support/api/methods/users/get-pricing/) returns bulk XML pricing; requires API access and IP allowlisting | Not implemented |
 | GoDaddy | No public bulk TLD pricing API (per-domain availability/pricing only, OAuth key) | Not possible |
 
-Dynadot response prices are USD strings and are converted to integer USD cents
-(unparseable/negative values become `null`, never guessed).
+Dynadot responses are requested explicitly in USD and parsed from the documented
+`TldPriceResponse` JSON. Only one-year price units are used; a registration
+with an unknown or greater-than-one-year minimum term is not shown as a
+one-year registration. Invalid amounts are ignored. The API supports pagination;
+the current integration makes one request and may not receive every TLD. It
+preserves the snapshot for any zones not returned. Coupon eligibility and
+account-specific pricing can differ. The vendor marks the legacy API as
+scheduled for retirement; migration to its newer REST API requires separate
+verification. No live account response was available for this change.
 
 ## Browser route (not implemented)
 
