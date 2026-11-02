@@ -41,7 +41,7 @@ Paste up to 3,000 domain names, pick the TLDs you care about, and hit start. Res
 
 The **Prices tab** shows a TLD × registrar price matrix with the cheapest cell highlighted, promo-trap flags (renewal ≥ 5× first year), and an exportable CSV. The results table includes a detail row with full **registrar price comparison** and clickable buy/search links for every available domain, plus USPTO/TMview trademark search link-outs.
 
-- **Live prices** from Porkbun and Cloudflare at-cost over an offline snapshot with carry-over, so a flaky source never erases coverage.
+- **Live prices** from Porkbun and Cloudflare at-cost over an offline snapshot with carry-over, so a flaky source never erases coverage. REG.RU prices are approximate, cover only the scraped zones, and have no verified renewal price; see [REG.RU pricing limitations](docs/regru-pricing.md). HostiMan prices use a dated public-page import; original RUB prices are shown when available, while comparison and TCO use USD conversion; automatic collection is not yet enabled; see [HostiMan pricing](docs/hostiman-pricing.md). Timeweb includes only .ru and .рф registration from a dated public-page import; renewal lower bounds are excluded from TCO. See [Timeweb pricing](docs/timeweb-pricing.md). Sprinthost includes 88 dated public prices subject to registrar, DNS and account terms; automatic collection is not enabled. See [Sprinthost pricing](docs/sprinthost-pricing.md). WebHOST1 includes 226 dated annual registration prices and two independently dated renewals; automatic collection is disabled. See [WebHOST1 pricing](docs/webhost1-pricing.md). AdminVPS includes 739 annual quotes from a user-saved cart, including seller-marked promotions; automated collection is disabled. See [AdminVPS pricing](docs/adminvps-pricing.md).
 - **Coupons, promo-trap detection**, coupon-aware first-year prices, and 3-year TCO sorting. Prices shown in USD, RUB, or EUR.
 - **Price trends** (▲/▼ over six months) from CI-harvested snapshot history, and instant **possible-premium hints** for dictionary words and short labels in premium-heavy zones.
 - **Coverage-aware buy links** target the cheapest registrar that has a deep-link template, not merely the cheapest price in the table.
@@ -334,7 +334,7 @@ If Domain Hunter saved you time, a ⭐ helps others find it too.
 
 - **Validate a shortlist before buying** — paste up to 3,000 names across 148 TLDs, stream results live, and export the available ones with prices and 3-year TCO.
 - **Drop-catching** — scan the daily dropped-domains snapshot at registration price, star candidates, and get freed/taken flags on reload.
-- **Avoid promo traps** — compare first-year, renewal, and 3-year TCO across 42 registrars before committing to a "$0.99 first year" deal.
+- **Avoid promo traps** — compare first-year, renewal, and 3-year TCO across multiple registrars before committing to a "$0.99 first year" deal.
 - **Brand brainstorming** — five generators (combinator, syllable mixer, thematic sets, TLD-hacks, mutations) collect checkable candidates in one tray.
 - **Automation** — the CLI and MCP server expose the same engine with a stable JSON contract for scripts and AI agents.
 

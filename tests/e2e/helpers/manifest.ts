@@ -180,9 +180,20 @@ export const ALL_TESTIDS = [
   'prices-toggle-unpriced', // hide-unpriced-zones toggle button
   'prices-export-csv', // CSV export button
   'prices-more', // show-more button
+  'prices-toggle-registrars', // expand/collapse registrar columns
 ] as const;
 
 export const DYNAMIC_TESTID_PREFIXES = [
+  'results-regru-estimate-',
+  'results-hostiman-estimate-',
+  'results-timeweb-estimate-',
+  'results-sprinthost-estimate-',
+  'results-sprinthost-renew-estimate-',
+  'results-webhost1-estimate-',
+  'results-webhost1-renew-estimate-',
+  'results-adminvps-estimate-',
+  'results-adminvps-renew-estimate-',
+  'results-seller-promo-',
   // ---- App.svelte ----
   'app-tab-', // tab buttons: app-tab-{tabId} (check|generators|drops|prices|social|settings|about)
   'app-lang-', // language menu items: app-lang-{code} (en|ru|es|de|pt)

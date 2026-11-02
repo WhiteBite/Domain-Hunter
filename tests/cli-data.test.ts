@@ -235,6 +235,20 @@ describe('loadRegistry', () => {
 });
 
 describe('loadPricingTable', () => {
+  it('retains bundled Sprinthost annual prices, source rubles and date offline', async () => {
+    installStorage(makeTempDir());
+    const state = await loadPricingTable({ fetchImpl: offlineFetch, currency: 'USD', rates: { RUB: 90, EUR: 0.9 } });
+    expect(state.table.sourceRub?.sprinthost?.xyz).toEqual([150000, 170000]);
+    expect(state.table.sourceRub?.sprinthost?.['com.ru']).toEqual([34800, 34800]);
+    expect(state.table.sprinthostUpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.sourceRub?.webhost1?.ru).toEqual([18900, 39900]);
+    expect(state.table.webhost1UpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.webhost1RenewalUpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.adminvpsUpdatedAt).toMatch(/^2026-11-01T/);
+    expect(state.table.sourceRub?.adminvps?.ru).toEqual([20300, 143900]);
+    expect(state.table.sourcePromotions?.adminvps).toContain('ru');
+  });
+
   it('expands compact [reg,renew,transfer] arrays into PriceEntry objects', async () => {
     const dir = makeTempDir();
     installStorage(dir);

@@ -137,6 +137,26 @@ export interface PricingTable {
   generatedAt: string;
   /** e.g. ['porkbun','cloudflare'] or ['snapshot']. */
   sources: string[];
+  /** Last successful REG.RU scrape; null/absent means unknown. */
+  regruUpdatedAt?: string | null;
+  /** Last successful HostiMan price collection or public-page import. */
+  hostimanUpdatedAt?: string | null;
+  /** Last successful Timeweb price collection or public-page import. */
+  timewebUpdatedAt?: string | null;
+  /** Last successful Sprinthost price collection or public-page import. */
+  sprinthostUpdatedAt?: string | null;
+  /** Last successful WebHOST1 price collection or public-page import. */
+  webhost1UpdatedAt?: string | null;
+  /** Date of the separately sourced WebHOST1 renewals. */
+  webhost1RenewalUpdatedAt?: string | null;
+  /** Last successful AdminVPS public-price import. */
+  adminvpsUpdatedAt?: string | null;
+  /** Seller-labeled promotions: registrar → zones. */
+  sourcePromotions?: Record<string, string[]>;
+  /** Published renewal lower bounds, in RUB, not exact renewal prices. */
+  timewebRenewalFromRub?: Record<string, number>;
+  /** Original prices in kopecks: registrar → TLD → [registration, renewal]. */
+  sourceRub?: Record<string, Record<string, [number | null, number | null]>>;
   /** tld -> registrarId -> entry. */
   tlds: Record<string, Record<string, PriceEntry>>;
   /** tld -> active coupons (from Porkbun). */

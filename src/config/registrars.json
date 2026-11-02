@@ -121,6 +121,17 @@
     }
   },
   {
+    "id": "hostiman",
+    "name": "HostiMan",
+    "market": "ru",
+    "searchUrl": "https://my.hostiman.ru/domain/register",
+    "affiliate": {
+      "program": "none",
+      "viable": false,
+      "note": "Landing page only."
+    }
+  },
+  {
     "id": "beget",
     "name": "Beget",
     "market": "ru",
@@ -281,7 +292,25 @@
     "id": "timeweb",
     "name": "Timeweb",
     "market": "ru",
-    "searchUrl": "https://timeweb.com/ru/services/domains/?domain={domain}"
+    "searchUrl": "https://timeweb.com/ru/services/domains/"
+  },
+  {
+    "id": "sprinthost",
+    "name": "Sprinthost",
+    "market": "ru",
+    "searchUrl": "https://sprinthost.ru/tariffs/domains"
+  },
+  {
+    "id": "adminvps",
+    "name": "AdminVPS",
+    "market": "ru",
+    "searchUrl": "https://adminvps.ru/domains.php"
+  },
+  {
+    "id": "webhost1",
+    "name": "WebHOST1",
+    "market": "ru",
+    "searchUrl": "https://webhost1.ru/domains"
   },
   {
     "id": "nicru",
