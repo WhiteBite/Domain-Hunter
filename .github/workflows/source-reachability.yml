@@ -22,7 +22,8 @@ jobs:
             https://sprinthost.ru/tariffs/domain-prices \
             https://webhost1.ru/domains/ru \
             https://adminvps.ru/domains/xyz.php; do
-            echo "HEAD $url"
-            curl --head --silent --show-error --max-time 20 --output /dev/null \
-              --write-out 'HTTP %{http_code}\n' "$url" || echo 'unreachable'
+            code=$(curl --head --silent --show-error --max-time 20 --output /dev/null \
+              --write-out '%{http_code}' "$url") || code=000
+            echo "HEAD $url: HTTP $code"
+            echo "::notice title=Source reachability::HEAD $url: HTTP $code"
           done
