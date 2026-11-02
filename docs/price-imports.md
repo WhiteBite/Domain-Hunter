@@ -5,8 +5,8 @@ remains disabled. The owner must first confirm each seller permits regular
 collection and that the runner can reach the allowed source; robots.txt alone
 is not explicit permission. AdminVPS's `/cart` is disallowed. Do not bypass
 bot protection or fetch authenticated/account-specific pages. No browser
-requests to these sellers are added. A manual dispatch of the full-scrape
-workflow also performs HEAD-only checks of public pages from its GitHub runner;
+requests to these sellers are added. The source-reachability workflow performs HEAD-only checks of public pages
+from its GitHub runner on a manual dispatch or changes to the check itself;
 these checks do not follow redirects or collect prices, and do not establish
 permission or guarantee a usable GET response.
 

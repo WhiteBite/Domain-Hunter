@@ -15,27 +15,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Manual, non-collecting reachability check. Do not request disallowed cart
-  # pages, follow redirects or bypass anti-bot controls. A HEAD response does
-  # not grant scraping permission or prove that parsing a GET will succeed.
-  source-reachability:
-    if: github.event_name == 'workflow_dispatch'
-    permissions: {}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check public endpoints
-        run: |
-          for url in \
-            https://my.hostiman.ru/domain/register \
-            https://timeweb.com/ru/services/domains/ \
-            https://sprinthost.ru/tariffs/domain-prices \
-            https://webhost1.ru/domains/ru \
-            https://adminvps.ru/domains/xyz.php; do
-            echo "HEAD $url"
-            curl --head --silent --show-error --max-time 20 --output /dev/null \
-              --write-out 'HTTP %{http_code}\n' "$url" || echo 'unreachable'
-          done
-
   harvest:
     permissions:
       contents: write

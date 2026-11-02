@@ -1,0 +1,28 @@
+name: Check public source reachability
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/source-reachability.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  reachability:
+    runs-on: ubuntu-latest
+    steps:
+      # HEAD does not collect prices, grant scraping permission or prove that
+      # a GET will be usable. Do not follow redirects or bypass protections.
+      - name: Check public endpoints
+        run: |
+          for url in \
+            https://my.hostiman.ru/domain/register \
+            https://timeweb.com/ru/services/domains/ \
+            https://sprinthost.ru/tariffs/domain-prices \
+            https://webhost1.ru/domains/ru \
+            https://adminvps.ru/domains/xyz.php; do
+            echo "HEAD $url"
+            curl --head --silent --show-error --max-time 20 --output /dev/null \
+              --write-out 'HTTP %{http_code}\n' "$url" || echo 'unreachable'
+          done
