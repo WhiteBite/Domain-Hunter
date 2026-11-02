@@ -12,8 +12,8 @@ jobs:
   reachability:
     runs-on: ubuntu-latest
     steps:
-      # HEAD does not collect prices, grant scraping permission or prove that
-      # a GET will be usable. Do not follow redirects or bypass protections.
+      # One-off reachability checks do not grant permission for regular
+      # collection. Do not follow redirects or bypass protections.
       - name: Check public endpoints
         run: |
           for url in \
@@ -26,4 +26,23 @@ jobs:
               --write-out '%{http_code}' "$url") || code=000
             echo "HEAD $url: HTTP $code"
             echo "::notice title=Source reachability::HEAD $url: HTTP $code"
+          done
+      - name: Check public GET responses without retaining prices
+        run: |
+          body=$(mktemp)
+          trap 'rm -f "$body"' EXIT
+          for url in \
+            https://my.hostiman.ru/domain/register \
+            https://timeweb.com/ru/services/domains/ \
+            https://sprinthost.ru/tariffs/domain-prices \
+            https://webhost1.ru/domains/ru \
+            https://adminvps.ru/domains/xyz.php; do
+            : > "$body"
+            code=$(curl --silent --show-error --max-time 20 --max-filesize 2097152 \
+              --output "$body" --write-out '%{http_code}' "$url") || code=000
+            # A keyword alone cannot prove a complete/usable price table.
+            marker=no
+            if grep -Eiq 'price|цена|стоимость' "$body"; then marker=yes; fi
+            echo "GET $url: HTTP $code, price keyword $marker"
+            echo "::notice title=Source GET check::GET $url: HTTP $code, price keyword $marker"
           done
