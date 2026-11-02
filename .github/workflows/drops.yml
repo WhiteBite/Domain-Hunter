@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: harvest-drops
@@ -14,6 +16,10 @@ concurrency:
 
 jobs:
   harvest:
+    permissions:
+      contents: write
+    outputs:
+      updated: ${{ steps.commit.outputs.updated }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,9 +34,24 @@ jobs:
       - run: node scripts/harvest-drops.mjs
 
       - name: Commit snapshot if changed
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/config/dropped.snapshot.json
-          git diff --quiet --cached -- src/config/dropped.snapshot.json || git commit -m "chore: update dropped-domains snapshot"
-          git push
+          if ! git diff --quiet --cached -- src/config/dropped.snapshot.json; then
+            git commit -m "chore: update dropped-domains snapshot"
+            git push
+            echo "updated=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: harvest
+    if: needs.harvest.outputs.updated == 'true' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      checkout_ref: main

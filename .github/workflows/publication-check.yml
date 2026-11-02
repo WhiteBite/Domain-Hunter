@@ -1,0 +1,53 @@
+name: Check snapshot publication workflow
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/deploy.yml'
+      - '.github/workflows/drops.yml'
+      - '.github/workflows/prices.yml'
+      - '.github/workflows/prices-scrape.yml'
+      - '.github/workflows/price-history.yml'
+      - '.github/workflows/publication-check.yml'
+      - 'tests/workflow-publication.test.ts'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  commit-simulation:
+    # PRs from forks cannot grant these permissions and must not run a
+    # privileged reusable workflow from untrusted code.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      updated: ${{ steps.test.outputs.updated }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The tests execute the real commit steps against isolated local Git
+      # repositories: no-op, successful push and rejected push (plus gate).
+      - id: test
+        run: |
+          npx vitest run tests/workflow-publication.test.ts
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+
+  publish-dry-run:
+    needs: commit-simulation
+    if: needs.commit-simulation.outputs.updated == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      checkout_ref: ${{ github.sha }}
+      dry_run: true

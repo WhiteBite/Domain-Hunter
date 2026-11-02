@@ -14,7 +14,8 @@ Keys live in the CLI storage file:
 ~/.domain-hunter/storage.json      (directory mode 0700, file mode 0600)
 ```
 
-under the internal key `dh:cli:registrar-keys`. Keys never appear in command
+under the internal key `dh:cli:registrar-keys`. The `keys set` positional argument can be visible in shell history or process
+listings; avoid running it on a shared machine. Keys never appear in command
 output — `keys list` shows only a `****`-masked tail. Nothing is sent anywhere
 except the registrar's own API over HTTPS.
 
@@ -60,6 +61,31 @@ preserves the snapshot for any zones not returned. Coupon eligibility and
 account-specific pricing can differ. The vendor marks the legacy API as
 scheduled for retirement; migration to its newer REST API requires separate
 verification. No live account response was available for this change.
+
+## Dynadot REST migration checklist
+
+Dynadot recommends its [REST API](https://www.dynadot.com/domain/api-document)
+instead of the legacy API. Its pricing documentation describes a required
+`currency`, optional `page`, `page_size`, `tlds` and `show_multi_year`, and a
+result containing `currency`, paging fields and `tld_price_list`. Pricing uses
+`all_years_register_price`, `all_years_renew_price`, `transfer_price`,
+`price_unit` and minimum/maximum duration. Authentication is via a Bearer key;
+confirm the vendor's current signing requirements for the pricing call. Do not
+log headers, response bodies containing credentials, or full legacy URLs.
+
+Before replacing the current implementation, use a real test account to verify:
+
+- the actual response envelope, amount strings, currency, one-year units and
+  how multi-year arrays behave for TLDs with a minimum term over one year;
+- pagination start, limit, ordering, termination, empty pages, repeated pages,
+  rate limits and errors — do not silently report a partial list as complete;
+- a handful of prices against the account's actual quotes, without placing an
+  order, and behavior when the account cannot access a TLD;
+- safe fallback to existing snapshot data for missing zones and failures.
+
+No account key or live REST response was available during this investigation,
+so the REST endpoint is **not yet used** and its details are not assumed from
+third-party examples.
 
 ## Browser route (not implemented)
 

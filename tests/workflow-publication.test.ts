@@ -8,6 +8,7 @@ const workflows = [
   { name: 'prices.yml', job: 'harvest', file: 'src/config/pricing.snapshot.json' },
   { name: 'prices-scrape.yml', job: 'harvest', file: 'src/config/pricing.snapshot.json' },
   { name: 'price-history.yml', job: 'build', file: 'src/config/price-history.json' },
+  { name: 'drops.yml', job: 'harvest', file: 'src/config/dropped.snapshot.json' },
 ] as const;
 const readWorkflow = (name: string) => readFileSync(join('.github/workflows', name), 'utf8');
 
@@ -32,6 +33,7 @@ function runStep(name: string, file: string, mode: 'unchanged' | 'changed' | 're
     mkdirSync(join(repo, 'src/config'), { recursive: true });
     writeFileSync(join(repo, 'src/config/pricing.snapshot.json'), '{}\n');
     writeFileSync(join(repo, 'src/config/price-history.json'), '{}\n');
+    writeFileSync(join(repo, 'src/config/dropped.snapshot.json'), '{}\n');
     git('add', '.'); git('commit', '-m', 'initial'); git('push', '-u', 'origin', 'main');
     if (mode !== 'unchanged') writeFileSync(join(repo, file), '{"changed":true}\n');
     if (mode === 'rejected') git('remote', 'set-url', 'origin', join(root, 'no-remote'));
@@ -48,14 +50,16 @@ function runStep(name: string, file: string, mode: 'unchanged' | 'changed' | 're
   }
 }
 
-describe('price data publication workflows', () => {
+describe('snapshot publication workflows', () => {
   it('deploys regular price-only pushes and accepts calls with the requested ref', () => {
     const deploy = readWorkflow('deploy.yml');
     expect(deploy).toContain('  workflow_call:');
     expect(deploy).toContain('ref: ${{ inputs.checkout_ref || github.sha }}');
     expect(deploy).not.toContain("- 'src/config/pricing.snapshot.json'");
     expect(deploy).not.toContain("- 'src/config/price-history.json'");
+    expect(deploy).not.toContain("- 'src/config/dropped.snapshot.json'");
     expect(deploy).toContain('group: pages');
+    expect(deploy).toContain('if: ${{ !inputs.dry_run }}');
   });
 
   it.each(workflows)('$name publishes only a successfully pushed main-branch change', ({ name, job, file }) => {
