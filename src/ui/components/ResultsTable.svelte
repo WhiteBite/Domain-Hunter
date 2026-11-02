@@ -2,6 +2,7 @@
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from 'svelte';
   import { results, settings, pricing, registry, runState, exportRows, requestFavoritesView, sharedView, loadResultsView, saveResultsView, type ResultsView } from '../store';
+  import { priceSourceLabel } from '../price-source';
   import type { CheckResult, EngineOptions, PriceEntry, PricingTable, RegistrarConfig, Settings } from '../../types';
   import {
     bestEntry,
@@ -559,12 +560,7 @@
   /** Title for the registrar source badge: full name plus the price source.
    *  Live fetches list their registrar id in table.sources; every other
    *  entry comes from the bundled snapshot baseline. */
-  function registrarBadgeTitle(id: string): string {
-    const name = registrarName(id);
-    const sources = $pricing?.table.sources ?? [];
-    if (sources.length === 0) return name;
-    return `${name} · ${sources.includes(id) ? 'live' : 'snapshot'}`;
-  }
+
 </script>
 
 {#if !hasResults}
@@ -655,6 +651,9 @@
       >
         {pairMode === 'paired' ? t('results.pairMode.paired') : t('results.pairMode.best')}
       </button>
+      <span class="pair-explanation" data-testid="results-pair-explanation">
+        {t('results.pairMode.aria')}
+      </span>
       <!-- Meta row: legend + showing-count + select-all link on the left,
            bulk actions (premium-check, show-available, ⋯ menu) on the right. -->
       <div class="meta-row">
@@ -876,7 +875,7 @@
                       {@const rid = row.best.registrarId}
                       {@const icon = REGISTRAR_ICONS[rid]}
                       {@const mono = registrarMonogram(rid)}
-                      {@const badgeTitle = registrarBadgeTitle(rid)}
+                      {@const badgeTitle = `${registrarName(rid)} · ${priceSourceLabel($pricing?.table ?? null, row.result.tld, rid, 'reg')}`}
                       {#if icon}
                         <img
                           src={icon}
@@ -895,6 +894,13 @@
                       {/if}
                     {/if}
                   </span>
+                  {#if !row.isPremiumOverride && row.best}
+                    <span class="registrar-source">{registrarName(row.best.registrarId)}</span>
+                    <span class="price-origin">{priceSourceLabel($pricing?.table ?? null, row.result.tld, row.best.registrarId, 'reg')}</span>
+                  {/if}
+                  {#if row.firstYear === 0}
+                    <span class="zero-price-note">{t('prices.zero.warning')}</span>
+                  {/if}
                   {#if !row.isPremiumOverride && row.best?.registrarId === 'regru'}
                     <Tooltip text={t('prices.regru.caveat')}>
                       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -978,11 +984,11 @@
                 <span class="renew-line">
                   <!-- Renewal stays neutral (tier colors live on the 1st-year column only). -->
                   <span class="renew">{displayRenewal(row, $pricing?.table ?? null, $settings)}</span>
-                  {#if row.renewalRegistrarId}
+                  {#if row.renewalRegistrarId && row.renewal != null}
                     {@const rid = row.renewalRegistrarId}
                     {@const icon = REGISTRAR_ICONS[rid]}
                     {@const mono = registrarMonogram(rid)}
-                    {@const badgeTitle = registrarBadgeTitle(rid)}
+                    {@const badgeTitle = `${registrarName(rid)} · ${priceSourceLabel($pricing?.table ?? null, row.result.tld, rid, 'renew')}`}
                     {#if icon}
                       <img
                         src={icon}
@@ -1001,6 +1007,13 @@
                     {/if}
                   {/if}
                 </span>
+                {#if row.renewalRegistrarId && row.renewal != null}
+                  <span class="registrar-source">{registrarName(row.renewalRegistrarId)}</span>
+                  <span class="price-origin">{priceSourceLabel($pricing?.table ?? null, row.result.tld, row.renewalRegistrarId, 'renew')}</span>
+                {/if}
+                {#if row.renewal === 0}
+                  <span class="zero-price-note">{t('prices.zero.warning')}</span>
+                {/if}
                 {#if row.renewalRegistrarId === 'sprinthost'}
                   <Tooltip text={t('prices.sprinthost.caveat')}>
                     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -1218,7 +1231,7 @@
   .filter.active {
     background: var(--accent-soft);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
   }
   .count {
     font-size: var(--text-xs);
@@ -1297,7 +1310,7 @@
     transition: color var(--dur) var(--ease);
   }
   .sort-btn:hover {
-    color: var(--accent);
+    color: var(--accent-text);
   }
   .sort-arrow {
     font-size: 9px;
@@ -1405,6 +1418,10 @@
      Card backgrounds are OPAQUE (row tint mixed over --bg-elevated via
      color-mix) so nothing bleeds through. ---- */
   @media (max-width: 700px) {
+    /* The wrapping controls would otherwise cover the results on phones. */
+    .toolbar {
+      position: static;
+    }
     thead {
       display: none;
     }
@@ -1418,7 +1435,7 @@
     }
     tbody tr.row-in {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) minmax(0, max-content);
+      grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
       grid-template-areas:
         'select domain price'
         'select status renew'
@@ -1545,6 +1562,26 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
+  .registrar-source,
+  .price-origin {
+    display: block;
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: normal;
+  }
+  .zero-price-note {
+    display: block;
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    white-space: normal;
+  }
+  .pair-explanation {
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+  }
   .renew-line {
     display: inline-flex;
     align-items: center;
@@ -1567,7 +1604,7 @@
     white-space: nowrap;
   }
   .domain-link {
-    color: var(--accent);
+    color: var(--accent-text);
     font-weight: 500;
   }
   .domain-text {
@@ -1616,7 +1653,8 @@
     background: var(--bg-sunken);
   }
   .watch-refresh:disabled {
-    opacity: 0.5;
+    color: var(--disabled-text);
+    opacity: 1;
     cursor: not-allowed;
   }
   .watch-refresh :global(svg) {
@@ -1651,7 +1689,7 @@
   }
   /* Shared .action-btn lives in src/ui/chrome.css. */
   .buy-btn {
-    color: var(--accent);
+    color: var(--accent-text);
     border-color: color-mix(in srgb, var(--accent) 30%, transparent);
     background: var(--accent-soft);
   }
@@ -1693,7 +1731,8 @@
     border-color: var(--accent);
   }
   .ghost-btn:disabled {
-    opacity: 0.5;
+    color: var(--disabled-text);
+    opacity: 1;
     cursor: not-allowed;
   }
   .ghost-btn.premium-check :global(svg) {

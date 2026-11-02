@@ -1,6 +1,11 @@
 import type { Dict } from './index';
 
 export const ja: Dict = {
+  'price.source.api': 'API: {date}',
+  'price.source.snapshot': 'スナップショット: {date}',
+  'price.source.unknown': '出典と日付は不明',
+  'price.source.dateUnknown': '日付不明',
+  'price.fresh.mixed': '価格の出典と日付は異なります',
   'app.name': 'Domain Hunter',
   'app.tagline': 'ブラウザーだけで空きドメインを探そう',
 
@@ -197,9 +202,6 @@ export const ja: Dict = {
   'price.premium': 'プレミアム',
   'price.premiumLikely': 'プレミアムの可能性',
   'price.coupon': 'コード {code} で {price}',
-  'price.fresh.now': '価格: ライブ',
-  'price.fresh.hours': '価格: {n} 時間前',
-  'price.fresh.snapshot': '価格: スナップショット {date}',
   'price.disclaimer':
     '価格は公開レジストラデータからの推定です。プレミアム（辞書語）の名前はさらに高額になる可能性があります — 必ずレジストラのカートで確認してください。',
 
@@ -327,7 +329,7 @@ export const ja: Dict = {
   'tooltip.promoTrap': 'プロモート罠: 初年度 {first}、更新 {renew} ({times}×) — 2 年目以降は更新料を支払います。',
   'tooltip.promo': 'レジストリの卸値を下回る — ほぼ間違いなく初年度プロモーションです; 更新料を確認してください。',
   'tooltip.premiumLikely': 'このゾーンの辞書語および短い名前はレジストリプレミアムであることが多いです — レジストラのカートで確認してください。',
-  'tooltip.registrars': 'ライブ価格: Porkbun と Cloudflare (原価); 他のレジストラは週次スナップショット由来。初年度価格でソート済み。',
+  'tooltip.registrars': '登録と更新を比較し、価格は販売元で確認してください。',
   'tooltip.trend':
     '過去 {months} か月の初年度価格変動（CI 収集の履歴）',
   'common.loading': '読み込み中…',
@@ -386,6 +388,7 @@ export const ja: Dict = {
   'results.hideTraps': 'プロモトラップを非表示',
   'results.hideTraps.count': 'プロモトラップを非表示 ({n})',
   'results.hideTraps.aria': 'プロモトラップ行の非表示を切り替え',
+  'prices.zero.warning': 'ゼロ価格は販売者に確認',
   'results.pairMode.best': '列ごとの最安値',
   'results.pairMode.paired': '同一レジストラのペア',
   'results.pairMode.aria':
@@ -442,7 +445,7 @@ export const ja: Dict = {
   'prices.regru.estimate': '概算',
   'prices.title': 'ドメイン価格',
   'prices.desc':
-    'レジストラごとの初年登録価格。ソース：ライブ Porkbun + Cloudflare 実費 + 週次スナップショット。価格は通貨設定で変換されない限り初年 USD です。',
+    '初年度の登録価格。各価格の出典と日付を確認してください。',
   'prices.search': 'ゾーンを絞り込み…',
   'prices.sort.reg': '初年が最安',
   'prices.sort.renew': '更新が最安',

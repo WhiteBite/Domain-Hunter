@@ -13,6 +13,7 @@
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { fetchWithTimeout, fetchWithRetry, UA, writeJson, readJson } from './lib/http.mjs';
+import { cleanLegacyPorkbun } from './lib/porkbun-legacy.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SNAPSHOT_PATH = join(__dirname, '..', 'src', 'config', 'pricing.snapshot.json');
@@ -29,13 +30,17 @@ const apiOnly = process.argv.includes('--api-only');
 // ---- Normalization (mirrors src/pricing/pricing.ts) ----
 
 export function toCents(value) {
-  if (value == null) return null;
-  const n = typeof value === 'string' ? parseFloat(value) : Number(value);
-  if (!Number.isFinite(n)) return null;
-  return Math.round(n * 100);
+  if (typeof value === 'string') {
+    value = value.trim();
+    if (!/^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(value)) return null;
+    value = value.replace(/,/g, '');
+  }
+  if (typeof value !== 'number' && typeof value !== 'string') return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) : null;
 }
 
-function normalizePorkbun(json) {
+export function normalizePorkbun(json) {
   const tlds = {};
   const coupons = {};
   for (const [tld, raw] of Object.entries(json)) {
@@ -43,7 +48,8 @@ function normalizePorkbun(json) {
     const reg = toCents(raw.registration);
     const renew = toCents(raw.renewal);
     const transfer = toCents(raw.transfer);
-    tlds[tld] = { porkbun: { reg, renew, transfer } };
+    const unpriced = (tld === 'web' || tld === 'dot') && reg === 0 && renew === 0 && transfer === 0;
+    tlds[tld] = { porkbun: unpriced ? { reg: null, renew: null, transfer: null } : { reg, renew, transfer } };
     if (Array.isArray(raw.coupons)) {
       const parsed = [];
       for (const c of raw.coupons) {
@@ -111,6 +117,10 @@ export function mergeSourceRub(previous, successful) {
     // Missing metadata on a successful refresh must not preserve old values.
     result[name] = pricing.sourceRub?.[name] ?? {};
   }
+  for (const name of Object.keys(result)) {
+    result[name] = Object.fromEntries(Object.entries(result[name]).sort(([, a], [, b]) =>
+      (a[0] ?? 0) - (b[0] ?? 0) || (a[1] ?? 0) - (b[1] ?? 0)));
+  }
   return result;
 }
 
@@ -139,7 +149,9 @@ export function expandCompactSnapshot(raw) {
     const bucket = {};
     for (const [rid, arr] of Object.entries(regs)) {
       if (!Array.isArray(arr)) continue;
-      const [reg, renew, transfer] = arr;
+      const [reg, renew, transfer] = rid === 'porkbun'
+        ? cleanLegacyPorkbun(tld, arr, raw?.porkbunFormatVersion)
+        : arr;
       // Older REG.RU snapshots used oldPrice as renewal; its meaning is unverified.
       bucket[rid] = { reg: reg ?? null, renew: rid === 'regru' ? null : (renew ?? null), transfer: transfer ?? null };
     }
@@ -900,6 +912,7 @@ async function main() {
   const table = {
     generatedAt: new Date().toISOString(),
     sources: ['snapshot'],
+    porkbunFormatVersion: 2,
     // No timestamp can be inferred for legacy carry-over prices.
     regruUpdatedAt: sourceUpdatedAt(sources, rawPrev?.regruUpdatedAt, 'regru'),
     hostimanUpdatedAt: sourceUpdatedAt(sources, rawPrev?.hostimanUpdatedAt, 'hostiman'),

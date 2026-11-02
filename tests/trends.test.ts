@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  extractMinPoints,
   summarizeTrendPoints,
   sparkValues,
   computeTrends,
@@ -158,4 +159,12 @@ describe('computeTrends', () => {
     expect(Object.keys(trends)).toEqual(['com']);
     expect(trends.com).toEqual({ pct: 10, dir: 'up', spark: [100, 110] });
   });
+});
+
+it('does not reintroduce corrupted values when seeding history from old snapshots', () => {
+  const raw = { tlds: { car: { porkbun: [200, 200, 200], dynadot: [214022, 214022, null] }, web: { porkbun: [0, 0, 0] }, uk: { porkbun: [566, 566, 0] } } };
+  expect(extractMinPoints(raw).car).toEqual({ reg: 214022, renew: 214022 });
+  expect(extractMinPoints(raw).web).toEqual({ reg: null, renew: null });
+  expect(extractMinPoints(raw).uk).toEqual({ reg: 566, renew: 566 });
+  expect(extractMinPoints({ ...raw, porkbunFormatVersion: 2 }).car?.reg).toBe(200);
 });

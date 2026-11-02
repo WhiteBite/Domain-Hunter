@@ -16,6 +16,7 @@
  * Also writes precomputed trends for registry zones into pricing.snapshot.json (trends field).
  */
 import { fileURLToPath } from 'node:url';
+import { cleanLegacyPorkbun } from './lib/porkbun-legacy.mjs';
 import { dirname, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { readJson, writeJson } from './lib/http.mjs';
@@ -46,14 +47,14 @@ function monthIndex(m) {
  * ({reg, renew, transfer}) registrar value formats.
  * Returns { tld: { reg: number|null, renew: number|null } }.
  */
-function extractMinPoints(raw) {
+export function extractMinPoints(raw) {
   const tlds = raw?.tlds ?? {};
   const result = {};
   for (const [tld, regs] of Object.entries(tlds)) {
     if (!regs || typeof regs !== 'object') continue;
     let minReg = null;
     let minRenew = null;
-    for (const val of Object.values(regs)) {
+    for (const [rid, val] of Object.entries(regs)) {
       let reg = null;
       let renew = null;
       if (Array.isArray(val)) {
@@ -62,6 +63,9 @@ function extractMinPoints(raw) {
       } else if (val && typeof val === 'object') {
         reg = val.reg ?? null;
         renew = val.renew ?? null;
+      }
+      if (rid === 'porkbun') {
+        [reg, renew] = cleanLegacyPorkbun(tld, [reg, renew, Array.isArray(val) ? val[2] ?? null : val?.transfer ?? null], raw?.porkbunFormatVersion);
       }
       if (reg != null) minReg = minReg == null ? reg : Math.min(minReg, reg);
       if (renew != null) minRenew = minRenew == null ? renew : Math.min(minRenew, renew);

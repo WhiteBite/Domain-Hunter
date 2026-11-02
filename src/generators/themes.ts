@@ -26,47 +26,54 @@ export interface ThemeCategory {
   words: ThemeWord[];
 }
 
-export const themes: ThemeCategory[] = [
+/** Lossless compact representation: a word, or [word, hint]. */
+function expandWords(data: (string | string[])[]): ThemeWord[] {
+  return data.map((item) => typeof item === 'string'
+    ? { w: item }
+    : { w: item[0]!, hint: item[1]! });
+}
+
+export const themes = Array.of<ThemeCategory>(
   {
     id: 'animals',
     labelKey: 'gen.themes.cat.animals',
     label: 'Animals',
-    words: animalsData as ThemeWord[],
+    words: expandWords(animalsData),
   },
   {
     id: 'nature',
     labelKey: 'gen.themes.cat.nature',
     label: 'Nature',
-    words: natureData as ThemeWord[],
+    words: expandWords(natureData),
   },
   {
     id: 'food',
     labelKey: 'gen.themes.cat.food',
     label: 'Food',
-    words: foodData as ThemeWord[],
+    words: expandWords(foodData),
   },
   {
     id: 'space',
     labelKey: 'gen.themes.cat.space',
     label: 'Space',
-    words: spaceData as ThemeWord[],
+    words: expandWords(spaceData),
   },
   {
     id: 'colors',
     labelKey: 'gen.themes.cat.colors',
     label: 'Colors',
-    words: colorsData as ThemeWord[],
+    words: expandWords(colorsData),
   },
   {
     id: 'mythology',
     labelKey: 'gen.themes.cat.mythology',
     label: 'Mythology',
-    words: mythologyData as ThemeWord[],
+    words: expandWords(mythologyData),
   },
   {
     id: 'latin',
     labelKey: 'gen.themes.cat.latin',
     label: 'Latin',
-    words: latinData as ThemeWord[],
+    words: expandWords(latinData),
   },
-];
+);

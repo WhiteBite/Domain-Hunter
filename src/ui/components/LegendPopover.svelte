@@ -75,7 +75,7 @@
   }
   .legend-toggle.active {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
     background: var(--accent-soft);
   }
   .legend {

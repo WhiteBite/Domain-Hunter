@@ -499,7 +499,8 @@
     background: var(--bg-sunken);
   }
   .action:disabled {
-    opacity: 0.4;
+    color: var(--disabled-text);
+    opacity: 1;
     cursor: not-allowed;
   }
   .action :global(svg) {

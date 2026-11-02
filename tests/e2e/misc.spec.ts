@@ -207,7 +207,12 @@ test.describe('Misc coverage', () => {
     ).toBeVisible();
 
     // Hover via mouse.move (locator.hover() would auto-scroll the table).
-    const chipBox = await chip.boundingBox();
+    let chipBox = await chip.boundingBox();
+    expect(chipBox).not.toBeNull();
+    // Scroll only vertically: the taller results toolbar can put the chip
+    // below the viewport, but the horizontal edge position must not change.
+    await page.evaluate((y) => window.scrollBy(0, y - window.innerHeight / 2), chipBox!.y);
+    chipBox = await chip.boundingBox();
     expect(chipBox).not.toBeNull();
     await page.mouse.move(chipBox!.x + chipBox!.width / 2, chipBox!.y + chipBox!.height / 2);
     const tip = page.locator('[role="tooltip"]');

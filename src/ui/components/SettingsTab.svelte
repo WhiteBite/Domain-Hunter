@@ -660,7 +660,7 @@
 
   .value-badge {
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-text);
     border-radius: var(--radius-full);
     padding: 0 var(--space-2);
     font-size: var(--text-xs);
@@ -679,13 +679,8 @@
     flex-wrap: wrap;
   }
 
-  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
-  .btn {
-    background: var(--bg);
-  }
-
-  .btn.danger {
-    color: var(--red);
+  .btn.danger:not(:disabled) {
+    color: color-mix(in srgb, var(--red) 85%, var(--text));
     border-color: color-mix(in srgb, var(--red) 40%, var(--border));
   }
 

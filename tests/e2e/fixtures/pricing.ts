@@ -123,6 +123,7 @@ export function cloudflarePricing(): CloudflareResponse {
 
 /** localStorage cache shape for dh:v1:pricing (matches pricing.ts CachedPricing). */
 export interface SeedPricing {
+  version: 2;
   table: PricingTable;
   fetchedAt: number;
 }
@@ -180,5 +181,5 @@ export function seedPricingTable(): SeedPricing {
     coupons,
   };
 
-  return { table, fetchedAt: Date.now() };
+  return { version: 2, table, fetchedAt: Date.now() };
 }

@@ -23,6 +23,18 @@ describe('expandCompactSnapshot', () => {
     expect(result.tlds.com?.porkbun).toEqual({ reg: 1026, renew: 1091, transfer: null });
   });
 
+  it('masks confirmed corrupted legacy prices without touching other fields or registrars', () => {
+    const raw = { tlds: { car: { porkbun: [200, 200, 200], dynadot: [214022, 214022, null] }, inc: { porkbun: [25798, 200, 200] }, uk: { porkbun: [566, 566, 0] }, web: { porkbun: [0, 0, 0] } } };
+    const result = expandCompactSnapshot(raw);
+    expect(result.tlds.car?.porkbun).toEqual({ reg: null, renew: null, transfer: null });
+    expect(result.tlds.car?.dynadot?.reg).toBe(214022);
+    expect(result.tlds.inc?.porkbun).toEqual({ reg: 25798, renew: null, transfer: null });
+    expect(result.tlds.uk?.porkbun?.transfer).toBe(0);
+    expect(result.tlds.web?.porkbun?.reg).toBeNull();
+    // New-format snapshots can contain a real two-dollar quote.
+    expect(expandCompactSnapshot({ ...raw, porkbunFormatVersion: 2 }).tlds.car?.porkbun?.reg).toBe(200);
+  });
+
   it('handles null values in all three positions', () => {
     const result = expandCompactSnapshot({
       tlds: { xyz: { cloudflare: [null, null, null] } },

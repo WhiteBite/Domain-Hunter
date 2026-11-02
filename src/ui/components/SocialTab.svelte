@@ -205,12 +205,16 @@
   }
 
   button:hover:not(:disabled) {
+    color: var(--on-accent-hover);
     background: var(--accent-hover);
     border-color: var(--accent-hover);
   }
 
   button:disabled {
-    opacity: 0.5;
+    background: var(--disabled-bg);
+    border-color: var(--disabled-border);
+    color: var(--disabled-text);
+    opacity: 1;
     cursor: not-allowed;
   }
 

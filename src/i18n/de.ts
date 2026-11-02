@@ -1,6 +1,11 @@
 import type { Dict } from './index';
 
 export const de: Dict = {
+  'price.source.api': 'API: {date}',
+  'price.source.snapshot': 'Snapshot: {date}',
+  'price.source.unknown': 'Quelle und Datum unbekannt',
+  'price.source.dateUnknown': 'Datum unbekannt',
+  'price.fresh.mixed': 'Preise aus verschiedenen Quellen und Daten',
   'app.name': 'Domain Hunter',
   'app.tagline': 'Verfügbare Domainnamen finden — direkt im Browser',
 
@@ -197,9 +202,6 @@ export const de: Dict = {
   'price.premium': 'Premium',
   'price.premiumLikely': 'möglicher Premium',
   'price.coupon': '{price} mit Code {code}',
-  'price.fresh.now': 'Preise: live',
-  'price.fresh.hours': 'Preise: vor {n} Std.',
-  'price.fresh.snapshot': 'Preise: Momentaufnahme {date}',
   'price.disclaimer':
     'Preise sind Schätzungen aus öffentlichen Registrar-Daten. Premium-Namen (Wörterbuchbegriffe) können viel mehr kosten — prüfe immer den Warenkorb des Registrars.',
 
@@ -327,7 +329,7 @@ export const de: Dict = {
   'tooltip.promoTrap': 'Promo-Falle: erstes Jahr {first}, Verlängerung {renew} ({times}×) — ab Jahr 2 zahlst du den Verlängerungspreis.',
   'tooltip.promo': 'Unter dem Großhandelspreis des Registers — fast sicher eine Erstjahres-Promo; prüfe den Verlängerungspreis.',
   'tooltip.premiumLikely': 'Wörterbuchwörter und kurze Namen in dieser Zone sind oft Registry-Premium — im Registrar-Warenkorb überprüfen.',
-  'tooltip.registrars': 'Live-Preise: Porkbun und Cloudflare (at-cost); andere Registrar aus wöchentlichen Snapshots. Sortiert nach Erstjahrespreis.',
+  'tooltip.registrars': 'Registrierung und Verlängerung vergleichen; Preise beim Anbieter prüfen.',
   'tooltip.trend':
     'Preisänderung des ersten Jahres über die letzten {months} Monate (CI-gesammelte Historie)',
   'common.loading': 'Wird geladen…',
@@ -386,6 +388,7 @@ export const de: Dict = {
   'results.hideTraps': 'Promo-Fallen ausblenden',
   'results.hideTraps.count': 'Promo-Fallen ausblenden ({n})',
   'results.hideTraps.aria': 'Ausblenden von Promo-Fallen-Zeilen umschalten',
+  'prices.zero.warning': 'Nullpreis beim Anbieter prüfen',
   'results.pairMode.best': 'Beste pro Spalte',
   'results.pairMode.paired': 'Paar vom selben Registrar',
   'results.pairMode.aria':
@@ -442,7 +445,7 @@ export const de: Dict = {
   'prices.regru.estimate': 'Richtwert',
   'prices.title': 'Domain-Preise',
   'prices.desc':
-    'Erstjahres-Registrierungspreise je Registrar. Quellen: Live Porkbun + Cloudflare at-cost + wöchentliche Snapshots. Preise sind Erstjahres-USD, sofern nicht durch deine Währungseinstellung umgerechnet.',
+    'Registrierungspreise im ersten Jahr. Quelle und Datum stehen beim Preis.',
   'prices.search': 'Zonen filtern…',
   'prices.sort.reg': 'Günstigstes erstes Jahr',
   'prices.sort.renew': 'Günstigste Verlängerung',

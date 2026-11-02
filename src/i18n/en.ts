@@ -1,6 +1,11 @@
 import type { Dict } from './index';
 
 export const en: Dict = {
+  'price.source.api': 'API: {date}',
+  'price.source.snapshot': 'Snapshot: {date}',
+  'price.source.unknown': 'Source and date unknown',
+  'price.source.dateUnknown': 'date unknown',
+  'price.fresh.mixed': 'Prices have different sources and dates',
   'app.name': 'Domain Hunter',
   'app.tagline': 'Find available domain names — right from your browser',
 
@@ -197,9 +202,6 @@ export const en: Dict = {
   'price.premium': 'premium',
   'price.premiumLikely': 'possible premium',
   'price.coupon': '{price} with code {code}',
-  'price.fresh.now': 'prices: live',
-  'price.fresh.hours': 'prices: {n} h ago',
-  'price.fresh.snapshot': 'prices: snapshot {date}',
   'price.disclaimer':
     'Prices are estimates from public registrar data. Premium (dictionary-word) names can cost far more — always check the registrar cart.',
 
@@ -327,7 +329,7 @@ export const en: Dict = {
   'tooltip.promoTrap': 'Promo trap: first year {first}, renewal {renew} ({times}×) — from year 2 you pay the renewal price.',
   'tooltip.promo': 'Below the registry wholesale floor — almost certainly a first-year promo; check the renewal price.',
   'tooltip.premiumLikely': 'Single dictionary words and short names in this zone are often registry premiums — verify in the registrar cart.',
-  'tooltip.registrars': 'Live prices: Porkbun and Cloudflare (at-cost); other registrars from weekly snapshots. Sorted by first-year price.',
+  'tooltip.registrars': 'Compare registration and renewal prices; verify them with the registrar.',
   'tooltip.trend':
     '1st-year price change over the last {months} months (CI-harvested history)',
   'common.loading': 'Loading…',
@@ -386,6 +388,7 @@ export const en: Dict = {
   'results.hideTraps': 'Hide promo traps',
   'results.hideTraps.count': 'Hide promo traps ({n})',
   'results.hideTraps.aria': 'Toggle hiding of promo-trap rows',
+  'prices.zero.warning': 'Confirm zero price with seller',
   'results.pairMode.best': 'Best per column',
   'results.pairMode.paired': 'Same-registrar pair',
   'results.pairMode.aria':
@@ -442,7 +445,7 @@ export const en: Dict = {
   'prices.regru.estimate': 'Estimate',
   'prices.title': 'Domain prices',
   'prices.desc':
-    'First-year registration prices across registrars. Sources: live Porkbun + Cloudflare at-cost + weekly snapshots. Prices are first-year USD unless converted by your currency setting.',
+    'First-year registration prices by registrar. Check each price’s source and date.',
   'prices.search': 'Filter zones…',
   'prices.sort.reg': 'Cheapest first year',
   'prices.sort.renew': 'Cheapest renewal',

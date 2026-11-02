@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { priceSourceLabel } from '../price-source';
   import type { CheckResult, PriceEntry, Settings } from '../../types';
   import type { RegistrarQuote } from '../registrar-quotes';
   import { trademarkLabel, usptoSearchUrl, tmviewSearchUrl } from '../trademark';
-  import { formatPrice, formatSourcePrice } from '../../pricing/pricing';
+  import { bestTco, formatPrice, formatSourcePrice } from '../../pricing/pricing';
   import { settings, pricing } from '../store';
   import { t } from '../../i18n';
   import Tooltip from './Tooltip.svelte';
@@ -31,6 +32,7 @@
 
   const s: Settings = $derived($settings);
   const tmLabel = $derived(trademarkLabel(row.result.domain));
+  const tcoQuote = $derived($pricing?.table && premiumOverride == null ? bestTco($pricing.table, row.result.tld) : null);
 
   function fmtDate(ms: number): string {
     return new Date(ms).toISOString().slice(0, 10);
@@ -67,6 +69,9 @@
         <div class="detail-cell">
           <span class="detail-label">{t('price.tco')}</span>
           <span class="detail-value nums">{formatPrice(row.tco, s)}</span>
+          {#if tcoQuote && $pricing?.table}
+            <span class="detail-label">{quotes.find(q => q.id === tcoQuote.registrarId)?.name ?? tcoQuote.registrarId} · {priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'reg')}{#if priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'reg') !== priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'renew')} / {priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'renew')}{/if}</span>
+          {/if}
         </div>
         {#if detail && !detail.loading && !detail.failed && (detail.premium || detail.likely)}
           <span class="chip-tag premium">
@@ -107,7 +112,7 @@
                     data-testid={`results-row-registrar-${sid}-${quote.id}`}
                   >
                     <span class="detail-reg-dot" aria-hidden="true"></span>
-                    {quote.name} — {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)} / {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}
+                    {quote.name} — {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'reg')}) / {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}{#if quote.renew != null} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'renew')}){/if}
                     {#if $pricing?.table.sourcePromotions?.[quote.id]?.includes(row.result.tld)} ({t('price.promo')}){/if}
                   </a>
                 {/each}
@@ -301,7 +306,10 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
-    white-space: nowrap;
+    white-space: normal;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     color: inherit;
     text-decoration: none;
     border-radius: 4px;
