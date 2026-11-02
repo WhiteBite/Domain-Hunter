@@ -384,7 +384,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   .brand-mark {
@@ -438,7 +438,7 @@
 
   .icon-btn.active {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
     background: var(--accent-soft);
   }
 
@@ -500,7 +500,7 @@
   }
 
   .lang-item.current {
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   .lang-check {
@@ -527,7 +527,7 @@
   }
 
   .lang-item.current .lang-item-code {
-    color: var(--accent);
+    color: var(--accent-text);
     opacity: 0.8;
   }
 
@@ -591,7 +591,7 @@
   }
 
   .tab.active {
-    color: var(--accent);
+    color: var(--accent-text);
     border-bottom-color: var(--accent);
   }
 

@@ -14,7 +14,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { openApp } from './helpers/setup';
-import { assertNoNetworkLeaks, getLeakedRequests, mockAll } from './helpers/mocks';
+import { assertNoNetworkLeaks, getLeakedRequests, mockAll, mockPorkbun } from './helpers/mocks';
+import observedPorkbun from '../fixtures/porkbun-grouped-prices.json' with { type: 'json' };
 import { ianaBootstrap, porkbunPricing, cloudflarePricing, seedPricingTable } from './fixtures';
 
 // ---- Local tab navigation ----
@@ -70,6 +71,35 @@ test.describe('Prices tab', () => {
     await expect(minCell).toHaveCount(1);
   });
 
+  test('shows per-zone provenance and the actual cheapest renewal', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.sources = ['porkbun'];
+    seed.table.priceProvenance = { observedAt: '2026-11-02T12:00:00Z', liveTlds: { porkbun: ['com'] } };
+    seed.table.tlds.com = { porkbun: { reg: 100, renew: 5000, transfer: null }, cloudflare: { reg: 1000, renew: 300, transfer: null } };
+    seed.table.tlds.net = { porkbun: { reg: 200, renew: 400, transfer: null }, cloudflare: { reg: 1000, renew: 1000, transfer: null } };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    const com = page.getByTestId('prices-row-com');
+    const net = page.getByTestId('prices-row-net');
+    await expect(com).toContainText('API: 2026-11-02');
+    await expect(net).toContainText('Snapshot: date unknown');
+    await expect(com.locator('td.best-cell').first()).toContainText('$3.00');
+    await expect(com.locator('td.best-cell').first()).toContainText('Cloudflare');
+    await page.getByTestId('prices-sort').selectOption('renew');
+    const rows = page.locator('tbody tr');
+    const values = await rows.evaluateAll((els) => els.map((el) => el.getAttribute('data-testid')));
+    expect(values.indexOf('prices-row-com')).toBeLessThan(values.indexOf('prices-row-net'));
+  });
+
+  test('does not invent per-zone origin in a legacy cache', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.sources = ['porkbun'];
+    delete seed.table.priceProvenance;
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    await expect(page.getByTestId('prices-row-com')).toContainText('Source and date unknown');
+  });
+
   test('can reveal registrar columns beyond the first six', async ({ page }) => {
     const seed = seedPricingTable();
     for (const id of ['dynadot', 'regru', 'beget', 'timeweb', 'namesilo']) {
@@ -89,6 +119,32 @@ test.describe('Prices tab', () => {
     await expect(headers).toHaveCount(9);
   });
 
+  test('invalidates old cache and displays grouped live Porkbun prices correctly', async ({ page }) => {
+    await mockPorkbun(page, observedPorkbun.pricing);
+    const old = seedPricingTable();
+    old.table.tlds.car = { porkbun: { reg: 200, renew: 200, transfer: 200 } };
+    const { table, fetchedAt } = old;
+    await openApp(page, { seed: { 'dh:v1:pricing': { table, fetchedAt } } });
+    await gotoPrices(page);
+    await page.getByTestId('prices-search').fill('car');
+    const car = page.getByTestId('prices-row-car');
+    await expect(car).toContainText('$2,060.25');
+    await expect(car).not.toContainText('$2.00');
+    await page.getByTestId('prices-search').fill('web');
+    await expect(page.getByTestId('prices-row-web')).not.toContainText('$0.00');
+    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('dh:v1:pricing') ?? '{}').version)).toBe(2);
+  });
+
+  test('zero registration or renewal prices are labeled for verification', async ({ page }) => {
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.porkbun = { reg: 0, renew: 1000, transfer: null };
+    seed.table.tlds.com!.cloudflare = { reg: 1000, renew: 0, transfer: null };
+    await openApp(page, { seed: { 'dh:v1:pricing': seed } });
+    await gotoPrices(page);
+    const row = page.getByTestId('prices-row-com');
+    await expect(row.locator('.renewal-hint', { hasText: 'Confirm zero price with seller' })).toHaveCount(2);
+  });
+
   test('marks legacy REG.RU prices as undated and does not present oldPrice as renewal', async ({ page }) => {
     const seed = seedPricingTable();
     seed.table.tlds.com!.regru = { reg: 200, renew: 268, transfer: null };
@@ -97,7 +153,9 @@ test.describe('Prices tab', () => {
     await expect(page.getByTestId('prices-regru-note')).toContainText('collection date is unknown');
     await expect(page.getByTestId('prices-regru-note')).toContainText('Renewal is unverified');
     const com = page.getByTestId('prices-row-com');
-    await expect(com.locator('td.best-cell').first()).toHaveText('—');
+    await expect(com.locator('td.best-cell').first()).toContainText('$10.44');
+    await expect(com.locator('td.best-cell').first()).toContainText('Cloudflare');
+    await expect(com.locator('td.best-cell').first()).not.toContainText('$2.68');
   });
 
   test('shows the REG.RU collection date rather than the table generation date', async ({ page }) => {

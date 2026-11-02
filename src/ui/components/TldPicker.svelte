@@ -588,7 +588,7 @@
   .tld-trigger.active {
     border-color: var(--accent);
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-text);
   }
   .tld-trigger :global(.chevron) {
     width: 14px;
@@ -608,7 +608,7 @@
     text-align: center;
   }
   .tld-trigger.active .trigger-count {
-    color: var(--accent);
+    color: var(--accent-text);
     background: color-mix(in srgb, var(--accent-soft) 60%, transparent);
   }
 
@@ -627,7 +627,7 @@
     padding: 0 var(--space-1) 0 var(--space-2);
     border: 1px solid var(--border);
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-text);
     border-radius: var(--radius-full);
     font-size: 11px;
     font-weight: 500;
@@ -658,7 +658,7 @@
   .clear-sel {
     border: none;
     background: transparent;
-    color: var(--accent);
+    color: var(--accent-text);
     font-size: var(--text-xs);
     cursor: pointer;
     padding: 0;
@@ -815,7 +815,7 @@
   }
   .zone-row.selected {
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-text);
   }
   .zone-check {
     width: 16px;
@@ -848,8 +848,7 @@
     color: var(--text-quaternary);
   }
   .zone-row.selected .price {
-    color: var(--accent);
-    opacity: 0.8;
+    color: var(--accent-text);
   }
   .zone-row.selected .price.price-none {
     color: var(--text-quaternary);

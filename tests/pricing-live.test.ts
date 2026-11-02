@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { loadPricing, normalizePorkbun, normalizeCloudflare, matrixColumns } from '../src/pricing/pricing';
 import snapshot from '../src/config/pricing.snapshot.json';
+import observations from './fixtures/porkbun-grouped-prices.json';
 import type { PriceEntry, PricingTable } from '../src/types';
 
 const SNAPSHOT = snapshot as unknown as PricingTable;
@@ -13,6 +14,33 @@ describe('normalizePorkbun', () => {
     });
     expect(result.tlds.com?.porkbun).toEqual({ reg: 1168, renew: 1168, transfer: 1168 });
     expect(result.tlds.dev?.porkbun).toEqual({ reg: 875, renew: 1287, transfer: 1287 });
+  });
+
+  it('correctly parses verified grouped prices and recognizes coming-soon placeholders', () => {
+    const result = normalizePorkbun(observations.pricing);
+    expect(result.tlds.car?.porkbun).toEqual({ reg: 206025, renew: 206025, transfer: 206025 });
+    expect(result.tlds.cars?.porkbun?.renew).toBe(206419);
+    expect(result.tlds.rich?.porkbun?.transfer).toBe(180278);
+    expect(result.tlds.web?.porkbun).toEqual({ reg: null, renew: null, transfer: null });
+    expect(result.tlds.dot?.porkbun?.reg).toBeNull();
+    expect(normalizePorkbun({ uk: { registration: '5.66', renewal: '5.66', transfer: '0.00' } }).tlds.uk?.porkbun?.transfer).toBe(0);
+    expect(normalizePorkbun({ web: { registration: '1.00', renewal: '2.00', transfer: '3.00' } }).tlds.web?.porkbun?.reg).toBe(100);
+  });
+
+  it('rejects malformed, ambiguous and negative prices instead of truncating them', () => {
+    for (const bad of ['2,06.25', '2,060.25xyz', '', '-1.00', 'Infinity', true, {}]) {
+      const result = normalizePorkbun({ car: { registration: bad } });
+      expect(result.tlds.car?.porkbun?.reg).toBeNull();
+    }
+  });
+
+  it('bundles the reviewed affected quotes without inventing zero-priced launches', () => {
+    const expected = normalizePorkbun(observations.pricing);
+    for (const [tld, regs] of Object.entries(expected.tlds)) {
+      const entry = regs.porkbun!;
+      const compact = (snapshot.tlds as unknown as Record<string, { porkbun?: (number | null)[] }>)[tld]?.porkbun;
+      expect(compact).toEqual([entry.reg, entry.renew, entry.transfer]);
+    }
   });
 
   it('parses amount coupons (dollars -> cents)', () => {
@@ -112,11 +140,23 @@ describe('loadPricing', () => {
       tlds: { com: { porkbun: { reg: 999, renew: 999, transfer: 999 } } },
       coupons: {},
     };
-    localStorage.setItem('dh:v1:pricing', JSON.stringify({ table, fetchedAt: Date.now() }));
+    localStorage.setItem('dh:v1:pricing', JSON.stringify({ version: 2, table, fetchedAt: Date.now() }));
 
     const state = await loadPricing();
     expect(state.fromCache).toBe(true);
     expect(state.table.tlds.com?.porkbun?.reg).toBe(999);
+  });
+
+  it('invalidates pre-fix price caches without touching other storage', async () => {
+    localStorage.setItem('dh:v1:settings', JSON.stringify({ theme: 'dark' }));
+    localStorage.setItem('dh:v1:pricing', JSON.stringify({
+      table: { generatedAt: '', sources: ['porkbun'], coupons: {}, tlds: { car: { porkbun: { reg: 200, renew: 200, transfer: 200 } } } },
+      fetchedAt: Date.now(),
+    }));
+    const state = await loadPricing({ fetchImpl: vi.fn().mockRejectedValue(new Error('offline')) as typeof fetch });
+    expect(state.fromCache).toBe(false);
+    expect(state.table.tlds.car?.porkbun?.reg).toBe(206025);
+    expect(localStorage.getItem('dh:v1:settings')).toContain('dark');
   });
 
   it('removes unverified REG.RU renewal from a legacy cache', async () => {
@@ -124,7 +164,7 @@ describe('loadPricing', () => {
       generatedAt: '2026-01-01T00:00:00.000Z', sources: ['snapshot'], coupons: {},
       tlds: { ru: { regru: { reg: 200, renew: 268, transfer: null } } },
     };
-    localStorage.setItem('dh:v1:pricing', JSON.stringify({ table, fetchedAt: Date.now() }));
+    localStorage.setItem('dh:v1:pricing', JSON.stringify({ version: 2, table, fetchedAt: Date.now() }));
     const state = await loadPricing();
     expect(state.fromCache).toBe(true);
     expect(state.table.tlds.ru?.regru).toEqual({ reg: 200, renew: null, transfer: null });
@@ -236,7 +276,8 @@ describe('loadPricing', () => {
     await loadPricing({ force: true, fetchImpl: mockFetch });
     const stored = localStorage.getItem('dh:v1:pricing');
     expect(stored).not.toBeNull();
-    const parsed = JSON.parse(stored!) as { table: PricingTable; fetchedAt: number };
+    const parsed = JSON.parse(stored!) as { version: number; table: PricingTable; fetchedAt: number };
+    expect(parsed.version).toBe(2);
     expect(parsed.table.sources).toContain('porkbun');
     expect(parsed.table.sources).not.toContain('cloudflare');
   });

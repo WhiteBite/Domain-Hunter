@@ -13,6 +13,7 @@
 import tldsJson from '../src/config/tlds.json';
 import { fetchBootstrap, mergeWithCurated } from '../src/core/bootstrap';
 import { loadPricing } from '../src/pricing/pricing';
+import { cleanLegacyPorkbun } from '../scripts/lib/porkbun-legacy.mjs';
 import { fetchFxRates, FX_TTL_MS, type FxRates } from '../src/pricing/fx';
 import { DEFAULT_SETTINGS } from '../src/types';
 import type {
@@ -233,6 +234,7 @@ type CompactReg = [number | null, number | null, number | null];
 interface CompactSnapshot {
   generatedAt: string;
   sources: string[];
+  porkbunFormatVersion?: number;
   regruUpdatedAt?: string | null;
   /** Last successful HostiMan price collection or public-page import. */
   hostimanUpdatedAt?: string | null;
@@ -278,9 +280,10 @@ function expandCompactSnapshot(json: unknown): PricingTable | null {
     const bucket: Record<string, PriceEntry> = {};
     for (const [rid, compact] of Object.entries(regs)) {
       if (!Array.isArray(compact)) continue;
-      const reg = compact[0] ?? null;
-      const renew = compact[1] ?? null;
-      const transfer = compact[2] ?? null;
+      const prices: CompactReg = [compact[0] ?? null, compact[1] ?? null, compact[2] ?? null];
+      const [reg, renew, transfer] = rid === 'porkbun'
+        ? cleanLegacyPorkbun(tld, prices, raw.porkbunFormatVersion)
+        : prices;
       bucket[rid] = { reg, renew, transfer };
     }
     tlds[tld] = bucket;

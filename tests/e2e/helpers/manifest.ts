@@ -107,6 +107,7 @@ export const ALL_TESTIDS = [
   'results-budget-input', // budget max-price number input
   'results-hide-traps', // hide promo traps toggle button
   'results-pair-toggle', // renewal column pair-mode toggle button
+  'results-pair-explanation', // explains market vs same-registrar renewal
   'results-select-all-matching', // select all matching rows link button
 
   // ---- GeneratorsTab.svelte ----

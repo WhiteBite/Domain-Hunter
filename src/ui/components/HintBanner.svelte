@@ -59,7 +59,7 @@
   .hint-dismiss {
     border: none;
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-text);
     border-radius: var(--radius-full);
     padding: var(--space-1) var(--space-3);
     min-height: 32px;

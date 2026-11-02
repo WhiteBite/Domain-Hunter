@@ -1,6 +1,11 @@
 import type { Dict } from './index';
 
 export const es: Dict = {
+  'price.source.api': 'API: {date}',
+  'price.source.snapshot': 'Snapshot: {date}',
+  'price.source.unknown': 'Fuente y fecha desconocidas',
+  'price.source.dateUnknown': 'fecha desconocida',
+  'price.fresh.mixed': 'Precios de distintas fuentes y fechas',
   'app.name': 'Domain Hunter',
   'app.tagline': 'Encuentra dominios disponibles — directamente desde tu navegador',
 
@@ -197,9 +202,6 @@ export const es: Dict = {
   'price.premium': 'premium',
   'price.premiumLikely': 'posible premium',
   'price.coupon': '{price} con el código {code}',
-  'price.fresh.now': 'precios: en vivo',
-  'price.fresh.hours': 'precios: hace {n} h',
-  'price.fresh.snapshot': 'precios: instantánea {date}',
   'price.disclaimer':
     'Los precios son estimaciones a partir de datos públicos de registradores. Los nombres premium (palabras de diccionario) pueden costar mucho más — comprueba siempre el carrito del registrador.',
 
@@ -327,7 +329,7 @@ export const es: Dict = {
   'tooltip.promoTrap': 'Trampa promocional: primer año {first}, renovación {renew} ({times}×) — desde el año 2 pagas el precio de renovación.',
   'tooltip.promo': 'Por debajo del precio mayorista del registro — casi con seguridad una promo de primer año; revisa el precio de renovación.',
   'tooltip.premiumLikely': 'Las palabras del diccionario y los nombres cortos en esta zona suelen ser premium del registro — verifica en el carrito del registrador.',
-  'tooltip.registrars': 'Precios en vivo: Porkbun y Cloudflare (coste); otros registradores desde instantáneas semanales. Ordenados por precio del primer año.',
+  'tooltip.registrars': 'Compare registro y renovación; confirme precios con el proveedor.',
   'tooltip.trend':
     'Cambio de precio del primer año en los últimos {months} meses (historial recolectado por CI)',
   'common.loading': 'Cargando…',
@@ -386,6 +388,7 @@ export const es: Dict = {
   'results.hideTraps': 'Ocultar trampas promocionales',
   'results.hideTraps.count': 'Ocultar trampas promocionales ({n})',
   'results.hideTraps.aria': 'Alternar ocultación de filas con trampa promocional',
+  'prices.zero.warning': 'Confirme el precio cero con el proveedor',
   'results.pairMode.best': 'Mejor por columna',
   'results.pairMode.paired': 'Par del mismo registrador',
   'results.pairMode.aria':
@@ -442,7 +445,7 @@ export const es: Dict = {
   'prices.regru.estimate': 'Estimación',
   'prices.title': 'Precios de dominios',
   'prices.desc':
-    'Precios de registro del primer año por registrador. Fuentes: Porkbun en vivo + Cloudflare a costo + instantáneas semanales. Precios en USD del primer año salvo conversión por la configuración de moneda.',
+    'Precios de registro del primer año. Fuente y fecha junto al precio.',
   'prices.search': 'Filtrar zonas…',
   'prices.sort.reg': 'Más barato primer año',
   'prices.sort.renew': 'Más barato renovación',

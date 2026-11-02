@@ -1,0 +1,21 @@
+{
+  "observedAt": "2026-11-02",
+  "source": "https://api.porkbun.com/api/json/v3/pricing/get?tlds=car,cars,auto,country,vana,protection,security,sexy,pr,lotto,inc,dealer,rich,web,dot",
+  "pricing": {
+    "car": {"registration":"2,060.25","renewal":"2,060.25","transfer":"2,060.25","coupons":[]},
+    "cars": {"registration":"2,060.25","renewal":"2,064.19","transfer":"2,060.25","coupons":[]},
+    "auto": {"registration":"2,060.25","renewal":"2,064.19","transfer":"2,060.25","coupons":[]},
+    "country": {"registration":"2,060.25","renewal":"2,060.25","transfer":"2,060.25","coupons":[]},
+    "vana": {"registration":"2,060.25","renewal":"2,060.25","transfer":"2,060.25","coupons":[]},
+    "protection": {"registration":"2,060.25","renewal":"2,060.25","transfer":"2,060.25","coupons":[]},
+    "security": {"registration":"2,060.25","renewal":"2,060.25","transfer":"2,060.25","coupons":[]},
+    "sexy": {"registration":"2,575.18","renewal":"2,575.18","transfer":"2,575.18","coupons":[]},
+    "pr": {"registration":"1,039.98","renewal":"1,039.98","transfer":"1,039.98","coupons":[]},
+    "lotto": {"registration":"1,648.30","renewal":"1,648.30","transfer":"1,648.30","coupons":[]},
+    "inc": {"registration":"257.98","renewal":"2,060.25","transfer":"2,060.25","coupons":[]},
+    "dealer": {"registration":"257.98","renewal":"2,060.25","transfer":"2,060.25","coupons":[]},
+    "rich": {"registration":"78.99","renewal":"160.71","transfer":"1,802.78","coupons":[]},
+    "web": {"registration":"0.00","renewal":"0.00","transfer":"0.00","coupons":[]},
+    "dot": {"registration":"0.00","renewal":"0.00","transfer":"0.00","coupons":[]}
+  }
+}

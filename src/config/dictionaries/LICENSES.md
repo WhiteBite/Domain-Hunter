@@ -14,5 +14,9 @@ JSON is committed to this repository; raw corpora are never committed.
 | pirtleshell/constellations | https://github.com/pirtleshell/constellations | MIT | Merged into `themes/space.json` (constellation names + meaning hints) |
 | cmusphinx/cmudict | https://github.com/cmusphinx/cmudict | BSD-2-Clause | `syllables.json` — onset/rime inventories derived from pronunciation data |
 
+The common-word list is stored as a comma-separated string (the source words contain no commas).
+Theme JSON uses a lossless compact form: a word string, or `[word, hint]`.
+The generator expands it back to the original objects without changing order.
+
 All licenses are permissive (Unlicense, CC0, MIT, BSD-2-Clause, Public Domain).
 No GPL or CC-BY-SA content is used.

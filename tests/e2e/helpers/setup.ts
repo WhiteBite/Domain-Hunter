@@ -150,9 +150,9 @@ export async function seedCache(
  * Requires page.reload() for the app to re-read pricing (loadPricing runs at boot).
  */
 export async function seedPricing(page: Page, table: PricingTable): Promise<void> {
-  const cached = { table, fetchedAt: Date.now() };
+  const cached = { version: 2, table, fetchedAt: Date.now() };
   await page.evaluate(
-    (c: { table: PricingTable; fetchedAt: number }) =>
+    (c: { version: number; table: PricingTable; fetchedAt: number }) =>
       localStorage.setItem('dh:v1:pricing', JSON.stringify(c)),
     cached,
   );

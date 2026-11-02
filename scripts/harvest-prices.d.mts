@@ -18,11 +18,13 @@ interface ParsedPricing {
 }
 
 interface CompactSnapshot {
+  porkbunFormatVersion?: number;
   tlds?: Record<string, Record<string, unknown>>;
   coupons?: Record<string, unknown[]>;
 }
 
-export declare function toCents(value: string | number | null | undefined): number | null;
+export declare function toCents(value: unknown): number | null;
+export declare function normalizePorkbun(json: Record<string, unknown>): ParsedPricing;
 export declare function normalizeRegru(html: string): ParsedPricing;
 export declare function fetchRegru(fetcher?: (url: string, opts: { timeoutMs: number; headers: Record<string, string> }, retries: { retries: number }) => Promise<Response>): Promise<ParsedPricing>;
 export declare function normalizeHostiman(html: string, rubToUsd?: number): ParsedPricing;

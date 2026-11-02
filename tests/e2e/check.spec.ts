@@ -1143,11 +1143,46 @@ test.describe('Check tab', () => {
     // Default mode ('best'): renewal = cloudflare $12.25 (cheapest renewal).
     const renewCell = row(page, 'zzqxtest1.dev').locator('.renew-cell .renew');
     await expect(renewCell).toHaveText('$12.25');
+    await expect(row(page, 'zzqxtest1.dev').locator('.price-cell .registrar-source')).toHaveText('Porkbun');
+    await expect(row(page, 'zzqxtest1.dev').locator('.price-cell .price-origin')).toHaveText('Source and date unknown');
+    await expect(row(page, 'zzqxtest1.dev').locator('.renew-cell .registrar-source')).toHaveText('Cloudflare Registrar');
+    await expect(page.getByTestId('results-pair-explanation')).toContainText('best market renewal');
     // Switch to paired mode: renewal = porkbun $12.87 (same registrar as $8.75 first-year).
     await page.locator('[data-testid="results-pair-toggle"]').click();
     await expect(renewCell).toHaveText('$12.87');
+    await expect(row(page, 'zzqxtest1.dev').locator('.renew-cell .registrar-source')).toHaveText('Porkbun');
     // Switch back to best mode.
     await page.locator('[data-testid="results-pair-toggle"]').click();
     await expect(renewCell).toHaveText('$12.25');
   });
+  test('zero quotes are flagged in results and mobile seller labels fit', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await setupBaseMocks(page);
+    await mockRdap(page, []);
+    const seed = seedPricingTable();
+    seed.table.tlds.com!.porkbun = { reg: 0, renew: 1000, transfer: null };
+    seed.table.tlds.com!.cloudflare = { reg: 1000, renew: 0, transfer: null };
+    await bootCheckTab(page, { 'dh:v1:pricing': seed });
+    await runCheck(page, 'zzqxtest1.com');
+    const result = row(page, 'zzqxtest1.com');
+    await expect(result).toBeVisible();
+    await expect(result.locator('.price-cell .zero-price-note')).toContainText('Confirm zero price with seller');
+    await expect(result.locator('.renew-cell .zero-price-note')).toContainText('Confirm zero price with seller');
+    await expect(result.locator('.price-cell .registrar-source')).toHaveText('Porkbun');
+    await expect(result.locator('.renew-cell .registrar-source')).toHaveText('Cloudflare Registrar');
+    const fits = await result.evaluate((el) => el.scrollWidth <= el.clientWidth);
+    expect(fits).toBe(true);
+  });
+
+  test('explicitly saved same-registrar mode is restored', async ({ page }) => {
+    await setupBaseMocks(page);
+    await mockRdap(page, []);
+    await bootCheckTab(page, {
+      'dh:v1:resultsview': { v: 1, filter: 'all', sortKey: 'name', sortDir: 'asc', budget: 0, hideTraps: false, pairMode: 'paired' },
+    });
+    await runCheck(page, 'zzqxtest1.dev');
+    await expect(row(page, 'zzqxtest1.dev').locator('.renew-cell .renew')).toHaveText('$12.87');
+    await expect(page.getByTestId('results-pair-toggle')).toHaveAttribute('aria-pressed', 'true');
+  });
+
 });

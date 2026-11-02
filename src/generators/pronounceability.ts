@@ -3,7 +3,7 @@
  * Port of the felixdorn/pronounceable approach (MIT).
  * Trained on words-common.json at module load; buildModel exported for tuning.
  */
-import commonWords from '../config/dictionaries/words-common.json';
+import { commonWords } from '../config/dictionaries/common-words';
 
 export interface PronounceabilityModel {
   readonly monogramCounts: Map<string, number>;
@@ -62,7 +62,7 @@ export function scoreWithModel(word: string, model: PronounceabilityModel): numb
 
 // Default model trained on the shipped common-words list.
 const defaultModel: PronounceabilityModel = buildModel(
-  commonWords as string[],
+  commonWords,
 );
 
 /**

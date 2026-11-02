@@ -1,6 +1,11 @@
 import type { Dict } from './index';
 
 export const zh: Dict = {
+  'price.source.api': 'API：{date}',
+  'price.source.snapshot': '快照：{date}',
+  'price.source.unknown': '来源和日期未知',
+  'price.source.dateUnknown': '日期未知',
+  'price.fresh.mixed': '价格来自不同来源和日期',
   'app.name': 'Domain Hunter',
   'app.tagline': '直接在浏览器中查找可注册的域名',
 
@@ -197,9 +202,6 @@ export const zh: Dict = {
   'price.premium': '溢价',
   'price.premiumLikely': '可能溢价',
   'price.coupon': '{price}，优惠码 {code}',
-  'price.fresh.now': '价格：实时',
-  'price.fresh.hours': '价格：{n} 小时前',
-  'price.fresh.snapshot': '价格：快照 {date}',
   'price.disclaimer':
     '价格来自公开注册商数据的估算。溢价（词典词）域名费用可能高得多——请务必在注册商购物车中核实。',
 
@@ -326,7 +328,7 @@ export const zh: Dict = {
   'tooltip.promoTrap': '促销陷阱：首年 {first}，续费 {renew}（{times}×）——从第 2 年起支付续费价格。',
   'tooltip.promo': '低于注册局批发底价——几乎肯定是首年促销；请检查续费价格。',
   'tooltip.premiumLikely': '该区域中的字典词和短名称通常是注册局溢价域名——请在注册商购物车中核实。',
-  'tooltip.registrars': '实时价格：Porkbun 和 Cloudflare（成本价）；其他注册商来自每周快照。按首年价格排序。',
+  'tooltip.registrars': '比较注册和续费价格，请向服务商核实。',
   'tooltip.trend':
     '过去 {months} 个月的首年价格变化（CI 采集的历史数据）',
   'common.loading': '加载中…',
@@ -385,6 +387,7 @@ export const zh: Dict = {
   'results.hideTraps': '隐藏促销陷阱',
   'results.hideTraps.count': '隐藏促销陷阱 ({n})',
   'results.hideTraps.aria': '切换隐藏促销陷阱行',
+  'prices.zero.warning': '零价格请向卖家确认',
   'results.pairMode.best': '各列最优',
   'results.pairMode.paired': '同一注册商配对',
   'results.pairMode.aria':
@@ -441,7 +444,7 @@ export const zh: Dict = {
   'prices.regru.estimate': '估价',
   'prices.title': '域名价格',
   'prices.desc':
-    '各注册商的首年注册价格。来源：实时 Porkbun + Cloudflare 成本价 + 每周快照。价格为首年美元，除非按你的货币设置换算。',
+    '首年注册价格。每个价格旁标明来源和日期。',
   'prices.search': '过滤区域…',
   'prices.sort.reg': '首年最便宜',
   'prices.sort.renew': '续费最便宜',

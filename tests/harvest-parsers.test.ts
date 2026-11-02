@@ -1,7 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { normalizeAdminvpsAnnual, normalizeWebhost1Annual, normalizeWebhost1Observed, normalizeSprinthostAnnual, normalizeSprinthost, fetchTimeweb, normalizeTimeweb, fetchHostiman, normalizeHostiman, fetchRegru, normalizeRegru, normalizeBeget, normalizeDynadotHtml, normalizeSpaceship } from '../scripts/harvest-prices.mjs';
+import { normalizePorkbun, toCents, normalizeAdminvpsAnnual, normalizeWebhost1Annual, normalizeWebhost1Observed, normalizeSprinthostAnnual, normalizeSprinthost, fetchTimeweb, normalizeTimeweb, fetchHostiman, normalizeHostiman, fetchRegru, normalizeRegru, normalizeBeget, normalizeDynadotHtml, normalizeSpaceship } from '../scripts/harvest-prices.mjs';
 
 import adminvpsAnnual from './fixtures/adminvps-annual-prices.json';
+import porkbunObserved from './fixtures/porkbun-grouped-prices.json';
+import { normalizePorkbun as browserPorkbun } from '../src/pricing/pricing';
 import webhost1Annual from './fixtures/webhost1-annual-prices.json';
 import webhost1Observations from './fixtures/webhost1-public-observations.json';
 import sprinthostAnnualHtml from './fixtures/sprinthost-annual-sanitized.html?raw';
@@ -13,6 +15,17 @@ import regruSanitizedHtml from './fixtures/regru-sanitized.html?raw';
 import begetHtml from './fixtures/beget.html?raw';
 import dynadotHtml from './fixtures/dynadot.html?raw';
 import spaceshipHtml from './fixtures/spaceship.html?raw';
+
+describe('Porkbun parsing', () => {
+  it('matches the browser parser on reviewed grouped prices and unpriced launches', () => {
+    expect(normalizePorkbun(porkbunObserved.pricing)).toEqual(browserPorkbun(porkbunObserved.pricing));
+    expect(normalizePorkbun(porkbunObserved.pricing).tlds.car?.porkbun?.reg).toBe(206025);
+  });
+  it('rejects invalid numbers while preserving zero', () => {
+    for (const bad of ['2,06.25', '2,060.25xyz', '', '-1', null, false]) expect(toCents(bad)).toBeNull();
+    expect(toCents('0.00')).toBe(0);
+  });
+});
 
 describe('normalizeWebhost1Observed', () => {
   it('converts two reviewed annual quotes while retaining original rubles', () => {

@@ -137,6 +137,8 @@ export interface PricingTable {
   generatedAt: string;
   /** e.g. ['porkbun','cloudflare'] or ['snapshot']. */
   sources: string[];
+  /** Per-zone API provenance; absent from older caches. */
+  priceProvenance?: { observedAt: string; liveTlds: Record<string, string[]> };
   /** Last successful REG.RU scrape; null/absent means unknown. */
   regruUpdatedAt?: string | null;
   /** Last successful HostiMan price collection or public-page import. */

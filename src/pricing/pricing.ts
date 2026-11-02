@@ -6,7 +6,7 @@
  */
 import snapshot from '../config/pricing.snapshot.json';
 import wholesale from '../config/wholesale.json';
-import commonWords from '../config/dictionaries/words-common.json';
+import { commonWords } from '../config/dictionaries/common-words';
 import tldsJson from '../config/tlds.json';
 import type { Coupon, PriceEntry, PricingTable, Settings, TldRegistry } from '../types';
 import type { PricingState } from '../ui/store';
@@ -89,10 +89,14 @@ interface NormalizedPricing {
 
 /** Decimal string or number → integer USD cents. null/invalid → null. */
 function toCents(value: unknown): number | null {
-  if (value == null) return null;
-  const n = typeof value === 'string' ? parseFloat(value) : Number(value);
-  if (!Number.isFinite(n)) return null;
-  return Math.round(n * 100);
+  if (typeof value === 'string') {
+    value = value.trim();
+    if (!/^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(value as string)) return null;
+    value = (value as string).replace(/,/g, '');
+  }
+  if (typeof value !== 'number' && typeof value !== 'string') return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) : null;
 }
 
 /**
@@ -111,7 +115,9 @@ export function normalizePorkbun(json: Record<string, unknown>): NormalizedPrici
     const reg = toCents(entry.registration);
     const renew = toCents(entry.renewal);
     const transfer = toCents(entry.transfer);
-    tlds[tld] = { porkbun: { reg, renew, transfer } };
+    // These two coming-soon TLDs are published as 0.00 placeholders, not free prices.
+    const unpriced = (tld === 'web' || tld === 'dot') && reg === 0 && renew === 0 && transfer === 0;
+    tlds[tld] = { porkbun: unpriced ? { reg: null, renew: null, transfer: null } : { reg, renew, transfer } };
 
     const rawCoupons = entry.coupons;
     if (Array.isArray(rawCoupons)) {
@@ -175,6 +181,7 @@ function mergePricing(target: NormalizedPricing, src: NormalizedPricing): void {
 // ---- Cache (localStorage with try/catch — unavailable in some envs) ----
 
 interface CachedPricing {
+  version: 2;
   table: PricingTable;
   fetchedAt: number;
 }
@@ -193,8 +200,9 @@ function readCache(): CachedPricing | null {
     const raw = localStorage.getItem(PRICING_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<CachedPricing>;
-    if (!parsed?.table || typeof parsed.fetchedAt !== 'number') return null;
-    return { table: parsed.table, fetchedAt: parsed.fetchedAt };
+    // Earlier versions truncated comma-grouped amounts. Discard them once.
+    if (parsed?.version !== 2 || !parsed.table || typeof parsed.fetchedAt !== 'number') return null;
+    return { version: 2, table: parsed.table, fetchedAt: parsed.fetchedAt };
   } catch {
     return null;
   }
@@ -281,6 +289,7 @@ export async function loadPricing(
   ]);
 
   const sources: string[] = [];
+  const liveTlds: Record<string, string[]> = {};
   const merged: NormalizedPricing = { tlds: {}, coupons: {} };
 
   // Bundled snapshot as offline baseline; live sources overlay it so prices
@@ -292,10 +301,12 @@ export async function loadPricing(
 
   if (porkbunRes.status === 'fulfilled') {
     sources.push('porkbun');
+    liveTlds.porkbun = Object.keys(porkbunRes.value.tlds);
     mergePricing(merged, porkbunRes.value);
   }
   if (cfRes.status === 'fulfilled') {
     sources.push('cloudflare');
+    liveTlds.cloudflare = Object.keys(cfRes.value.tlds);
     mergePricing(merged, cfRes.value);
   }
 
@@ -305,8 +316,9 @@ export async function loadPricing(
   }
 
   const table: PricingTable = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: baseline.generatedAt,
     sources,
+    priceProvenance: { observedAt: new Date().toISOString(), liveTlds },
     regruUpdatedAt: baseline.regruUpdatedAt ?? null,
     hostimanUpdatedAt: baseline.hostimanUpdatedAt ?? null,
     timewebUpdatedAt: baseline.timewebUpdatedAt ?? null,
@@ -327,7 +339,7 @@ export async function loadPricing(
   // Live-augmented tables (any live source succeeded) are cached normally.
   const isSnapshotOnly = sources.length === 1 && sources[0] === 'snapshot';
   if (!isSnapshotOnly) {
-    writeCache({ table, fetchedAt });
+    writeCache({ version: 2, table, fetchedAt });
   }
 
   return { table, fetchedAt, fromCache: false };
@@ -360,16 +372,20 @@ export function bestEntry(
 /** 3-year total cost of ownership, USD cents: min over registrars of (reg + 2×renew).
  *  Per SPEC §9 this is the true minimum across all registrars with both prices,
  *  not the TCO at the reg-cheapest registrar (which can be higher). */
-export function tco3(table: PricingTable, tld: string): number | null {
+export function bestTco(table: PricingTable, tld: string): { registrarId: string; total: number } | null {
   const entries = table.tlds[tld];
   if (!entries) return null;
-  let min: number | null = null;
-  for (const entry of Object.values(entries)) {
+  let best: { registrarId: string; total: number } | null = null;
+  for (const [registrarId, entry] of Object.entries(entries)) {
     if (entry.reg == null || entry.renew == null) continue;
-    const tco = entry.reg + 2 * entry.renew;
-    if (min == null || tco < min) min = tco;
+    const total = entry.reg + 2 * entry.renew;
+    if (!best || total < best.total) best = { registrarId, total };
   }
-  return min;
+  return best;
+}
+
+export function tco3(table: PricingTable, tld: string): number | null {
+  return bestTco(table, tld)?.total ?? null;
 }
 
 export function priceTier(centsUsd: number): 'cheap' | 'mid' | 'high' {
@@ -521,13 +537,10 @@ export function freshnessLabel(
   state: PricingState,
   now = Date.now(),
 ): { key: string; params?: Record<string, string | number> } {
-  if (state.table.sources.includes('snapshot') && state.table.sources.length === 1) {
-    const date = new Date(state.table.generatedAt).toLocaleDateString();
-    return { key: 'price.fresh.snapshot', params: { date } };
-  }
-  const ageHours = Math.floor((now - state.fetchedAt) / 3_600_000);
-  if (ageHours < 1) return { key: 'price.fresh.now' };
-  return { key: 'price.fresh.hours', params: { n: ageHours } };
+  // Individual prices can have different sources and dates.
+  void state;
+  void now;
+  return { key: 'price.fresh.mixed' };
 }
 
 /** Cheapest renewal across registrars with a non-null renew price.
@@ -559,7 +572,7 @@ export function couponEffectivePrice(
   return Math.max(0, reg - couponDiscountCents(coupon, reg));
 }
 
-const COMMON_WORDS: ReadonlySet<string> = new Set(commonWords as string[]);
+const COMMON_WORDS: ReadonlySet<string> = new Set(commonWords);
 
 /** Zones where short/dictionary labels are frequently registry premiums —
  *  the list is data and lives in src/config/tlds.json. */

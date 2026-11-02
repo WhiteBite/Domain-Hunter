@@ -838,13 +838,8 @@
     width: 100%;
   }
 
-  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
-  .btn {
-    background: var(--bg);
-  }
-
-  .btn.danger {
-    color: var(--red);
+  .btn.danger:not(:disabled) {
+    color: color-mix(in srgb, var(--red) 85%, var(--text));
     border-color: color-mix(in srgb, var(--red) 40%, var(--border));
   }
 
@@ -880,7 +875,7 @@
   .tech.active {
     background: var(--accent-soft);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   .hint-line {
@@ -979,7 +974,7 @@
 
   .count-badge {
     background: var(--accent-soft);
-    color: var(--accent);
+    color: var(--accent-text);
     border-radius: var(--radius-full);
     padding: 0 var(--space-2);
     font-size: var(--text-xs);
@@ -1028,7 +1023,7 @@
 
   .tray-action-btn.active {
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
     background: var(--accent-soft);
   }
 
@@ -1090,7 +1085,8 @@
   }
 
   .tray-menu-item:disabled {
-    opacity: 0.45;
+    color: var(--disabled-text);
+    opacity: 1;
     cursor: not-allowed;
   }
 
@@ -1214,7 +1210,7 @@
 
   .row-fav:hover,
   .row-fav.active {
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   .row-fav :global(svg) {
@@ -1356,7 +1352,7 @@
     align-self: flex-start;
     border: none;
     background: transparent;
-    color: var(--accent);
+    color: var(--accent-text);
     font-size: var(--text-xs);
     cursor: pointer;
     padding: var(--space-1) var(--space-2);
@@ -1390,7 +1386,7 @@
   .chip.cat.active {
     background: var(--accent-soft);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   .words {
@@ -1422,7 +1418,7 @@
   .word.selected {
     background: var(--accent-soft);
     border-color: var(--accent);
-    color: var(--accent);
+    color: var(--accent-text);
   }
 
   /* ---- Saved sets ---- */

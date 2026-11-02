@@ -472,11 +472,6 @@
     margin-left: auto;
   }
 
-  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
-  .btn {
-    background: var(--bg);
-  }
-
   .grid {
     list-style: none;
     margin: 0;
@@ -625,13 +620,13 @@
   }
 
   .icon-btn.fav.active {
-    color: var(--accent);
+    color: var(--accent-text);
     border-color: var(--accent);
     background: var(--accent-soft);
   }
 
   .icon-btn.primary {
-    color: var(--accent);
+    color: var(--accent-text);
     border-color: color-mix(in srgb, var(--accent) 30%, transparent);
     background: var(--accent-soft);
   }

@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { priceSourceLabel } from '../price-source';
   import { t } from '../../i18n';
   import { pricing, registry, settings } from '../store';
-  import { bestEntry, formatPrice, formatSourcePrice, isPromoTrap, matrixColumns, tco3 } from '../../pricing/pricing';
+  import { bestEntry, bestRenewal, bestTco, formatPrice, formatSourcePrice, isPromoTrap, matrixColumns } from '../../pricing/pricing';
   import { downloadCsv } from '../csv';
   import { registrarMonogram } from '../registrar-badge';
   import { REGISTRAR_ICONS } from '../registrar-icons';
@@ -118,8 +119,8 @@
       });
     } else {
       sorted.sort((a, b) => {
-        const pa = bestEntry(table, a)?.entry.renew ?? Infinity;
-        const pb = bestEntry(table, b)?.entry.renew ?? Infinity;
+        const pa = bestRenewal(table, a)?.renew ?? Infinity;
+        const pb = bestRenewal(table, b)?.renew ?? Infinity;
         return pa - pb;
       });
     }
@@ -304,6 +305,12 @@
     >
       {t('prices.hideUnpriced')}
     </button>
+    {#if extraRegs > 0}
+      <button class="btn" type="button" onclick={() => (showAllRegistrars = !showAllRegistrars)}
+        aria-pressed={showAllRegistrars} data-testid="prices-toggle-registrars">
+        {showAllRegistrars ? t('prices.fewerRegistrars') : t('prices.showRegistrars', { n: extraRegs })}
+      </button>
+    {/if}
     <button
       class="btn primary"
       type="button"
@@ -367,6 +374,8 @@
           {#each visibleZones as tld (tld)}
             {@const best = bestEntry(table, tld)}
             {@const minRid = best?.registrarId ?? null}
+            {@const cheapestRenewal = bestRenewal(table, tld)}
+            {@const tcoBest = bestTco(table, tld)}
             {@const trend = trends[tld] ?? EMPTY_TREND}
             {@const sparkGeo =
               trend.spark && trend.spark.length >= 2 ? sparkGeometry(trend.spark) : null}
@@ -383,8 +392,12 @@
                   title={cellTitle(entry, isMin, rid, tld, $settings)}
                 >
                   {entry?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', entry.reg, $settings) : '—'}
+                  {#if entry?.reg != null}<span class="renewal-hint">{priceSourceLabel(table, tld, rid, 'reg')}</span>{/if}
                   {#if (rid === 'hostiman' || rid === 'sprinthost' || rid === 'webhost1' || rid === 'adminvps') && entry?.renew != null}
-                    <span class="renewal-hint">{t('prices.source.renewal', { price: formatSourcePrice(table, tld, rid, 'renew', entry.renew, $settings) })}</span>
+                    <span class="renewal-hint">{t('prices.source.renewal', { price: formatSourcePrice(table, tld, rid, 'renew', entry.renew, $settings) })} · {priceSourceLabel(table, tld, rid, 'renew')}</span>
+                  {/if}
+                  {#if entry && (entry.reg === 0 || entry.renew === 0)}
+                    <span class="renewal-hint">{t('prices.zero.warning')}</span>
                   {/if}
                   {#if entry && table.sourcePromotions?.[rid]?.includes(tld)}
                     <span class="renewal-hint" title={t('prices.source.sellerPromo')}>{t('price.promo')}</span>
@@ -395,10 +408,14 @@
                 </td>
               {/each}
               <td class="price-cell nums best-cell">
-                {best?.entry.renew != null ? formatSourcePrice(table, tld, best.registrarId, 'renew', best.entry.renew, $settings) : '—'}
+                {cheapestRenewal ? formatSourcePrice(table, tld, cheapestRenewal.registrarId, 'renew', cheapestRenewal.renew, $settings) : '—'}
+                {#if cheapestRenewal}<span class="renewal-hint">{registrarName.get(cheapestRenewal.registrarId) ?? cheapestRenewal.registrarId} · {priceSourceLabel(table, tld, cheapestRenewal.registrarId, 'renew')}</span>{/if}
               </td>
               <td class="price-cell nums best-cell">
-                {formatPrice(tco3(table, tld), $settings)}
+                {formatPrice(tcoBest?.total ?? null, $settings)}
+                {#if tcoBest}
+                  <span class="renewal-hint">{registrarName.get(tcoBest.registrarId) ?? tcoBest.registrarId} · {priceSourceLabel(table, tld, tcoBest.registrarId, 'reg')}{#if priceSourceLabel(table, tld, tcoBest.registrarId, 'reg') !== priceSourceLabel(table, tld, tcoBest.registrarId, 'renew')} / {priceSourceLabel(table, tld, tcoBest.registrarId, 'renew')}{/if}</span>
+                {/if}
                 {#if sparkGeo}
                   <svg
                     class="spark trend-{trend.dir ?? 'flat'}"
@@ -433,12 +450,6 @@
         </tbody>
       </table>
     </div>
-    {#if extraRegs > 0}
-      <button class="btn" type="button" onclick={() => (showAllRegistrars = !showAllRegistrars)}
-        aria-pressed={showAllRegistrars} data-testid="prices-toggle-registrars">
-        {showAllRegistrars ? t('prices.fewerRegistrars') : t('prices.showRegistrars', { n: extraRegs })}
-      </button>
-    {/if}
     {#if remaining > 0}
       <button class="btn more-btn" type="button" onclick={showMore} data-testid="prices-more">
         {t('prices.more', { n: remaining })}
@@ -502,11 +513,6 @@
     font-size: var(--text-sm);
     font-family: inherit;
     min-height: 40px;
-  }
-
-  /* Canonical .btn lives in chrome.css; local delta: recessed bg on cards. */
-  .btn {
-    background: var(--bg);
   }
 
   /* On-state: soft fill + accent border + outer ring so the pressed toggle is

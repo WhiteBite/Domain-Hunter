@@ -249,6 +249,20 @@ describe('loadPricingTable', () => {
     expect(state.table.sourcePromotions?.adminvps).toContain('ru');
   });
 
+  it('masks corrupt values in an old remotely cached snapshot', async () => {
+    installStorage(makeTempDir());
+    const legacy = { ...compactSnapshot, tlds: { car: { porkbun: [200, 200, 200], dynadot: [214022, 214022, null] }, web: { porkbun: [0, 0, 0] }, inc: { porkbun: [25798, 200, 200] } } };
+    const fetchImpl = (async (url: string) => {
+      if (url.includes('raw.githubusercontent.com')) return new Response(JSON.stringify(legacy), { status: 200 });
+      throw new TypeError('offline');
+    }) as unknown as typeof fetch;
+    const state = await loadPricingTable({ fetchImpl, currency: 'USD', rates: { RUB: 90, EUR: 0.9 } });
+    expect(state.table.tlds.car?.porkbun?.reg).toBeNull();
+    expect(state.table.tlds.car?.dynadot?.reg).toBe(214022);
+    expect(state.table.tlds.inc?.porkbun).toEqual({ reg: 25798, renew: null, transfer: null });
+    expect(state.table.tlds.web?.porkbun?.reg).toBeNull();
+  });
+
   it('expands compact [reg,renew,transfer] arrays into PriceEntry objects', async () => {
     const dir = makeTempDir();
     installStorage(dir);

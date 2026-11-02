@@ -1,6 +1,11 @@
 import type { Dict } from './index';
 
 export const ru: Dict = {
+  'price.source.api': 'API: {date}',
+  'price.source.snapshot': 'Снапшот: {date}',
+  'price.source.unknown': 'Источник и дата неизвестны',
+  'price.source.dateUnknown': 'дата неизвестна',
+  'price.fresh.mixed': 'Цены из разных источников и дат',
   'app.name': 'Domain Hunter',
   'app.tagline': 'Свободные домены — прямо из браузера',
 
@@ -197,9 +202,6 @@ export const ru: Dict = {
   'price.premium': 'премиум',
   'price.premiumLikely': 'возможен премиум',
   'price.coupon': '{price} по коду {code}',
-  'price.fresh.now': 'цены: актуальные',
-  'price.fresh.hours': 'цены: {n} ч назад',
-  'price.fresh.snapshot': 'цены: снапшот от {date}',
   'price.disclaimer':
     'Цены ориентировочные, по открытым данным регистраторов. Премиум-имена (словарные слова) могут стоить сильно дороже — всегда проверяйте корзину регистратора.',
 
@@ -328,7 +330,7 @@ export const ru: Dict = {
   'tooltip.promoTrap': 'Промо-ловушка: первый год {first}, продление {renew} ({times}×) — со второго года вы платите цену продления.',
   'tooltip.promo': 'Дешевле оптовой цены реестра — почти наверняка промо первого года; проверьте цену продления.',
   'tooltip.premiumLikely': 'Словарные слова и короткие имена в этой зоне часто являются премиум-доменами реестра — проверьте в корзине регистратора.',
-  'tooltip.registrars': 'Цены live: Porkbun и Cloudflare (at-cost); остальные регистраторы — из недельных снапшотов. Сортировка по цене первого года.',
+  'tooltip.registrars': 'Сравнение регистрации и продления; проверяйте цены у регистратора.',
   'tooltip.trend':
     'Изменение цены первого года за последние {months} мес. (история из CI)',
   'common.loading': 'Загрузка…',
@@ -387,6 +389,7 @@ export const ru: Dict = {
   'results.hideTraps': 'Скрыть промо-ловушки',
   'results.hideTraps.count': 'Скрыть промо-ловушки ({n})',
   'results.hideTraps.aria': 'Скрыть строки с промо-ловушками',
+  'prices.zero.warning': 'Нулевую цену уточняйте у продавца',
   'results.pairMode.best': 'Лучшие по колонкам',
   'results.pairMode.paired': 'Пара у одного регистратора',
   'results.pairMode.aria':
@@ -443,7 +446,7 @@ export const ru: Dict = {
   'prices.regru.estimate': 'Ориентир',
   'prices.title': 'Цены на домены',
   'prices.desc':
-    'Цены регистрации первого года по регистраторам. Источники: live Porkbun + Cloudflare по себестоимости + еженедельные снапшоты. Цены в USD первого года, если не конвертируются настройкой валюты.',
+    'Цены регистрации за первый год. Источник и дата указаны рядом с ценой.',
   'prices.search': 'Фильтр зон…',
   'prices.sort.reg': 'Дешевле первый год',
   'prices.sort.renew': 'Дешевле продление',

@@ -51,12 +51,13 @@
 }
 
 .menu-item:disabled {
-  opacity: 0.5;
+  color: var(--disabled-text);
+  opacity: 1;
   cursor: not-allowed;
 }
 
-.menu-item.active {
-  color: var(--accent);
+.menu-item.active:not(:disabled) {
+  color: var(--accent-text);
   background: var(--accent-soft);
 }
 
@@ -90,13 +91,14 @@
 }
 
 .action-btn:disabled {
-  opacity: 0.5;
+  color: var(--disabled-text);
+  opacity: 1;
   cursor: not-allowed;
 }
 
-.action-btn.active {
+.action-btn.active:not(:disabled) {
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-text);
   background: var(--accent-soft);
 }
 
@@ -236,7 +238,7 @@
 }
 
 .btn:disabled {
-  opacity: 0.45;
+  opacity: 1;
   cursor: not-allowed;
 }
 
@@ -253,6 +255,7 @@
 }
 
 .btn.primary:hover:not(:disabled) {
+  color: var(--on-accent-hover);
   background: var(--accent-hover);
   border-color: var(--accent-hover);
 }
@@ -264,7 +267,7 @@
 .btn.stop {
   background: var(--red);
   border-color: var(--red);
-  color: var(--on-accent);
+  color: var(--on-danger);
 }
 
 .btn.stop:hover:not(:disabled) {
@@ -275,6 +278,17 @@
 .btn.ghost {
   background: transparent;
   color: var(--text-secondary);
+}
+
+/* Disabled controls remain readable in both themes, including primary/danger. */
+.btn:disabled,
+.btn.primary:disabled,
+.btn.stop:disabled,
+.btn.ghost:disabled {
+  background: var(--disabled-bg);
+  border-color: var(--disabled-border);
+  color: var(--disabled-text);
+  opacity: 1;
 }
 
 .btn.sm {
