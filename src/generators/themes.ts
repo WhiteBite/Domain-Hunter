@@ -26,11 +26,12 @@ export interface ThemeCategory {
   words: ThemeWord[];
 }
 
-/** Lossless compact representation: a word, or [word, hint]. */
-function expandWords(data: (string | string[])[]): ThemeWord[] {
-  return data.map((item) => typeof item === 'string'
-    ? { w: item }
-    : { w: item[0]!, hint: item[1]! });
+/** Compact JSON strings use commas for plain words, or | between entries and a tab before each optional hint. Separators must not appear inside the corresponding fields. */
+function expandWords(data: string | (string | string[])[]): ThemeWord[] {
+  return (typeof data === 'string' ? data.split(data.includes('|') ? '|' : ',') : data).map((item) => {
+    const parts = typeof item === 'string' ? item.split('\t') : item;
+    return parts.length > 1 ? { w: parts[0]!, hint: parts[1]! } : { w: parts[0]! };
+  });
 }
 
 export const themes = Array.of<ThemeCategory>(

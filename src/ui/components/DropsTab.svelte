@@ -163,7 +163,7 @@
   }
 
   function addAll(): void {
-    appendToCheck(filtered, 500);
+    appendToCheck(visible, RENDER_CAP);
     activeTab.set('check');
     pendingShareRun.set(true);
   }
@@ -322,9 +322,9 @@
         {@const fullName = dom.d + '.' + dom.tld}
         {@const sid = sanitizeId(fullName)}
         <li class="row" class:expanded={expandedRow === fullName}>
-          <span class="domain" aria-label={fullName}>{dom.d}<span class="tld">.{dom.tld}</span></span>
+          <span class="domain" aria-label={fullName} title={fullName}>{dom.d}<span class="tld">.{dom.tld}</span></span>
           <span class="row-score nums" title={t('drops.col.score')}>{domainScore(dom.d).toFixed(1)}</span>
-          <span class="row-price nums">{priceByTld.get(dom.tld) || '—'}</span>
+          <span class="row-price nums" title={t('results.col.price')}>{priceByTld.get(dom.tld) || '—'}</span>
           <span class="row-actions">
             <button
               class="icon-btn fav"
@@ -477,16 +477,16 @@
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--space-1);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: var(--space-2);
   }
 
   .row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-2);
-    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1) var(--space-2);
+    padding: var(--space-2) var(--space-3);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     background: var(--bg-elevated);
@@ -501,10 +501,10 @@
   .domain {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
+    grid-column: 1 / -1;
     min-width: 0;
-    word-break: break-all;
     overflow-wrap: anywhere;
-    line-height: 1.3;
+    line-height: 1.4;
   }
 
   .tld {
@@ -563,10 +563,6 @@
     color: var(--on-accent);
   }
 
-  .row.expanded {
-    flex-wrap: wrap;
-  }
-
   .row-score,
   .row-price {
     color: var(--text-tertiary);
@@ -584,7 +580,7 @@
   }
 
   .row-history {
-    flex-basis: 100%;
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -602,8 +598,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border: 1px solid var(--border);
     background: var(--bg-elevated);
     color: var(--text-secondary);

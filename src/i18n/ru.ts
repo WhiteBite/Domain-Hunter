@@ -19,7 +19,7 @@ export const ru: Dict = {
 
   'drops.title': 'Дропнутые домены',
   'drops.desc':
-    'Недавно дропнутые домены — брендовые имена по обычной цене регистрации. Ежедневный снапшот публичных дроп-листов.',
+    'Имена из публичных дроп-листов. Доступность и цену нужно проверить у регистратора.',
   'drops.search': 'Фильтр по имени или зоне',
   'drops.addAll': 'Добавить все показанные в проверку',
   'drops.export.csv': 'Скачать CSV',
@@ -92,7 +92,7 @@ export const ru: Dict = {
   'check.run.resume.no': 'Сбросить',
 
   'check.progress.checked': 'Проверено {done} из {total}',
-  'check.progress.available': 'Не найдены в RDAP: {n}',
+  'check.progress.available': 'Возможно свободны: {n}',
   'check.progress.errors': 'Ошибок: {n}',
   'check.progress.elapsed': '{s}',
 
@@ -101,7 +101,7 @@ export const ru: Dict = {
   'results.empty.body':
     'Введите имя выше, выберите зоны и нажмите «Проверить доступность». Или загляните в «Генераторы», чтобы сначала придумать имена.',
   'results.filters.all': 'Все',
-  'results.filters.available': 'Не найдены в RDAP',
+  'results.filters.available': 'Свободные (RDAP)',
   'results.filters.taken': 'Занятые',
   'results.filters.problems': 'Проблемные',
   'results.sort.name': 'Имя',
@@ -127,7 +127,7 @@ export const ru: Dict = {
   'results.copy.selected': 'Скопировать выбранные ({n})',
   'results.buy.aria': 'Купить {domain}',
   'results.domain.aria': 'Открыть {domain} у {registrar}',
-  'status.available': 'Не найден в RDAP',
+  'status.available': 'Возможно свободен',
   'app.title.html': 'Domain Hunter — проверка доступности доменов',
   'a11y.skip': 'Перейти к содержимому',
   'check.hint.1': 'Введите имена или сгенерируйте их в «Генераторах».',
@@ -472,7 +472,7 @@ export const ru: Dict = {
   'prices.legend.band': 'Лучшие цены',
   'prices.legend.band.tip':
     'Столбцы «Продление» и «За 3 года» показывают лучшую цену среди всех регистраторов для каждой зоны.',
-  'prices.legend.dot': 'Дешевле всех',
+  'prices.legend.dot': 'Лучшая регистрация',
   'prices.legend.dot.tip': 'Зелёная точка отмечает минимальную цену первого года в строке.',
   'prices.legend.trap': 'Промо-ловушка',
   'prices.legend.trap.tip':
@@ -525,4 +525,11 @@ export const ru: Dict = {
   'card.status.pending': 'Ожидается операция реестра.',
   'card.status.grace': 'Льготный период реестра; условия различаются.',
   'card.status.restricted': 'Указанная операция ограничена регистратором или реестром.',
+  'prices.sources': 'Источники и условия',
+  'prices.scrollHint': 'Прокрутите таблицу вправо, чтобы увидеть всех регистраторов.',
+  'detail.open': 'Открыть',
+  'detail.website': 'На сайт',
+  'detail.websiteHint': '«На сайт» открывает сайт регистратора без поиска домена.',
+  'detail.conditions': 'Условия',
+  'detail.noQuotes': 'Нет цен для этой зоны.',
 };

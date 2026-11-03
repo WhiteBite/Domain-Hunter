@@ -579,7 +579,7 @@
         <button class="filter" class:active={filter === 'all'} onclick={() => (filter = 'all')} type="button" data-testid="results-filter-all">
           {t('results.filters.all')}
         </button>
-        <button class="filter" class:active={filter === 'available'} onclick={() => (filter = 'available')} type="button" data-testid="results-filter-available">
+        <button class="filter" class:active={filter === 'available'} onclick={() => (filter = 'available')} type="button" title={t('results.legend.available')} data-testid="results-filter-available">
           {t('results.filters.available')}
         </button>
         <button class="filter" class:active={filter === 'taken'} onclick={() => (filter = 'taken')} type="button" data-testid="results-filter-taken">
@@ -658,6 +658,7 @@
       >
         {pairMode === 'paired' ? t('results.pairMode.paired') : t('results.pairMode.best')}
       </button>
+      {#if filter === 'available'}<span class="pair-explanation">{t('results.legend.available')}</span>{/if}
       <span class="pair-explanation" data-testid="results-pair-explanation">
         {t('results.pairMode.aria')}
       </span>
@@ -842,6 +843,7 @@
                 {:else}
                   <span class="domain-text">{row.result.domain}</span>
                 {/if}
+                <button class="detail-toggle" type="button" aria-expanded={isExpanded} aria-controls={isExpanded ? `detail-${sid}` : undefined} onclick={() => { void toggleDetail(row.result.domain, () => (menuFor = null)); }} data-testid={`results-row-expand-${sid}`}>{t('results.detail.label')} <span aria-hidden="true">{isExpanded ? '−' : '+'}</span></button>
               </td>
               <td class="status-cell">
                 <StatusBadge status={row.result.status} size="sm" />
@@ -1166,15 +1168,13 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
-    position: sticky;
-    top: 0;
-    z-index: 6;
     background: var(--bg);
     padding: var(--space-2) 0;
     margin: calc(-1 * var(--space-2)) 0 0;
   }
   .filters {
     display: flex;
+    flex-basis: 100%;
     gap: var(--space-1);
     flex-wrap: wrap;
   }
@@ -1203,7 +1203,7 @@
   /* Premium-check + "Show available (N)" + ⋯ menu never split across lines. */
   .meta-right {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
     margin-left: auto;
@@ -1250,8 +1250,6 @@
     border-radius: var(--radius-md);
     background: var(--bg-elevated);
     box-shadow: var(--shadow-1);
-    max-height: 72vh;
-    overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border-strong) transparent;
   }
@@ -1685,6 +1683,8 @@
   :global([data-theme='dark']) .coupon {
     color: var(--text-secondary);
   }
+  .detail-toggle { display: block; padding: 2px 0; border: 0; background: none; color: var(--accent-text); font: inherit; font-size: 12px; cursor: pointer; }
+  .detail-toggle:hover { text-decoration: underline; }
   .actions-cell {
     text-align: right;
   }

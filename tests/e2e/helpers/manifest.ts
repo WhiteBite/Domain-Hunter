@@ -210,6 +210,7 @@ export const DYNAMIC_TESTID_PREFIXES = [
   'history-entry-', // history restore buttons: history-entry-{index}
   'results-row-copy-', // copy buttons: results-row-copy-{domain}
   'results-row-recheck-', // recheck buttons: results-row-recheck-{domain}
+  'results-row-expand-', // visible detail toggles
   'results-row-detail-', // detail buttons: results-row-detail-{domain}
   'results-row-buy-', // buy links: results-row-buy-{domain}
   'results-row-detail-buy-', // detail buy links: results-row-detail-buy-{domain}

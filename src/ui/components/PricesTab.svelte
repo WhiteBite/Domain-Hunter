@@ -33,6 +33,7 @@
   let visibleCount = $state(100);
   let hideUnpriced = $state(false);
   let showAllRegistrars = $state(true);
+  let selectedRegistrar = $state('');
 
   const table = $derived($pricing?.table ?? null);
   const hasRegru = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.regru) : false);
@@ -90,7 +91,7 @@
   ])]);
 
   const allColumns = $derived(table ? matrixColumns(table, Number.POSITIVE_INFINITY) : []);
-  const columns = $derived(showAllRegistrars ? allColumns : allColumns.slice(0, 6));
+  const columns = $derived(selectedRegistrar ? allColumns.filter(id => id === selectedRegistrar) : showAllRegistrars ? allColumns : allColumns.slice(0, 6));
   const extraRegs = $derived(Math.max(0, allColumns.length - 6));
 
   const filteredZones = $derived.by(() => {
@@ -232,6 +233,8 @@
 <section class="prices">
   <h2>{t('prices.title')}</h2>
   <p class="desc">{t('prices.desc')}</p>
+  <details class="source-notes">
+    <summary>{t('prices.sources')}</summary>
   {#if hasRegru}
     <p class="regru-note" data-testid="prices-regru-note">
       {regruDate ? t('prices.regru.updated', { date: regruDate }) : t('prices.regru.unknown')}
@@ -275,6 +278,8 @@
     </p>
   {/if}
 
+  </details>
+
   <div class="controls">
     <input
       class="search"
@@ -305,7 +310,13 @@
     >
       {t('prices.hideUnpriced')}
     </button>
-    {#if extraRegs > 0}
+    <label class="registrar-filter">{t('card.registrar')}
+      <select bind:value={selectedRegistrar} data-testid="prices-registrar-filter">
+        <option value="">{t('check.tlds.presets.all')}</option>
+        {#each allColumns as id (id)}<option value={id}>{registrarName.get(id) ?? id}</option>{/each}
+      </select>
+    </label>
+    {#if extraRegs > 0 && !selectedRegistrar}
       <button class="btn" type="button" onclick={() => (showAllRegistrars = !showAllRegistrars)}
         aria-pressed={showAllRegistrars} data-testid="prices-toggle-registrars">
         {showAllRegistrars ? t('prices.fewerRegistrars') : t('prices.showRegistrars', { n: extraRegs })}
@@ -345,11 +356,16 @@
   {#if !table || Object.keys(table.tlds).length === 0}
     <p class="muted empty">{t('prices.empty')}</p>
   {:else}
-    <div class="table-wrap">
+    <p class="scroll-hint">{t('prices.scrollHint')}</p>
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <div class="table-wrap" role="region" aria-label={t('prices.title')} tabindex="0" data-testid="prices-table-scroll">
       <table>
         <thead>
           <tr>
             <th class="zone-col">{t('csv.tld')}</th>
+            <th class="price-col best-col">{t('prices.legend.dot')}</th>
+            <th class="price-col best-col">{t('prices.col.renewal')}</th>
+            <th class="price-col best-col">{t('prices.col.tco')}</th>
             {#each columns as rid (rid)}
               {@const icon = REGISTRAR_ICONS[rid]}
               {@const mono = registrarMonogram(rid)}
@@ -366,8 +382,6 @@
                 </span>
               </th>
             {/each}
-            <th class="price-col best-col">{t('prices.col.renewal')}</th>
-            <th class="price-col best-col">{t('prices.col.tco')}</th>
           </tr>
         </thead>
         <tbody>
@@ -381,32 +395,10 @@
               trend.spark && trend.spark.length >= 2 ? sparkGeometry(trend.spark) : null}
             <tr data-testid={`prices-row-${tld}`}>
               <td class="zone-cell">{tld}</td>
-              {#each columns as rid (rid)}
-                {@const entry = entryFor(tld, rid)}
-                {@const isMin = minRid === rid && entry != null && entry.reg != null}
-                {@const isTrap = entry != null && isPromoTrap(entry)}
-                <td
-                  class="price-cell nums"
-                  class:min={isMin}
-                  class:trap={isTrap}
-                  title={cellTitle(entry, isMin, rid, tld, $settings)}
-                >
-                  {entry?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', entry.reg, $settings) : '—'}
-                  {#if entry?.reg != null}<span class="renewal-hint">{priceSourceLabel(table, tld, rid, 'reg')}</span>{/if}
-                  {#if (rid === 'hostiman' || rid === 'sprinthost' || rid === 'webhost1' || rid === 'adminvps') && entry?.renew != null}
-                    <span class="renewal-hint">{t('prices.source.renewal', { price: formatSourcePrice(table, tld, rid, 'renew', entry.renew, $settings) })} · {priceSourceLabel(table, tld, rid, 'renew')}</span>
-                  {/if}
-                  {#if entry && (entry.reg === 0 || entry.renew === 0)}
-                    <span class="renewal-hint">{t('prices.zero.warning')}</span>
-                  {/if}
-                  {#if entry && table.sourcePromotions?.[rid]?.includes(tld)}
-                    <span class="renewal-hint" title={t('prices.source.sellerPromo')}>{t('price.promo')}</span>
-                  {/if}
-                  {#if rid === 'timeweb' && entry && table.timewebRenewalFromRub?.[tld] != null}
-                    <span class="renewal-hint">{t('prices.timeweb.renewFrom', { price: `${table.timewebRenewalFromRub[tld]} ₽` })}</span>
-                  {/if}
-                </td>
-              {/each}
+              <td class="price-cell nums best-registration">
+                {best ? formatSourcePrice(table, tld, best.registrarId, 'reg', best.entry.reg, $settings) : '—'}
+                {#if best}<span class="renewal-hint">{registrarName.get(best.registrarId) ?? best.registrarId} · {priceSourceLabel(table, tld, best.registrarId, 'reg')}</span>{/if}
+              </td>
               <td class="price-cell nums best-cell">
                 {cheapestRenewal ? formatSourcePrice(table, tld, cheapestRenewal.registrarId, 'renew', cheapestRenewal.renew, $settings) : '—'}
                 {#if cheapestRenewal}<span class="renewal-hint">{registrarName.get(cheapestRenewal.registrarId) ?? cheapestRenewal.registrarId} · {priceSourceLabel(table, tld, cheapestRenewal.registrarId, 'renew')}</span>{/if}
@@ -445,6 +437,32 @@
                   </span>
                 {/if}
               </td>
+              {#each columns as rid (rid)}
+                {@const entry = entryFor(tld, rid)}
+                {@const isMin = minRid === rid && entry != null && entry.reg != null}
+                {@const isTrap = entry != null && isPromoTrap(entry)}
+                <td
+                  class="price-cell nums"
+                  class:min={isMin}
+                  class:trap={isTrap}
+                  title={cellTitle(entry, isMin, rid, tld, $settings)}
+                >
+                  {entry?.reg != null ? formatSourcePrice(table, tld, rid, 'reg', entry.reg, $settings) : '—'}
+                  {#if entry?.reg != null}<span class="renewal-hint">{priceSourceLabel(table, tld, rid, 'reg')}</span>{/if}
+                  {#if (rid === 'hostiman' || rid === 'sprinthost' || rid === 'webhost1' || rid === 'adminvps') && entry?.renew != null}
+                    <span class="renewal-hint">{t('prices.source.renewal', { price: formatSourcePrice(table, tld, rid, 'renew', entry.renew, $settings) })} · {priceSourceLabel(table, tld, rid, 'renew')}</span>
+                  {/if}
+                  {#if entry && (entry.reg === 0 || entry.renew === 0)}
+                    <span class="renewal-hint">{t('prices.zero.warning')}</span>
+                  {/if}
+                  {#if entry && table.sourcePromotions?.[rid]?.includes(tld)}
+                    <span class="renewal-hint" title={t('prices.source.sellerPromo')}>{t('price.promo')}</span>
+                  {/if}
+                  {#if rid === 'timeweb' && entry && table.timewebRenewalFromRub?.[tld] != null}
+                    <span class="renewal-hint">{t('prices.timeweb.renewFrom', { price: `${table.timewebRenewalFromRub[tld]} ₽` })}</span>
+                  {/if}
+                </td>
+              {/each}
             </tr>
           {/each}
         </tbody>
@@ -491,6 +509,12 @@
     font-size: var(--text-sm);
   }
 
+  .source-notes { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
+  .source-notes summary { cursor: pointer; color: var(--accent-text); font-weight: 600; }
+  .source-notes .regru-note { margin-top: var(--space-2); }
+  .scroll-hint { margin: 0; color: var(--text-secondary); font-size: var(--text-sm); }
+
+  .registrar-filter { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); font-size: var(--text-sm); }
   .controls {
     display: flex;
     align-items: center;
@@ -527,6 +551,7 @@
   /* Cheapest-registrar columns (renewal / 3y TCO) are set off from the
      registrar matrix by a leading divider. */
   .best-col,
+  .best-registration,
   .best-cell {
     border-left: 1px solid var(--border);
   }
@@ -611,7 +636,8 @@
     width: 100%;
     border-collapse: collapse;
     font-size: var(--text-sm);
-    min-width: 480px;
+    min-width: 100%;
+    width: max-content;
   }
 
   thead {
@@ -645,7 +671,10 @@
 
   .price-col {
     text-align: right;
+    min-width: 150px;
   }
+  .zone-col, .zone-cell { width: 72px; max-width: 72px; position: sticky; left: 0; background: var(--bg-elevated); box-shadow: 1px 0 0 var(--border); z-index: 2; }
+  .table-wrap thead .zone-col { z-index: 5; }
 
   .price-col-head {
     display: inline-flex;
@@ -682,12 +711,16 @@
   .zone-cell {
     font-family: var(--font-mono);
     color: var(--text);
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .price-cell {
     text-align: right;
-    white-space: nowrap;
+    white-space: normal;
+    min-width: 150px;
+    max-width: 210px;
+    overflow-wrap: anywhere;
     color: var(--text);
   }
 

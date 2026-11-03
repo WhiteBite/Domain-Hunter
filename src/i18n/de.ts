@@ -19,7 +19,7 @@ export const de: Dict = {
 
   'drops.title': 'Dropdomains',
   'drops.desc':
-    'Kürzlich freigegebene Domains — Markennamen zum regulären Registrierungspreis. Tägliche Momentaufnahme öffentlicher Drop-Listen.',
+    'Namen aus öffentlichen Drop-Listen. Verfügbarkeit und Preis beim Registrar prüfen.',
   'drops.search': 'Nach Name oder Zone filtern',
   'drops.addAll': 'Alle angezeigten zur Prüfung hinzufügen',
   'drops.export.csv': 'CSV exportieren',
@@ -92,7 +92,7 @@ export const de: Dict = {
   'check.run.resume.no': 'Verwerfen',
 
   'check.progress.checked': '{done} von {total} geprüft',
-  'check.progress.available': 'Nicht in RDAP gefunden: {n}',
+  'check.progress.available': 'Möglicherweise frei: {n}',
   'check.progress.errors': '{n} Fehler',
   'check.progress.elapsed': '{s}',
 
@@ -101,7 +101,7 @@ export const de: Dict = {
   'results.empty.body':
     'Gib oben einen Namen ein, wähle Zonen und drücke „Verfügbarkeit prüfen". Oder öffne den Generatoren-Tab, um zuerst Namen zu erfinden.',
   'results.filters.all': 'Alle',
-  'results.filters.available': 'Nicht in RDAP gefunden',
+  'results.filters.available': 'Frei (RDAP)',
   'results.filters.taken': 'Vergeben',
   'results.filters.problems': 'Probleme',
   'results.sort.name': 'Name',
@@ -127,7 +127,7 @@ export const de: Dict = {
   'results.copy.selected': 'Ausgewählte kopieren ({n})',
   'results.buy.aria': '{domain} kaufen',
   'results.domain.aria': '{domain} bei {registrar} öffnen',
-  'status.available': 'Nicht in RDAP gefunden',
+  'status.available': 'Möglicherweise frei',
   'app.title.html': 'Domain Hunter — kostenloser Domain-Verfügbarkeitschecker',
   'a11y.skip': 'Zum Inhalt springen',
   'check.hint.1': 'Namen eingeben oder in den Generatoren erstellen.',
@@ -471,7 +471,7 @@ export const de: Dict = {
   'prices.legend.band': 'Günstigste Spalten',
   'prices.legend.band.tip':
     'Die Spalten „Verlängerung“ und „3 Jahre“ zeigen den besten Preis aller Registrare pro Zone.',
-  'prices.legend.dot': 'Günstigster Registrar',
+  'prices.legend.dot': 'Günstigste Registrierung',
   'prices.legend.dot.tip': 'Der grüne Punkt markiert den niedrigsten Erstjahrespreis der Zeile.',
   'prices.legend.trap': 'Promo-Falle',
   'prices.legend.trap.tip':
@@ -524,4 +524,11 @@ export const de: Dict = {
   'card.status.pending': 'Registry-Vorgang ausstehend.',
   'card.status.grace': 'Schonfrist der Registry; Bedingungen variieren.',
   'card.status.restricted': 'Der genannte Vorgang ist vom Registrar oder der Registry gesperrt.',
+  'prices.sources': 'Quellen und Bedingungen',
+  'prices.scrollHint': 'Tabelle scrollen, um alle Registrare zu sehen.',
+  'detail.open': 'Öffnen',
+  'detail.website': 'Website',
+  'detail.websiteHint': '„Website“ öffnet die Seite des Registrars ohne Domain-Suche.',
+  'detail.conditions': 'Bedingungen',
+  'detail.noQuotes': 'Keine Preise für diese Zone.',
 };

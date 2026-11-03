@@ -1,11 +1,29 @@
 import { defineConfig } from 'vitest/config';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { compactPricingModule } from './scripts/compact-pricing.mjs';
 
 export default defineConfig(({ command }) => ({
   // Relative base: required for GitHub Pages sub-path AND file:// usage.
   base: './',
-  plugins: [svelte(), ...(command === 'build' ? [viteSingleFile()] : [])],
+  plugins: [
+    ...(command === 'build' ? [{
+      name: 'compact-pricing-snapshot',
+      enforce: 'pre' as const,
+      resolveId(source: string) {
+        if (source.endsWith('/config/pricing.snapshot.json')) return '\0compact-pricing-snapshot';
+      },
+      load(this: import('rollup').PluginContext, id: string) {
+        if (id !== '\0compact-pricing-snapshot') return;
+        const file = fileURLToPath(new URL('./src/config/pricing.snapshot.json', import.meta.url));
+        this.addWatchFile(file);
+        return compactPricingModule(JSON.parse(readFileSync(file, 'utf8')));
+      },
+    }] : []),
+    svelte(), ...(command === 'build' ? [viteSingleFile()] : []),
+  ],
   build: {
     target: 'es2022',
     // Inline every asset (fonts, images) into the single HTML file.

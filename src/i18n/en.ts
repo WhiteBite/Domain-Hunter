@@ -19,7 +19,7 @@ export const en: Dict = {
 
   'drops.title': 'Dropped domains',
   'drops.desc':
-    'Recently dropped domains — brandable names at plain registration price. Daily snapshot of public dropped lists.',
+    'Names from public drop lists. Verify availability and price with the registrar.',
   'drops.search': 'Filter by name or zone',
   'drops.addAll': 'Add all shown to check',
   'drops.export.csv': 'Export CSV',
@@ -92,7 +92,7 @@ export const en: Dict = {
   'check.run.resume.no': 'Discard',
 
   'check.progress.checked': 'Checked {done} of {total}',
-  'check.progress.available': 'RDAP candidates: {n}',
+  'check.progress.available': 'Possibly available: {n}',
   'check.progress.errors': '{n} errors',
   'check.progress.elapsed': '{s}',
 
@@ -101,7 +101,7 @@ export const en: Dict = {
   'results.empty.body':
     'Type a name above, pick zones and press “Check availability”. Or open the Generators tab to invent names first.',
   'results.filters.all': 'All',
-  'results.filters.available': 'RDAP candidates',
+  'results.filters.available': 'Available (RDAP)',
   'results.filters.taken': 'Taken',
   'results.filters.problems': 'Problems',
   'results.sort.name': 'Name',
@@ -127,7 +127,7 @@ export const en: Dict = {
   'results.copy.selected': 'Copy selected ({n})',
   'results.buy.aria': 'Buy {domain}',
   'results.domain.aria': 'Open {domain} at {registrar}',
-  'status.available': 'Not in RDAP',
+  'status.available': 'Possibly available',
   'app.title.html': 'Domain Hunter — free domain availability checker',
   'a11y.skip': 'Skip to content',
   'check.hint.1': 'Type names or generate them in Generators.',
@@ -471,7 +471,7 @@ export const en: Dict = {
   'prices.legend.band': 'Cheapest columns',
   'prices.legend.band.tip':
     'Renewal and 3-year columns show the best price across all registrars for each zone.',
-  'prices.legend.dot': 'Cheapest registrar',
+  'prices.legend.dot': 'Lowest registration',
   'prices.legend.dot.tip': 'Green dot marks the lowest first-year price in the row.',
   'prices.legend.trap': 'Promo trap',
   'prices.legend.trap.tip':
@@ -524,4 +524,11 @@ export const en: Dict = {
   'card.status.pending': 'A registry operation is pending.',
   'card.status.grace': 'Registry grace period; conditions vary.',
   'card.status.restricted': 'The named operation is restricted by the registrar or registry.',
+  'prices.sources': 'Sources and conditions',
+  'prices.scrollHint': 'Scroll the table to see all registrars.',
+  'detail.open': 'Open',
+  'detail.website': 'Website',
+  'detail.websiteHint': '“Website” opens the registrar’s site without a domain search.',
+  'detail.conditions': 'Conditions',
+  'detail.noQuotes': 'No price data for this zone.',
 };

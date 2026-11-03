@@ -61,14 +61,59 @@ test.describe('Prices tab', () => {
     // Column headers include both registrars from the seed fixture plus the
     // cheapest-registrar Renewal and 3-year TCO columns.
     const headers = page.locator('thead th');
-    await expect(headers).toHaveCount(5); // Zone + Porkbun + Cloudflare + Renewal + TCO
-    await expect(headers.nth(1)).toContainText('Porkbun');
-    await expect(headers.nth(2)).toContainText('Cloudflare');
+    await expect(headers).toHaveCount(6); // Zone + market minima + Porkbun + Cloudflare
+    await expect(headers.nth(1)).toContainText('Lowest registration');
+    await expect(headers.nth(2)).toContainText('Renewal');
+    await expect(headers.nth(4)).toContainText('Porkbun');
+    await expect(headers.nth(5)).toContainText('Cloudflare');
 
     // The .com row has a cell with the min class (cheapest = cloudflare $10.44).
     const comRow = page.locator('[data-testid="prices-row-com"]');
     const minCell = comRow.locator('td.min');
     await expect(minCell).toHaveCount(1);
+  });
+
+  test('registrar filter and keyboard scrolling keep market minima intact', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
+    await gotoPrices(page);
+    const scroll = page.getByTestId('prices-table-scroll');
+    await expect(scroll).toBeVisible();
+    await expect(scroll).toHaveAttribute('tabindex', '0');
+    const dimensions = await scroll.evaluate((el) => ({ client: el.clientWidth, scroll: el.scrollWidth }));
+    expect(dimensions.scroll).toBeGreaterThan(dimensions.client);
+    await scroll.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(() => scroll.evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
+    const row = page.getByTestId('prices-row-com');
+    const renewal = await row.locator('td.best-cell').first().innerText();
+    await page.getByTestId('prices-registrar-filter').selectOption('porkbun');
+    await expect(page.locator('thead')).not.toContainText('Cloudflare');
+    await expect(page.locator('thead')).toContainText('Porkbun');
+    await expect(row.locator('td.best-cell').first()).toHaveText(renewal);
+    await page.getByTestId('prices-registrar-filter').selectOption('');
+    await expect(page.locator('thead')).toContainText('Cloudflare');
+    if (process.env.DH_UI_SCREENSHOTS) await page.screenshot({ path: '/tmp/dh-prices-mobile.png' });
+  });
+
+  test('desktop pricing keeps terms available and zones pinned while scrolling', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await gotoPrices(page);
+    const notes = page.locator('.source-notes');
+    await expect(notes).not.toHaveAttribute('open', '');
+    await notes.locator('summary').click();
+    await expect(notes).toHaveAttribute('open', '');
+    await notes.locator('summary').click();
+    const wrap = page.getByTestId('prices-table-scroll');
+    const row = page.getByTestId('prices-row-com');
+    const zone = row.locator('.zone-cell');
+    const before = await zone.boundingBox();
+    await wrap.evaluate(el => { el.scrollLeft = el.scrollWidth; });
+    const after = await zone.boundingBox();
+    expect(Math.abs(before!.x - after!.x)).toBeLessThanOrEqual(1);
+    if (process.env.DH_UI_SCREENSHOTS) {
+      await wrap.evaluate(el => { el.scrollLeft = 0; });
+      await page.screenshot({ path: '/tmp/dh-prices-desktop.png' });
+    }
   });
 
   test('shows per-zone provenance and the actual cheapest renewal', async ({ page }) => {
@@ -108,17 +153,17 @@ test.describe('Prices tab', () => {
     await openApp(page, { seed: { 'dh:v1:pricing': seed } });
     await gotoPrices(page);
     const headers = page.locator('thead th');
-    await expect(headers).toHaveCount(10); // all sellers are visible by default
+    await expect(headers).toHaveCount(11); // all sellers are visible by default
     const toggle = page.getByTestId('prices-toggle-registrars');
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     await toggle.click();
-    await expect(headers).toHaveCount(9);
-    await toggle.click();
     await expect(headers).toHaveCount(10);
+    await toggle.click();
+    await expect(headers).toHaveCount(11);
     await expect(page.locator('thead')).toContainText('NameSilo');
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
     await toggle.click();
-    await expect(headers).toHaveCount(9);
+    await expect(headers).toHaveCount(10);
   });
 
   test('invalidates old cache and displays grouped live Porkbun prices correctly', async ({ page }) => {

@@ -757,7 +757,7 @@ test.describe('Check tab', () => {
     const legend = page.locator('.legend');
     await expect(legend).toBeVisible();
     const text = (await legend.textContent()) ?? '';
-    expect(text).toContain('Not in RDAP');
+    expect(text).toContain('Possibly available');
     expect(text).toContain('Unconfirmed');
     expect(text).toContain('Taken');
     expect(text).toContain('Unknown');
@@ -1261,7 +1261,9 @@ test('premium signal suppresses prices in clipboard JSON and tabular exports', a
   await grantClipboard(context);
   await setupBaseMocks(page);
   await mockRdap(page, []);
+  let digRequests = 0;
   await page.route('https://api.digmyname.com/functions/v1/public-api/check?*', async (route) => {
+    if (++digRequests > 1) return route.fulfill({ status: 503, headers: CORS, body: '{}' });
     await route.fulfill({ status: 200, headers: CORS, body: JSON.stringify({ result: {
       domain: 'zzqxtest1.com', available: true, uncertain: false, premium: true, price_usd: null,
     } }) });
@@ -1274,6 +1276,12 @@ test('premium signal suppresses prices in clipboard JSON and tabular exports', a
   await page.getByTestId('results-row-dig-check-zzqxtest1-com').click();
   await expect(page.getByTestId('results-row-dig-availability-zzqxtest1-com')).toBeVisible();
   await expect(row(page, 'zzqxtest1.com').locator('.price-cell')).not.toContainText('$');
+  await expect(page.getByTestId('results-row-registrars-zzqxtest1-com')).toHaveCount(0);
+  await page.getByTestId('results-row-dig-check-zzqxtest1-com').click();
+  const expanded = page.getByTestId('results-row-expanded-zzqxtest1-com');
+  await expect(expanded).toContainText('No extra data available for this domain.');
+  await expect(expanded).toContainText('Premium possible — price unconfirmed');
+  await expect(expanded).not.toContainText('No price data for this zone.');
   await expect(page.getByTestId('results-row-registrars-zzqxtest1-com')).toHaveCount(0);
   await page.getByTestId('check-button-export-menu').click();
   await page.getByTestId('check-export-copy-json').click();
@@ -1302,4 +1310,72 @@ test('registration card explains known status codes inline', async ({ page }) =>
   await expect(card).toContainText('clientTransferProhibited');
   await expect(card).toContainText('The named operation is restricted by the registrar or registry.');
   await expect(card).toContainText('Expiration is not the release date');
+});
+
+
+for (const { width, theme } of [{ width: 1440, theme: 'light' }, { width: 390, theme: 'light' }, { width: 390, theme: 'dark' }]) {
+  test(`visible detail toggle presents readable registrar comparison at ${width}px in ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await setupBaseMocks(page);
+    await mockRdap(page, []);
+    const seed = seedPricingTable();
+    const entry = (reg: number) => ({ reg, renew: reg + 100, transfer: null });
+    seed.table.tlds.com = { cloudflare: entry(300), porkbun: entry(400), timeweb: entry(500), hostiman: entry(600), sprinthost: entry(700), webhost1: entry(800), adminvps: entry(900) };
+    // Synthetic quote exercises display only; it is not a Timeweb .com tariff.
+    seed.table.timewebRenewalFromRub = { com: 399 };
+    let advisoryHits = 0;
+    for (const host of ['dotsweep.com', 'who-dat.as93.net', 'cctld.ru', 'api.digmyname.com']) {
+      await page.route(`https://${host}/**`, (route) => { advisoryHits++; return route.abort(); });
+    }
+    await bootCheckTab(page, { 'dh:v1:pricing': seed, 'dh:v1:settings': { lang: 'ru', theme } });
+    await runCheck(page, 'zzqxtest1.com');
+    const toggle = page.getByTestId('results-row-expand-zzqxtest1-com');
+    await expect(toggle).toBeVisible();
+    await expect(row(page, 'zzqxtest1.com').getByTestId('status-badge-available')).toContainText('Возможно свободен');
+    await expect(page.getByTestId('results-filter-available')).toContainText('Свободные');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await toggle.focus();
+    await page.keyboard.press('Enter');
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    const expanded = page.getByTestId('results-row-expanded-zzqxtest1-com');
+    await expect(expanded).toBeVisible();
+    const quotes = page.getByTestId('results-row-registrars-zzqxtest1-com');
+    await expect(quotes.locator('.quote-row')).toHaveCount(7);
+    await expect(quotes).toContainText('Timeweb');
+    await expect(quotes).toContainText('AdminVPS');
+    await expect(quotes).toContainText('Продление');
+    await expect(quotes).toContainText('Снапшот');
+    await expect(quotes.locator('.quote-notice')).toContainText('без поиска домена');
+    await expect(page.getByTestId('results-row-registrar-zzqxtest1-com-cloudflare')).toHaveText(/На сайт/);
+    const timeweb = page.getByTestId('results-row-registrar-zzqxtest1-com-timeweb');
+    await expect(timeweb).toHaveAttribute('href', /timeweb/);
+    const timewebRow = timeweb.locator('..');
+    await expect(timewebRow).toContainText('Продление от 399 ₽');
+    await timewebRow.getByText('Условия', { exact: true }).click();
+    await expect(timewebRow).toContainText('не входит в TCO');
+    await expect(expanded.getByText('Дополнительные проверки')).toBeVisible();
+    await expect(expanded.getByText(/Только по нажатию/)).toBeVisible();
+    expect(advisoryHits).toBe(0);
+    const geometry = await expanded.evaluate((el) => ({ width: el.clientWidth, scroll: el.scrollWidth }));
+    expect(geometry.scroll).toBeLessThanOrEqual(geometry.width + 1);
+    if (process.env.DH_UI_SCREENSHOTS) {
+      await expanded.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `/tmp/domain-detail-${width}-${theme}.png` });
+    }
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(expanded).toHaveCount(0);
+  });
+}
+
+
+test('empty registrar comparison reports missing zone prices', async ({ page }) => {
+  await setupBaseMocks(page);
+  await mockRdap(page, []);
+  const seed = seedPricingTable();
+  seed.table.tlds.com = {};
+  await bootCheckTab(page, { 'dh:v1:pricing': seed, 'dh:v1:settings': { lang: 'ru' } });
+  await runCheck(page, 'zzqxtest1.com');
+  await page.getByTestId('results-row-expand-zzqxtest1-com').click();
+  await expect(page.getByTestId('results-row-expanded-zzqxtest1-com')).toContainText('Нет цен для этой зоны.');
 });
