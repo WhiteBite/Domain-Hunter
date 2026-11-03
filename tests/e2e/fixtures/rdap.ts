@@ -74,7 +74,7 @@ export function rdapTakenFull(domain: string): RdapMockResponse {
 
 /** RDAP 404 — domain not found in registry (availability depends on trust level). */
 export function rdapFree(): RdapMockResponse {
-  return { status: 404 };
+  return { status: 404, body: { errorCode: 404 } };
 }
 
 /** RDAP 429 — rate limited; honor Retry-After (seconds). */

@@ -1,7 +1,7 @@
 /**
  * Acceptance smoke test (SPEC §15): opens dist/index.html over file://,
  * verifies the app boots with zero console errors, runs a real check
- * (google.com → taken, random name → available), captures screenshots.
+ * (google.com → taken, random name → RDAP candidate), captures screenshots.
  *
  * Usage: node scripts/smoke.mjs
  */
@@ -43,12 +43,12 @@ console.log('run started, waiting for results...');
 await page.waitForSelector('text=Taken', { timeout: 90_000 });
 console.log('PASS: google.com reported Taken');
 
-// 5. Wait for the random name to be reported Available in at least one zone
+// 5. Wait for the random name to be reported as not found in RDAP in at least one zone
 await page.waitForSelector(`text=${randomName}.com`, { timeout: 90_000 });
 await page.waitForTimeout(2000);
-const availableCount = await page.locator('text=Available').count();
-if (availableCount < 1) throw new Error('random name produced no Available results');
-console.log(`PASS: ${randomName} reported Available (${availableCount} badge(s))`);
+const availableCount = await page.locator('text=Not in RDAP').count();
+if (availableCount < 1) throw new Error('random name produced no RDAP candidate results');
+console.log(`PASS: ${randomName} not found in RDAP (${availableCount} badge(s)); registrar confirmation still required`);
 
 // 6. Wait for pricing to resolve so prices are visible, then screenshot — light theme
 await page.waitForSelector('.freshness', { timeout: 30_000 });

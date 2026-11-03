@@ -6,7 +6,7 @@
  */
 import type { CacheEntry } from '../types';
 
-const CACHE_KEY = 'dh:v1:cache';
+const CACHE_KEY = 'dh:v2:cache';
 export const MAX_ENTRIES = 4000;
 const WRITE_DEBOUNCE_MS = 1500;
 

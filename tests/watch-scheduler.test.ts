@@ -47,7 +47,7 @@ describe('summarizeChanges', () => {
       change(4, 'taken', 'price_drop'),
       change(5, 'unknown'),
     ]);
-    expect(s).toEqual({ freed: 2, taken: 1, priceDrops: 1 });
+    expect(s).toEqual({ freed: 1, taken: 1, priceDrops: 1 });
   });
 
   it('returns zeros for an empty list', () => {
@@ -129,7 +129,7 @@ describe('startWatchScheduler', () => {
     await vi.advanceTimersByTimeAsync(60_000);
     expect(d.notify).toHaveBeenCalledTimes(1);
     expect(d.notify.mock.calls[0]?.[0]).toBe('Domain Hunter watchlist');
-    expect(d.notify.mock.calls[0]?.[1]).toContain('1 freed');
+    expect(d.notify.mock.calls[0]?.[1]).toContain('1 not found in RDAP');
 
     await vi.advanceTimersByTimeAsync(60_000);
     expect(d.notify).toHaveBeenCalledTimes(1);

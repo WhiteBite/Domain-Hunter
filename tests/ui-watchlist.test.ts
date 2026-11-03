@@ -38,7 +38,7 @@ describe('classifyChange', () => {
     }
     // taken/error → probably_available is also a freed flip.
     for (const from of ['taken', 'error'] as CheckStatus[]) {
-      expect(classifyChange(from, 'probably_available')).toBe('freed');
+      expect(classifyChange(from, 'probably_available')).toBeNull();
     }
     // unknown → probably_available is NOT reported (uncertain→uncertain).
     expect(classifyChange('unknown', 'probably_available')).toBeNull();
@@ -46,13 +46,13 @@ describe('classifyChange', () => {
 
   it('reports "taken" when to is taken and from was available/probably_available', () => {
     expect(classifyChange('available', 'taken')).toBe('taken');
-    expect(classifyChange('probably_available', 'taken')).toBe('taken');
+    expect(classifyChange('probably_available', 'taken')).toBeNull();
   });
 
   it('returns null for all other transitions', () => {
     // Never report flips from unknown→probably etc.
     expect(classifyChange('unknown', 'probably_available')).toBeNull();
-    expect(classifyChange('probably_available', 'available')).toBeNull();
+    expect(classifyChange('probably_available', 'available')).toBe('freed');
     expect(classifyChange('available', 'probably_available')).toBeNull();
     expect(classifyChange('taken', 'error')).toBeNull();
     expect(classifyChange('error', 'unknown')).toBeNull();

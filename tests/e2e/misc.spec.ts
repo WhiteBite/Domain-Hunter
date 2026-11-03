@@ -403,6 +403,7 @@ test.describe('Misc coverage', () => {
     // Detail row renders the DigMyName buy link (open ⋯ menu first).
     await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
     await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
+    await page.click('[data-testid="results-row-dig-check-zzqxtest1-com"]');
     await expect(
       page.locator('[data-testid^="results-row-detail-buy-"]').first(),
     ).toBeVisible({ timeout: 10_000 });
@@ -516,7 +517,7 @@ test.describe('Misc coverage', () => {
     expectNoLeaks(page);
   });
 
-  test('premium override: row price cell shows premium price with standard struck through', async ({
+  test('premium indication never quotes a standard API price as a premium price', async ({
     page,
   }) => {
     await assertNoNetworkLeaks(page);
@@ -557,16 +558,16 @@ test.describe('Misc coverage', () => {
     await expect(priceCell.locator('.price-strike')).toHaveCount(0);
     await expect(priceCell.locator('.coupon')).toHaveCount(0);
 
-    // Open details (triggers the on-demand DigMyName premium check).
+    // Opening details is local; explicitly opt in to the DigMyName check.
     await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
     await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
+    await page.click('[data-testid="results-row-dig-check-zzqxtest1-com"]');
 
-    // After the premium check resolves, the row price cell shows the
-    // premium override ($348.00) with the standard price ($10.44) struck
-    // through, plus an amber premium chip-tag.
-    await expect(priceCell).toContainText('$348.00', { timeout: 10_000 });
-    await expect(priceCell.locator('.price-strike')).toBeVisible();
-    await expect(priceCell.locator('.price-strike')).toContainText('$10.44');
+    // A premium indication is not a price quote; hide standard and API prices.
+    await expect(priceCell.locator('.price')).toHaveText('—', { timeout: 10_000 });
+    await expect(priceCell).not.toContainText('$348.00');
+    await expect(priceCell.locator('.price-strike')).toHaveCount(0);
+    await expect(priceCell).not.toContainText('$10.44');
     await expect(priceCell.locator('.chip-tag.premium')).toBeVisible();
     await expect(
       priceCell.locator('[data-testid="results-chip-premium-zzqxtest1-com"]'),
@@ -825,11 +826,11 @@ test.describe('Misc coverage', () => {
     // Click the bulk premium check button.
     await btn.click();
 
-    // After the check resolves: premium domain shows $2,500.00 with strike
-    // and amber premium chip; non-premium domain keeps standard price.
-    await expect(premCell).toContainText('$2,500.00', { timeout: 10_000 });
-    await expect(premCell.locator('.price-strike')).toBeVisible();
-    await expect(premCell.locator('.price-strike')).toContainText('$10.44');
+    // The premium row has no price; the non-premium row keeps its standard price.
+    await expect(premCell.locator('.price')).toHaveText('—', { timeout: 10_000 });
+    await expect(premCell).not.toContainText('$2,500.00');
+    await expect(premCell.locator('.price-strike')).toHaveCount(0);
+    await expect(premCell).not.toContainText('$10.44');
     await expect(premCell.locator('.chip-tag.premium')).toBeVisible();
 
     // Non-premium row keeps the Cloudflare price without a Porkbun coupon.

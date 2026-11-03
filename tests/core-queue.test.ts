@@ -23,7 +23,7 @@ const registry: TldRegistry = {
   hackTlds: [],
 };
 
-const always404 = (async () => new Response(null, { status: 404 })) as unknown as typeof fetch;
+const always404 = (async () => new Response(JSON.stringify({ errorCode: 404 }), { status: 404 })) as unknown as typeof fetch;
 
 describe('runQueue', () => {
   it('processes all candidates across infras and emits final progress', async () => {

@@ -105,6 +105,7 @@ async function mockRdap(page: Page, rules: RdapRule[]): Promise<void> {
       await route.fulfill({
         status: 404,
         headers: { ...CORS, 'Content-Type': 'application/rdap+json' },
+        body: JSON.stringify({ errorCode: 404 }),
       });
       return;
     }
@@ -113,6 +114,7 @@ async function mockRdap(page: Page, rules: RdapRule[]): Promise<void> {
       await route.fulfill({
         status: 404,
         headers: { ...CORS, 'Content-Type': 'application/rdap+json' },
+        body: JSON.stringify({ errorCode: 404 }),
       });
       return;
     }
@@ -404,7 +406,7 @@ test.describe('Check tab', () => {
     await mockDoh(page, { 'zzqxtest1.de': 'nxdomain' });
     await bootCheckTab(page);
     await runCheck(page, 'zzqxtest1.de');
-    await expect(row(page, 'zzqxtest1.de').locator('[data-testid="status-badge-probably_available"]')).toBeVisible();
+    await expect(row(page, 'zzqxtest1.de').locator('[data-testid="status-badge-unknown"]')).toBeVisible();
   });
 
   // 11. filter available shows only available rows
@@ -536,6 +538,7 @@ test.describe('Check tab', () => {
           await route.fulfill({
             status: 404,
             headers: { ...CORS, 'Content-Type': 'application/rdap+json' },
+            body: JSON.stringify({ errorCode: 404 }),
           });
           return;
         }
@@ -598,7 +601,36 @@ test.describe('Check tab', () => {
     expect(digHits).toBe(0);
     await page.locator('[data-testid="results-row-menu-zzqxtest1-dev"]').click();
     await page.locator('[data-testid="results-row-detail-zzqxtest1-dev"]').click();
+    expect(digHits).toBe(0);
+    await page.getByTestId('results-row-dig-check-zzqxtest1-dev').click();
     await expect.poll(async () => digHits).toBe(1);
+  });
+
+  test('additional source is requested only on click and DNS estimates remain unconfirmed', async ({ page, context }) => {
+    await grantClipboard(context);
+    let hits = 0;
+    await setupBaseMocks(page);
+    await mockRdap(page, []);
+    await page.route('https://dotsweep.com/check/zzqxtest1.dev', async (route) => {
+      hits++;
+      await route.fulfill({ status: 200, headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: 'zzqxtest1.dev', status: 'available', source: 'dns', confidence: 'estimated' }) });
+    });
+    await bootCheckTab(page);
+    await runCheck(page, 'zzqxtest1.dev');
+    await expect(row(page, 'zzqxtest1.dev')).toBeVisible();
+    await page.getByTestId('results-row-menu-zzqxtest1-dev').click();
+    await page.getByTestId('results-row-detail-zzqxtest1-dev').click();
+    expect(hits).toBe(0);
+    await page.getByTestId('results-row-dotsweep-zzqxtest1-dev').click();
+    await expect(page.getByTestId('results-row-advisory-zzqxtest1-dev')).toContainText('Unconfirmed');
+    await expect(page.getByTestId('results-row-advisory-zzqxtest1-dev')).toContainText('dns / estimated');
+    expect(hits).toBe(1);
+    await page.getByTestId('check-button-export-menu').click();
+    await page.getByTestId('check-export-copy-csv').click();
+    const exported = await readClipboard(page);
+    expect(exported).toContain('dotsweep / unknown / dns / estimated');
+    expect(exported).toContain('Not a registration guarantee');
   });
 
   // 20. stop during run terminates and shows partial state
@@ -725,8 +757,8 @@ test.describe('Check tab', () => {
     const legend = page.locator('.legend');
     await expect(legend).toBeVisible();
     const text = (await legend.textContent()) ?? '';
-    expect(text).toContain('Available');
-    expect(text).toContain('Likely available');
+    expect(text).toContain('Not in RDAP');
+    expect(text).toContain('Unconfirmed');
     expect(text).toContain('Taken');
     expect(text).toContain('Unknown');
     expect(text).toContain('Error');
@@ -775,6 +807,8 @@ test.describe('Check tab', () => {
     expect(clip).toContain('| Domain');
     expect(clip).toContain('| --- |');
     expect(clip).toContain('zzqxtest1.com');
+    expect(clip).toContain('Result source');
+    expect(clip).toContain('Not a registration guarantee');
   });
 
   // 27b. export menu: copy as CSV and TSV put tabular data on the clipboard
@@ -793,6 +827,8 @@ test.describe('Check tab', () => {
     const csvClip = await readClipboard(page);
     expect(csvClip).toContain('Domain,Status');
     expect(csvClip).toContain('zzqxtest1.com');
+    expect(csvClip).toContain('Result source');
+    expect(csvClip).toContain('Not a registration guarantee');
     expect(csvClip.charCodeAt(0)).not.toBe(0xfeff);
 
     // Copy as TSV — header joined by tabs.
@@ -800,6 +836,8 @@ test.describe('Check tab', () => {
     const tsvClip = await readClipboard(page);
     expect(tsvClip).toContain('Domain\tStatus');
     expect(tsvClip).toContain('zzqxtest1.com');
+    expect(tsvClip).toContain('Registration price source');
+    expect(tsvClip).toContain('Not a registration guarantee');
   });
 
   // 28. available menu: copy puts the available domain list on the clipboard
@@ -915,13 +953,13 @@ test.describe('Check tab', () => {
     await expect(page.locator('[data-testid="check-button-start"]')).toBeVisible({ timeout: 10_000 });
     await page.waitForFunction(
       () =>
-        localStorage.getItem('dh:v1:cache') !== null &&
+        localStorage.getItem('dh:v2:cache') !== null &&
         localStorage.getItem('dh:v1:lastrun') !== null,
       { timeout: 5000 },
     );
 
     // Read the cache and lastrun that the run persisted.
-    const cacheRaw = await page.evaluate(() => localStorage.getItem('dh:v1:cache'));
+    const cacheRaw = await page.evaluate(() => localStorage.getItem('dh:v2:cache'));
     const lastrunRaw = await page.evaluate(() => localStorage.getItem('dh:v1:lastrun'));
 
     // Reload: openApp's init script clears dh:* keys on every navigation,
@@ -930,7 +968,7 @@ test.describe('Check tab', () => {
       seed: {
         'dh:v1:pricing': seedPricingTable(),
         'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
-        'dh:v1:cache': JSON.parse(cacheRaw!),
+        'dh:v2:cache': JSON.parse(cacheRaw!),
         'dh:v1:lastrun': JSON.parse(lastrunRaw!),
       },
     });
@@ -1065,7 +1103,7 @@ test.describe('Check tab', () => {
       cache[name] = { status: 'available', source: 'rdap', ts: now, tld: 'com' };
     }
     await bootCheckTab(page, {
-      'dh:v1:cache': cache,
+      'dh:v2:cache': cache,
       'dh:v1:lastrun': {
         input: names.join('\n'),
         tlds: ['com'],
@@ -1185,4 +1223,83 @@ test.describe('Check tab', () => {
     await expect(page.getByTestId('results-pair-toggle')).toHaveAttribute('aria-pressed', 'true');
   });
 
+});
+
+test('all local quotes appear immediately and conflicting advisory results become unconfirmed', async ({ page }) => {
+  await setupBaseMocks(page);
+  await mockRdap(page, []);
+  const seed = seedPricingTable();
+  const entry = (reg: number) => ({ reg, renew: reg + 100, transfer: null });
+  seed.table.tlds.com = {
+    cloudflare: entry(300), porkbun: entry(400), timeweb: entry(500),
+    hostiman: entry(600), sprinthost: entry(700), webhost1: entry(800), adminvps: entry(900),
+  };
+  await page.route('https://api.digmyname.com/functions/v1/public-api/check?*', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await route.fulfill({ status: 200, headers: CORS, body: JSON.stringify({ result: {
+      domain: 'zzqxtest1.com', available: false, uncertain: false,
+      premium: true, price_usd: 99, cheapest_registrar: null,
+    } }) });
+  });
+  await bootCheckTab(page, { 'dh:v1:pricing': seed });
+  await runCheck(page, 'zzqxtest1.com');
+  await expect(row(page, 'zzqxtest1.com').locator('[data-testid="status-badge-available"]')).toBeVisible();
+  await expect(page.getByTestId('results-row-link-zzqxtest1-com')).toHaveAttribute('href', /cloudflare\.com/);
+  await page.getByTestId('results-row-menu-zzqxtest1-com').click();
+  await page.getByTestId('results-row-detail-zzqxtest1-com').click();
+  const quotes = page.getByTestId('results-row-registrars-zzqxtest1-com');
+  await expect(quotes).toContainText('Timeweb');
+  await expect(quotes).toContainText('AdminVPS');
+  await expect(quotes.locator('a')).toHaveCount(7);
+  await page.getByTestId('results-row-dig-check-zzqxtest1-com').click();
+  await expect(row(page, 'zzqxtest1.com').locator('[data-testid="status-badge-unknown"]')).toBeVisible();
+  await expect(page.getByTestId('results-row-dig-availability-zzqxtest1-com')).toContainText('unavailable');
+  await expect(row(page, 'zzqxtest1.com')).not.toContainText('$99.00');
+});
+
+test('premium signal suppresses prices in clipboard JSON and tabular exports', async ({ page, context }) => {
+  await grantClipboard(context);
+  await setupBaseMocks(page);
+  await mockRdap(page, []);
+  await page.route('https://api.digmyname.com/functions/v1/public-api/check?*', async (route) => {
+    await route.fulfill({ status: 200, headers: CORS, body: JSON.stringify({ result: {
+      domain: 'zzqxtest1.com', available: true, uncertain: false, premium: true, price_usd: null,
+    } }) });
+  });
+  await bootCheckTab(page);
+  await runCheck(page, 'zzqxtest1.com');
+  await expect(row(page, 'zzqxtest1.com')).toBeVisible();
+  await page.getByTestId('results-row-menu-zzqxtest1-com').click();
+  await page.getByTestId('results-row-detail-zzqxtest1-com').click();
+  await page.getByTestId('results-row-dig-check-zzqxtest1-com').click();
+  await expect(page.getByTestId('results-row-dig-availability-zzqxtest1-com')).toBeVisible();
+  await expect(row(page, 'zzqxtest1.com').locator('.price-cell')).not.toContainText('$');
+  await expect(page.getByTestId('results-row-registrars-zzqxtest1-com')).toHaveCount(0);
+  await page.getByTestId('check-button-export-menu').click();
+  await page.getByTestId('check-export-copy-json').click();
+  const parsed = JSON.parse(await readClipboard(page));
+  expect(parsed.rows[0]).toMatchObject({ priceFirstYearCents: null, priceRenewalCents: null,
+    priceTcoCents: null, bestRegistrar: '', buyUrl: '', resultSource: 'rdap' });
+  for (const kind of ['csv', 'tsv', 'md']) {
+    await page.getByTestId(`check-export-copy-${kind}`).click();
+    const text = await readClipboard(page);
+    expect(text).toContain('zzqxtest1.com');
+    expect(text).toContain('Not a registration guarantee');
+    expect(text).not.toMatch(/\$\d/);
+  }
+});
+
+
+test('registration card explains known status codes inline', async ({ page }) => {
+  await setupBaseMocks(page);
+  await mockRdap(page, [{ domain: 'google.com', response: rdapTaken('google.com') }]);
+  await bootCheckTab(page);
+  await runCheck(page, 'google.com');
+  await expect(row(page, 'google.com')).toBeVisible();
+  await page.getByTestId('results-row-menu-google-com').click();
+  await page.getByTestId('results-row-detail-google-com').click();
+  const card = page.getByTestId('results-row-card-google-com');
+  await expect(card).toContainText('clientTransferProhibited');
+  await expect(card).toContainText('The named operation is restricted by the registrar or registry.');
+  await expect(card).toContainText('Expiration is not the release date');
 });

@@ -63,6 +63,8 @@ export interface RdapCard {
   expiresAt: number | null;
   /** Epoch ms of the 'last changed' event; null when absent/invalid. */
   changedAt: number | null;
+  /** Planned registry free date, never a guaranteed release. */
+  freeDate?: number | null;
   /** Whole days since registration at parse time; null without registeredAt. */
   ageDays: number | null;
   /** Registrar name from the 'registrar' entity vCard fn; null when absent. */

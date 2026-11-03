@@ -4,12 +4,9 @@ export interface HealthEntry {
   cfOk?: boolean | null;
 }
 
-/** 'unverified': no transport answered the probe. 'indirect': only the
- *  Cloudflare aggregator answered — runtime checks ride the fallback
- *  transport. Legacy entries ({ok} only) map ok:false to 'unverified'. */
+/** Do not trust legacy health entries that only passed the retired fallback. */
 export function healthNote(entry: HealthEntry | undefined): 'unverified' | 'indirect' | null {
   if (entry == null) return null;
-  if (entry.ok === false) return 'unverified';
-  if (entry.directOk === false && entry.cfOk === true) return 'indirect';
+  if (entry.ok === false || entry.directOk === false) return 'unverified';
   return null;
 }

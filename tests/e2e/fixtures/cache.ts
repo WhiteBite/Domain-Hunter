@@ -2,7 +2,7 @@
  * localStorage cache seed entries for E2E mocks.
  *
  * Storage shape matches src/core/cache.ts: Record<domain, CacheEntry>
- * stored as JSON at key 'dh:v1:cache'. CacheEntry is from src/types.ts.
+ * stored as JSON at key 'dh:v2:cache'. CacheEntry is from src/types.ts.
  */
 import type { CacheEntry } from '../../../src/types';
 import { TAKEN_GTLD, FREE_GTLD } from './domains';

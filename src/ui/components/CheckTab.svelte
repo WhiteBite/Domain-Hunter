@@ -20,6 +20,7 @@
   import type { HistoryEntry } from '../../types';
   import { loadPricing, freshnessLabel } from '../../pricing/pricing';
   import { resultsToCsvRows, buildCsv, downloadCsv, resultsToJson } from '../csv';
+  import { premiumDomainsForExport } from '../premium-check';
   import { encodeShare, parseShare, clearShare } from '../share';
   import { t } from '../../i18n';
   import { copyText } from '../clipboard';
@@ -121,7 +122,7 @@
         let taken = 0;
         let problems = 0;
         for (const cr of r.values()) {
-          if (cr.status === 'available' || cr.status === 'probably_available') available++;
+          if (cr.status === 'available') available++;
           else if (cr.status === 'taken') taken++;
           else problems++;
         }
@@ -147,16 +148,19 @@
 
   function handleExportCsv() {
     const table = $pricing?.table ?? null;
-    const rows = resultsToCsvRows(get(results), table, get(settings));
+    const current = get(results);
+    const rows = resultsToCsvRows(current, table, get(settings), premiumDomainsForExport(current));
     const headers = [
       t('csv.domain'),
       t('csv.status'),
       t('csv.tld'),
       t('csv.priceFirstYear'),
-      t('csv.priceRenewal'),
+      t('csv.pairedRenewal'),
       t('csv.bestRegistrar'),
       t('csv.buyUrl'),
       t('csv.checkedAt'),
+    t('csv.resultSource'), t('csv.resultNote'), t('csv.regSource'), t('csv.renewSource'),
+    t('csv.lowRenewal'), t('csv.lowRenewalSeller'), t('csv.lowRenewalSource'), t('csv.limitations'), t('csv.advisory'),
     ];
     const csv = buildCsv(rows, headers);
     const date = new Date().toISOString().slice(0, 10);
@@ -165,7 +169,8 @@
 
   function handleDownloadJson() {
     const table = $pricing?.table ?? null;
-    const json = resultsToJson(get(results), table);
+    const current = get(results);
+    const json = resultsToJson(current, table, premiumDomainsForExport(current));
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

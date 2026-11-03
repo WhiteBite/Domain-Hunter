@@ -23,7 +23,7 @@ describe('availableDomainsOf', () => {
       ['gone.com', result('gone.com', 'unknown')],
       ['err.com', result('err.com', 'error')],
     ]);
-    expect(availableDomainsOf(map)).toEqual(['alpha.com', 'beta.com']);
+    expect(availableDomainsOf(map)).toEqual(['beta.com']);
   });
 
   it('returns [] for an empty results map', () => {
@@ -42,6 +42,6 @@ describe('favAllAvailable', () => {
       ]),
     );
     favAllAvailable();
-    expect([...get(favorites)].sort()).toEqual(['a.com', 'c.io', 'kept.com']);
+    expect([...get(favorites)].sort()).toEqual(['a.com', 'kept.com']);
   });
 });

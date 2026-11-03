@@ -61,7 +61,6 @@ describe('applyViewFilters', () => {
     });
     expect(res.rows.map((r) => r.result.domain)).toEqual([
       'alpha.com',
-      'epsilon.com',
     ]);
   });
 
@@ -87,6 +86,7 @@ describe('applyViewFilters', () => {
     expect(res.rows.map((r) => r.result.domain)).toEqual([
       'gamma.com',
       'delta.com',
+      'epsilon.com',
     ]);
   });
 

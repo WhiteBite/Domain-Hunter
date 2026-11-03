@@ -5,17 +5,18 @@
  */
 import type { PriceEntry, PricingTable, RegistrarConfig } from '../types';
 import { applyAffiliate } from './affiliate';
+import { bestEntry } from '../pricing/pricing';
 
 export interface RegistrarQuote {
   id: string;
   name: string;
-  reg: number;
+  reg: number | null;
   renew: number | null;
   url: string;
   hasDeepLink: boolean;
 }
 
-/** Cheapest {domain}-deep-link registrar, landing-only fallback; returns an always-present object with nullable fields. */
+/** Link to the same registrar as the displayed minimum, or no link if unavailable. */
 export function pickRegistrar(
   registrars: RegistrarConfig[],
   table: PricingTable | null,
@@ -24,20 +25,10 @@ export function pickRegistrar(
   if (!table) return { registrar: null, entry: null };
   const entries = table.tlds[tld];
   if (!entries) return { registrar: null, entry: null };
-  let best: { registrar: RegistrarConfig; entry: PriceEntry } | null = null;
-  let fallback: { registrar: RegistrarConfig; entry: PriceEntry } | null = null;
-  for (const r of registrars) {
-    const e = entries[r.id];
-    if (!e || e.reg == null) continue;
-    const hasDeepLink = r.searchUrl.includes('{domain}');
-    const candidate = { registrar: r, entry: e };
-    if (hasDeepLink) {
-      if (!best || (e.reg ?? Infinity) < (best.entry.reg ?? Infinity)) best = candidate;
-    } else {
-      if (!fallback || (e.reg ?? Infinity) < (fallback.entry.reg ?? Infinity)) fallback = candidate;
-    }
-  }
-  return best ?? fallback ?? { registrar: null, entry: null };
+  const best = bestEntry(table, tld);
+  if (!best) return { registrar: null, entry: null };
+  const registrar = registrars.find((r) => r.id === best.registrarId) ?? null;
+  return { registrar, entry: registrar ? best.entry : null };
 }
 
 /**
@@ -58,7 +49,7 @@ export function buildRegistrarQuotes(
   const list: RegistrarQuote[] = [];
   for (const r of registrars) {
     const e = entries[r.id];
-    if (!e || e.reg == null) continue;
+    if (!e) continue;
     const hasDeepLink = r.searchUrl.includes('{domain}');
     list.push({
       id: r.id,
@@ -74,6 +65,6 @@ export function buildRegistrarQuotes(
       ),
     });
   }
-  list.sort((a, b) => a.reg - b.reg || (a.renew ?? Infinity) - (b.renew ?? Infinity));
+  list.sort((a, b) => (a.reg ?? Infinity) - (b.reg ?? Infinity) || (a.renew ?? Infinity) - (b.renew ?? Infinity));
   return list;
 }

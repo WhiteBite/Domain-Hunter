@@ -3,8 +3,12 @@
  * Prices sourced from the pricing module via bestEntry + formatPrice.
  */
 import type { CheckResult, PricingTable, RegistrarConfig, Settings } from '../types';
-import { bestEntry, formatPrice } from '../pricing/pricing';
+import { bestEntry, bestRenewal, formatPrice, pricingZoneFor } from '../pricing/pricing';
 import { applyAffiliate } from './affiliate';
+import { pickRegistrar } from './registrar-quotes';
+import { priceSourceLabel } from './price-source';
+import { advisoryForExport } from './advisory';
+import { t } from '../i18n';
 import registrarsJson from '../config/registrars.json';
 
 const registrars = registrarsJson as unknown as RegistrarConfig[];
@@ -18,30 +22,25 @@ export interface CsvRow {
   bestRegistrar: string;
   buyUrl: string;
   checkedAt: string;
+  resultSource?: string;
+  resultNote?: string;
+  regSource?: string;
+  renewSource?: string;
+  lowestRenewal?: string;
+  lowestRenewalSeller?: string;
+  lowestRenewalSource?: string;
+  limitations?: string;
+  advisory?: string;
 }
 
-/** Cheapest-registrar buy URL for a TLD among registrars with a reg price
- *  (deep-link registrar preferred), affiliate tag applied when configured.
- *  '' when no quote exists. Mirrors ResultsTable's registrarFor so exports
- *  and UI agree. */
+/** Buy URL for the displayed cheapest seller; never substitute a different seller. */
 export function buyUrlFor(
   tld: string,
   domain: string,
   table: PricingTable | null,
 ): string {
-  const entries = table?.tlds[tld] ?? null;
-  if (!entries) return '';
-  let best: { reg: RegistrarConfig; price: number } | null = null;
-  let fallback: { reg: RegistrarConfig; price: number } | null = null;
-  for (const r of registrars) {
-    const e = entries[r.id];
-    if (!e || e.reg == null) continue;
-    const candidate = { reg: r, price: e.reg };
-    if (r.searchUrl.includes('{domain}')) {
-      if (!best || candidate.price < best.price) best = candidate;
-    } else if (!fallback || candidate.price < fallback.price) fallback = candidate;
-  }
-  const pick = best ?? fallback;
+  const chosen = pickRegistrar(registrars, table, tld).registrar;
+  const pick = chosen ? { reg: chosen } : null;
   if (!pick) return '';
   const url = pick.reg.searchUrl.includes('{domain}')
     ? pick.reg.searchUrl.replace('{domain}', encodeURIComponent(domain))
@@ -57,11 +56,15 @@ export function resultsToCsvRows(
   results: Map<string, CheckResult>,
   table: PricingTable | null,
   settings: Settings,
+  premiumDomains: ReadonlySet<string> = new Set(),
 ): CsvRow[] {
   const rows: CsvRow[] = [];
   for (const result of results.values()) {
-    const best = table ? bestEntry(table, result.tld) : null;
+    const zone = pricingZoneFor(result.domain, table, result.tld);
+    const best = table && !premiumDomains.has(result.domain) ? bestEntry(table, zone) : null;
     const entry = best?.entry ?? null;
+    const lowest = table && !premiumDomains.has(result.domain) ? bestRenewal(table, zone) : null;
+    const advisory = advisoryForExport(result.domain, result.checkedAt);
     rows.push({
       domain: result.domain,
       status: result.status,
@@ -69,8 +72,17 @@ export function resultsToCsvRows(
       priceFirstYear: formatPrice(entry?.reg ?? null, settings),
       priceRenewal: formatPrice(entry?.renew ?? null, settings),
       bestRegistrar: best?.registrarId ?? '',
-      buyUrl: buyUrlFor(result.tld, result.domain, table),
+      buyUrl: best ? buyUrlFor(zone, result.domain, table) : '',
       checkedAt: new Date(result.checkedAt).toISOString(),
+      resultSource: result.source,
+      resultNote: result.note ?? '',
+      regSource: priceSourceLabel(table, zone, best?.registrarId ?? null, 'reg'),
+      renewSource: priceSourceLabel(table, zone, best?.registrarId ?? null, 'renew'),
+      lowestRenewal: formatPrice(lowest?.renew ?? null, settings),
+      lowestRenewalSeller: lowest?.registrarId ?? '',
+      lowestRenewalSource: priceSourceLabel(table, zone, lowest?.registrarId ?? null, 'renew'),
+      limitations: t('csv.limitationsValue'),
+      advisory: advisory ? `${advisory.provider} / ${advisory.verdict} / ${advisory.source}${advisory.confidence ? ` / ${advisory.confidence}` : ''} / ${new Date(advisory.requestedAt).toISOString()} / ${advisory.dataAt ? new Date(advisory.dataAt).toISOString() : 'data time unknown'}` : '',
     });
   }
   return rows;
@@ -102,6 +114,7 @@ export function buildCsv(rows: CsvRow[], headers: string[]): string {
         row.bestRegistrar,
         row.buyUrl,
         row.checkedAt,
+        ...(headers.length > 8 ? [row.resultSource ?? '', row.resultNote ?? '', row.regSource ?? '', row.renewSource ?? '', row.lowestRenewal ?? '', row.lowestRenewalSeller ?? '', row.lowestRenewalSource ?? '', row.limitations ?? '', row.advisory ?? ''] : []),
       ]
         .map(escapeCsvField)
         .join(','),
@@ -137,6 +150,17 @@ export interface ExportRow {
   priceFirstYear: string;
   priceRenewal: string;
   priceTco: string;
+  registrationSeller?: string;
+  renewalSeller?: string;
+  tcoSeller?: string;
+  registrationSource?: string;
+  renewalSource?: string;
+  tcoSource?: string;
+  checkedAt?: string;
+  resultSource?: string;
+  resultNote?: string;
+  limitations?: string;
+  advisory?: string;
 }
 
 /** Field order for the 5-column clipboard formats (matches ExportRow keys). */
@@ -147,6 +171,12 @@ const EXPORT_FIELDS: readonly (keyof ExportRow)[] = [
   'priceRenewal',
   'priceTco',
 ];
+const EXPORT_EXTRA_FIELDS: readonly (keyof ExportRow)[] = [
+  'registrationSeller', 'renewalSeller', 'tcoSeller', 'registrationSource', 'renewalSource', 'tcoSource',
+  'checkedAt', 'resultSource', 'resultNote', 'limitations', 'advisory',
+];
+const exportFields = (headers: string[]): readonly (keyof ExportRow)[] =>
+  headers.length > EXPORT_FIELDS.length ? [...EXPORT_FIELDS, ...EXPORT_EXTRA_FIELDS] : EXPORT_FIELDS;
 
 /**
  * Convert check results to 5-column export rows with formatted prices.
@@ -160,7 +190,8 @@ export function resultsToExportRows(
 ): ExportRow[] {
   const rows: ExportRow[] = [];
   for (const result of results.values()) {
-    const best = table ? bestEntry(table, result.tld) : null;
+    const zone = pricingZoneFor(result.domain, table, result.tld);
+    const best = table ? bestEntry(table, zone) : null;
     const entry = best?.entry ?? null;
     const reg = entry?.reg ?? null;
     const renew = entry?.renew ?? null;
@@ -176,6 +207,34 @@ export function resultsToExportRows(
   return rows;
 }
 
+/** Attach current provenance to the filtered/sorted table view at copy time. */
+export function clipboardRows(
+  visible: ExportRow[], current: Map<string, CheckResult>, table: PricingTable | null,
+  settings: Settings, premiumDomains: ReadonlySet<string>,
+): ExportRow[] {
+  const provenance = new Map(resultsToCsvRows(current, table, settings, premiumDomains).map((row) => [row.domain, row]));
+  return visible.flatMap((row) => {
+    const result = current.get(row.domain);
+    const info = provenance.get(row.domain);
+    if (!result || !info) return [];
+    const flagged = premiumDomains.has(row.domain);
+    const zone = pricingZoneFor(row.domain, table, result.tld);
+    const regSeller = flagged ? '' : row.registrationSeller ?? '';
+    const renewalSeller = flagged ? '' : row.renewalSeller ?? '';
+    const tcoSeller = flagged ? '' : row.tcoSeller ?? '';
+    return [{ ...row, status: result.status,
+      priceFirstYear: flagged ? '' : row.priceFirstYear, priceRenewal: flagged ? '' : row.priceRenewal,
+      priceTco: flagged ? '' : row.priceTco,
+      registrationSeller: regSeller, renewalSeller, tcoSeller,
+      registrationSource: priceSourceLabel(table, zone, regSeller, 'reg'),
+      renewalSource: priceSourceLabel(table, zone, renewalSeller, 'renew'),
+      tcoSource: tcoSeller ? [priceSourceLabel(table, zone, tcoSeller, 'reg'), priceSourceLabel(table, zone, tcoSeller, 'renew')].filter(Boolean).join(' / ') : '',
+      checkedAt: info.checkedAt, resultSource: info.resultSource, resultNote: info.resultNote,
+      limitations: info.limitations, advisory: info.advisory,
+    }];
+  });
+}
+
 // ---- JSON export (machine-readable, versioned schema) ----
 
 export interface JsonExportRow {
@@ -188,6 +247,15 @@ export interface JsonExportRow {
   bestRegistrar: string;
   buyUrl: string;
   checkedAt: string;
+  resultSource: string;
+  resultNote: string | null;
+  registrationPriceSource: string;
+  renewalPriceSource: string;
+  lowestRenewalCents: number | null;
+  lowestRenewalRegistrar: string | null;
+  lowestRenewalSource: string;
+  limitations: string;
+  advisory: ReturnType<typeof advisoryForExport>;
 }
 
 export interface JsonExport {
@@ -201,10 +269,12 @@ export interface JsonExport {
 export function resultsToJson(
   results: Map<string, CheckResult>,
   table: PricingTable | null,
+  premiumDomains: ReadonlySet<string> = new Set(),
 ): string {
   const rows: JsonExportRow[] = [];
   for (const result of results.values()) {
-    const best = table ? bestEntry(table, result.tld) : null;
+    const zone = pricingZoneFor(result.domain, table, result.tld);
+    const best = table && !premiumDomains.has(result.domain) ? bestEntry(table, zone) : null;
     const entry = best?.entry ?? null;
     const reg = entry?.reg ?? null;
     const renew = entry?.renew ?? null;
@@ -216,8 +286,17 @@ export function resultsToJson(
       priceRenewalCents: renew,
       priceTcoCents: reg != null && renew != null ? reg + 2 * renew : null,
       bestRegistrar: best?.registrarId ?? '',
-      buyUrl: buyUrlFor(result.tld, result.domain, table),
+      buyUrl: best ? buyUrlFor(zone, result.domain, table) : '',
       checkedAt: new Date(result.checkedAt).toISOString(),
+      resultSource: result.source,
+      resultNote: result.note ?? null,
+      registrationPriceSource: priceSourceLabel(table, zone, best?.registrarId ?? null, 'reg'),
+      renewalPriceSource: priceSourceLabel(table, zone, best?.registrarId ?? null, 'renew'),
+      lowestRenewalCents: table && !premiumDomains.has(result.domain) ? bestRenewal(table, zone)?.renew ?? null : null,
+      lowestRenewalRegistrar: table && !premiumDomains.has(result.domain) ? bestRenewal(table, zone)?.registrarId ?? null : null,
+      lowestRenewalSource: priceSourceLabel(table, zone, table && !premiumDomains.has(result.domain) ? bestRenewal(table, zone)?.registrarId ?? null : null, 'renew'),
+      limitations: t('csv.limitationsValue'),
+      advisory: advisoryForExport(result.domain, result.checkedAt),
     });
   }
   const payload: JsonExport = {
@@ -242,7 +321,7 @@ function formatPriceOrEmpty(cents: number | null, settings: Settings): string {
 export function toCsv(rows: ExportRow[], headers: string[]): string {
   const lines: string[] = [headers.join(',')];
   for (const row of rows) {
-    lines.push(EXPORT_FIELDS.map((f) => escapeCsvField(row[f])).join(','));
+    lines.push(exportFields(headers).map((f) => escapeCsvField(row[f] ?? '')).join(','));
   }
   return lines.join('\r\n') + '\r\n';
 }
@@ -257,7 +336,7 @@ export function toTsv(rows: ExportRow[], headers: string[]): string {
   const sanitize = (s: string): string => s.replace(/[\t\r\n]/g, ' ');
   const lines: string[] = [headers.map(sanitize).join('\t')];
   for (const row of rows) {
-    lines.push(EXPORT_FIELDS.map((f) => sanitize(row[f])).join('\t'));
+    lines.push(exportFields(headers).map((f) => sanitize(row[f] ?? '')).join('\t'));
   }
   return lines.join('\n') + '\n';
 }
@@ -270,19 +349,8 @@ export function toMarkdown(rows: ExportRow[], headers: string[]): string {
   const escape = (s: string): string => s.replace(/\|/g, '\\|').replace(/\r?\n/g, '<br>');
   const head = `| ${headers.map(escape).join(' | ')} |`;
   const sep = `| ${headers.map(() => '---').join(' | ')} |`;
-  const body = rows.map((row) => `| ${EXPORT_FIELDS.map((f) => escape(row[f])).join(' | ')} |`);
+  const body = rows.map((row) => `| ${exportFields(headers).map((f) => escape(row[f] ?? '')).join(' | ')} |`);
   return [head, sep, ...body].join('\n') + '\n';
 }
 
-/**
- * Generic CSV file string for plain rows (no fixed shape): BOM prefix, header
- * row, CRLF endings, RFC 4180 quoting. For exports whose columns differ from
- * the results table (drops list).
- */
-export function toSimpleCsv(rows: string[][], headers: string[]): string {
-  const lines: string[] = [headers.map(escapeCsvField).join(',')];
-  for (const row of rows) {
-    lines.push(row.map(escapeCsvField).join(','));
-  }
-  return String.fromCharCode(0xfeff) + lines.join('\r\n') + '\r\n';
-}
+export { toSimpleCsv } from './simple-csv';

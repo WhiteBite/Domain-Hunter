@@ -73,7 +73,7 @@ async function main(): Promise<void> {
       title: 'Check domain availability',
       description:
         'Check domain availability via RDAP (the modern WHOIS replacement). ' +
-        'Returns the honest three-state model: "available", "probably_available", ' +
+        'Returns the evidence-based statuses: "available" (not found in RDAP), "probably_available" (legacy unconfirmed), ' +
         'or "unknown". For low-trust ccTLDs a 404 is corroborated via ' +
         'DNS-over-HTTPS before reporting available. Bare labels (e.g. "example") ' +
         'expand over the given TLDs. Cached hits skip the network. Set ' +
@@ -187,7 +187,7 @@ async function main(): Promise<void> {
       description:
         'Generate candidate domains around a seed name (combinator + mutations + ' +
         'TLD-hacks), check availability via RDAP, attach prices, and flag those ' +
-        'within the given budget. Returns available/probably_available rows ' +
+        'within the given budget. Returns RDAP candidate rows ' +
         'sorted by cheapest registration price. No budget means every available ' +
         'row is flagged withinBudget.',
       inputSchema: {

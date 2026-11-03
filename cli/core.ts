@@ -18,7 +18,7 @@ import { DEFAULT_SETTINGS } from '../src/types';
 import { normalizeDomainInput, parseCandidate } from '../src/core/idn';
 import { runQueue } from '../src/core/queue';
 import { getFresh, put } from '../src/core/cache';
-import { bestEntry, formatPrice, isPromoTrap, tco3 } from '../src/pricing/pricing';
+import { bestEntry, formatPrice, isPromoTrap, tco3, pricingZoneFor } from '../src/pricing/pricing';
 import { displayToUsdCents } from '../src/ui/table-filters';
 import { combinator, DEFAULT_AFFIXES } from '../src/generators/combinator';
 import { mixSyllables } from '../src/generators/syllables';
@@ -241,8 +241,8 @@ export async function runCheckCommand(
         rates,
       });
       for (const row of results) {
-        if (row.status === 'available' || row.status === 'probably_available') {
-          row.price = buildPriceInfo(pricingState.table, row.tld, settings);
+        if (row.status === 'available') {
+          row.price = buildPriceInfo(pricingState.table, pricingZoneFor(row.domain, pricingState.table, row.tld), settings);
         }
       }
     }
@@ -482,7 +482,7 @@ export async function runFindCommand(
   // Build find rows — available/probably_available only, sorted by reg price.
   const available: FindRow[] = [];
   for (const row of checkOutcome.results) {
-    if (row.status !== 'available' && row.status !== 'probably_available') continue;
+    if (row.status !== 'available') continue;
     const reg = row.price?.reg ?? null;
     const withinBudget =
       budgetUsdCents != null

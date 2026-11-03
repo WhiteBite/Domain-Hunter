@@ -97,12 +97,12 @@ export async function mockRdap(page: Page, rules: RdapRule[]): Promise<void> {
     const url = route.request().url();
     const domain = extractDomainFromRdapUrl(url);
     if (!domain) {
-      await route.fulfill({ status: 404, headers: CORS_HEADERS });
+      await route.fulfill({ status: 404, headers: CORS_HEADERS, body: JSON.stringify({ errorCode: 404 }) });
       return;
     }
     const rule = ruleMap.get(domain);
     if (!rule) {
-      await route.fulfill({ status: 404, headers: CORS_HEADERS });
+      await route.fulfill({ status: 404, headers: CORS_HEADERS, body: JSON.stringify({ errorCode: 404 }) });
       return;
     }
     const headers: Record<string, string> = {
@@ -113,7 +113,7 @@ export async function mockRdap(page: Page, rules: RdapRule[]): Promise<void> {
     await route.fulfill({
       status: rule.response.status,
       headers,
-      body: rule.response.body ? JSON.stringify(rule.response.body) : '',
+      body: rule.response.body ? JSON.stringify(rule.response.body) : rule.response.status === 404 ? JSON.stringify({ errorCode: 404 }) : '',
     });
   });
 }
@@ -309,13 +309,13 @@ export async function mockDigMyName(
       }
       const rule = ruleMap.get(domain);
       if (!rule || rule.result === null) {
-        await route.fulfill({ status: 404, headers: CORS_HEADERS });
+        await route.fulfill({ status: 404, headers: CORS_HEADERS, body: JSON.stringify({ errorCode: 404 }) });
         return;
       }
       await route.fulfill({
         status: 200,
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ result: rule.result }),
+        body: JSON.stringify({ result: { domain, ...rule.result } }),
       });
     },
   );

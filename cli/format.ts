@@ -1,4 +1,4 @@
-import { toSimpleCsv } from '../src/ui/csv';
+import { toSimpleCsv } from '../src/ui/simple-csv';
 import type { CheckOutcome, DropsOutcome, PricesOutcome } from './contract';
 
 export type OutputFormat = 'json' | 'table' | 'csv';

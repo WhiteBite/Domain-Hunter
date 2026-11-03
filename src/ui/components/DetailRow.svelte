@@ -7,7 +7,12 @@
   import { settings, pricing } from '../store';
   import { t } from '../../i18n';
   import Tooltip from './Tooltip.svelte';
+  import StatusDetails from './StatusDetails.svelte';
   import type { DigDetail } from '../dig';
+  import { checkDetail } from '../premium-check';
+  import { displayUnicode, hasMixedLookalikeScripts, toAscii } from '../../core/idn';
+  import { checkAdvisory, type Advisory, type AdvisoryProvider } from '../advisory';
+  import { registry } from '../store';
 
   export interface RowData {
     result: CheckResult;
@@ -30,9 +35,22 @@
   }
   let { sid, row, isAvail, isErr, detail, quotes, premiumOverride }: Props = $props();
 
+  let advisory = $state<Advisory | null>(null);
+  let advisoryLoading = $state(false);
+  let advisoryFailed = $state(false);
+  const unicodeDomain = $derived(displayUnicode(row.result.domain));
+  const isRu = $derived(/\.(ru|xn--p1ai)$/.test(toAscii(row.result.domain)));
+  const policyRu = $derived(/\.(ru|xn--p1ai|su)$/.test(toAscii(row.result.domain)));
+  const minimum = $derived($registry.tlds.find(x => toAscii(x.tld) === toAscii(row.result.tld))?.flags?.minYears ?? 0);
+  async function lookup(provider: AdvisoryProvider): Promise<void> {
+    advisoryLoading = true; advisoryFailed = false;
+    advisory = await checkAdvisory(provider, row.result.domain);
+    advisoryFailed = !advisory; advisoryLoading = false;
+  }
+
   const s: Settings = $derived($settings);
   const tmLabel = $derived(trademarkLabel(row.result.domain));
-  const tcoQuote = $derived($pricing?.table && premiumOverride == null ? bestTco($pricing.table, row.result.tld) : null);
+  const tcoQuote = $derived($pricing?.table && row.tco != null && premiumOverride == null ? bestTco($pricing.table, row.result.tld) : null);
 
   function fmtDate(ms: number): string {
     return new Date(ms).toISOString().slice(0, 10);
@@ -60,6 +78,14 @@
           <span class="detail-label">{t('price.renewal')}</span>
           <span class="detail-value nums">{formatSourcePrice($pricing?.table ?? null, row.result.tld, row.renewalRegistrarId, 'renew', row.renewal, s)}</span>
         </div>
+        <span class="detail-muted">{t('adv.source', { source: row.result.source })} · {t('adv.requested', { date: new Date(row.result.checkedAt).toLocaleString() })}</span>
+        {#if unicodeDomain !== row.result.domain}
+          <span class="detail-muted">{t('idn.unicode', { domain: unicodeDomain })}</span>
+          <span class="detail-muted">{t('idn.ascii', { domain: row.result.domain })}</span>
+        {/if}
+        {#if hasMixedLookalikeScripts(row.result.domain)}<span class="detail-note">{t('idn.mixed')}</span>{/if}
+        {#if minimum > 1}<span class="detail-note">{t('price.minTerm', { n: minimum })}</span>{/if}
+        {#if policyRu}<a href="https://cctld.ru/help/faq/" target="_blank" rel="noopener noreferrer" class="detail-buy">{t('policy.ru')}</a>{/if}
         {#if row.result.note}
           <div class="detail-note">{row.result.note}</div>
         {/if}
@@ -87,20 +113,13 @@
       <!-- Column 3: registrar comparison (1fr) with a shimmer placeholder
            while the on-demand detail loads — no floating text. -->
       <div class="detail-col detail-registrars-col">
-        {#if !detail || detail.loading}
-          <div class="detail-shimmer" aria-hidden="true">
-            <span class="shimmer-bar"></span>
-            <span class="shimmer-bar"></span>
-            <span class="shimmer-bar"></span>
-          </div>
-        {:else}
-          {#if quotes.length >= 2}
+        {#if quotes.length >= 1}
             <div class="detail-registrars" data-testid={`results-row-registrars-${sid}`}>
               <Tooltip text={t('tooltip.registrars')}>
                 <span class="detail-label">{t('results.detail.registrars')}</span>
               </Tooltip>
               <span class="detail-reg-list nums">
-                {#each quotes.slice(0, 4) as quote, i}
+                {#each quotes as quote, i}
                   <a
                     class="detail-reg-item"
                     class:cheapest={i === 0}
@@ -112,26 +131,52 @@
                     data-testid={`results-row-registrar-${sid}-${quote.id}`}
                   >
                     <span class="detail-reg-dot" aria-hidden="true"></span>
-                    {quote.name} — {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'reg')}) / {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}{#if quote.renew != null} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'renew')}){/if}
+                    {quote.name} — {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)}{#if quote.reg != null} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'reg')}){/if} / {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}{#if quote.renew != null} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'renew')}){/if}
                     {#if $pricing?.table.sourcePromotions?.[quote.id]?.includes(row.result.tld)} ({t('price.promo')}){/if}
                   </a>
                 {/each}
-                {#if quotes.length > 4}
-                  <span
-                    class="detail-reg-more"
-                    title={`${t('results.detail.registrars')}: ${quotes.length}`}
-                  >
-                    {t('results.detail.registrars.more', { n: quotes.length - 4 })}
-                  </span>
-                {/if}
               </span>
             </div>
           {/if}
-          {#if detail.failed}
+        {#if detail?.premium || detail?.likely}<span class="detail-muted">{t('price.disclaimer')}</span>{/if}
+        <span class="detail-label">{t('adv.heading')}</span>
+        <span class="detail-muted">{t('adv.hint')}</span>
+        <div class="detail-extra">
+          <button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('dotsweep')} data-testid={`results-row-dotsweep-${sid}`}>{t('adv.dotsweep')}</button>
+          <button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('whodat')} data-testid={`results-row-whodat-${sid}`}>{t('adv.whodat')}</button>
+          {#if isRu}<button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('cctld')} data-testid={`results-row-cctld-${sid}`}>{t('adv.cctld')}</button>{/if}
+        </div>
+        {#if advisoryLoading}<span class="detail-muted">{t('adv.loading')}</span>
+        {:else if advisoryFailed}<span class="detail-muted" role="status">{t('adv.failed')}</span>
+        {:else if advisory}
+          <div class="detail-extra" role="status" data-testid={`results-row-advisory-${sid}`}>
+            <span>{advisory.verdict === 'registered' ? t('adv.registered') : advisory.verdict === 'not_found' ? t('adv.notfound') : t('adv.unknown')}</span>
+            <span>{t('adv.source', { source: `${advisory.provider} / ${advisory.source}${advisory.confidence ? ` / ${advisory.confidence}` : ''}` })}</span>
+            <span>{t('adv.requested', { date: new Date(advisory.requestedAt).toLocaleString() })}</span>
+            <span>{advisory.dataAt ? t('adv.dataTime', { date: new Date(advisory.dataAt).toLocaleString() }) : t('adv.dataUnknown')}</span>
+            {#if advisory.cached}<span>{t('adv.cache')}</span>{/if}
+            {#if advisory.card?.expiresAt}<span>{t('card.expires')}: {fmtDate(advisory.card.expiresAt)}</span>{/if}
+            {#if advisory.card?.statuses.length}<StatusDetails statuses={advisory.card.statuses} />{/if}
+            {#if advisory.card?.freeDate}<span>{t('card.freeDate')}: {fmtDate(advisory.card.freeDate)}</span>{/if}
+            {#if advisory.card}<span>{t('card.dateHint')}</span><a href="https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en" target="_blank" rel="noopener noreferrer">{t('card.statusHelp')}</a>{/if}
+          </div>
+        {/if}
+        <button class="detail-check" type="button" disabled={detail?.loading ?? false}
+          onclick={() => void checkDetail(row.result.domain)} title={t('results.detail.dig.hint')}
+          data-testid={`results-row-dig-check-${sid}`}>{t('results.detail.dig.check')}</button>
+        <span class="detail-muted">{t('results.detail.dig.hint')}</span>
+        {#if detail?.loading}
+          <div class="detail-shimmer" aria-hidden="true"><span class="shimmer-bar"></span></div>
+        {:else if detail?.failed}
             <span class="detail-muted">{t('results.detail.failed')}</span>
-          {:else}
+        {:else if detail}
             <div class="detail-extra">
-              {#if detail.registrar}
+              {#if detail.availability}
+                <span class="detail-muted" data-testid={`results-row-dig-availability-${sid}`}>
+                  {detail.availability === 'available' ? t('results.detail.dig.available') : detail.availability === 'unavailable' ? t('results.detail.dig.unavailable') : t('results.detail.dig.unknown')}
+                </span>
+              {/if}
+              {#if detail.registrar && !detail.premium && !detail.likely}
                 <span class="detail-cheap">
                   {t('results.detail.cheapest', {
                     registrar: detail.registrar,
@@ -142,13 +187,12 @@
                   })}
                 </span>
               {/if}
-              {#if detail.url}
+              {#if detail.url && !detail.premium && !detail.likely}
                 <a class="detail-buy" href={detail.url} target="_blank" rel="noopener noreferrer" data-testid={`results-row-detail-buy-${sid}`}>
                   {t('results.detail.buy')}
                 </a>
               {/if}
             </div>
-          {/if}
         {/if}
         <span class="detail-trademark">
           <a
@@ -190,6 +234,9 @@
                 <span class="detail-value nums">{fmtDate(card.expiresAt)}</span>
               </div>
             {/if}
+            {#if card.freeDate != null}
+              <div class="detail-cell"><span class="card-k">{t('card.freeDate')}</span><span class="detail-value nums">{fmtDate(card.freeDate)}</span></div>
+            {/if}
             {#if card.changedAt != null}
               <div class="detail-cell">
                 <span class="card-k">{t('card.changed')}</span>
@@ -197,12 +244,10 @@
               </div>
             {/if}
           </div>
+          <span class="detail-muted">{t('card.dateHint')}</span>
+          <a href="https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en" target="_blank" rel="noopener noreferrer" class="detail-buy">{t('card.statusHelp')}</a>
           {#if card.statuses.length > 0}
-            <div class="card-statuses" role="list" aria-label={t('card.statuses.aria')}>
-              {#each card.statuses as st (st)}
-                <span class="chip-tag" role="listitem">{st}</span>
-              {/each}
-            </div>
+            <StatusDetails statuses={card.statuses} />
           {/if}
           {#if card.nameservers.length > 0}
             <div class="card-ns">
@@ -340,10 +385,16 @@
     background: var(--green-solid);
     border-color: var(--green-solid);
   }
-  .detail-reg-more {
-    color: var(--text-tertiary);
-  }
 
+  .detail-check {
+    align-self: flex-start;
+    padding: 4px 8px;
+    color: var(--text);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
   .detail-extra {
     display: flex;
     align-items: center;
@@ -380,12 +431,6 @@
 
   .card-k {
     color: var(--text-tertiary);
-  }
-
-  .card-statuses {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1);
   }
 
   .card-ns {

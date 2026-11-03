@@ -21,22 +21,38 @@ const ENDPOINTS: DohEndpoint[] = [
 
 interface DohResponse {
   Status?: number;
+  Answer?: Array<{ name?: string; type?: number; data?: string }>;
 }
 
 export async function queryNs(
   domain: string,
   fetchImpl: typeof fetch = fetch,
+  signal?: AbortSignal,
 ): Promise<DohOutcome> {
   for (const endpoint of ENDPOINTS) {
     try {
-      const init: RequestInit = endpoint.accept
-        ? { headers: { Accept: endpoint.accept } }
-        : {};
-      const resp = await fetchImpl(endpoint.buildUrl(domain), init);
+      const ctrl = new AbortController();
+      const abort = (): void => ctrl.abort();
+      signal?.addEventListener('abort', abort);
+      if (signal?.aborted) ctrl.abort();
+      const timer = setTimeout(abort, 8000);
+      let resp: Response;
+      try {
+        const init: RequestInit = { signal: ctrl.signal, ...(endpoint.accept ? { headers: { Accept: endpoint.accept } } : {}) };
+        resp = await fetchImpl(endpoint.buildUrl(domain), init);
+      } finally {
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', abort);
+      }
       if (!resp.ok) continue;
       const data = (await resp.json()) as DohResponse;
       if (data.Status === 3) return 'nxdomain';
-      if (data.Status === 0) return 'noerror';
+      if (data.Status === 0) {
+        const name = domain.toLowerCase().replace(/\.$/, '');
+        if (Array.isArray(data.Answer) && data.Answer.some((rr) =>
+          rr.type === 2 && typeof rr.name === 'string' && rr.name.toLowerCase().replace(/\.$/, '') === name && typeof rr.data === 'string' && rr.data.length > 0)) return 'noerror';
+        continue;
+      }
       if (data.Status === 2) continue; // SERVFAIL → try the next resolver
       return 'error';
     } catch {

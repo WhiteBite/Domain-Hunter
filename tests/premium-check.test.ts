@@ -9,6 +9,7 @@ import {
   premiumChecking,
   runPremiumCheck,
   toggleDetail,
+  checkDetail,
 } from '../src/ui/premium-check';
 import { results, runState, pricing } from '../src/ui/store';
 import type { CheckResult, PricingTable } from '../src/types';
@@ -67,7 +68,7 @@ describe('premiumCheckEligibleOf', () => {
     const eligible = premiumCheckEligibleOf(
       map,
       TABLE,
-      { 'a.com': detail({ failed: false }) },
+      { 'a.com': detail({ failed: false, checkedAt: Date.now() }) },
       { 'b.com': 50000 },
     );
     expect(eligible).toEqual([]);
@@ -93,9 +94,11 @@ describe('toggleDetail', () => {
 
   it('seeds a loading entry and applies the fetched detail', async () => {
     await toggleDetail('a.com');
+    expect(get(details)['a.com']).toBeUndefined();
+    await checkDetail('a.com');
     const d = get(details)['a.com'];
     expect(d?.premium).toBe(true);
-    expect(get(premiumOverrides)['a.com']).toBe(2500);
+    expect(get(premiumOverrides)['a.com']).toBeUndefined();
   });
 });
 
@@ -111,7 +114,7 @@ describe('runPremiumCheck', () => {
     );
     await runPremiumCheck(fetcher);
     expect(fetcher).toHaveBeenCalledTimes(2);
-    expect(get(premiumOverrides)['a.com']).toBe(2500);
+    expect(get(premiumOverrides)['a.com']).toBeUndefined();
     expect(get(premiumFound)).toBe(1);
     expect(get(premiumChecking)).toBe(false);
     expect(Object.keys(get(details)).sort()).toEqual(['a.com', 'b.com']);
@@ -128,5 +131,18 @@ describe('runPremiumCheck', () => {
     results.set(new Map());
     await runPremiumCheck(fetcher);
     expect(fetcher).not.toHaveBeenCalled();
+  });
+});
+
+describe('premium exports', () => {
+  it('suppresses standard prices while a known premium flag is being retried or a retry failed', async () => {
+    const { premiumDomainsForExport } = await import('../src/ui/premium-check');
+    const map = new Map<string, CheckResult>([['a.com', result('a.com', 'available')]]);
+    details.set({ 'a.com': detail({ checkedAt: Date.now(), premium: true, loading: true }) });
+    expect(premiumDomainsForExport(map).has('a.com')).toBe(true);
+    details.set({ 'a.com': detail({ checkedAt: Date.now(), premium: true, failed: true }) });
+    expect(premiumDomainsForExport(map).has('a.com')).toBe(true);
+    details.set({ 'a.com': detail({ checkedAt: Date.now() - 300_001, premium: true }) });
+    expect(premiumDomainsForExport(map).has('a.com')).toBe(false);
   });
 });

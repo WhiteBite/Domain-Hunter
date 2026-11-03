@@ -3,7 +3,7 @@
  *
  * Storage keys (from src/ui/settings.ts KEYS + src/ui/store.ts):
  *   dh:v1:settings   — Settings JSON (merged with DEFAULT_SETTINGS on load)
- *   dh:v1:cache      — Record<string, CacheEntry> (domain → {status, source, ts, tld})
+ *   dh:v2:cache      — Record<string, CacheEntry> (domain → {status, source, ts, tld})
  *   dh:v1:pricing    — { table: PricingTable, fetchedAt: number }
  *   dh:v1:bootstrap  — { json: unknown, fetchedAt: number }
  *   dh:v1:run        — RunSnapshot { pending, tlds, ignoreCache, ts }
@@ -13,7 +13,7 @@
  * Read timing (determines whether pre-boot or post-boot seeding is needed):
  *   - genCandidates (dh:v1:gentray): read at MODULE INIT in store.ts → MUST seed before goto
  *   - settings (dh:v1:settings): read via loadSettings() at App boot → MUST seed before goto
- *   - cache (dh:v1:cache): read LAZILY on first getFresh() call → can seed after goto (before any check)
+ *   - cache (dh:v2:cache): read LAZILY on first getFresh() call → can seed after goto (before any check)
  *   - pricing (dh:v1:pricing): read via readCache() in loadPricing() at boot → MUST seed before goto
  *   - bootstrap (dh:v1:bootstrap): read in fetchBootstrap() at boot → MUST seed before goto
  *
@@ -64,7 +64,7 @@ export async function setupPage(page: Page): Promise<void> {
  * goto. The init script first clears all dh:* keys (clean slate), then writes
  * each seed entry as JSON. This runs on every navigation of this page,
  * ensuring deterministic state. The seed keys must be full localStorage key
- * names (e.g. 'dh:v1:settings', 'dh:v1:cache').
+ * names (e.g. 'dh:v1:settings', 'dh:v2:cache').
  *
  * Default-seeds a fresh dh:v1:fx so the boot-time FX refresh stays offline.
  * Note: addInitScript is cumulative — calling openApp() multiple times stacks
@@ -130,7 +130,7 @@ export async function seedSettings(page: Page, partial: Partial<Settings>): Prom
 }
 
 /**
- * Write dh:v1:cache as a Record<string, CacheEntry>.
+ * Write dh:v2:cache as a Record<string, CacheEntry>.
  * Cache is loaded lazily on first getFresh() call, so if no check has run
  * yet, the seed takes effect without a reload.
  */
@@ -140,7 +140,7 @@ export async function seedCache(
 ): Promise<void> {
   await page.evaluate(
     (e: Record<string, CacheEntry>) =>
-      localStorage.setItem('dh:v1:cache', JSON.stringify(e)),
+      localStorage.setItem('dh:v2:cache', JSON.stringify(e)),
     entries,
   );
 }

@@ -414,7 +414,7 @@ test.describe('Watchlist — silent re-check of favorited domains', () => {
         'dh:v1:pricing': seedPricingTable(),
         'dh:v1:bootstrap': { json: ianaBootstrap(), fetchedAt: Date.now() },
         'dh:v1:favorites': ['zzqxwatch.com'],
-        'dh:v1:watch': { 'zzqxwatch.com': { status: 'taken', ts: Date.now() } },
+        'dh:v2:watch': { 'zzqxwatch.com': { status: 'taken', ts: Date.now() } },
       },
     });
     await page.waitForSelector('[data-testid="check-input-domains"]', {
@@ -482,7 +482,7 @@ test.describe('Watchlist — silent re-check of favorited domains', () => {
         'dh:v1:favorites': ['zzqxpricedrop.com'],
         // Watch map seeded with same status as the RDAP result → no status
         // change, so the only watch change is the price drop.
-        'dh:v1:watch': { 'zzqxpricedrop.com': { status: 'available', ts: Date.now() } },
+        'dh:v2:watch': { 'zzqxpricedrop.com': { status: 'available', ts: Date.now() } },
         // Baseline $20.00 (2000 cents); cheapest .com in seedPricingTable is
         // $10.44 (1044 cents, cloudflare) → 47.8% drop ≥ 5% threshold.
         'dh:v1:watchprices': { 'zzqxpricedrop.com': { cents: 2000, ts: Date.now() } },

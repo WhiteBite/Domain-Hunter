@@ -84,6 +84,7 @@ async function expandTransientUi(page: Page): Promise<void> {
   // Open the detail row of the available domain (renders the detail-buy link).
   await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');
   await page.click('[data-testid="results-row-detail-zzqxtest1-com"]');
+  await page.click('[data-testid="results-row-dig-check-zzqxtest1-com"]');
   await expect(page.locator('[data-testid^="results-row-detail-buy-"]')).toBeVisible({
     timeout: 10_000,
   });

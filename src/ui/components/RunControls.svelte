@@ -96,7 +96,7 @@
           for (const r of hits) map.set(r.domain, r);
           results.set(map);
           const available = hits.filter(
-            (r) => r.status === 'available' || r.status === 'probably_available',
+            (r) => r.status === 'available',
           ).length;
           const errors = hits.filter((r) => r.status === 'error').length;
           runState.set({
@@ -313,7 +313,7 @@
     completedByEngine = new Set();
     cacheHitsCount = cacheHits.length;
     cacheAvailable = cacheHits.filter(
-      (r) => r.status === 'available' || r.status === 'probably_available',
+      (r) => r.status === 'available',
     ).length;
     cacheErrors = cacheHits.filter((r) => r.status === 'error').length;
     lastSnapshotDone = cacheHitsCount;

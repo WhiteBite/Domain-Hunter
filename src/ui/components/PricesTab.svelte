@@ -32,7 +32,7 @@
   let sortMode = $state<SortMode>('reg');
   let visibleCount = $state(100);
   let hideUnpriced = $state(false);
-  let showAllRegistrars = $state(false);
+  let showAllRegistrars = $state(true);
 
   const table = $derived($pricing?.table ?? null);
   const hasRegru = $derived(table ? Object.values(table.tlds).some((entries) => !!entries.regru) : false);

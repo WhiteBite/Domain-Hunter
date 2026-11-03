@@ -336,7 +336,7 @@ test.describe('Cross-cutting features', () => {
 
     // Header row (translated — test runs in English locale)
     expect(content).toContain(
-      'Domain,Status,TLD,First year,Renewal,Cheapest registrar,Buy URL,Checked at',
+      'Domain,Status,TLD,First year,Renewal at registration seller,Cheapest registrar,Buy URL,Checked at,Result source,Result note,Registration price source,Renewal price source,Lowest renewal,Lowest renewal seller,Lowest renewal source,Limitations',
     );
 
     // Domain rows with correct statuses

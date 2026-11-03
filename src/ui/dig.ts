@@ -4,8 +4,8 @@
  * Extracted from ResultsTable.toggleDetail so both the on-demand detail row
  * and the bulk "check premium prices" toolbar action share one code path.
  *
- * DigMyName is allowlisted (SPEC §7/§17): no auth, CORS `*`, rate-limited
- * client-side to on-demand clicks. The 8s timeout matches the original
+ * DigMyName is allowlisted (SPEC §7/§17): no auth, rate-limited client-side to on-demand clicks. Browser CORS
+ * support depends on the third-party service. The 8s timeout matches the original
  * per-row fetch.
  */
 
@@ -15,7 +15,10 @@ export interface DigDetail {
   failed?: boolean;
   premium?: boolean;
   likely?: boolean;
-  /** Registry premium price in USD (not cents). null when not reported. */
+  /** Third-party indication, not a registrar confirmation. */
+  availability?: 'available' | 'unavailable' | 'unknown';
+  checkedAt?: number;
+  /** Standard-tier API price; not a premium offer and never a price override. */
   price: number | null;
   registrar: string | null;
   /** Cheapest registrar's registration price in USD (not cents). */
@@ -24,6 +27,10 @@ export interface DigDetail {
 }
 
 const DIG_TIMEOUT_MS = 8000;
+// Limit all on-demand requests, not just each individual bulk action.
+const requestTimes: number[] = [];
+const DIG_REQUEST_CAP = 50;
+const DIG_WINDOW_MS = 60_000;
 const DIG_ENDPOINT =
   'https://api.digmyname.com/functions/v1/public-api/check?domain=';
 
@@ -34,20 +41,26 @@ const DIG_ENDPOINT =
  */
 export async function fetchPremiumDetail(domain: string): Promise<DigDetail> {
   try {
+    const now = Date.now();
+    while (requestTimes.length && (requestTimes[0] ?? now) <= now - DIG_WINDOW_MS) requestTimes.shift();
+    if (requestTimes.length >= DIG_REQUEST_CAP) throw new Error('DigMyName rate limit');
+    requestTimes.push(now);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), DIG_TIMEOUT_MS);
-    const res = await fetch(
-      `${DIG_ENDPOINT}${encodeURIComponent(domain)}`,
-      { signal: ctrl.signal },
-    );
-    clearTimeout(timer);
+    let res: Response;
+    try {
+      res = await fetch(`${DIG_ENDPOINT}${encodeURIComponent(domain)}`, { signal: ctrl.signal });
+    } finally {
+      clearTimeout(timer);
+    }
     if (!res.ok) throw new Error(String(res.status));
     const json = (await res.json()) as { result?: Record<string, unknown> };
     const r = json.result;
-    if (!r) throw new Error('no result');
+    if (!r || typeof r.domain !== 'string' || r.domain.toLowerCase().replace(/\.$/, '') !== domain.toLowerCase().replace(/\.$/, '')) throw new Error('invalid result');
     const cheapest = (r.cheapest_registrar ?? null) as Record<string, unknown> | null;
     const priceUsd = typeof r.price_usd === 'number' ? r.price_usd : null;
     return {
+      availability: r.uncertain === false && typeof r.available === 'boolean' ? (r.available ? 'available' : 'unavailable') : 'unknown',
       premium: r.premium === true,
       likely: r.likely_premium === true,
       price: priceUsd,
@@ -64,14 +77,4 @@ export async function fetchPremiumDetail(domain: string): Promise<DigDetail> {
   } catch {
     return { failed: true, price: null, registrar: null, regPrice: null, url: null };
   }
-}
-
-/** True when a parsed detail indicates a premium domain with a numeric price. */
-export function isPremiumPriced(d: DigDetail): boolean {
-  return (d.premium === true || d.likely === true) && typeof d.price === 'number';
-}
-
-/** Convert a DigDetail.price (USD) to the cents override used by the price cell. */
-export function premiumOverrideCents(d: DigDetail): number | null {
-  return typeof d.price === 'number' ? Math.round(d.price * 100) : null;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resultsToCsvRows, buildCsv, resultsToExportRows, toCsv, toTsv, toMarkdown, toSimpleCsv, buyUrlFor, resultsToJson } from '../src/ui/csv';
+import { resultsToCsvRows, buildCsv, clipboardRows, resultsToExportRows, toCsv, toTsv, toMarkdown, toSimpleCsv, buyUrlFor, resultsToJson } from '../src/ui/csv';
 import type { ExportRow } from '../src/ui/csv';
 import type { CheckResult, PricingTable, Settings } from '../src/types';
 import { DEFAULT_SETTINGS } from '../src/types';
@@ -337,5 +337,64 @@ describe('toSimpleCsv', () => {
     const csv = toSimpleCsv([['a,b.com', 'x"y']], ['A', 'B']);
     expect(csv).toContain('"a,b.com"');
     expect(csv).toContain('"x""y"');
+  });
+});
+
+describe('premium advisory exports', () => {
+  it('does not export standard prices or a cheapest seller as confirmed premium quotes', () => {
+    const results = new Map<string, CheckResult>([
+      ['myapp.com', { domain: 'myapp.com', tld: 'com', status: 'available', source: 'rdap', checkedAt: 0 }],
+    ]);
+    const flagged = new Set(['myapp.com']);
+    const row = resultsToCsvRows(results, table, settings, flagged)[0];
+    expect(row).toMatchObject({ priceFirstYear: '—', priceRenewal: '—', bestRegistrar: '', buyUrl: '' });
+    const json = JSON.parse(resultsToJson(results, table, flagged));
+    expect(json.rows[0]).toMatchObject({ priceFirstYearCents: null, priceRenewalCents: null, priceTcoCents: null, bestRegistrar: '', buyUrl: '' });
+  });
+});
+
+describe('export provenance and independent renewals', () => {
+  it('identifies the seller and source for each distinct quote, with limitations', () => {
+    const quoteTable: PricingTable = {
+      generatedAt: '2026-01-01T00:00:00Z', sources: [], coupons: {},
+      regruUpdatedAt: '2026-01-02T00:00:00Z', hostimanUpdatedAt: '2026-01-03T00:00:00Z',
+      tlds: { ru: { regru: { reg: 100, renew: 900, transfer: null }, hostiman: { reg: 200, renew: 300, transfer: null } } },
+    };
+    const results = new Map<string, CheckResult>([['sample.ru', { domain: 'sample.ru', tld: 'ru', status: 'unknown', source: 'doh', checkedAt: 1, note: 'no reliable RDAP' }]]);
+    const row = resultsToCsvRows(results, quoteTable, settings)[0];
+    expect(row).toMatchObject({ resultSource: 'doh', resultNote: 'no reliable RDAP', bestRegistrar: 'regru', priceRenewal: '$9.00', lowestRenewal: '$3.00', lowestRenewalSeller: 'hostiman' });
+    expect(row?.regSource).toContain('2026-01-02');
+    expect(row?.lowestRenewalSource).toContain('2026-01-03');
+    expect(row?.limitations).toContain('Not a registration guarantee');
+    const json = JSON.parse(resultsToJson(results, quoteTable));
+    expect(json.rows[0]).toMatchObject({ resultSource: 'doh', resultNote: 'no reliable RDAP', priceRenewalCents: 900, lowestRenewalCents: 300, lowestRenewalRegistrar: 'hostiman', advisory: null });
+    expect(json.rows[0].lowestRenewalSource).toContain('2026-01-03');
+  });
+});
+
+
+describe('clipboard provenance', () => {
+  it('attaches actual sellers, current source and limitations and suppresses a premium flag at copy time', () => {
+    const prices: PricingTable = { generatedAt: '2026-01-01', sources: [], coupons: {},
+      regruUpdatedAt: '2026-01-02', hostimanUpdatedAt: '2026-01-03',
+      tlds: { ru: { regru: { reg: 100, renew: 900, transfer: null }, hostiman: { reg: 200, renew: 300, transfer: null } } } };
+    const data = new Map<string, CheckResult>([['sample.ru', { domain: 'sample.ru', tld: 'ru', status: 'unknown', source: 'doh', checkedAt: 1, note: 'test note' }]]);
+    const visible: ExportRow[] = [{ domain: 'sample.ru', status: 'available', priceFirstYear: '$1', priceRenewal: '$3', priceTco: '$8',
+      registrationSeller: 'regru', renewalSeller: 'hostiman', tcoSeller: 'hostiman' }];
+    const row = clipboardRows(visible, data, prices, settings, new Set())[0];
+    expect(row).toMatchObject({ status: 'unknown', registrationSeller: 'regru', renewalSeller: 'hostiman', tcoSeller: 'hostiman', resultSource: 'doh', resultNote: 'test note' });
+    expect(row?.registrationSource).toContain('2026-01-02');
+    expect(row?.renewalSource).toContain('2026-01-03');
+    expect(row?.tcoSource).toContain('2026-01-03');
+    expect(row?.limitations).toContain('Not a registration guarantee');
+    const flagged = clipboardRows(visible, data, prices, settings, new Set(['sample.ru']))[0];
+    expect(flagged).toMatchObject({ priceFirstYear: '', priceRenewal: '', priceTco: '', registrationSeller: '', renewalSeller: '', tcoSeller: '', registrationSource: '', renewalSource: '', tcoSource: '' });
+    expect(clipboardRows(visible, new Map(), prices, settings, new Set())).toEqual([]);
+    const headers = ['Domain', 'Status', 'Registration', 'Renewal', 'TCO', 'Reg seller', 'Renew seller', 'TCO seller', 'Reg source', 'Renew source', 'TCO source', 'Checked at', 'Source', 'Note', 'Limitations', 'Advisory'];
+    for (const output of [toCsv([row!], headers), toTsv([row!], headers), toMarkdown([row!], headers)]) {
+      expect(output).toContain('test note');
+      expect(output).toContain('hostiman');
+      expect(output).toContain('Not a registration guarantee');
+    }
   });
 });
