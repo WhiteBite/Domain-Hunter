@@ -60,7 +60,7 @@ export async function runQueue(
 
   const recordResult = (result: CheckResult): void => {
     done += 1;
-    if (result.status === 'available' || result.status === 'probably_available') available += 1;
+    if (result.status === 'available') available += 1;
     if (result.status === 'error') errors += 1;
     batch.push(result);
     if (flushTimer == null) flushTimer = setTimeout(flush, 50);

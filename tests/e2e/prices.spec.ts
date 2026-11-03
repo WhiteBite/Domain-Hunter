@@ -108,9 +108,11 @@ test.describe('Prices tab', () => {
     await openApp(page, { seed: { 'dh:v1:pricing': seed } });
     await gotoPrices(page);
     const headers = page.locator('thead th');
-    await expect(headers).toHaveCount(9); // zone + 6 sellers + 2 totals
+    await expect(headers).toHaveCount(10); // all sellers are visible by default
     const toggle = page.getByTestId('prices-toggle-registrars');
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await toggle.click();
+    await expect(headers).toHaveCount(9);
     await toggle.click();
     await expect(headers).toHaveCount(10);
     await expect(page.locator('thead')).toContainText('NameSilo');
@@ -205,7 +207,7 @@ test.describe('Prices tab', () => {
     await gotoPrices(page);
     await expect(page.getByTestId('prices-sprinthost-note')).toContainText('2026-11-01');
     const toggle = page.getByTestId('prices-toggle-registrars');
-    if (await toggle.count()) await toggle.click();
+    if (await toggle.count() && await toggle.getAttribute('aria-pressed') === 'false') await toggle.click();
     await expect(page.locator('thead')).toContainText('Sprinthost');
     await page.getByTestId('prices-search').fill('xyz');
     const xyz = page.getByTestId('prices-row-xyz');
@@ -409,7 +411,7 @@ test.describe('Prices tab', () => {
     expect(title).toContain('Porkbun');
   });
 
-  test('buy link uses deep-link registrar; comparison cells show no-deeplink title', async ({ page }) => {
+  test('buy link matches the displayed cheapest seller; comparison cells show no-deeplink title', async ({ page }) => {
     // App opens on Check tab. Narrow to .com and run a check.
     await page.click('[data-testid="tld-button-clear"]');
     await page.click('[data-testid="tld-picker-toggle"]');
@@ -426,8 +428,7 @@ test.describe('Prices tab', () => {
     const buy = page.locator('[data-testid="results-row-buy-zzqxtest1-com"]');
     await expect(buy).toBeVisible();
     const href = await buy.evaluate((el: HTMLElement) => el.getAttribute('href') ?? '');
-    expect(href).toContain('porkbun.com/checkout/search');
-    expect(href).toContain('zzqxtest1.com');
+    expect(href).toBe('https://domains.cloudflare.com/');
 
     // Open details to see comparison cells.
     await page.click('[data-testid="results-row-menu-zzqxtest1-com"]');

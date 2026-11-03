@@ -32,9 +32,9 @@ Domain Hunter calls registry **RDAP** endpoints directly from the browser (Veris
 Paste up to 3,000 domain names, pick the TLDs you care about, and hit start. Results stream live into a sortable table with status badges, pricing columns, and per-domain buy links. Interrupted runs can be resumed later.
 
 - **148 curated TLD zones** across 18 registry infrastructures (`com net io ai dev app xyz me co uk de nl fr ch so ly tech site online store cloud` and more). New gTLDs are discovered automatically via the live IANA RDAP bootstrap, and a "+N" chip in the zone picker surfaces zones delegated since your last visit. Results stream live into a sortable table with status badges, pricing columns, and per-domain buy links. Interrupted runs can be resumed later. Run history with one-click restore keeps your last search ready after reload.
-- **Honest three-state results** — `available`, `probably_available`, or `unknown`. For low-trust ccTLDs a 404 is corroborated with DNS-over-HTTPS (Cloudflare + Google DNS) before anything is called available. Domain Hunter never guesses.
+- **Evidence-based results** — a validated high-trust registry 404 means “not found in RDAP”, not guaranteed registration. DNS-only and low-trust negatives remain `unknown`; confirm availability with the registrar.
 - **RDAP registry card** — every taken domain expands into its registry record: registration and expiry dates, age, registrar, EPP status codes, and nameservers.
-- **Cloudflare RDAP aggregator fallback** — when the primary RDAP fetch fails, `rdap.cloudflare.com/domain/{domain}` is queried once as a transport fallback and as a contradiction cross-check for low-trust zones. A taken domain must never be reported free.
+- **Optional second opinion** — an explicit button in the detail row queries DigMyName; a conflicting result is marked unconfirmed, not treated as proof of registration or availability.
 - **Polite to registries** — per-infrastructure AIMD rate limiting (Google Registry's strict ~1 rps is honored), automatic backoff on HTTP 429 with `Retry-After`, and result caching in `localStorage`.
 
 ## How to compare domain prices across registrars
@@ -239,8 +239,8 @@ WHOIS returns unstructured text — a human-readable wall of paragraphs that is 
 ## How it works
 
 1. The browser talks **directly to registry RDAP endpoints** — all endpoints used by Domain Hunter have open CORS, so no server or proxy is required.
-2. **HTTP 200 → taken**, **404 → not in the registry** (then trust rules apply: high-trust gTLD 404s are corroborated by a DoH NS probe before reporting `available` — NXDOMAIN → available, live NS → taken; low-trust ccTLDs are double-checked via DNS-over-HTTPS and reported as `probably_available`).
-3. **429 / 5xx → retry with backoff**; on persistent network or CORS failures the Cloudflare RDAP aggregator is tried once, then DoH corroboration takes over.
+2. **Valid matching RDAP 200 → taken**. A valid high-trust registry 404 means not found in RDAP; matching DNS NS records veto it. Low-trust or malformed replies stay unknown.
+3. **429 / 5xx → retry with backoff**; DNS alone cannot establish that a name is registrable. Use a registrar to confirm the final status and price.
 4. Results are cached locally with a configurable TTL; re-checking is one click, and an "ignore cache" toggle forces fresh lookups.
 
 ## Supported zones
@@ -272,7 +272,7 @@ Registries expose RDAP (Registration Data Access Protocol, the modern successor 
 
 ### Is the "available" status accurate?
 
-For ICANN-contracted gTLD infrastructure (Verisign, Google, Identity Digital, …) an RDAP 404 is authoritative. For ccTLDs with less reliable RDAP, Domain Hunter corroborates with DNS NS lookups via DoH and reports `probably_available` instead of overpromising. A domain can still be registered by someone else seconds later — a check is a snapshot, so buy promptly.
+A valid 404 from a trusted registry means the name was not found in RDAP, not that it is guaranteed registrable. Low-trust or DNS-only negatives are unconfirmed. Always verify the final status and price at a registrar.
 
 ### Is checking domains via RDAP legal and polite to registries?
 
@@ -292,7 +292,7 @@ Yes. The production build is a single `index.html` file that works from `file://
 
 ### How is "available" determined for ccTLDs?
 
-A ccTLD 404 triggers two parallel checks: a DNS-over-HTTPS NS probe (Cloudflare + Google DNS) and, when available, a Cloudflare RDAP aggregator query. If the aggregator returns 200 the domain is marked `taken` regardless of the DoH outcome. Otherwise the DoH result stands: NXDOMAIN → `probably_available`, NOERROR → `taken`, other → `unknown`.
+An untrusted 404 and negative DNS result remain `unknown`. A matching NS record indicates delegation; a registrar must confirm whether registration is possible.
 
 ### Where is my data stored?
 
@@ -343,7 +343,7 @@ If Domain Hunter saved you time, a ⭐ helps others find it too.
 
 - **One self-contained HTML file** — the whole app compiles into a single `dist/index.html` that works offline from `file://`: no server, no API keys, no tracking.
 - **Installable (PWA)** — the hosted build ships a web app manifest and an offline service worker, so it installs to your desktop/home screen and keeps working without a network.
-- **Honest results** — a three-state model (`available` / `probably_available` / `unknown`): low-trust zones are corroborated via DoH before anything is called free, because a wrong "available" is worse than "unknown".
+- **Evidence-based results** — DNS-only and low-trust negatives are unconfirmed; a registry 404 is a candidate, not a guaranteed purchase.
 - **148 zones, 18 registries** — live registrar prices, promo-trap flags, and 3-year TCO with zero paid APIs.
 - **Tested** — 4,640 unit tests plus 155 Playwright E2E, 8 UI languages, MIT license.
 
@@ -356,3 +356,29 @@ domain-hunter check acme-nova.com --tlds com,io,dev --prices
 # Generate and check name candidates within a budget
 domain-hunter find mybrand --budget 15 --tlds com,io,dev
 ```
+
+### Additional domain signals and privacy
+
+Expanded results offer **optional, single-domain** checks with Dotsweep and
+Who Dat, and, for `.ru`/`.рф`, the Russian coordination centre's RDAP endpoint.
+No request to these services is made until you click the corresponding button;
+the selected service receives the domain. Dotsweep says it caches lookups by
+name; Who Dat is a public service without a guaranteed SLA. These checks may
+fail because of CORS, rate limits or service policy, particularly from `file://`.
+DNS/estimated responses do not establish availability, and an RDAP/WHOIS 404
+cannot rule out reserved or blocked names. Always verify registration and the
+actual price with the registrar. Russian RDAP is intentionally not used in bulk:
+its CORS, terms, limits and stop-list handling have not been independently verified.
+RDAP expiration is not the release date; a `ripn_free_date`, when present, is
+only a planned date. Unicode names are also shown as ASCII/Punycode, and mixed
+Latin/Cyrillic/Greek labels are flagged as a caution, not blocked.
+
+To test the optional services from a real browser on your own network, install
+Playwright Chromium and run `node scripts/check-advisory-cors.mjs yandex.ru`
+(or replace that domain with one you are willing to send). This makes one request
+per service from each of `file://` and a local HTTP origin. A failure can mean
+network, CORS or provider restrictions; it does not establish the cause. The
+probe does not change the production endpoint or enable bulk queries.
+
+Price publication can be checked without guessing from a green harvest: see the
+[production verification checklist](docs/publication-verification.md).

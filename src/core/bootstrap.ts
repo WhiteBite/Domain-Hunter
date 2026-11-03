@@ -110,7 +110,8 @@ export function mergeWithCurated(curated: TldRegistry, bootstrapJson: unknown): 
       const config: TldConfig = {
         tld,
         infra: infraId,
-        trust: tld.length === 2 ? 'low' : 'high',
+        // Length alone cannot prove the semantics of a registry's 404.
+        trust: 'low',
       };
       result.tlds.push(config);
     }

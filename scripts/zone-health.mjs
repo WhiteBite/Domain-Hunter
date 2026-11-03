@@ -15,7 +15,6 @@ const TLDS_PATH = join(__dirname, '..', 'src', 'config', 'tlds.json');
 const HEALTH_PATH = join(__dirname, '..', 'public', 'health.json');
 const TIMEOUT_MS = 8_000;
 const CONCURRENCY = 4;
-const CF_RDAP = 'https://rdap.cloudflare.com/domain/';
 
 function resolveRdapBase(rdapBase, tld) {
   return rdapBase.includes('{tld}') ? rdapBase.replace('{tld}', tld) : rdapBase;
@@ -32,7 +31,9 @@ async function probe(url) {
   const start = Date.now();
   try {
     const res = await fetchWithTimeout(url, { timeoutMs: TIMEOUT_MS, redirect: 'manual' });
+    const body = res.status === 404 ? await res.json().catch(() => null) : null;
     return {
+      rdapNotFound: body?.errorCode === 404,
       http: res.status,
       cors: res.headers.get('access-control-allow-origin') !== null,
       ms: Date.now() - start,
@@ -45,19 +46,16 @@ async function probe(url) {
 async function checkTld(tld, infra) {
   const domain = 'dh-health-' + randomChars(12) + '.' + tld;
   const direct = await probe(resolveRdapBase(infra.rdapBase, tld) + domain);
-  const directOk = direct.http === 404;
-  const cf = directOk ? null : await probe(CF_RDAP + domain);
-  const cfOk = cf === null ? null : cf.http === 404;
+  const directOk = direct.http === 404 && direct.rdapNotFound;
   const result = {
     http: direct.http,
     cors: direct.cors,
-    ok: directOk || cfOk === true,
+    ok: directOk,
     directOk,
-    cfOk,
+    cfOk: null,
     ms: direct.ms,
   };
   if (direct.error !== undefined) result.error = direct.error;
-  if (cf !== null) result.cfHttp = cf.http;
   return result;
 }
 
@@ -81,7 +79,7 @@ async function main() {
   const infras = registry.infras;
   const tldConfigs = registry.tlds;
 
-  const items = tldConfigs.map((c) => ({ tld: c.tld, infra: infras[c.infra] }));
+  const items = tldConfigs.map((c) => ({ tld: c.tld, infra: { ...infras[c.infra], rdapBase: c.rdapBase ?? infras[c.infra].rdapBase } }));
   const results = await runWithConcurrency(items, async ({ tld, infra }) => {
     const result = await checkTld(tld, infra);
     return [tld, result];

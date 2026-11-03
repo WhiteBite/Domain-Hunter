@@ -2,7 +2,7 @@
 
 > Free, open-source bulk domain availability checker and name generator that runs 100% in the browser: direct RDAP checks against 148 TLD registries, five name generators, live registrar prices with 3-year TCO, CSV/TSV/Markdown export. No servers, no API keys, no tracking. MIT licensed. Built with Svelte 5 + TypeScript + Vite (single-file build).
 
-Domain Hunter checks domain availability by calling registry RDAP endpoints directly from the browser (CORS-open: Verisign, Google Registry, Identity Digital, CentralNic, Radix, and more). It never guesses availability: a high-trust gTLD 404 is corroborated by a DoH NS probe before reporting `available` (NXDOMAIN → available; live NS → taken), and low-trust ccTLDs report `probably_available`. Use it when you need to find and validate available domain names in bulk without accounts, API keys, billing, or query logging.
+Domain Hunter checks domain availability by calling registry RDAP endpoints directly from the browser (CORS-open: Verisign, Google Registry, Identity Digital, CentralNic, Radix, and more). A valid high-trust registry 404 means “not found in RDAP”, not guaranteed registrability. Low-trust 404 and DNS-only negatives are unknown; verify each candidate at a registrar. Optional on-demand DigMyName checks offer an advisory second opinion.
 
 ## Documentation
 

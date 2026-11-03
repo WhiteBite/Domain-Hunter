@@ -11,12 +11,12 @@ import { get } from 'svelte/store';
 import type { CheckResult, CheckStatus, EngineEvent, EngineOptions, PricingTable } from '../types';
 import { createEngine } from '../core/engine';
 import type { EngineHandle } from '../core/engine';
-import { bestEntry } from '../pricing/pricing';
+import { bestEntry, pricingZoneFor } from '../pricing/pricing';
 import { favorites } from './favorites';
 import { results, runState, registry, pricing } from './store';
 import { KEYS, readJson, writeJson } from './settings';
 
-const WATCH_CHANGES_KEY = 'dh:v1:watch-changes';
+const WATCH_CHANGES_KEY = 'dh:v2:watch-changes';
 const WATCH_PRICES_KEY = 'dh:v1:watchprices';
 const MAX_WATCH_DOMAINS = 200;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -71,21 +71,19 @@ export function classifyPriceDrop(
 
 /**
  * Classify a status transition. PURE.
- * - 'freed' when `to` is available/probably_available AND `from` was taken/error/unknown.
- * - 'taken' when `to` is taken AND `from` was available/probably_available.
- * - null otherwise (never report flips like unknown->probably).
+ * - 'freed' when the registry gives an RDAP candidate after an unconfirmed/taken result.
+ * - 'taken' only when the previous result was an RDAP candidate.
+ * - Legacy probably_available is treated as unconfirmed.
  */
 export function classifyChange(
   from: CheckStatus,
   to: CheckStatus,
 ): 'freed' | 'taken' | null {
-  const toAvail = to === 'available' || to === 'probably_available';
-  const fromAvail = from === 'available' || from === 'probably_available';
-  const fromUnavail = from === 'taken' || from === 'error' || from === 'unknown';
+  const toAvail = to === 'available';
+  const fromAvail = from === 'available';
+  const fromUnavail = from === 'taken' || from === 'error' || from === 'unknown' || from === 'probably_available';
 
   if (toAvail && fromUnavail) {
-    // Never report uncertain-to-uncertain flips (unknown->probably etc.).
-    if (from === 'unknown' && to === 'probably_available') return null;
     return 'freed';
   }
   if (to === 'taken' && fromAvail) return 'taken';
@@ -299,7 +297,7 @@ export async function refreshWatchlist(): Promise<void> {
       const baselines = readPriceBaselines();
       let baselinesUpdated = false;
       for (const domain of targets) {
-        const tld = domain.split('.').pop() ?? '';
+        const tld = pricingZoneFor(domain, table, domain.split('.').pop() ?? '');
         const best = bestEntry(table, tld);
         const currentCents = best?.entry.reg ?? null;
         const baseline = baselines[domain];

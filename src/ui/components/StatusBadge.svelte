@@ -14,7 +14,7 @@
     status === 'available'
       ? 'available'
       : status === 'probably_available'
-        ? 'probably'
+        ? 'unknown'
         : status === 'taken'
           ? 'taken'
           : status === 'unknown'
@@ -35,7 +35,9 @@
   );
 
   const tooltipKey = $derived(
-    status === 'probably_available'
+    status === 'available'
+      ? 'results.legend.available'
+      : status === 'probably_available'
       ? 'status.probably_available.tooltip'
       : status === 'unknown'
         ? 'status.unknown.tooltip'

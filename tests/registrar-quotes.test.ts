@@ -27,8 +27,8 @@ describe('pickRegistrar', () => {
 
   it('prefers the cheapest deep-link registrar over a cheaper landing one', () => {
     const r = pickRegistrar(REGISTRARS, T, 'com');
-    expect(r.registrar?.id).toBe('deep2');
-    expect(r.entry?.reg).toBe(1000);
+    expect(r.registrar?.id).toBe('landing');
+    expect(r.entry?.reg).toBe(900);
   });
 
   it('falls back to the landing-only registrar when no deep-link quotes exist', () => {

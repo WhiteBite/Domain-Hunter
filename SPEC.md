@@ -14,9 +14,8 @@ disagree, SPEC wins unless the SPEC is factually impossible.
 1. Works when opened from `file://` (single self-contained `dist/index.html`).
 2. Works under a sub-path (`https://user.github.io/Domain-Hunter/`) — all paths relative (`base: './'`).
 3. Zero runtime requests to anything except: RDAP endpoints, IANA bootstrap, DoH endpoints,
-    Porkbun pricing API, cfdomainpricing.com, Cloudflare RDAP aggregator
-    (`rdap.cloudflare.com/domain/{domain}`), `api.digmyname.com` (per-domain premium/buy data,
-    user-initiated on-demand clicks), `api.github.com` and `github.com` (Social tab GitHub device-flow
+    Porkbun pricing API, cfdomainpricing.com, `api.digmyname.com` (per-domain advisory data,
+    user-initiated on-demand clicks), `dotsweep.com`, `who-dat.as93.net`, and `cctld.ru` (explicit single-domain advisory checks only, no background or bulk queries), `api.github.com` and `github.com` (Social tab GitHub device-flow
     authentication and username lookups), `www.tiktok.com` (Social tab oEmbed lookup),
     `open.er-api.com` (FX rates, cached 7 days, §13).
     No CDNs, no fonts from network, no analytics.
@@ -267,44 +266,30 @@ Flags: `ai` minYears 2; `ru` experimental; `top icu cyou sbs cfd` reputationNote
 Default selection (settings.defaultTlds): com net dev app io ai xyz me info pro tech site online cloud page.
 
 Runtime merge: curated `tlds.json` + live IANA bootstrap (24h cache) + user-added custom zones.
-Bootstrap-only zones render with price "—" and trust per bootstrap (gTLD=high, ccTLD=low).
+Bootstrap-only zones default to low trust; name length does not establish 404 semantics.
 Curated always wins on conflict.
 
 ## 7. Status model (correctness contract)
 
-| RDAP | trust high | trust low |
-|---|---|---|
-| 200 | `taken` | `taken` |
-| 404 | DoH NS probe: NXDOMAIN → `available`; NOERROR → `taken` (source `doh`); DoH unreachable → `available` (RDAP stands) | DoH NS query + Cloudflare aggregator: NXDOMAIN → `probably_available`; NOERROR → `taken`; aggregator 200 → `taken` (source `cloudflare`); other → `unknown` |
-| 429 | retry w/ backoff (≤3), then `error` | same |
-| 5xx | retry (≤3), then `error` | same |
-| network/CORS fail | retry direct ×2 (transient TLS resets), then proxy once if set, then DoH corroboration (any trust; outcome never bare `available`), else `error` | same |
+| RDAP | Interpretation |
+|---|---|
+| 200 | `taken` only if JSON objectClassName is `domain` and ldhName matches the query; malformed responses are `unknown`. |
+| 404 | Validate the RDAP error object. A curated high-trust registry 404 is `available` (UI: not found in RDAP, **not** a guarantee of registration); NS answer contradicting it yields `taken`. Low-trust 404 is `unknown` unless a matching NS answer establishes delegation. |
+| 429 / 5xx | Retry with backoff, then `error`. |
+| network/CORS failure | Optional legacy proxy response is unverified; otherwise DoH NS data may indicate delegation, but NXDOMAIN is `unknown`, never evidence of registration availability. |
 
-DoH: primary `https://cloudflare-dns.com/dns-query?name={d}&type=NS` (`Accept: application/dns-json`),
-fallback `https://dns.google/resolve?name={d}&type=NS`. DoH-only results never yield bare `available`.
+`probably_available` remains in the type for older data, but is treated as unconfirmed,
+not included in free filters, counts, bulk exports, CLI find or watch notifications.
+DoH must check a matching NS record, not just NOERROR. A negative DNS answer is never
+proof of registrability. Old `dh:v1:cache` is invalidated; `dh:v2:cache` and v2 watch
+state prevent outdated free results and alerts from being restored.
 
-**High-trust 404 DoH veto** — a high-trust RDAP 404 is corroborated by a
-DoH NS probe before reporting `available`. Live NS records (NOERROR)
-contradict the 404 and the result becomes `taken` (source `doh`, note
-"RDAP 404 contradicted by live NS delegation") — a taken domain must
-never be reported free. NXDOMAIN strengthens `available` (RDAP
-authoritative, DNS corroborates). DoH unreachable → the trusted RDAP
-result stands (`available`); a DoH outage never downgrades a trusted registry.
-
-**Cloudflare RDAP aggregator** (`rdap.cloudflare.com/domain/{domain}`) is a secondary
-registry-level source used in two places, both honest per the three-state model:
-(1) **Transport fallback** — when the primary RDAP fetch fails transport-level (after the
-optional proxy, before the DoH last resort), the aggregator is queried once (8s timeout, no
-retries). HTTP 200 → `taken` (source `cloudflare`); HTTP 404 → `conclude404` (trust rules
-still apply); anything else → fall through to DoH unchanged.
-(2) **Low-trust cross-check** — in `conclude404` for low-trust zones, the aggregator is
-queried in parallel with the DoH NS probe (no added latency). If the aggregator returns
-HTTP 200, the result is `taken` (source `cloudflare`, note "registry 404 contradicted by
-cloudflare rdap") overriding the DoH outcome — a taken domain must never be reported free.
-Otherwise the DoH-based outcomes stand exactly as before.
-
-UI badges: available (green), probably_available (green outline + tooltip), taken (neutral),
-unknown (amber), error (red). Filters: all / available (includes probably) / taken / problems.
+The former Cloudflare registrar RDAP path is not a registry-wide aggregator and is not
+queried as a fallback. On an explicit DigMyName check button click (or capped bulk check), the existing
+DigMyName API supplies an advisory second opinion; uncertain results do not upgrade
+status. A contradictory unavailable result downgrades an RDAP candidate to `unknown`,
+without asserting it is taken. The user must verify availability and final price at a
+registrar immediately before purchase. No keys or new browser destinations are used.
 
 ## 8. Queue & rate limiting
 
@@ -335,7 +320,7 @@ unknown (amber), error (red). Filters: all / available (includes probably) / tak
 - Renewal column shows the cheapest renewal over registrars (badge of that
   registrar); first-year cell is coupon-aware: when the best coupon lowers the
   price, the effective price renders with the standard reg price struck through
-  (registry-premium override wins over coupon).
+  (premium indications suppress unverified retail price and TCO).
 - Harvest carry-over: snapshot builds start from the previous snapshot; fresh
   sources win per registrar and coupons dedupe fresh-wins — a flaky source never
   erases coverage.
@@ -347,7 +332,7 @@ unknown (amber), error (red). Filters: all / available (includes probably) / tak
   |Δ| ≥ 2%, flat otherwise, hidden when insufficient) + sparkline.
 - Instant "possible premium" heuristic chip on available rows: dictionary words
   and ≤4-char labels in premium-heavy zones (no network call); the on-demand
-  DigMyName check remains authoritative.
+  DigMyName check is advisory and does not provide a confirmed premium quote.
 - UI always shows price freshness: "just now" / "N h ago" / "snapshot {date}".
 - Disclaimer (About + tooltip): estimates; premium names cost more; check registrar cart.
 
@@ -430,8 +415,8 @@ Every generator panel: output list (deduped, cap 500), "Check now" (fills Check 
   deploy. Manual data-only pushes to main trigger deployment normally. Script must exit 0 on partial source failure;
   exit 1 only if ALL sources fail.
 - `zone-health.yml`: daily cron → `node scripts/zone-health.mjs` → commit `health.json`
-  (tld → {http, cors, ok, directOk, cfOk, ms, ts}; direct RDAP probe with the
-  Cloudflare-aggregator fallback); failures visible in repo.
+  (tld → {http, cors, ok, directOk, cfOk, ms, ts}; validates direct RDAP 404;
+  the retired Cloudflare fallback is never considered healthy).
 
 ## 15. Acceptance criteria (agent must run through all)
 
@@ -463,13 +448,11 @@ affiliate link activation (config already affiliate-ready: Porkbun Ambassador + 
 - **Candidate tray**: generator output lives in a persisted store
   (`dh:v1:gentray`), survives tab switches and reloads; the tray shows the
   projected check count (bare names × selected zones) before running.
-- **Coverage-aware buy links**: the buy button targets the cheapest registrar
-  that has a deep-link template in `registrars.json`, not merely the cheapest
-  price in the table (snapshots may contain registrars without links).
+- **Price-matched buy links**: the buy button targets the displayed cheapest seller,
+  using its landing page when no domain deep-link exists; missing links stay absent.
 - **Per-domain detail row**: on-demand lookup via the public DigMyName API
-  (no auth, CORS `*`, rate-limited client-side to on-demand clicks) shows a
-  registry-premium warning with price and the currently cheapest registrar
-  with a buy URL.
+  (no auth, CORS `*`, capped on-demand checks) shows advisory status and
+  premium flags, never an unverified premium price.
 - **Harvest sources**: Porkbun + cfdomainpricing (live and harvest); beget HTML
   scraper best-effort (works). reg.ru (JS cookie challenge), Spaceship
   (Cloudflare 403) and regctl.sh (TLS-blocked from CI) stay wired but are
@@ -530,3 +513,15 @@ automation. They are additive surfaces — no app behavior changes.
   and `price_trends` — thin wrappers over `cli/core.ts` with zod input
   schemas. Long-polling `watch` and secret-handling `keys` are deliberately
   not exposed as MCP tools.
+
+### Additional advisory checks
+
+Dotsweep and Who Dat are optional, independent public services and are called only
+after a user clicks a check button. The selected service receives the domain; its
+response may be cached, stale or incomplete. DNS and estimated answers do not
+prove availability, and an absence from any source is not a registration guarantee.
+The Russian registry RDAP endpoint is an optional single-domain check for `.ru` and
+`.рф` only; it is not used for automatic bulk checks because browser CORS, terms,
+blocking/stop-list behavior and operational limits have not been verified. Errors,
+CORS restrictions and rate limits yield no conclusion. Planned free dates are not
+release guarantees. External policy/status documentation links are navigation only.

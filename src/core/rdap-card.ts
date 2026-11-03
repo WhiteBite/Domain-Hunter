@@ -89,7 +89,8 @@ export function parseRdapCard(body: unknown, now: number = Date.now()): RdapCard
   const registeredAt = eventDate(rec.events, 'registration');
   const expiresAt = eventDate(rec.events, 'expiration');
   const changedAt = eventDate(rec.events, 'last changed');
-  const statuses = stringList(rec.status, MAX_STATUSES);
+  const freeDate = eventDate(rec.events, 'ripn_free_date');
+  const statuses = stringList(rec.status ?? rec.ripn_state, MAX_STATUSES);
   const nameservers = nameserverList(rec.nameservers);
   const registrar = registrarName(rec.entities);
 
@@ -97,6 +98,7 @@ export function parseRdapCard(body: unknown, now: number = Date.now()): RdapCard
     registeredAt == null &&
     expiresAt == null &&
     changedAt == null &&
+    freeDate == null &&
     registrar == null &&
     statuses.length === 0 &&
     nameservers.length === 0
@@ -108,6 +110,7 @@ export function parseRdapCard(body: unknown, now: number = Date.now()): RdapCard
     registeredAt,
     expiresAt,
     changedAt,
+    freeDate,
     ageDays:
       registeredAt != null ? Math.max(0, Math.floor((now - registeredAt) / MS_PER_DAY)) : null,
     registrar,

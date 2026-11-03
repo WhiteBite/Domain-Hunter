@@ -31,7 +31,7 @@ export function summarizeChanges(changes: WatchChange[]): {
   for (const c of changes) {
     if (c.kind === 'price_drop') {
       priceDrops += 1;
-    } else if (c.to === 'available' || c.to === 'probably_available') {
+    } else if (c.to === 'available') {
       freed += 1;
     } else if (c.to === 'taken') {
       taken += 1;

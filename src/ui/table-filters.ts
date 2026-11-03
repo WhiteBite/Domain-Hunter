@@ -41,8 +41,7 @@ export interface FilterResult<R> {
 /**
  * Apply status → query → budget → promo-trap filters in order.
  *
- * Status filter uses the three-state model (available includes
- * probably_available; problems = unknown + error). Query is a
+ * Status filter keeps legacy probably_available in problems, not available. Query is a
  * case-insensitive domain substring. Budget requires a non-null firstYear
  * at or below budgetCents. hideTraps excludes rows whose best entry is a
  * promo trap (renewal ≥ 5× first year).
@@ -55,9 +54,7 @@ export function applyViewFilters<R extends FilterableRow>(
   switch (opts.filter) {
     case 'available':
       arr = rows.filter(
-        (r) =>
-          r.result.status === 'available' ||
-          r.result.status === 'probably_available',
+        (r) => r.result.status === 'available',
       );
       break;
     case 'taken':
@@ -65,7 +62,7 @@ export function applyViewFilters<R extends FilterableRow>(
       break;
     case 'problems':
       arr = rows.filter(
-        (r) => r.result.status === 'unknown' || r.result.status === 'error',
+        (r) => r.result.status === 'unknown' || r.result.status === 'error' || r.result.status === 'probably_available',
       );
       break;
     case 'favorites':

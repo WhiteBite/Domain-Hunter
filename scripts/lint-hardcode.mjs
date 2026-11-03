@@ -81,6 +81,12 @@ const NETWORK_ALLOWLIST = [
   // Trademark link-outs from detail rows (link-only, never fetched)
   /^tmsearch\.uspto\.gov$/,
   /^www\.tmdn\.org$/,
+  // Explicit single-domain advisory checks; never used in bulk
+  /^dotsweep\.com$/,
+  /^who-dat\.as93\.net$/,
+  /^cctld\.ru$/,
+  // External documentation link only
+  /^www\.icann\.org$/,
   // DigMyName (per-domain buy-link API)
   /^api\.digmyname\.com$/,
   // GitHub (device flow + user API + profile links)

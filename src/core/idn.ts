@@ -147,3 +147,53 @@ export function parseCandidate(token: string, selectedTlds: string[]): string[] 
   if (ascii.includes('.')) return [ascii];
   return selectedTlds.map((tld) => `${ascii}.${tld}`);
 }
+
+/** Decode ACE for display only. Invalid labels remain unchanged. */
+export function displayUnicode(domain: string): string {
+  return domain.split('.').map((label) => {
+    if (!label.toLowerCase().startsWith('xn--')) return label;
+    try {
+      const input = label.slice(4).toLowerCase();
+      const out: number[] = [];
+      const dash = input.lastIndexOf('-');
+      let pos = 0;
+      if (dash >= 0) {
+        for (const ch of input.slice(0, dash)) out.push(ch.charCodeAt(0));
+        pos = dash + 1;
+      }
+      let n = INITIAL_N, i = 0, bias = INITIAL_BIAS;
+      while (pos < input.length) {
+        const old = i;
+        let weight = 1;
+        for (let k = BASE; ; k += BASE) {
+          if (pos >= input.length) throw new Error('bad punycode');
+          const code = input.charCodeAt(pos++);
+          const digit = code >= 97 && code <= 122 ? code - 97 : code >= 48 && code <= 57 ? code - 22 : BASE;
+          if (digit >= BASE || digit > Math.floor((Number.MAX_SAFE_INTEGER - i) / weight)) throw new Error('bad punycode');
+          i += digit * weight;
+          const t = k <= bias ? TMIN : k >= bias + TMAX ? TMAX : k - bias;
+          if (digit < t) break;
+          weight *= BASE - t;
+          if (!Number.isSafeInteger(weight)) throw new Error('bad punycode');
+        }
+        const len = out.length + 1;
+        bias = adapt(i - old, len, old === 0);
+        n += Math.floor(i / len);
+        i %= len;
+        if (n > 0x10ffff || (n >= 0xd800 && n <= 0xdfff)) throw new Error('bad punycode');
+        out.splice(i, 0, n);
+        i++;
+      }
+      const decoded = String.fromCodePoint(...out);
+      return decoded && toAscii(decoded) === label.toLowerCase() ? decoded : label;
+    } catch { return label; }
+  }).join('.');
+}
+
+/** A targeted warning, not a universal IDN validation rule. */
+export function hasMixedLookalikeScripts(domain: string): boolean {
+  return displayUnicode(domain).split('.').some((label) => {
+    const scripts = [/\p{Script=Latin}/u, /\p{Script=Cyrillic}/u, /\p{Script=Greek}/u];
+    return scripts.filter((script) => script.test(label)).length > 1;
+  });
+}

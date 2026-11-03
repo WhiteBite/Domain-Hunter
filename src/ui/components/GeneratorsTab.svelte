@@ -676,7 +676,7 @@
                             {#each previews[cand.n]?.rows ?? [] as pr (pr.domain)}
                               <span
                                 class="td-chip"
-                                class:avail={pr.status === 'available' || pr.status === 'probably_available'}
+                                class:avail={pr.status === 'available'}
                                 class:taken={pr.status === 'taken'}
                                 data-testid={`gen-tray-pchip-${sanitizeId(pr.domain)}`}
                               >

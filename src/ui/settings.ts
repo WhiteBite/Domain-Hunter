@@ -6,13 +6,13 @@ import { DEFAULT_SETTINGS } from '../types';
 
 export const KEYS = {
   settings: 'dh:v1:settings',
-  cache: 'dh:v1:cache',
+  cache: 'dh:v2:cache',
   pricing: 'dh:v1:pricing',
   bootstrap: 'dh:v1:bootstrap',
   run: 'dh:v1:run',
   lastrun: 'dh:v1:lastrun',
   wordsets: 'dh:v1:wordsets',
-  watch: 'dh:v1:watch',
+  watch: 'dh:v2:watch',
   resultsview: 'dh:v1:resultsview',
   fx: 'dh:v1:fx',
 } as const;

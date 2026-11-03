@@ -10,12 +10,13 @@ import { favorites } from './favorites';
 import { copyText } from './clipboard';
 import { resultsToCsvRows, buildCsv, downloadCsv } from './csv';
 import { t } from '../i18n';
+import { premiumDomainsForExport } from './premium-check';
 
-/** Domain names of available/probably_available results, sorted A–Z. */
+/** Domain names of RDAP candidate results, sorted A–Z. */
 export function availableDomainsOf(resultsMap: Map<string, CheckResult>): string[] {
   const list: string[] = [];
   for (const r of resultsMap.values()) {
-    if (r.status === 'available' || r.status === 'probably_available') list.push(r.domain);
+    if (r.status === 'available') list.push(r.domain);
   }
   list.sort((a, b) => a.localeCompare(b));
   return list;
@@ -64,18 +65,20 @@ export function downloadAvailableCsv(): void {
   const table = get(pricing)?.table ?? null;
   const filtered = new Map<string, CheckResult>();
   for (const [d, r] of get(results)) {
-    if (r.status === 'available' || r.status === 'probably_available') filtered.set(d, r);
+    if (r.status === 'available') filtered.set(d, r);
   }
-  const rows = resultsToCsvRows(filtered, table, get(settings));
+  const rows = resultsToCsvRows(filtered, table, get(settings), premiumDomainsForExport(filtered));
   const headers = [
     t('csv.domain'),
     t('csv.status'),
     t('csv.tld'),
     t('csv.priceFirstYear'),
-    t('csv.priceRenewal'),
+    t('csv.pairedRenewal'),
     t('csv.bestRegistrar'),
     t('csv.buyUrl'),
     t('csv.checkedAt'),
+    t('csv.resultSource'), t('csv.resultNote'), t('csv.regSource'), t('csv.renewSource'),
+    t('csv.lowRenewal'), t('csv.lowRenewalSeller'), t('csv.lowRenewalSource'), t('csv.limitations'), t('csv.advisory'),
   ];
   const csv = buildCsv(rows, headers);
   const date = new Date().toISOString().slice(0, 10);

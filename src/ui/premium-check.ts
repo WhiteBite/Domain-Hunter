@@ -1,18 +1,19 @@
 /**
- * On-demand DigMyName premium checks (SPEC §9): per-domain detail rows and
- * the bulk "check premium prices" toolbar action. Store-based composable —
+ * Explicit DigMyName advisory checks (SPEC §9): per-domain button and
+ * the bulk premium-flag toolbar action. Store-based composable —
  * state survives ResultsTable remounts (tab switches) by design, mirroring
  * the watchlist module pattern.
  */
 import { get, writable } from 'svelte/store';
 import type { CheckResult, PricingTable } from '../types';
 import { results, pricing, runState } from './store';
-import { bestEntry } from '../pricing/pricing';
-import { fetchPremiumDetail, isPremiumPriced, premiumOverrideCents, type DigDetail } from './dig';
+import { put as putCache } from '../core/cache';
+import { bestEntry, pricingZoneFor } from '../pricing/pricing';
+import { fetchPremiumDetail, type DigDetail } from './dig';
 
 export const detailFor = writable<string | null>(null);
 export const details = writable<Record<string, DigDetail>>({});
-/** Per-domain premium price override (USD cents) from the on-demand check. */
+/** Legacy store retained for callers; DigMyName never supplies a price override. */
 export const premiumOverrides = writable<Record<string, number>>({});
 export const premiumChecking = writable(false);
 export const premiumDone = writable(0);
@@ -31,11 +32,11 @@ export function premiumCheckEligibleOf(
 ): { domain: string; firstYear: number | null }[] {
   const list: { domain: string; firstYear: number | null }[] = [];
   for (const r of resultsMap.values()) {
-    if (r.status !== 'available' && r.status !== 'probably_available') continue;
+    if (r.status !== 'available') continue;
     if (overrides[r.domain] != null) continue;
     const d = detailsMap[r.domain];
-    if (d && !d.failed) continue;
-    const best = table ? bestEntry(table, r.tld) : null;
+    if (d && !d.failed && d.checkedAt && Date.now() - d.checkedAt < 300_000 && d.checkedAt >= r.checkedAt) continue;
+    const best = table ? bestEntry(table, pricingZoneFor(r.domain, table, r.tld)) : null;
     list.push({ domain: r.domain, firstYear: best?.entry.reg ?? null });
   }
   list.sort((a, b) => (a.firstYear ?? Infinity) - (b.firstYear ?? Infinity));
@@ -52,31 +53,53 @@ export async function toggleDetail(
   }
   detailFor.set(domain);
   onExpand?.();
-  const cached = get(details)[domain];
-  if (cached && !cached.failed) return;
-  details.update((m) => ({
-    ...m,
-    [domain]: { loading: true, price: null, registrar: null, regPrice: null, url: null },
-  }));
-  const detail = await fetchPremiumDetail(domain);
-  applyDetail(domain, detail);
 }
 
-/** Store a fetched detail; register its premium override when priced. */
-function applyDetail(domain: string, detail: DigDetail): void {
-  if (isPremiumPriced(detail)) {
-    const override = premiumOverrideCents(detail);
-    if (override != null) {
-      premiumOverrides.update((m) => ({ ...m, [domain]: override }));
-    }
+/** Explicit user action: sends only this domain to the existing DigMyName API. */
+export async function checkDetail(domain: string): Promise<void> {
+  if (get(details)[domain]?.loading) return;
+  details.update((m) => ({
+    ...m,
+    [domain]: { price: null, registrar: null, regPrice: null, url: null, ...m[domain], loading: true },
+  }));
+  const requestedAt = Date.now();
+  const detail = await fetchPremiumDetail(domain);
+  applyDetail(domain, detail, requestedAt);
+}
+
+/** Store a fetched detail and downgrade a conflicting result. */
+function applyDetail(domain: string, detail: DigDetail, requestedAt: number): void {
+  // A conflicting third-party response is not proof of registration, but it
+  // invalidates our free signal. Never overwrite a newer recheck.
+  if (detail.availability === 'unavailable') {
+    let downgraded = false;
+    results.update((map) => {
+      const current = map.get(domain);
+      if (!current || current.status !== 'available' || current.checkedAt > requestedAt) return map;
+      downgraded = true;
+      const updated: CheckResult = { ...current, status: 'unknown', note: 'DigMyName conflicts with RDAP; verify at registrar' };
+      putCache(domain, { status: updated.status, source: updated.source, ts: Date.now(), tld: updated.tld });
+      const next = new Map(map);
+      next.set(domain, updated);
+      return next;
+    });
+    if (downgraded) runState.update((state) => state.phase === 'done' ? { ...state, available: Math.max(0, state.available - 1) } : state);
   }
-  details.update((m) => ({ ...m, [domain]: detail }));
+  if ((get(results).get(domain)?.checkedAt ?? 0) <= requestedAt) {
+    details.update((m) => {
+      const previous = m[domain];
+      // A failed retry is not evidence that a previously reported premium flag disappeared.
+      const retained = detail.failed && previous && (previous.premium || previous.likely)
+        ? { premium: previous.premium, likely: previous.likely, checkedAt: previous.checkedAt }
+        : { checkedAt: Date.now() };
+      return { ...m, [domain]: { ...detail, ...retained } };
+    });
+  }
 }
 
 /**
  * Bulk-fetch premium data for the cheapest eligible domains (capped).
- * Concurrency 2 — polite to DigMyName. Premium prices land in
- * premiumOverrides so price cells show the real price + strike + chip.
+ * Concurrency 2; the response is an advisory flag, not a price quote.
  */
 export async function runPremiumCheck(
   fetcher: (domain: string) => Promise<DigDetail> = fetchPremiumDetail,
@@ -100,16 +123,33 @@ export async function runPremiumCheck(
       const i = idx++;
       const target = targets[i];
       if (!target) break;
-      const detail = await fetcher(target.domain);
-      applyDetail(target.domain, detail);
-      if (isPremiumPriced(detail)) {
-        const override = premiumOverrideCents(detail);
-        if (override != null) premiumFound.update((n) => n + 1);
+      const requestedAt = Date.now();
+      let detail: DigDetail;
+      try {
+        detail = await fetcher(target.domain);
+      } catch {
+        detail = { failed: true, price: null, registrar: null, regPrice: null, url: null };
       }
+      applyDetail(target.domain, detail, requestedAt);
+      if (detail.premium || detail.likely) premiumFound.update((n) => n + 1);
       premiumDone.update((n) => n + 1);
     }
   };
-  await Promise.all([worker(), worker()]);
+  try {
+    await Promise.all([worker(), worker()]);
+  } finally {
+    premiumChecking.set(false);
+  }
+}
 
-  premiumChecking.set(false);
+/** Premium flags invalidate standard quotes in downloads too. */
+export function premiumDomainsForExport(currentResults: Map<string, CheckResult>): Set<string> {
+  const found = new Set<string>();
+  const currentDetails = get(details);
+  for (const [domain, result] of currentResults) {
+    const detail = currentDetails[domain];
+    if (detail && detail.checkedAt && detail.checkedAt >= result.checkedAt && Date.now() - detail.checkedAt < 300_000 &&
+        (detail.premium || detail.likely)) found.add(domain);
+  }
+  return found;
 }

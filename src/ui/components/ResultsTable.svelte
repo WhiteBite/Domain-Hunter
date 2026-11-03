@@ -15,8 +15,10 @@
     tco3,
     couponDiscountCents,
     bestRenewal,
+    bestTco,
     couponEffectivePrice,
     premiumLikely,
+    pricingZoneFor,
   } from '../../pricing/pricing';
   import { createEngine } from '../../core/engine';
   import type { EngineHandle } from '../../core/engine';
@@ -213,8 +215,7 @@
     best: { registrarId: string; entry: PriceEntry } | null;
     tco: number | null;
     firstYear: number | null;
-    /** Original standard first-year price (non-null only when a premium
-     *  override or coupon discount is active, for struck-through display). */
+    /** Original standard first-year price when a coupon discount is active. */
     standardFirstYear: number | null;
     renewal: number | null;
     /** Registrar id offering the cheapest renewal (for the renewal badge). */
@@ -237,9 +238,12 @@
   const rows = $derived.by(() => {
     const table = $pricing?.table ?? null;
     const arr: RowData[] = [];
-    for (const r of $results.values()) {
+    for (const item of $results.values()) {
+      const r = { ...item, tld: pricingZoneFor(item.domain, table, item.tld) };
       const best = table ? bestEntry(table, r.tld) : null;
-      const override = $premiumOverrides[r.domain] ?? null;
+      const detail = $details[r.domain];
+      const freshDetail = detail?.checkedAt && detail.checkedAt >= item.checkedAt && Date.now() - detail.checkedAt < 300_000;
+      const premiumUnknown = !!freshDetail && !!(detail?.premium || detail?.likely);
       const stdFirstYear = best?.entry.reg ?? null;
       const stdTco = table ? tco3(table, r.tld) : null;
       const renewalBest = table && pairMode === 'best' ? bestRenewal(table, r.tld) : null;
@@ -250,12 +254,12 @@
       arr.push({
         result: r,
         best,
-        tco: override ?? stdTco,
-        firstYear: override ?? (couponApplies && couponPrice != null ? couponPrice : stdFirstYear),
-        standardFirstYear: override != null || couponApplies ? stdFirstYear : null,
-        renewal: renewalBest?.renew ?? best?.entry.renew ?? null,
-        renewalRegistrarId: renewalBest?.registrarId ?? best?.registrarId ?? null,
-        isPremiumOverride: override != null,
+        tco: premiumUnknown ? null : stdTco,
+        firstYear: premiumUnknown ? null : (couponApplies && couponPrice != null ? couponPrice : stdFirstYear),
+        standardFirstYear: !premiumUnknown && couponApplies ? stdFirstYear : null,
+        renewal: premiumUnknown ? null : (renewalBest?.renew ?? best?.entry.renew ?? null),
+        renewalRegistrarId: premiumUnknown ? null : (renewalBest?.registrarId ?? best?.registrarId ?? null),
+        isPremiumOverride: premiumUnknown,
       });
     }
     return arr;
@@ -400,6 +404,9 @@
       priceFirstYear: r.firstYear != null ? displayFirstYear(r, $pricing?.table ?? null, s) : '',
       priceRenewal: r.renewal != null ? displayRenewal(r, $pricing?.table ?? null, s) : '',
       priceTco: r.tco != null ? formatPrice(r.tco, s) : '',
+      registrationSeller: r.firstYear != null ? r.best?.registrarId ?? '' : '',
+      renewalSeller: r.renewal != null ? r.renewalRegistrarId ?? '' : '',
+      tcoSeller: r.tco != null && $pricing?.table ? bestTco($pricing.table, r.result.tld)?.registrarId ?? '' : '',
     }));
     exportRows.set(list);
   });
@@ -550,7 +557,7 @@
     return m;
   });
 
-  /** Domain names of available/probably_available results, sorted A–Z. */
+  /** Domain names of RDAP candidate results, sorted A–Z. */
   const availableDomains = $derived(availableDomainsOf($results));
 
   function registrarName(id: string): string {
@@ -783,10 +790,10 @@
         </thead>
         <tbody>
           {#each visible as row (row.result.domain)}
-            {@const isAvail = row.result.status === 'available' || row.result.status === 'probably_available'}
+            {@const isAvail = row.result.status === 'available'}
             {@const isErr = row.result.status === 'error'}
             {@const buyInfo = pickRegistrar(registrars, $pricing?.table ?? null, row.result.tld)}
-            {@const buy = buyInfo.registrar
+            {@const buy = buyInfo.registrar && !row.isPremiumOverride
               ? applyAffiliate(
                   buyInfo.registrar,
                   buyInfo.registrar.searchUrl.includes('{domain}')
@@ -804,7 +811,7 @@
             {@const isFav = $favorites.has(row.result.domain)}
             {@const sid = sanitizeId(row.result.domain)}
             {@const isExpanded = $detailFor === row.result.domain}
-            {@const quotes = buildRegistrarQuotes(registrars, $pricing?.table ?? null, row.result.tld, row.result.domain)}
+            {@const quotes = row.isPremiumOverride ? [] : buildRegistrarQuotes(registrars, $pricing?.table ?? null, row.result.tld, row.result.domain)}
             <tr class="row-in" class:available={isAvail} class:error={isErr} class:row-taken={row.result.status === 'taken'} data-testid={`results-row-${sid}`}>
               <td class="select-cell">
                 <input
@@ -955,7 +962,7 @@
                       <span class="chip-tag promo" tabindex="0" data-testid={`results-chip-promo-${sid}`}>{t('price.promo')}</span>
                     </Tooltip>
                   {/if}
-                  {#if trap && row.best}
+                  {#if !row.isPremiumOverride && trap && row.best}
                     {@const reg = row.best.entry.reg ?? 0}
                     {@const renew = row.best.entry.renew ?? 0}
                     {@const first = formatSourcePrice($pricing?.table ?? null, row.result.tld, row.best.registrarId, 'reg', reg, $settings)}
@@ -972,7 +979,7 @@
                       <span class="chip-tag premium-likely" tabindex="0" data-testid={`results-chip-premium-likely-${sid}`}>{t('price.premiumLikely')}</span>
                     </Tooltip>
                   {/if}
-                  {#if coupon && row.best != null && row.best.entry.reg != null}
+                  {#if !row.isPremiumOverride && coupon && row.best != null && row.best.entry.reg != null}
                     {@const reg = row.best.entry.reg ?? 0}
                     <span class="coupon">
                       {t('price.coupon', { price: formatPrice(Math.max(0, reg - couponDiscountCents(coupon, reg)), $settings), code: coupon.code })}

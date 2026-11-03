@@ -86,10 +86,10 @@ describe('mergeWithCurated', () => {
     expect(infra?.rdapBase).toBe('https://rdap.centralnic.com/shop/domain/');
   });
 
-  it('marks 2-letter zones low trust, longer zones high trust', () => {
+  it('does not infer trust from TLD length', () => {
     const merged = mergeWithCurated(curated, ianaSample);
     expect(merged.tlds.find((t) => t.tld === 'uk')?.trust).toBe('low');
-    expect(merged.tlds.find((t) => t.tld === 'shop')?.trust).toBe('high');
+    expect(merged.tlds.find((t) => t.tld === 'shop')?.trust).toBe('low');
   });
 
   it('preserves curated infras and hackTlds', () => {

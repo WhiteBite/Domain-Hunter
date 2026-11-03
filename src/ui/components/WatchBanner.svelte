@@ -15,7 +15,7 @@
         priceDrop++;
         continue;
       }
-      if (c.to === 'available' || c.to === 'probably_available') freed++;
+      if (c.to === 'available') freed++;
       else if (c.to === 'taken') taken++;
     }
     return { freed, taken, priceDrop };

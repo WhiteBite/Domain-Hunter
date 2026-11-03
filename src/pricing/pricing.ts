@@ -10,6 +10,7 @@ import { commonWords } from '../config/dictionaries/common-words';
 import tldsJson from '../config/tlds.json';
 import type { Coupon, PriceEntry, PricingTable, Settings, TldRegistry } from '../types';
 import type { PricingState } from '../ui/store';
+import { toAscii } from '../core/idn';
 
 // The snapshot stores registrar prices as compact [reg, renew, transfer]
 // arrays (~3× smaller on disk/bundle); expand back to PriceEntry objects here.
@@ -160,7 +161,8 @@ export function normalizeCloudflare(json: Record<string, unknown>): NormalizedPr
 }
 
 function mergePricing(target: NormalizedPricing, src: NormalizedPricing): void {
-  for (const [tld, registrars] of Object.entries(src.tlds)) {
+  for (const [zone, registrars] of Object.entries(src.tlds)) {
+    const tld = toAscii(zone);
     let bucket = target.tlds[tld];
     if (!bucket) {
       bucket = {};
@@ -168,7 +170,8 @@ function mergePricing(target: NormalizedPricing, src: NormalizedPricing): void {
     }
     Object.assign(bucket, registrars);
   }
-  for (const [tld, coupons] of Object.entries(src.coupons)) {
+  for (const [zone, coupons] of Object.entries(src.coupons)) {
+    const tld = toAscii(zone);
     let bucket = target.coupons[tld];
     if (!bucket) {
       bucket = [];
@@ -186,13 +189,62 @@ interface CachedPricing {
   fetchedAt: number;
 }
 
+/** Normalize IDN aliases without losing per-seller prices or native-currency metadata.
+ * ASCII is the canonical lookup key; Unicode aliases remain for the price matrix. */
+export function normalizePriceZones(table: PricingTable): PricingTable {
+  const tlds: PricingTable['tlds'] = {};
+  for (const [zone, entries] of Object.entries(table.tlds)) {
+    const key = toAscii(zone);
+    tlds[key] = { ...tlds[key], ...entries };
+  }
+  // Keep aliases for existing price-matrix searches and localized display.
+  for (const zone of Object.keys(table.tlds)) tlds[zone] = tlds[toAscii(zone)] ?? {};
+  const sourceRub: NonNullable<PricingTable['sourceRub']> = {};
+  for (const [seller, zones] of Object.entries(table.sourceRub ?? {})) {
+    const normalized: Record<string, [number | null, number | null]> = {};
+    for (const [zone, amounts] of Object.entries(zones)) normalized[toAscii(zone)] = amounts;
+    for (const zone of Object.keys(zones)) normalized[zone] = normalized[toAscii(zone)]!;
+    sourceRub[seller] = normalized;
+  }
+  const sourcePromotions = Object.fromEntries(Object.entries(table.sourcePromotions ?? {}).map(([seller, zones]) =>
+    [seller, [...new Set(zones.flatMap(zone => [zone, toAscii(zone)]))]]));
+  const fromRub = { ...(table.timewebRenewalFromRub ?? {}) };
+  for (const [zone, value] of Object.entries(fromRub)) fromRub[toAscii(zone)] = value;
+  return { ...table, tlds, sourceRub, sourcePromotions, timewebRenewalFromRub: fromRub };
+}
+
+const zoneAliases = new WeakMap<PricingTable, Map<string, string>>();
+
+/** Longest priced suffix; a two-label suffix is selected only if a name precedes it. */
+export function pricingZoneFor(domain: string, table: PricingTable | null, fallback: string): string {
+  if (!table) return fallback;
+  const parts = toAscii(domain).split('.');
+  for (let i = 1; i < parts.length; i++) {
+    const suffix = parts.slice(i).join('.');
+    if (table.tlds[suffix]) return suffix;
+    // Also support unnormalized test/legacy tables containing a Unicode key.
+    let aliases = zoneAliases.get(table);
+    if (!aliases) {
+      aliases = new Map();
+      for (const zone of Object.keys(table.tlds)) {
+        const ascii = toAscii(zone);
+        if (ascii !== zone) aliases.set(ascii, zone);
+      }
+      zoneAliases.set(table, aliases);
+    }
+    const alias = aliases.get(suffix);
+    if (alias) return alias;
+  }
+  return fallback;
+}
+
 // Old snapshots and persisted caches used a promotional oldPrice as renewal.
 // Do not trust it until a verified renewal source is integrated.
 function sanitizeRegru(table: PricingTable): PricingTable {
   const tlds = Object.fromEntries(Object.entries(table.tlds).map(([tld, entries]) => [
     tld, entries.regru ? { ...entries, regru: { ...entries.regru, renew: null } } : entries,
   ]));
-  return { ...table, tlds };
+  return normalizePriceZones({ ...table, tlds });
 }
 
 function readCache(): CachedPricing | null {
@@ -338,11 +390,16 @@ export async function loadPricing(
   // next load retries live sources instead of serving the snapshot for 12h.
   // Live-augmented tables (any live source succeeded) are cached normally.
   const isSnapshotOnly = sources.length === 1 && sources[0] === 'snapshot';
+  // Recreate display aliases after overlaying live prices on canonical keys.
+  for (const zone of Object.keys(baseline.tlds)) {
+    if (toAscii(zone) !== zone && table.tlds[toAscii(zone)]) table.tlds[zone] = table.tlds[toAscii(zone)]!;
+  }
+  const normalized = normalizePriceZones(table);
   if (!isSnapshotOnly) {
-    writeCache({ version: 2, table, fetchedAt });
+    writeCache({ version: 2, table: normalized, fetchedAt });
   }
 
-  return { table, fetchedAt, fromCache: false };
+  return { table: normalized, fetchedAt, fromCache: false };
 }
 
 // ---- Pure helpers (unchanged — UI already consumes these) ----

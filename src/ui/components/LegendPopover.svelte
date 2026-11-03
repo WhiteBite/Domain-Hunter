@@ -14,7 +14,7 @@
 
   const legendItems: LegendItem[] = [
     { status: 'available', labelKey: 'status.available', descKey: 'results.legend.available', variant: 'available' },
-    { status: 'probably_available', labelKey: 'status.probably_available', descKey: 'results.legend.probably_available', variant: 'probably' },
+    { status: 'probably_available', labelKey: 'status.probably_available', descKey: 'results.legend.probably_available', variant: 'unknown' },
     { status: 'taken', labelKey: 'status.taken', descKey: 'results.legend.taken', variant: 'taken' },
     { status: 'unknown', labelKey: 'status.unknown', descKey: 'results.legend.unknown', variant: 'unknown' },
     { status: 'error', labelKey: 'status.error', descKey: 'results.legend.error', variant: 'error' },

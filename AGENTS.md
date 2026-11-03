@@ -64,12 +64,12 @@ dist-cli/               # esbuild output — domain-hunter.mjs + mcp-server.mjs 
 - **TypeScript strict.** Shared types live only in `src/types.ts`. No `any`, no `@ts-ignore`.
 - **All user-visible strings go through i18n** (`t(key)`), including tooltips, aria-labels, empty states, and errors. All eight locale files must keep identical key sets — a test enforces parity.
 - **Zones are data, not code.** Adding/changing a TLD means editing `src/config/tlds.json` only.
-- **Never guess availability.** Honor the three-state model in SPEC §7 (`available` / `probably_available` / `unknown`); DoH-only results never yield bare `available`. A wrong "available" is worse than "unknown".
+- **Never guess availability.** Honor the status model in SPEC §7; DNS-only negatives and legacy `probably_available` are unconfirmed, and registry 404 is not a purchase guarantee. A wrong "available" is worse than "unknown".
 - **Be polite to registries.** Per-infra rate profiles, AIMD backoff, honor `Retry-After`, global concurrency cap. Google Registry ≈1 rps is strict.
-- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com, Cloudflare RDAP aggregator (`rdap.cloudflare.com/domain/{domain}`), DigMyName per-domain detail API, open.er-api.com (FX rates, 7-day cache). No CDNs, no webfonts from network, no analytics. The CLI additionally fetches `raw.githubusercontent.com` (WhiteBite/Domain-Hunter main branch configs — `tlds.json` and `pricing.snapshot.json`, 24h TTL cache, bundled fallback) and, only on explicit `prices --source dynadot` with a user-stored key, `api.dynadot.com` (see `docs/registrar-keys.md`) — the app runtime allowlist is unchanged.
+- **Network allowlist.** Runtime requests only to: RDAP endpoints, IANA bootstrap, DoH endpoints, Porkbun pricing, cfdomainpricing.com, DigMyName per-domain advisory API (explicit user action), open.er-api.com (FX rates, 7-day cache). No CDNs, no webfonts from network, no analytics. The CLI additionally fetches `raw.githubusercontent.com` (WhiteBite/Domain-Hunter main branch configs — `tlds.json` and `pricing.snapshot.json`, 24h TTL cache, bundled fallback) and, only on explicit `prices --source dynadot` with a user-stored key, `api.dynadot.com` (see `docs/registrar-keys.md`) — the app runtime allowlist is unchanged.
 - **Security.** Registry-derived text is escaped; external links use `target="_blank" rel="noopener noreferrer"`; keep the CSP meta in `index.html` intact.
 - **Pricing unit is USD cents** internally; display converts via `settings.rates`.
-- **Storage keys** are versioned: `dh:v1:*` (see SPEC §5). Migrate, don't silently break.
+- **Storage keys** are versioned: `dh:v1:*` / `dh:v2:*` (see SPEC §5). Migrate, don't silently break.
 
 ## Boundaries
 

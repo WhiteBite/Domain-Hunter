@@ -80,3 +80,13 @@ describe('parseCandidate', () => {
     expect(parseCandidate('myapp.dev', ['com'])).toEqual(['myapp.dev']);
   });
 });
+
+describe('IDN display warnings', () => {
+  it('decodes ACE safely and flags mixed scripts per label without blocking', async () => {
+    const { displayUnicode, hasMixedLookalikeScripts, toAscii } = await import('../src/core/idn');
+    expect(displayUnicode('xn--e1afmkfd.xn--p1ai')).toBe('пример.рф');
+    expect(displayUnicode('xn--.com')).toBe('xn--.com');
+    expect(hasMixedLookalikeScripts(toAscii('pаypal.com'))).toBe(true);
+    expect(hasMixedLookalikeScripts('xn--e1afmkfd.xn--p1ai')).toBe(false);
+  });
+});

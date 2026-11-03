@@ -181,18 +181,18 @@ describe('checkDomain attaches cards', () => {
     expect(r.card?.nameservers[0]).toBe('ns1.google.com');
   });
 
-  it('HTTP 200 with an unparseable body stays taken without a card', async () => {
+  it('HTTP 200 with an unparseable body stays unknown without a card', async () => {
     const r = await checkDomain('google.com', TLD_COM, INFRA_VERISIGN, {
       fetchImpl: scriptFetch([jsonResponse(200, {}, true)]),
       sleep: noSleep,
     });
-    expect(r.status).toBe('taken');
+    expect(r.status).toBe('unknown');
     expect(r.card).toBeUndefined();
   });
 
   it('404 available paths carry no card', async () => {
     const r = await checkDomain('fresh-x9z7q.com', TLD_COM, INFRA_VERISIGN, {
-      fetchImpl: scriptFetch([jsonResponse(404), jsonResponse(200, { Status: 3 })]),
+      fetchImpl: scriptFetch([jsonResponse(404, { errorCode: 404 }), jsonResponse(200, { Status: 3 })]),
       sleep: noSleep,
     });
     expect(r.status).toBe('available');

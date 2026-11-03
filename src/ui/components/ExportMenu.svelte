@@ -1,12 +1,13 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import { onDestroy } from 'svelte';
-  import { exportRows, results, pricing } from '../store';
+  import { exportRows, results, pricing, settings } from '../store';
   import { t } from '../../i18n';
   import { popover } from '../popover';
   import { trapFocus } from '../focustrap';
   import { copyText } from '../clipboard';
-  import { toCsv, toMarkdown, toTsv, resultsToJson } from '../csv';
+  import { toCsv, toMarkdown, toTsv, resultsToJson, clipboardRows } from '../csv';
+  import { premiumDomainsForExport } from '../premium-check';
   import IconDots from './icons/IconDots.svelte';
   import IconCheck from './icons/IconCheck.svelte';
   import IconCopy from './icons/IconCopy.svelte';
@@ -24,6 +25,9 @@
       t('results.col.price'),
       t('price.renewal'),
       t('price.tco'),
+      t('csv.bestRegistrar'), t('csv.renewSeller'), t('csv.tcoSeller'),
+      t('csv.regSource'), t('csv.renewSource'), t('csv.tcoSource'),
+      t('csv.checkedAt'), t('csv.resultSource'), t('csv.resultNote'), t('csv.limitations'), t('csv.advisory'),
     ];
   }
 
@@ -35,24 +39,30 @@
     }, 1500);
   }
 
+  function rowsForCopy() {
+    const current = get(results);
+    return clipboardRows(get(exportRows), current, get(pricing)?.table ?? null, get(settings), premiumDomainsForExport(current));
+  }
+
   async function copyAsCsv(): Promise<void> {
-    const ok = await copyText(toCsv(get(exportRows), exportHeaders()));
+    const ok = await copyText(toCsv(rowsForCopy(), exportHeaders()));
     if (ok) flashExportCopied('csv');
   }
 
   async function copyAsMd(): Promise<void> {
-    const ok = await copyText(toMarkdown(get(exportRows), exportHeaders()));
+    const ok = await copyText(toMarkdown(rowsForCopy(), exportHeaders()));
     if (ok) flashExportCopied('md');
   }
 
   async function copyAsTsv(): Promise<void> {
-    const ok = await copyText(toTsv(get(exportRows), exportHeaders()));
+    const ok = await copyText(toTsv(rowsForCopy(), exportHeaders()));
     if (ok) flashExportCopied('tsv');
   }
 
   async function copyAsJson(): Promise<void> {
     const table = get(pricing)?.table ?? null;
-    const json = resultsToJson(get(results), table);
+    const current = get(results);
+    const json = resultsToJson(current, table, premiumDomainsForExport(current));
     const ok = await copyText(json);
     if (ok) flashExportCopied('json');
   }

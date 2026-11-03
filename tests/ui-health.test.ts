@@ -12,7 +12,7 @@ describe('healthNote', () => {
   });
 
   it('indirect when only the CF aggregator answered', () => {
-    expect(healthNote({ ok: true, directOk: false, cfOk: true })).toBe('indirect');
+    expect(healthNote({ ok: true, directOk: false, cfOk: true })).toBe('unverified');
   });
 
   it('null for healthy or legacy-ok entries', () => {
