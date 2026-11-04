@@ -127,6 +127,18 @@ test.describe('Drops tab', () => {
     await expect(page.locator(`[data-testid="${FIRST_COPY_TESTID}"]`)).toBeVisible();
   });
 
+  for (const width of [1440, 390]) {
+    test(`domain names remain readable at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await gotoDrops(page);
+      const geometry = await page.locator('.drops .domain').evaluateAll((els) => els.map((el) => ({ height: el.getBoundingClientRect().height, line: parseFloat(getComputedStyle(el).lineHeight), name: el.getAttribute('aria-label'), text: el.textContent })));
+      expect(geometry.length).toBe(RENDER_CAP);
+      expect(geometry.filter((g) => g.height > g.line * 1.1)).toEqual([]);
+      expect(geometry.every((g) => g.text === g.name)).toBe(true);
+      if (process.env.DH_UI_SCREENSHOTS) await page.screenshot({ path: `/tmp/dh-drops-${width}.png` });
+    });
+  }
+
   test('search input filters rows by substring', async ({ page }) => {
     await gotoDrops(page);
 
@@ -183,9 +195,9 @@ test.describe('Drops tab', () => {
     const textarea = page.locator('[data-testid="check-input-domains"]');
     await expect(textarea).toBeVisible();
     const value = await textarea.inputValue();
-    // addAll appends up to 500 filtered domains (capped at 500).
+    // The action adds exactly the displayed domains.
     const lines = value.split('\n').filter((l) => l.trim().length > 0);
-    expect(lines.length).toBeGreaterThan(1);
+    expect(lines.length).toBe(RENDER_CAP);
     expect(value).toContain(FIRST_DOMAIN);
 
     // Auto-run started: progress bar appears (run no longer idle).

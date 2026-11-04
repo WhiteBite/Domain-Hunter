@@ -19,7 +19,7 @@ export const ja: Dict = {
 
   'drops.title': '削除ドメイン',
   'drops.desc':
-    '最近削除されたドメイン — ブランド可能な名前が通常の登録料金で。公開削除リストの日次スナップショット。',
+    '公開削除リストの名前です。空き状況と価格は登録事業者で確認してください。',
   'drops.search': '名前またはゾーンで絞り込み',
   'drops.addAll': '表示中をすべてチェックに追加',
   'drops.export.csv': 'CSV をエクスポート',
@@ -92,7 +92,7 @@ export const ja: Dict = {
   'check.run.resume.no': '破棄',
 
   'check.progress.checked': '{done} / {total} 件チェック済み',
-  'check.progress.available': 'RDAPに記録なし：{n}',
+  'check.progress.available': '空き候補: {n}',
   'check.progress.errors': '{n} 件のエラー',
   'check.progress.elapsed': '{s}',
 
@@ -101,7 +101,7 @@ export const ja: Dict = {
   'results.empty.body':
     '上で名前を入力し、ゾーンを選んで「登録可否をチェック」を押してください。またはジェネレータータブで先に名前を生成できます。',
   'results.filters.all': 'すべて',
-  'results.filters.available': 'RDAPに記録なし',
+  'results.filters.available': '空き候補 (RDAP)',
   'results.filters.taken': '登録済み',
   'results.filters.problems': '問題あり',
   'results.sort.name': '名前',
@@ -127,7 +127,7 @@ export const ja: Dict = {
   'results.copy.selected': '選択をコピー ({n})',
   'results.buy.aria': '{domain} を購入',
   'results.domain.aria': '{domain} を {registrar} で開く',
-  'status.available': 'RDAPに記録なし',
+  'status.available': '利用可能の可能性',
   'app.title.html': 'Domain Hunter — 無料ドメイン登録可否チェッカー',
   'a11y.skip': '本文へスキップ',
   'check.hint.1': '名前を入力するか、ジェネレーターで生成します。',
@@ -469,7 +469,7 @@ export const ja: Dict = {
   'prices.col.tco': '3 年（最安）',
   'prices.legend.band': '最安コラム',
   'prices.legend.band.tip': '更新と 3 年の列は、各ゾーンの全レジストラ中最安値を表示します。',
-  'prices.legend.dot': '最安レジストラ',
+  'prices.legend.dot': '最安の登録料',
   'prices.legend.dot.tip': '緑のドットは、その行で初年度価格が最も安いセルを示します。',
   'prices.legend.trap': 'プロモ罠',
   'prices.legend.trap.tip': '点線の下線 — 更新料が初年度の 5 倍以上です。',
@@ -520,4 +520,11 @@ export const ja: Dict = {
   'card.status.pending': 'レジストリの処理待ち。',
   'card.status.grace': 'レジストリの猶予期間。条件は異なります。',
   'card.status.restricted': '表示された操作は登録事業者またはレジストリにより制限されています。',
+  'prices.sources': '情報源と条件',
+  'prices.scrollHint': '表をスクロールして全登録事業者を表示。',
+  'detail.open': '開く',
+  'detail.website': 'サイト',
+  'detail.websiteHint': '「サイト」はドメインを検索せずに登録事業者のサイトを開きます。',
+  'detail.conditions': '条件',
+  'detail.noQuotes': 'このゾーンの価格情報はありません。',
 };

@@ -19,7 +19,7 @@ export const zh: Dict = {
 
   'drops.title': '过期删除域名',
   'drops.desc':
-    '近期过期删除的域名——以普通注册价格获取的品牌化名称。每日快照来自公开的删除列表。',
+    '来自公开删除列表的域名。请向注册商确认可用性和价格。',
   'drops.search': '按名称或区域筛选',
   'drops.addAll': '将所有显示项加入查询',
   'drops.export.csv': '导出 CSV',
@@ -92,7 +92,7 @@ export const zh: Dict = {
   'check.run.resume.no': '丢弃',
 
   'check.progress.checked': '已完成 {done}/{total}',
-  'check.progress.available': 'RDAP 未找到：{n}',
+  'check.progress.available': '可能可用：{n}',
   'check.progress.errors': '{n} 个错误',
   'check.progress.elapsed': '{s}',
 
@@ -101,7 +101,7 @@ export const zh: Dict = {
   'results.empty.body':
     '在上方输入名称，选择区域并点击“查询可注册性”。或先打开“生成器”标签页来发明名称。',
   'results.filters.all': '全部',
-  'results.filters.available': 'RDAP 未找到',
+  'results.filters.available': '可用候选 (RDAP)',
   'results.filters.taken': '已注册',
   'results.filters.problems': '有问题',
   'results.sort.name': '名称',
@@ -127,7 +127,7 @@ export const zh: Dict = {
   'results.copy.selected': '复制所选（{n}）',
   'results.buy.aria': '购买 {domain}',
   'results.domain.aria': '在 {registrar} 打开 {domain}',
-  'status.available': 'RDAP 未找到',
+  'status.available': '可能可用',
   'app.title.html': 'Domain Hunter——免费域名可注册性查询工具',
   'a11y.skip': '跳至内容',
   'check.hint.1': '输入名称或在“生成器”中生成。',
@@ -468,7 +468,7 @@ export const zh: Dict = {
   'prices.col.tco': '3 年（最低）',
   'prices.legend.band': '最低价列',
   'prices.legend.band.tip': '续费和 3 年列显示每个区域所有注册商中的最低价格。',
-  'prices.legend.dot': '最低价注册商',
+  'prices.legend.dot': '最低注册价格',
   'prices.legend.dot.tip': '绿点标记该行首年价格最低的单元格。',
   'prices.legend.trap': '促销陷阱',
   'prices.legend.trap.tip': '虚线下划线 — 续费价格达到首年的 5 倍及以上。',
@@ -519,4 +519,11 @@ export const zh: Dict = {
   'card.status.pending': '注册局操作待处理。',
   'card.status.grace': '注册局宽限期；条件可能不同。',
   'card.status.restricted': '所列操作受到注册商或注册局限制。',
+  'prices.sources': '来源与条件',
+  'prices.scrollHint': '滚动表格以查看所有注册商。',
+  'detail.open': '打开',
+  'detail.website': '网站',
+  'detail.websiteHint': '“网站”打开注册商网站，不会搜索域名。',
+  'detail.conditions': '条件',
+  'detail.noQuotes': '没有此域名后缀的价格数据。',
 };

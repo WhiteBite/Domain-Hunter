@@ -5,8 +5,7 @@
   import { trademarkLabel, usptoSearchUrl, tmviewSearchUrl } from '../trademark';
   import { bestTco, formatPrice, formatSourcePrice } from '../../pricing/pricing';
   import { settings, pricing } from '../store';
-  import { t } from '../../i18n';
-  import Tooltip from './Tooltip.svelte';
+  import { t, locale } from '../../i18n';
   import StatusDetails from './StatusDetails.svelte';
   import type { DigDetail } from '../dig';
   import { checkDetail } from '../premium-check';
@@ -22,6 +21,7 @@
     standardFirstYear: number | null;
     renewal: number | null;
     renewalRegistrarId: string | null;
+    isPremiumOverride: boolean;
   }
 
   interface Props {
@@ -48,6 +48,7 @@
     advisoryFailed = !advisory; advisoryLoading = false;
   }
 
+  const conditionSellers = Array.of('regru', 'hostiman', 'timeweb', 'sprinthost', 'webhost1', 'adminvps');
   const s: Settings = $derived($settings);
   const tmLabel = $derived(trademarkLabel(row.result.domain));
   const tcoQuote = $derived($pricing?.table && row.tco != null && premiumOverride == null ? bestTco($pricing.table, row.result.tld) : null);
@@ -68,92 +69,76 @@
   class="detail-row"
   class:is-available={isAvail}
   class:is-error={isErr}
+  id={`detail-${sid}`}
   data-testid={`results-row-expanded-${sid}`}
 >
   <td colspan="6">
     <div class="detail-band">
-      <!-- Column 1: renewal metric stack (+ status note when present). -->
-      <div class="detail-col">
+      <div class="detail-summary">
         <div class="detail-cell">
           <span class="detail-label">{t('price.renewal')}</span>
-          <span class="detail-value nums">{formatSourcePrice($pricing?.table ?? null, row.result.tld, row.renewalRegistrarId, 'renew', row.renewal, s)}</span>
+          <strong class="detail-value nums">{formatSourcePrice($pricing?.table ?? null, row.result.tld, row.renewalRegistrarId, 'renew', row.renewal, s)}</strong>
+          {#if row.renewalRegistrarId}<span class="detail-muted">{quotes.find(q => q.id === row.renewalRegistrarId)?.name ?? row.renewalRegistrarId} · {priceSourceLabel($pricing?.table ?? null, row.result.tld, row.renewalRegistrarId, 'renew')}</span>{/if}
         </div>
-        <span class="detail-muted">{t('adv.source', { source: row.result.source })} · {t('adv.requested', { date: new Date(row.result.checkedAt).toLocaleString() })}</span>
-        {#if unicodeDomain !== row.result.domain}
-          <span class="detail-muted">{t('idn.unicode', { domain: unicodeDomain })}</span>
-          <span class="detail-muted">{t('idn.ascii', { domain: row.result.domain })}</span>
-        {/if}
-        {#if hasMixedLookalikeScripts(row.result.domain)}<span class="detail-note">{t('idn.mixed')}</span>{/if}
-        {#if minimum > 1}<span class="detail-note">{t('price.minTerm', { n: minimum })}</span>{/if}
-        {#if policyRu}<a href="https://cctld.ru/help/faq/" target="_blank" rel="noopener noreferrer" class="detail-buy">{t('policy.ru')}</a>{/if}
-        {#if row.result.note}
-          <div class="detail-note">{row.result.note}</div>
-        {/if}
-      </div>
-      <!-- Column 2: TCO metric stack (+ premium chip once confirmed). -->
-      <div class="detail-col">
         <div class="detail-cell">
           <span class="detail-label">{t('price.tco')}</span>
-          <span class="detail-value nums">{formatPrice(row.tco, s)}</span>
+          <strong class="detail-value nums">{formatPrice(row.tco, s)}</strong>
           {#if tcoQuote && $pricing?.table}
-            <span class="detail-label">{quotes.find(q => q.id === tcoQuote.registrarId)?.name ?? tcoQuote.registrarId} · {priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'reg')}{#if priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'reg') !== priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'renew')} / {priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'renew')}{/if}</span>
+            <span class="detail-muted">{quotes.find(q => q.id === tcoQuote.registrarId)?.name ?? tcoQuote.registrarId} · {priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'reg')}{#if priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'reg') !== priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'renew')} / {priceSourceLabel($pricing.table, row.result.tld, tcoQuote.registrarId, 'renew')}{/if}</span>
           {/if}
         </div>
-        {#if detail && !detail.loading && !detail.failed && (detail.premium || detail.likely)}
-          <span class="chip-tag premium">
-            {t('results.detail.premium', {
-              price:
-                premiumOverride != null
-                  ? formatPrice(premiumOverride, s)
-                  : '—',
-            })}
-          </span>
-        {/if}
+        <div class="detail-cell detail-observation">
+          <span class="detail-label">{t('csv.resultSource')}</span>
+          <span>{row.result.source} · {new Date(row.result.checkedAt).toLocaleString($locale)}</span>
+          {#if unicodeDomain !== row.result.domain}<span class="detail-muted">{t('idn.unicode', { domain: unicodeDomain })} · {t('idn.ascii', { domain: row.result.domain })}</span>{/if}
+          {#if hasMixedLookalikeScripts(row.result.domain)}<span class="detail-note">{t('idn.mixed')}</span>{/if}
+          {#if minimum > 1}<span class="detail-note">{t('price.minTerm', { n: minimum })}</span>{/if}
+          {#if policyRu}<a href="https://cctld.ru/help/faq/" target="_blank" rel="noopener noreferrer" class="detail-buy">{t('policy.ru')}</a>{/if}
+          {#if row.result.note}<span class="detail-note">{row.result.note}</span>{/if}
+        </div>
       </div>
-      <!-- Column 3: registrar comparison (1fr) with a shimmer placeholder
-           while the on-demand detail loads — no floating text. -->
-      <div class="detail-col detail-registrars-col">
-        {#if quotes.length >= 1}
+      <div class="detail-layout">
+        <section class="detail-panel detail-registrars-col" aria-label={t('results.detail.registrars')}>
+          <div class="panel-heading">
+            <div><h3>{t('results.detail.registrars')}</h3><p>{t('tooltip.registrars')}</p></div>
+          </div>
+          {#if quotes.length >= 1}
             <div class="detail-registrars" data-testid={`results-row-registrars-${sid}`}>
-              <Tooltip text={t('tooltip.registrars')}>
-                <span class="detail-label">{t('results.detail.registrars')}</span>
-              </Tooltip>
-              <span class="detail-reg-list nums">
-                {#each quotes as quote, i}
-                  <a
-                    class="detail-reg-item"
-                    class:cheapest={i === 0}
-                    class:no-deeplink={!quote.hasDeepLink}
-                    href={quote.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={quote.hasDeepLink ? undefined : t('registrar.noDeeplink', { registrar: quote.name })}
-                    data-testid={`results-row-registrar-${sid}-${quote.id}`}
-                  >
-                    <span class="detail-reg-dot" aria-hidden="true"></span>
-                    {quote.name} — {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)}{#if quote.reg != null} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'reg')}){/if} / {formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}{#if quote.renew != null} ({priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'renew')}){/if}
-                    {#if $pricing?.table.sourcePromotions?.[quote.id]?.includes(row.result.tld)} ({t('price.promo')}){/if}
-                  </a>
-                {/each}
-              </span>
+              <div class="quote-head" aria-hidden="true"><span>{t('card.registrar')}</span><span>{t('results.col.price')}</span><span>{t('price.renewal')}</span><span></span></div>
+              {#each quotes as quote (quote.id)}
+                <div class="quote-row">
+                  <div class="quote-name"><strong>{quote.name}</strong>{#if row.best?.registrarId === quote.id && quote.reg != null}<span class="quote-best">{t('prices.legend.dot')}</span>{/if}{#if $pricing?.table.sourcePromotions?.[quote.id]?.includes(row.result.tld)}<span class="chip-tag promo">{t('price.promo')}</span>{/if}</div>
+                  <div class="quote-price nums"><span class="quote-price-label">{t('results.col.price')}</span><strong>{formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'reg', quote.reg, s)}</strong>{#if quote.reg != null}<span>{priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'reg')}</span>{/if}</div>
+                  <div class="quote-price nums"><span class="quote-price-label">{t('price.renewal')}</span><strong>{formatSourcePrice($pricing?.table ?? null, row.result.tld, quote.id, 'renew', quote.renew, s)}</strong>{#if quote.renew != null}<span>{priceSourceLabel($pricing?.table ?? null, row.result.tld, quote.id, 'renew')}</span>{/if}{#if quote.id === 'timeweb' && $pricing?.table.timewebRenewalFromRub?.[row.result.tld] != null}<span>{t('prices.timeweb.renewFrom', { price: `${$pricing.table.timewebRenewalFromRub[row.result.tld]} ₽` })}</span>{/if}</div>
+                  <a class="quote-open" href={quote.url} target="_blank" rel="noopener noreferrer" title={quote.hasDeepLink ? undefined : t('registrar.noDeeplink', { registrar: quote.name })} aria-label={quote.hasDeepLink ? t('results.domain.aria', { domain: row.result.domain, registrar: quote.name }) : t('registrar.noDeeplink', { registrar: quote.name })} data-testid={`results-row-registrar-${sid}-${quote.id}`}>{t(quote.hasDeepLink ? 'detail.open' : 'detail.website')} <span aria-hidden="true">↗</span></a>
+                  {#if conditionSellers.includes(quote.id)}<details class="quote-conditions"><summary>{t('detail.conditions')}</summary><span>{t(`prices.${quote.id}.caveat`)}</span></details>{/if}
+                </div>
+              {/each}
+              {#if quotes.some(q => !q.hasDeepLink)}<p class="quote-notice">{t('detail.websiteHint')}</p>{/if}
             </div>
+          {:else if detail?.premium || detail?.likely}
+            <p class="detail-note">{t('price.disclaimer')}</p>
+          {:else}
+            <p class="detail-muted">{t('detail.noQuotes')}</p>
           {/if}
-        {#if detail?.premium || detail?.likely}<span class="detail-muted">{t('price.disclaimer')}</span>{/if}
-        <span class="detail-label">{t('adv.heading')}</span>
-        <span class="detail-muted">{t('adv.hint')}</span>
-        <div class="detail-extra">
-          <button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('dotsweep')} data-testid={`results-row-dotsweep-${sid}`}>{t('adv.dotsweep')}</button>
-          <button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('whodat')} data-testid={`results-row-whodat-${sid}`}>{t('adv.whodat')}</button>
-          {#if isRu}<button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('cctld')} data-testid={`results-row-cctld-${sid}`}>{t('adv.cctld')}</button>{/if}
-        </div>
+          {#if row.isPremiumOverride}<span class="chip-tag premium">{t('results.detail.premium', { price: '—' })}</span>{/if}
+        </section>
+        <section class="detail-panel detail-checks" aria-label={t('adv.heading')}>
+          <div class="panel-heading"><div><h3>{t('adv.heading')}</h3><p>{t('adv.hint')}</p></div></div>
+          <div class="detail-buttons">
+            <button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('dotsweep')} data-testid={`results-row-dotsweep-${sid}`}>{t('adv.dotsweep')}</button>
+            <button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('whodat')} data-testid={`results-row-whodat-${sid}`}>{t('adv.whodat')}</button>
+            {#if isRu}<button class="detail-check" type="button" disabled={advisoryLoading} onclick={() => void lookup('cctld')} data-testid={`results-row-cctld-${sid}`}>{t('adv.cctld')}</button>{/if}
+            <button class="detail-check" type="button" disabled={detail?.loading ?? false} onclick={() => void checkDetail(row.result.domain)} title={t('results.detail.dig.hint')} data-testid={`results-row-dig-check-${sid}`}>{t('results.detail.dig.check')}</button>
+          </div>
         {#if advisoryLoading}<span class="detail-muted">{t('adv.loading')}</span>
         {:else if advisoryFailed}<span class="detail-muted" role="status">{t('adv.failed')}</span>
         {:else if advisory}
           <div class="detail-extra" role="status" data-testid={`results-row-advisory-${sid}`}>
             <span>{advisory.verdict === 'registered' ? t('adv.registered') : advisory.verdict === 'not_found' ? t('adv.notfound') : t('adv.unknown')}</span>
             <span>{t('adv.source', { source: `${advisory.provider} / ${advisory.source}${advisory.confidence ? ` / ${advisory.confidence}` : ''}` })}</span>
-            <span>{t('adv.requested', { date: new Date(advisory.requestedAt).toLocaleString() })}</span>
-            <span>{advisory.dataAt ? t('adv.dataTime', { date: new Date(advisory.dataAt).toLocaleString() }) : t('adv.dataUnknown')}</span>
+            <span>{t('adv.requested', { date: new Date(advisory.requestedAt).toLocaleString($locale) })}</span>
+            <span>{advisory.dataAt ? t('adv.dataTime', { date: new Date(advisory.dataAt).toLocaleString($locale) }) : t('adv.dataUnknown')}</span>
             {#if advisory.cached}<span>{t('adv.cache')}</span>{/if}
             {#if advisory.card?.expiresAt}<span>{t('card.expires')}: {fmtDate(advisory.card.expiresAt)}</span>{/if}
             {#if advisory.card?.statuses.length}<StatusDetails statuses={advisory.card.statuses} />{/if}
@@ -161,10 +146,6 @@
             {#if advisory.card}<span>{t('card.dateHint')}</span><a href="https://www.icann.org/resources/pages/epp-status-codes-2014-06-16-en" target="_blank" rel="noopener noreferrer">{t('card.statusHelp')}</a>{/if}
           </div>
         {/if}
-        <button class="detail-check" type="button" disabled={detail?.loading ?? false}
-          onclick={() => void checkDetail(row.result.domain)} title={t('results.detail.dig.hint')}
-          data-testid={`results-row-dig-check-${sid}`}>{t('results.detail.dig.check')}</button>
-        <span class="detail-muted">{t('results.detail.dig.hint')}</span>
         {#if detail?.loading}
           <div class="detail-shimmer" aria-hidden="true"><span class="shimmer-bar"></span></div>
         {:else if detail?.failed}
@@ -195,21 +176,10 @@
             </div>
         {/if}
         <span class="detail-trademark">
-          <a
-            href={usptoSearchUrl(tmLabel)}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={t('results.detail.tm.hint')}
-            data-testid={`results-row-tm-uspto-${sid}`}
-          >{t('results.detail.tm.uspto')}</a>
-          <a
-            href={tmviewSearchUrl(tmLabel)}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={t('results.detail.tm.hint')}
-            data-testid={`results-row-tm-tmview-${sid}`}
-          >{t('results.detail.tm.tmview')}</a>
+          <a href={usptoSearchUrl(tmLabel)} target="_blank" rel="noopener noreferrer" title={t('results.detail.tm.hint')} data-testid={`results-row-tm-uspto-${sid}`}>{t('results.detail.tm.uspto')}</a>
+          <a href={tmviewSearchUrl(tmLabel)} target="_blank" rel="noopener noreferrer" title={t('results.detail.tm.hint')} data-testid={`results-row-tm-tmview-${sid}`}>{t('results.detail.tm.tmview')}</a>
         </span>
+        </section>
       </div>
       {#if row.result.card}
         {@const card = row.result.card}
@@ -266,260 +236,61 @@
 </tr>
 
 <style>
-  /* Full-bleed band: the td contributes no padding/background of its own —
-     the inner panel spans the whole colspan-6 cell, aligns to the table
-     edges, and inherits the parent row's tint. */
-  .detail-row td {
-    padding: 0;
-    background: transparent;
-  }
-
-  .detail-band {
-    display: grid;
-    grid-template-columns: max-content max-content minmax(0, 1fr);
-    align-items: start;
-    gap: var(--space-2) var(--space-6);
-    font-size: var(--text-xs);
-    padding: var(--space-3) var(--space-4);
-    background: var(--bg-sunken);
-    box-shadow: inset 2px 0 0 var(--border-strong);
-  }
-  .detail-row.is-available .detail-band {
-    background: var(--row-tint-available);
-    box-shadow: inset 2px 0 0 var(--green-solid);
-  }
-  .detail-row.is-error .detail-band {
-    background: var(--row-tint-error);
-    box-shadow: inset 2px 0 0 var(--red);
-  }
-
-  .detail-col {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-    min-width: 0;
-  }
-
-  .detail-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .detail-label {
-    color: var(--text-tertiary);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  .detail-value {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .detail-note {
-    color: var(--text-secondary);
-    max-width: 260px;
-    white-space: normal;
-  }
-
-  .detail-muted {
-    color: var(--text-tertiary);
-    font-size: var(--text-xs);
-  }
-
-  .detail-cheap {
-    color: var(--text-secondary);
-  }
-
-  .detail-registrars {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-1);
-  }
-
-  .detail-reg-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px var(--space-3);
-    color: var(--text-secondary);
-  }
-  .detail-reg-item {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    white-space: normal;
-    min-width: 0;
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    color: inherit;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: color var(--dur) var(--ease);
-  }
-  .detail-reg-item:hover {
-    color: var(--accent-text);
-    text-decoration: underline;
-  }
-  .detail-reg-item.cheapest {
-    color: var(--text);
-    font-weight: 500;
-  }
-  .detail-reg-item.no-deeplink {
-    opacity: 0.8;
-    text-decoration: underline dotted;
-  }
-  /* Unified entries: every quote carries a dot; the cheapest fills it. */
-  .detail-reg-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    border: 1px solid var(--border-strong);
-    background: transparent;
-    flex: none;
-  }
-  .detail-reg-item.cheapest .detail-reg-dot {
-    background: var(--green-solid);
-    border-color: var(--green-solid);
-  }
-
-  .detail-check {
-    align-self: flex-start;
-    padding: 4px 8px;
-    color: var(--text);
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-  }
-  .detail-extra {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-1) var(--space-3);
-  }
-
-  .detail-buy {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--accent-text);
-    font-weight: 500;
-    text-decoration: none;
-    transition: all var(--dur) var(--ease);
-  }
-  .detail-buy:hover {
-    background: var(--bg-overlay);
-    text-decoration: none;
-  }
-
-  .detail-card {
-    max-width: 340px;
-  }
-
-  .card-grid {
-    display: grid;
-    grid-template-columns: max-content max-content;
-    gap: 2px var(--space-2);
-    align-items: baseline;
-  }
-
-  .card-k {
-    color: var(--text-tertiary);
-  }
-
-  .card-ns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1);
-    color: var(--text-secondary);
-  }
-
-  .detail-trademark {
-    display: flex;
-    gap: var(--space-3);
-    font-size: var(--text-xs);
-  }
-
-  .detail-trademark a {
-    color: var(--accent-text);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--border-strong);
-  }
-
-  .detail-trademark a:hover {
-    border-bottom-color: var(--accent);
-  }
-  /* Shared .chip-tag (+ .premium variant) lives in src/ui/chrome.css. */
-
-  /* Loading shimmer sized to the registrar-list area. */
-  .detail-shimmer {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    width: 100%;
-    max-width: 420px;
-    padding: 2px 0;
-  }
-  .shimmer-bar {
-    height: 12px;
-    border-radius: var(--radius-sm);
-    background: linear-gradient(
-      90deg,
-      var(--border) 25%,
-      var(--border-strong) 50%,
-      var(--border) 75%
-    );
-    background-size: 200% 100%;
-    animation: dh-shimmer 1.2s linear infinite;
-  }
-  .shimmer-bar:nth-child(1) {
-    width: 90%;
-  }
-  .shimmer-bar:nth-child(2) {
-    width: 70%;
-  }
-  .shimmer-bar:nth-child(3) {
-    width: 45%;
-  }
-  @keyframes dh-shimmer {
-    from {
-      background-position: 200% 0;
-    }
-    to {
-      background-position: -200% 0;
-    }
-  }
-
+  .detail-row td { padding: 0; background: transparent; }
+  .detail-band { padding: 18px; background: var(--bg-sunken); box-shadow: inset 3px 0 var(--border-strong); color: var(--text); font-size: 13px; }
+  .detail-row.is-available .detail-band { box-shadow: inset 3px 0 var(--green-solid); }
+  .detail-row.is-error .detail-band { box-shadow: inset 3px 0 var(--red); }
+  .detail-summary { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(200px, 2fr); gap: 20px; padding: 0 2px 16px; }
+  .detail-cell { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .detail-label, .card-k { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+  .detail-value { color: var(--text); font-size: 17px; font-weight: 650; }
+  .detail-muted, .detail-note { color: var(--text-secondary); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+  .detail-note { color: var(--amber); }
+  .detail-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr); align-items: start; gap: 14px; }
+  .detail-panel, .detail-card { min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-elevated); }
+  .panel-heading { margin-bottom: 14px; }
+  .panel-heading h3 { margin: 0; font-size: 14px; line-height: 1.4; font-weight: 650; color: var(--text); }
+  .panel-heading p { margin: 4px 0 0; color: var(--text-secondary); font-size: 12px; line-height: 1.45; }
+  .quote-head, .quote-row { display: grid; grid-template-columns: minmax(110px, 1.2fr) minmax(85px, 1fr) minmax(85px, 1fr) auto; gap: 8px; align-items: start; }
+  .quote-head { padding: 0 0 8px; color: var(--text-secondary); font-size: 11px; font-weight: 600; }
+  .quote-row { padding: 10px 0; border-top: 1px solid var(--border); }
+  .quote-conditions { grid-column: 1 / -1; color: var(--text-secondary); font-size: 11px; line-height: 1.45; }
+  .quote-conditions summary { color: var(--accent-text); cursor: pointer; }
+  .quote-notice { color: var(--text-secondary); font-size: 11px; line-height: 1.4; margin: 8px 0 0; }
+  .quote-name, .quote-price { display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+  .quote-name strong, .quote-price strong { font-size: 13px; color: var(--text); }
+  .quote-price span { color: var(--text-secondary); font-size: 11px; line-height: 1.35; }
+  .quote-price .quote-price-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .quote-best { width: fit-content; padding: 2px 6px; border-radius: var(--radius-full); color: var(--green); background: var(--green-soft); font-size: 10px; font-weight: 600; }
+  .quote-open, .detail-buy { color: var(--accent-text); font-weight: 600; text-decoration: none; }
+  .quote-open { padding: 5px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); white-space: nowrap; }
+  .quote-open:hover, .detail-check:hover:not(:disabled) { background: var(--accent-soft); border-color: var(--accent); }
+  .quote-open:focus-visible, .detail-check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .detail-checks { display: flex; flex-direction: column; gap: 12px; }
+  .detail-checks .panel-heading { margin-bottom: 0; }
+  .detail-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .detail-check { min-height: 40px; padding: 7px 10px; color: var(--text); background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font: inherit; font-weight: 500; cursor: pointer; }
+  .detail-check:disabled { opacity: .6; cursor: wait; }
+  .detail-extra { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; padding: 10px; background: var(--bg-sunken); border-radius: var(--radius-sm); overflow-wrap: anywhere; }
+  .detail-cheap { color: var(--text-secondary); }
+  .detail-trademark { display: flex; gap: 12px; padding-top: 4px; border-top: 1px solid var(--border); }
+  .detail-trademark a { color: var(--accent-text); }
+  .detail-card { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .card-grid .detail-value { font-size: 13px; }
+  .card-ns { display: flex; flex-wrap: wrap; gap: 8px; color: var(--text-secondary); }
+  .detail-shimmer { width: 100%; }
+  .shimmer-bar { display: block; height: 12px; background: var(--border); border-radius: var(--radius-sm); }
+  @media (max-width: 1000px) { .detail-layout { grid-template-columns: 1fr; } }
   @media (max-width: 700px) {
-    tr.detail-row {
-      display: block;
-      margin: 0 0 var(--space-2);
-      border: 1px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 var(--radius-md) var(--radius-md);
-    }
-    tr.detail-row td {
-      display: block;
-      padding: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-    .detail-band {
-      grid-template-columns: 1fr;
-      gap: var(--space-2);
-    }
-    .detail-shimmer {
-      max-width: none;
-    }
-    .detail-buy {
-      width: 100%;
-      justify-content: center;
-    }
+    tr.detail-row, tr.detail-row td { display: block; }
+    .detail-band { padding: 14px; }
+    .detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .detail-observation { grid-column: 1 / -1; }
+    .quote-head { display: none; }
+    .quote-row { grid-template-columns: minmax(0, 1fr) minmax(80px, 1fr); gap: 8px; }
+    .quote-name { grid-column: 1; }
+    .quote-open { grid-column: 2; grid-row: 1; justify-self: end; }
+    .quote-price .quote-price-label { position: static; width: auto; height: auto; clip-path: none; }
   }
 </style>
