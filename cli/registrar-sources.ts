@@ -1,4 +1,5 @@
 import type { PriceEntry, PricingTable } from '../src/types';
+import { toAscii } from '../src/core/idn';
 import { fetchJsonWithTimeout } from './data';
 
 // Dynadot's documented legacy API. It is scheduled for retirement; the newer
@@ -75,21 +76,32 @@ export async function fetchDynadotTldPrices(
  * Layer dynadot entries over existing curated TLDs only (zones are data, not
  * code — unknown TLDs from the registrar feed are ignored). Immutable.
  */
-export function mergeDynadotIntoTable(
+export function mergePriceSourceIntoTable(
   table: PricingTable,
   prices: Record<string, PriceEntry>,
+  sourceId: string,
 ): PricingTable {
   const tlds = { ...table.tlds };
   let merged = 0;
   for (const [tld, entry] of Object.entries(prices)) {
     const existing = tlds[tld];
     if (!existing) continue;
-    tlds[tld] = { ...existing, dynadot: entry };
+    tlds[tld] = { ...existing, [sourceId]: entry };
     merged += 1;
   }
+  // Keep Unicode aliases in sync with their canonical ASCII zone.
+  for (const zone of Object.keys(tlds)) {
+    const canonical = toAscii(zone);
+    if (canonical !== zone && prices[canonical] && tlds[canonical]) tlds[zone] = tlds[canonical]!;
+  }
   const sources =
-    merged > 0 && !table.sources.includes('dynadot')
-      ? [...table.sources, 'dynadot']
+    merged > 0 && !table.sources.includes(sourceId)
+      ? [...table.sources, sourceId]
       : table.sources;
   return { ...table, tlds, sources };
+}
+
+/** Backwards-compatible CLI helper. */
+export function mergeDynadotIntoTable(table: PricingTable, prices: Record<string, PriceEntry>): PricingTable {
+  return mergePriceSourceIntoTable(table, prices, 'dynadot');
 }

@@ -1,0 +1,49 @@
+name: Verify release changes
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npm run build:cli
+      - run: npm run build
+      - run: npm run size
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      - run: npx playwright install chromium
+      - run: npx playwright test
+      - name: Verify packaged CLI installation
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          VERSION=$(node -p 'require("./package.json").version')
+          npm install --prefix "$RUNNER_TEMP/domain-hunter-check" --omit=dev --ignore-scripts --no-audit --no-fund "$RUNNER_TEMP/domain-hunter-$VERSION.tgz"
+          node "$RUNNER_TEMP/domain-hunter-check/node_modules/domain-hunter/dist-cli/domain-hunter.mjs" --version
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: verify-playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore

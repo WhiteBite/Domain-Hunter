@@ -5,6 +5,14 @@ Versioning policy: the package version follows the CLI/MCP JSON contract
 a major bump. The browser app ships continuously from `main` and is not
 versioned separately.
 
+## 3.0.0
+
+- **Breaking MCP change:** `get_prices` now returns at most 100 rows by default (maximum 200). Follow `nextOffset` with the same filters to retrieve subsequent pages.
+- MCP: add keyless, read-only DotSweep, Domainee and DigMyName availability signals with explicit source selection, conservative uncertainty, source attribution, privacy notices and standard-price caveats. Provider responses may be cached and are not registration guarantees.
+- MCP: coordinate provider request pacing, cooldowns and quotas across processes for the same OS user without persisting queried domains; reject requests when coordination cannot be established.
+- CLI/MCP: provide per-field price provenance, independent renewal and three-year estimates, and clearer snapshot/API limitations. The MCP server does not expose keyed registrar APIs; the existing optional CLI-only Dynadot integration remains separate.
+- Browser app: no new API calls or credentials.
+
 ## 2.1.3
 
 - Packaging: the web-font package moved to devDependencies — `npm i -g domain-hunter` now installs with zero runtime dependencies.
