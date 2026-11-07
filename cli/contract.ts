@@ -4,6 +4,9 @@
  * Mirrors the browser app's three-state model and pricing units (USD cents).
  */
 import type { CheckStatus, ResultSource, TldRegistry } from '../src/types';
+import type { QuoteOrigin } from './price-provenance';
+import type { PriceSourceService } from './sources/types';
+
 
 export interface CliRates {
   RUB: number;
@@ -36,6 +39,9 @@ export interface PriceInfo {
   transfer: number | null;
   promoTrap: boolean;
   formatted?: { first: string; renew: string };
+  /** A standard TLD price, not a confirmed domain-specific or premium quote. */
+  quoteType?: 'standard_tld';
+  origins?: { reg: QuoteOrigin | null; renew: QuoteOrigin | null; transfer: QuoteOrigin | null };
 }
 
 export interface CheckRow {
@@ -50,6 +56,7 @@ export interface CheckRow {
 }
 
 export interface CheckOutcome {
+  limitations?: string[];
   command: 'check';
   checkedAt: number;
   durationMs: number;
@@ -69,6 +76,13 @@ export interface PricesCommandOptions {
   rates?: Partial<CliRates>;
   /** Extra keyed pricing sources to merge (currently: 'dynadot'). */
   sources?: string[];
+  /** Internal source registry; never passed as an MCP argument. */
+  sourceService?: PriceSourceService;
+  /** Return a structured missing-key status instead of throwing (MCP). */
+  reportSourceErrors?: boolean;
+  /** Optional page of results; omitted means the CLI returns all rows. */
+  limit?: number;
+  offset?: number;
   /** Injectable for tests; defaults to globalThis.fetch. */
   fetchImpl?: typeof fetch;
 }
@@ -87,12 +101,29 @@ export interface PricesRow {
   tco3UsdCents: number | null;
   promoTrap: boolean;
   entries: Record<string, { reg: number | null; renew: number | null; transfer: number | null; sellerPromotion?: boolean }>;
+  /** Origins match the individual fields in entries, not the table fetch time. */
+  quoteOrigins?: Record<string, { reg: QuoteOrigin | null; renew: QuoteOrigin | null; transfer: QuoteOrigin | null }>;
+  /** Cheapest renewal may be at a different seller than best registration. */
+  bestRenewal?: { registrarId: string; renew: number } | null;
+  bestTco?: { registrarId: string; total: number } | null;
+  /** Published lower bound, not an exact annual renewal and excluded from TCO. */
+  renewalFromRub?: Record<string, number>;
+  renewalFromOrigins?: Record<string, QuoteOrigin>;
+  originalRubKopecks?: Record<string, [number | null, number | null]>;
 }
 
 export interface PricesOutcome {
   command: 'prices';
   sources: string[];
   fetchedAt: number | null;
+  /** Aggregate table/cache time, not freshness of each quote. */
+  fromCache?: boolean;
+  quoteType?: 'standard_tld';
+  limitations?: string[];
+  requestedSources?: { source: string; status: 'ok' | 'empty' | 'failed' | 'missing_key' | 'unsupported' | 'busy'; completeness: 'unknown' | 'complete'; observedAt: string | null; receivedZones: number | null; appliedZones: number | null; fromCache: boolean }[];
+  total?: number;
+  offset?: number;
+  nextOffset?: number | null;
   rows: PricesRow[];
 }
 
@@ -128,6 +159,7 @@ export interface FindRow extends CheckRow {
 }
 
 export interface FindOutcome {
+  limitations?: string[];
   command: 'find';
   seedName: string;
   budgetUsdCents: number | null;

@@ -185,7 +185,7 @@ The CLI fetches fresh `tlds.json` and `pricing.snapshot.json` from the `main` br
 
 ### MCP server
 
-An MCP (Model Context Protocol) server exposes the core commands as tools (`check_availability`, `get_prices`, `generate_names`, `find_domains`, `list_zones`, `list_drops`, `price_trends`) so AI agents can call them directly:
+An MCP (Model Context Protocol) server exposes the core commands as tools (`check_availability`, `get_prices`, `list_price_sources`, `list_public_sources`, `compare_public_sources`, `generate_names`, `find_domains`, `list_zones`, `list_drops`, `price_trends`) so AI agents can call them directly:
 
 ```jsonc
 // Claude / opencode-style config
@@ -200,7 +200,47 @@ An MCP (Model Context Protocol) server exposes the core commands as tools (`chec
 }
 ```
 
-Build the server with `npm run build:cli` (it bundles `cli/mcp/server.ts` into `dist-cli/mcp-server.mjs` when present). The server reuses `cli/core.ts` — no separate logic, no new network destinations beyond the CLI's `raw.githubusercontent.com` snapshot fetch.
+Build with `npm run build:cli`. The server reuses `cli/core.ts` and runs in Node,
+separate from the standalone browser app. It may contact GitHub snapshots,
+Porkbun and the third-party cfdomainpricing.com feed; availability checks also
+contact RDAP/DNS services. No registration or purchase is performed.
+
+`get_prices` returns standard TLD estimates in **USD cents**, not quotes for a
+particular domain or premium name. `quoteOrigins` identifies each non-null
+field as `api`, `snapshot`, or `unknown`, with its own observation time (or
+null). Porkbun and cfdomainpricing record only a shared batch completion time,
+reported separately as `batchObservedAt`; their individual fetch times are
+unknown. `fetchedAt` is only the aggregate table/cache time. `bestRenewal` and
+`bestTco` may name different sellers from `best`; TCO is reg plus two renewals
+at the same seller, excluding taxes, fees and changes. Native snapshot amounts,
+when known, are in `originalRubKopecks`; `renewalFromRub` is a lower bound,
+not a fixed renewal price; its source is in `renewalFromOrigins`. Verify actual availability and price with the seller.
+`find_domains` budget flags are likewise estimates, not purchase guarantees.
+
+`list_price_sources` describes the keyless baseline prices. `get_prices` returns
+at most 100 rows by default (maximum 200); follow `nextOffset` with `offset`
+and the same filters. Sorting and prices may change between calls.
+
+`list_public_sources` lists the keyless, read-only DotSweep, Domainee and
+DigMyName adapters. `compare_public_sources` takes up to 10 fully qualified
+`domains` and an explicit `sources` array, e.g.:
+
+```json
+{"domains":["example.com"],"sources":["dotsweep","digmyname"]}
+```
+
+This sends names to those third parties; get permission before sharing sensitive
+searches. Responses are advisory and can conflict or be incomplete. `fetchedAt`
+is our receipt time; `observedAt` is null because the provider may use a cache.
+The response cache is process-local. Request pacing, quotas and 429 cooldowns
+are coordinated across MCP processes for the same local user, but other users,
+machines and applications may share the IP quota. DigMyName data must be attributed using
+the returned links. Prices are standard-zone estimates, not premium or
+per-domain quotes. Integrations have fixture/protocol tests; public examples were sampled through a
+separate web-fetch proxy, not through the MCP network path. See [MCP source architecture](docs/mcp-sources.md).
+
+MCP does not accept credentials or expose keyed APIs. The pre-existing optional
+Dynadot legacy integration remains a separate CLI-only feature.
 
 ### Releasing
 

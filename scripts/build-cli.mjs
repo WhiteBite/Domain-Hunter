@@ -34,7 +34,7 @@ async function bundleEntry(entry, outfile) {
     format: 'esm',
     target: 'node20',
     outfile,
-    banner: { js: '#!/usr/bin/env node' },
+    banner: { js: "#!/usr/bin/env node\nimport { createRequire as __dhCreateRequire } from 'node:module'; const require = __dhCreateRequire(import.meta.url);" },
     logLevel: 'info',
   });
   const size = statSync(outfile).size;

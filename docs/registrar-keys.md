@@ -3,7 +3,7 @@
 Domain Hunter prices come from keyless public sources (Porkbun, Cloudflare
 at-cost, offline snapshot). Some registrars only expose bulk TLD pricing behind
 an API key. The **CLI** can store such keys locally and merge them as an extra
-pricing source. The browser app never handles registrar keys (see
+pricing source. The MCP server does not expose keyed APIs. The browser app never handles registrar keys (see
 [Browser route](#browser-route-not-implemented) below).
 
 ## Storage
@@ -44,11 +44,21 @@ and participate in best-price selection, TCO, and promo-trap detection like any
 other registrar. Only TLDs already present in the curated table are merged —
 zones stay data-driven (`src/config/tlds.json`).
 
+### Legacy CLI security
+
+This optional source is not exposed by MCP. The browser also does not use it.
+
+Legacy Dynadot authentication places the API key in the HTTPS request URL.
+While this application does not print that URL or return it to the model, URLs
+may be recorded by proxies, network instrumentation or the provider. Consider
+this risk before opting in and restrict the API key's permissions where possible.
+No real account was used to validate this integration. Nothing is purchased.
+
 ## Supported registrars
 
 | Registrar | Bulk TLD pricing | Status |
 |---|---|---|
-| Dynadot | [Legacy `tld_price` API](https://www.dynadot.com/domain/api-commands#tld_price), key from Dynadot → Tools → API | Supported in CLI; legacy API scheduled for retirement |
+| Dynadot | [Legacy `tld_price` API](https://www.dynadot.com/domain/api-commands#tld_price), key from Dynadot → Tools → API | Supported only in CLI; legacy API scheduled for retirement |
 | Namecheap | [`namecheap.users.getPricing`](https://www.namecheap.com/support/api/methods/users/get-pricing/) returns bulk XML pricing; requires API access and IP allowlisting | Not implemented |
 | GoDaddy | No public bulk TLD pricing API (per-domain availability/pricing only, OAuth key) | Not possible |
 

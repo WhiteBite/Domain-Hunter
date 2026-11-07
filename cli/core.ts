@@ -15,10 +15,10 @@ import type {
   Settings,
 } from '../src/types';
 import { DEFAULT_SETTINGS } from '../src/types';
-import { normalizeDomainInput, parseCandidate } from '../src/core/idn';
+import { normalizeDomainInput, parseCandidate, toAscii } from '../src/core/idn';
 import { runQueue } from '../src/core/queue';
 import { getFresh, put } from '../src/core/cache';
-import { bestEntry, formatPrice, isPromoTrap, tco3, pricingZoneFor } from '../src/pricing/pricing';
+import { bestEntry, bestTco, formatPrice, isPromoTrap, tco3, pricingZoneFor } from '../src/pricing/pricing';
 import { displayToUsdCents } from '../src/ui/table-filters';
 import { combinator, DEFAULT_AFFIXES } from '../src/generators/combinator';
 import { mixSyllables } from '../src/generators/syllables';
@@ -36,8 +36,11 @@ import {
   removeRegistrarKey,
   saveRegistrarKey,
 } from './keys';
-import { fetchDynadotTldPrices, mergeDynadotIntoTable } from './registrar-sources';
+import { mergePriceSourceIntoTable } from './registrar-sources';
+import { createDefaultPriceSourceService } from './sources';
+import type { SourceOverlay } from './sources/types';
 import process from 'node:process';
+import { quoteOrigin, snapshotOrigin } from './price-provenance';
 import type {
   CheckCommandOptions,
   CheckOutcome,
@@ -101,6 +104,7 @@ function buildPriceInfo(
       renew: null,
       transfer: null,
       promoTrap: false,
+      quoteType: 'standard_tld',
     };
   }
   return {
@@ -109,6 +113,12 @@ function buildPriceInfo(
     renew: best.entry.renew,
     transfer: best.entry.transfer,
     promoTrap: isPromoTrap(best.entry),
+    quoteType: 'standard_tld',
+    origins: {
+      reg: quoteOrigin(table, tld, best.registrarId, 'reg'),
+      renew: quoteOrigin(table, tld, best.registrarId, 'renew'),
+      transfer: quoteOrigin(table, tld, best.registrarId, 'transfer'),
+    },
     formatted: {
       first: formatPrice(best.entry.reg, settings),
       renew: formatPrice(best.entry.renew, settings),
@@ -254,6 +264,7 @@ export async function runCheckCommand(
 
     return {
       command: 'check',
+      limitations: ['RDAP availability is a signal, not a registration guarantee. Any prices are standard TLD estimates, not domain-specific or premium quotes.'],
       checkedAt: Date.now(),
       durationMs: Date.now() - start,
       total: results.length,
@@ -285,20 +296,26 @@ export async function runPricesCommand(
   });
   let table = pricingState.table;
 
-  if (opts.sources?.includes('dynadot')) {
-    const apiKey = loadRegistrarKeys().dynadot;
-    if (!apiKey) {
-      throw new Error(
-        'no dynadot API key stored - run: domain-hunter keys set dynadot <key>',
-      );
+  const requestedSources: NonNullable<PricesOutcome['requestedSources']> = [];
+  const overlays: Record<string, SourceOverlay> = {};
+  const sourceService = opts.sourceService ?? createDefaultPriceSourceService(opts.fetchImpl);
+  const descriptors = new Map(sourceService.list().map((source) => [source.id, source]));
+  for (const sourceId of new Set(opts.sources ?? [])) {
+    const descriptor = descriptors.get(sourceId);
+    const loaded = await sourceService.load(sourceId);
+    if (loaded.status !== 'ok') {
+      if (!opts.reportSourceErrors && loaded.status === 'missing_key') {
+        throw new Error(`no ${sourceId} API key stored - configure it using domain-hunter keys`);
+      }
+      if (!opts.reportSourceErrors && loaded.status === 'unsupported') throw new Error('unsupported pricing source');
+      if (loaded.status === 'failed') process.stderr.write(`warning: pricing source failed; continuing without it\n`);
+      requestedSources.push({ source: sourceId, status: loaded.status, completeness: descriptor?.completeness ?? 'unknown', observedAt: null, receivedZones: null, appliedZones: null, fromCache: false });
+      continue;
     }
-    try {
-      const dynadotPrices = await fetchDynadotTldPrices(apiKey, opts.fetchImpl);
-      table = mergeDynadotIntoTable(table, dynadotPrices);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      process.stderr.write(`warning: dynadot source failed (${msg}); continuing without it\n`);
-    }
+    const zones = new Set(Object.keys(loaded.prices).filter((zone) => table.tlds[zone] != null));
+    table = mergePriceSourceIntoTable(table, loaded.prices, sourceId);
+    if (descriptor) overlays[sourceId] = { zones, observedAt: loaded.observedAt, sourceUrl: descriptor.sourceUrl };
+    requestedSources.push({ source: sourceId, status: zones.size ? 'ok' : 'empty', completeness: descriptor?.completeness ?? 'unknown', observedAt: loaded.observedAt, receivedZones: Object.keys(loaded.prices).length, appliedZones: zones.size, fromCache: loaded.fromCache });
   }
 
   let tldKeys = Object.keys(table.tlds);
@@ -315,17 +332,31 @@ export async function runPricesCommand(
   tldKeys.sort((a, b) => {
     const ra = bestEntry(table, a)?.entry.reg ?? Infinity;
     const rb = bestEntry(table, b)?.entry.reg ?? Infinity;
-    return ra - rb;
+    return ra - rb || a.localeCompare(b);
   });
 
-  const rows: PricesRow[] = tldKeys.map((tld) => {
+  const total = tldKeys.length;
+  const offset = Math.max(0, opts.offset ?? 0);
+  const page = tldKeys.slice(offset, opts.limit == null ? undefined : offset + opts.limit);
+  const rows: PricesRow[] = page.map((tld) => {
     const best = bestEntry(table, tld);
     const entriesForTld = table.tlds[tld] ?? {};
     const entries: Record<
       string,
       { reg: number | null; renew: number | null; transfer: number | null; sellerPromotion?: boolean }
     > = {};
+    const quoteOrigins: NonNullable<PricesRow['quoteOrigins']> = {};
+    const originalRubKopecks: NonNullable<PricesRow['originalRubKopecks']> = {};
+    let bestRenewal: PricesRow['bestRenewal'] = null;
     for (const [rid, entry] of Object.entries(entriesForTld)) {
+      quoteOrigins[rid] = { reg: quoteOrigin(table, tld, rid, 'reg', overlays), renew: quoteOrigin(table, tld, rid, 'renew', overlays), transfer: quoteOrigin(table, tld, rid, 'transfer', overlays) };
+      const rub = table.sourceRub?.[rid]?.[tld];
+      if (rub) {
+        const regRub = quoteOrigins[rid].reg?.kind === 'snapshot' ? rub[0] : null;
+        const renewRub = quoteOrigins[rid].renew?.kind === 'snapshot' ? rub[1] : null;
+        if (regRub != null || renewRub != null) originalRubKopecks[rid] = [regRub, renewRub];
+      }
+      if (entry.renew != null && (!bestRenewal || entry.renew < bestRenewal.renew)) bestRenewal = { registrarId: rid, renew: entry.renew };
       entries[rid] = {
         reg: entry.reg,
         renew: entry.renew,
@@ -333,6 +364,11 @@ export async function runPricesCommand(
         ...(table.sourcePromotions?.[rid]?.includes(tld) ? { sellerPromotion: true } : {}),
       };
     }
+    const renewalFromRub: Record<string, number> = {};
+    const timewebFrom = table.timewebRenewalFromRub?.[toAscii(tld)];
+    if (timewebFrom != null) renewalFromRub.timeweb = timewebFrom;
+    const renewalFromOrigins: NonNullable<PricesRow['renewalFromOrigins']> = {};
+    if (timewebFrom != null) renewalFromOrigins.timeweb = snapshotOrigin(table.timewebUpdatedAt);
     return {
       tld,
       best: best
@@ -346,6 +382,12 @@ export async function runPricesCommand(
       tco3UsdCents: tco3(table, tld),
       promoTrap: best ? isPromoTrap(best.entry) : false,
       entries,
+      quoteOrigins,
+      bestRenewal,
+      bestTco: bestTco(table, tld),
+      renewalFromRub,
+      renewalFromOrigins,
+      originalRubKopecks,
     };
   });
 
@@ -353,6 +395,18 @@ export async function runPricesCommand(
     command: 'prices',
     sources: table.sources,
     fetchedAt: pricingState.fetchedAt,
+    fromCache: pricingState.fromCache,
+    quoteType: 'standard_tld',
+    limitations: [
+      'Standard TLD prices are estimates, not domain-specific or premium quotes; confirm availability and final price with the registrar.',
+      'TCO is registration plus two annual renewals at the same seller, excluding taxes, fees, multi-year discounts and future changes.',
+      'Cloudflare pricing is supplied by the third-party cfdomainpricing.com feed, not a direct Cloudflare API.',
+      ...requestedSources.flatMap(({ source }) => descriptors.get(source)?.limitations ?? []),
+    ],
+    requestedSources,
+    total,
+    offset,
+    nextOffset: offset + rows.length < total ? offset + rows.length : null,
     rows,
   };
 }
@@ -498,6 +552,7 @@ export async function runFindCommand(
 
   return {
     command: 'find',
+    limitations: ['Availability is a signal, not a guarantee. withinBudget uses a standard TLD estimate; domain-specific or premium pricing, taxes and fees are not checked.'],
     seedName: opts.seedName,
     budgetUsdCents,
     checked: checkOutcome.results.length,
