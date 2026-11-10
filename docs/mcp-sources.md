@@ -65,8 +65,11 @@ names and `available`/`estimated` for `.invalid`; these remain unknown locally.
 Domainee rejected the sampled IDN TLD, and its DNS-based `.invalid` positive
 remains unknown. For the sampled random `.com` all three reported a positive
 signal; prices from DotSweep and DigMyName differed and are kept separate.
-The MCP process's live network path and DotSweep batch POST could not be verified
-from this environment. These samples do not establish accuracy or coverage.
+The local sandbox cannot reach these providers directly. A GitHub Actions
+[stdio smoke run](https://github.com/WhiteBite/Domain-Hunter/actions/runs/42728026883)
+successfully exercised the MCP network path for all three providers, including
+the DotSweep batch POST, using `example.com` and `example.net`. These samples
+do not establish accuracy, coverage or future uptime.
 
 ## Boundaries for adding sources
 
