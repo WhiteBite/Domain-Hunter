@@ -1,6 +1,12 @@
 import type { Dict } from './index';
 
 export const pt: Dict = {
+  'result.reason.timeout': "A solicitação ao registro expirou; a disponibilidade não foi confirmada.",
+  'result.reason.rateLimit': "Limite do registro atingido (429); tente mais tarde.",
+  'result.reason.invalid': "Não foi possível verificar a resposta do registro.",
+  'result.reason.proxy': "A resposta do proxy não pode ser verificada; disponibilidade desconhecida.",
+  'result.reason.unverified': "A resposta RDAP de ausência não foi verificada independentemente.",
+  'result.reason.conflict': "A ausência no RDAP contradiz a delegação DNS; verifique antes de comprar.",
   'price.source.api': 'API: {date}',
   'price.source.snapshot': 'Snapshot: {date}',
   'price.source.unknown': 'Fonte e data desconhecidas',

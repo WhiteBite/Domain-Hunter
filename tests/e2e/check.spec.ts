@@ -1379,3 +1379,20 @@ test('empty registrar comparison reports missing zone prices', async ({ page }) 
   await page.getByTestId('results-row-expand-zzqxtest1-com').click();
   await expect(page.getByTestId('results-row-expanded-zzqxtest1-com')).toContainText('Нет цен для этой зоны.');
 });
+
+
+test('expanded result explains an unverifiable registry response in the selected language', async ({ page }) => {
+  await setupBaseMocks(page);
+  await mockRdap(page, [{ domain: 'zzqxtest1.com', response: { status: 404, body: { errorCode: 400 } } }]);
+  await bootCheckTab(page);
+  await runCheck(page, 'zzqxtest1.com');
+  await expect(row(page, 'zzqxtest1.com').getByTestId('status-badge-unknown')).toBeVisible();
+  await page.getByTestId('results-row-menu-zzqxtest1-com').click();
+  await page.getByTestId('results-row-detail-zzqxtest1-com').click();
+  const reason = page.getByTestId('results-row-reason-zzqxtest1-com');
+  await expect(reason).toHaveText('Registry response could not be verified.');
+  await page.getByTestId('app-lang-toggle').click();
+  await page.getByTestId('app-lang-ru').click();
+  await expect(reason).toHaveText('Ответ реестра не удалось проверить.');
+  expect(leaked).toEqual([]);
+});

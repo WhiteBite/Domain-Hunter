@@ -5,6 +5,13 @@ Versioning policy: the package version follows the CLI/MCP JSON contract
 a major bump. The browser app ships continuously from `main` and is not
 versioned separately.
 
+## Unreleased
+
+- Browser: explain known RDAP failures and conflicting signals in all eight locales without changing availability classifications.
+- Build: pack locale dictionaries losslessly for a smaller self-contained HTML file.
+- CI: verify packaged CLI/MCP and coordination on Linux, macOS and Windows; add a bounded live protocol smoke test with fixed public test domains.
+- Release operations: dispatch tag-verified npm trusted publishing and HTML/checksum attachment independently from `main`.
+
 ## 3.0.0
 
 - **Breaking MCP change:** `get_prices` now returns at most 100 rows by default (maximum 200). Follow `nextOffset` with the same filters to retrieve subsequent pages.

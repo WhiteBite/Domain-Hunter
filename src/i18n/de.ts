@@ -1,6 +1,12 @@
 import type { Dict } from './index';
 
 export const de: Dict = {
+  'result.reason.timeout': "Zeitüberschreitung bei der Registry; die Verfügbarkeit ist unbestätigt.",
+  'result.reason.rateLimit': "Registry-Limit erreicht (429); später erneut versuchen.",
+  'result.reason.invalid': "Die Antwort der Registry konnte nicht überprüft werden.",
+  'result.reason.proxy': "Die Proxy-Antwort ist nicht überprüfbar; Verfügbarkeit unbekannt.",
+  'result.reason.unverified': "Die RDAP-Antwort „nicht gefunden“ ist nicht unabhängig bestätigt.",
+  'result.reason.conflict': "RDAP „nicht gefunden“ widerspricht der DNS-Delegierung; vor dem Kauf prüfen.",
   'price.source.api': 'API: {date}',
   'price.source.snapshot': 'Snapshot: {date}',
   'price.source.unknown': 'Quelle und Datum unbekannt',

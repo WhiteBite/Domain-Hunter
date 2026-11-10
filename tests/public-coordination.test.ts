@@ -37,7 +37,8 @@ describe('cross-process public API coordination', () => {
     const content = await readFile(join(dir, 'domainee.json'), 'utf8');
     expect(content).not.toContain('example.com');
     expect(JSON.parse(content).requests).toHaveLength(1);
-    expect((await stat(join(dir, 'domainee.json'))).mode & 0o777).toBe(0o600);
+    // Windows ACLs do not expose POSIX permission bits through fs.stat.
+    if (process.platform !== 'win32') expect((await stat(join(dir, 'domainee.json'))).mode & 0o777).toBe(0o600);
     expect(request).toHaveBeenCalledTimes(1);
   }));
 

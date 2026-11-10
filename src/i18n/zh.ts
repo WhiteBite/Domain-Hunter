@@ -1,6 +1,12 @@
 import type { Dict } from './index';
 
 export const zh: Dict = {
+  'result.reason.timeout': "注册局请求超时；可用性尚未确认。",
+  'result.reason.rateLimit': "已达到注册局速率限制（429）；请稍后重试。",
+  'result.reason.invalid': "无法验证注册局响应。",
+  'result.reason.proxy': "无法验证代理响应；可用性未知。",
+  'result.reason.unverified': "RDAP 未找到记录的响应未经过独立验证。",
+  'result.reason.conflict': "RDAP 未找到记录与 DNS 委派冲突；购买前请核实。",
   'price.source.api': 'API：{date}',
   'price.source.snapshot': '快照：{date}',
   'price.source.unknown': '来源和日期未知',

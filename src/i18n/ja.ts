@@ -1,6 +1,12 @@
 import type { Dict } from './index';
 
 export const ja: Dict = {
+  'result.reason.timeout': "レジストリへの要求がタイムアウトしました。利用可能かは未確認です。",
+  'result.reason.rateLimit': "レジストリの制限に達しました（429）。後でもう一度お試しください。",
+  'result.reason.invalid': "レジストリの応答を検証できませんでした。",
+  'result.reason.proxy': "プロキシの応答を検証できないため、利用可能かは不明です。",
+  'result.reason.unverified': "RDAP の未検出応答は独立して検証されていません。",
+  'result.reason.conflict': "RDAP の未検出と DNS 委任が矛盾しています。購入前に確認してください。",
   'price.source.api': 'API: {date}',
   'price.source.snapshot': 'スナップショット: {date}',
   'price.source.unknown': '出典と日付は不明',

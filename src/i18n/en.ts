@@ -1,6 +1,12 @@
 import type { Dict } from './index';
 
 export const en: Dict = {
+  'result.reason.timeout': "Registry request timed out; availability remains unconfirmed.",
+  'result.reason.rateLimit': "Registry rate limit reached (429); try later.",
+  'result.reason.invalid': "Registry response could not be verified.",
+  'result.reason.proxy': "Proxy response cannot be verified; availability remains unknown.",
+  'result.reason.unverified': "RDAP not-found response is not independently verified.",
+  'result.reason.conflict': "RDAP not-found conflicts with DNS delegation; verify before buying.",
   'price.source.api': 'API: {date}',
   'price.source.snapshot': 'Snapshot: {date}',
   'price.source.unknown': 'Source and date unknown',
