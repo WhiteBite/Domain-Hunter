@@ -1,0 +1,48 @@
+name: Attach release HTML
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag, e.g. v3.0.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-assets
+  cancel-in-progress: false
+
+jobs:
+  attach:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify published tag and source
+        shell: bash
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test "$(gh release view "$RELEASE_TAG" --json isDraft,isPrerelease --jq '.isDraft == false and .isPrerelease == false')" = true
+          git checkout --detach "refs/tags/$RELEASE_TAG"
+          git merge-base --is-ancestor HEAD origin/main
+          test "v$(node -p 'require("./package.json").version')" = "$RELEASE_TAG"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build && npm run size
+      - name: Create and attach immutable assets
+        shell: bash
+        run: |
+          cp dist/index.html "domain-hunter-$RELEASE_TAG.html"
+          sha256sum "domain-hunter-$RELEASE_TAG.html" > "domain-hunter-$RELEASE_TAG.sha256"
+          gh release upload "$RELEASE_TAG" "domain-hunter-$RELEASE_TAG.html" "domain-hunter-$RELEASE_TAG.sha256"

@@ -1,0 +1,26 @@
+name: MCP public sources live smoke
+
+# Never send user names. PR probes run only when this workflow or its script changes.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/mcp-live-smoke.yml
+      - scripts/mcp-live-smoke.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:cli
+      - run: node scripts/mcp-live-smoke.mjs

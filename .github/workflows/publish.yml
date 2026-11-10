@@ -2,27 +2,45 @@ name: Publish npm package
 
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release tag, e.g. v3.0.0
+        required: true
+        type: string
 
 permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
+      - name: Verify published tag and source
+        shell: bash
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test "$(gh release view "$RELEASE_TAG" --json isDraft,isPrerelease --jq '.isDraft == false and .isPrerelease == false')" = true
+          git checkout --detach "refs/tags/$RELEASE_TAG"
+          git merge-base --is-ancestor HEAD origin/main
+          test "v$(node -p 'require("./package.json").version')" = "$RELEASE_TAG"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-
+          cache: npm
       - run: npm ci
-
       - run: npm run typecheck && npm run test:coverage && npm run lint
-
-      # OIDC after trusted-publisher registration; NPM_TOKEN secret bootstraps the first publish only.
-      - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # npm trusted publishing must be configured for this repository/workflow.
+      - run: npm publish --access public --provenance

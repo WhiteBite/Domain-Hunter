@@ -1,6 +1,12 @@
 import type { Dict } from './index';
 
 export const ru: Dict = {
+  'result.reason.timeout': "Реестр не ответил вовремя; доступность не подтверждена.",
+  'result.reason.rateLimit': "Достигнут лимит реестра (429); попробуйте позже.",
+  'result.reason.invalid': "Ответ реестра не удалось проверить.",
+  'result.reason.proxy': "Ответ прокси нельзя проверить; доступность неизвестна.",
+  'result.reason.unverified': "Ответ RDAP об отсутствии записи не подтверждён независимо.",
+  'result.reason.conflict': "Ответ RDAP об отсутствии записи противоречит DNS-делегированию; проверьте перед покупкой.",
   'price.source.api': 'API: {date}',
   'price.source.snapshot': 'Снапшот: {date}',
   'price.source.unknown': 'Источник и дата неизвестны',

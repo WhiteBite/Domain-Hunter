@@ -4,6 +4,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compactPricingModule } from './scripts/compact-pricing.mjs';
+import { compactLocale } from './scripts/compact-locales.mjs';
 
 export default defineConfig(({ command }) => ({
   // Relative base: required for GitHub Pages sub-path AND file:// usage.
@@ -20,6 +21,17 @@ export default defineConfig(({ command }) => ({
         const file = fileURLToPath(new URL('./src/config/pricing.snapshot.json', import.meta.url));
         this.addWatchFile(file);
         return compactPricingModule(JSON.parse(readFileSync(file, 'utf8')));
+      },
+    }] : []),
+    ...(command === 'build' ? [{
+      name: 'compact-locales',
+      enforce: 'pre' as const,
+      transform(this: import('rollup').PluginContext, code: string, id: string) {
+        const match = id.replaceAll('\\', '/').match(/\/src\/i18n\/(ru|es|de|pt|zh|ja|fr)\.ts$/);
+        if (!match) return null;
+        const english = fileURLToPath(new URL('./src/i18n/en.ts', import.meta.url));
+        this.addWatchFile(english);
+        return compactLocale(code, readFileSync(english, 'utf8'), match[1]!);
       },
     }] : []),
     svelte(), ...(command === 'build' ? [viteSingleFile()] : []),

@@ -47,7 +47,7 @@ requests. There are no automatic retries.
 
 Pacing, quotas and provider cooldowns are coordinated across MCP processes
 running under the same OS user, using per-provider locks and private state files
-under `~/.domain-hunter/public-rate-limits/` (directory mode 0700, files 0600).
+under `~/.domain-hunter/public-rate-limits/` (POSIX directory mode 0700 and files 0600). On Windows, access is controlled by inherited account ACLs; POSIX mode bits do not establish ACL privacy.
 Only timestamps and counters are persisted, **not searched domains**. A request
 is counted before it is sent, so a crash cannot silently refund quota. If a lock
 is held, the response reports `busy`; if state or locking fails, it reports
@@ -65,8 +65,11 @@ names and `available`/`estimated` for `.invalid`; these remain unknown locally.
 Domainee rejected the sampled IDN TLD, and its DNS-based `.invalid` positive
 remains unknown. For the sampled random `.com` all three reported a positive
 signal; prices from DotSweep and DigMyName differed and are kept separate.
-The MCP process's live network path and DotSweep batch POST could not be verified
-from this environment. These samples do not establish accuracy or coverage.
+The local sandbox cannot reach these providers directly. A GitHub Actions
+[stdio smoke run](https://github.com/WhiteBite/Domain-Hunter/actions/runs/42728026883)
+successfully exercised the MCP network path for all three providers, including
+the DotSweep batch POST, using `example.com` and `example.net`. These samples
+do not establish accuracy, coverage or future uptime.
 
 ## Boundaries for adding sources
 
@@ -78,3 +81,13 @@ Do not treat DNS absence as proof of availability, infer a quote's currency or
 mix a domain-specific price into the standard TLD table. Paid operations, keys,
 account creation, retries that ignore provider limits and automatic transmission
 of names to additional services are out of scope.
+
+## Opt-in live protocol smoke test
+
+The `MCP public sources live smoke` workflow runs the built
+MCP server over stdio using only `example.com` and `example.net`. It performs
+one DotSweep batch POST and two GETs for each other provider. It runs manually or on pull requests that change the smoke script or workflow.
+It does not use credentials or send user-provided names. Non-OK, partial,
+rate-limited or malformed responses fail the run rather than guessing a result.
+A passing run checks the current protocol, not availability accuracy, terms or
+service uptime. Avoid frequent execution and follow each provider's limits.

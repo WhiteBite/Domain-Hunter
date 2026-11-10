@@ -1,5 +1,6 @@
 <script lang="ts">
   import { priceSourceLabel } from '../price-source';
+  import { resultNoteKey } from '../result-note';
   import type { CheckResult, PriceEntry, Settings } from '../../types';
   import type { RegistrarQuote } from '../registrar-quotes';
   import { trademarkLabel, usptoSearchUrl, tmviewSearchUrl } from '../trademark';
@@ -39,6 +40,7 @@
   let advisoryLoading = $state(false);
   let advisoryFailed = $state(false);
   const unicodeDomain = $derived(displayUnicode(row.result.domain));
+  const noteKey = $derived(row.result.note ? resultNoteKey(row.result.note) : null);
   const isRu = $derived(/\.(ru|xn--p1ai)$/.test(toAscii(row.result.domain)));
   const policyRu = $derived(/\.(ru|xn--p1ai|su)$/.test(toAscii(row.result.domain)));
   const minimum = $derived($registry.tlds.find(x => toAscii(x.tld) === toAscii(row.result.tld))?.flags?.minYears ?? 0);
@@ -94,7 +96,7 @@
           {#if hasMixedLookalikeScripts(row.result.domain)}<span class="detail-note">{t('idn.mixed')}</span>{/if}
           {#if minimum > 1}<span class="detail-note">{t('price.minTerm', { n: minimum })}</span>{/if}
           {#if policyRu}<a href="https://cctld.ru/help/faq/" target="_blank" rel="noopener noreferrer" class="detail-buy">{t('policy.ru')}</a>{/if}
-          {#if row.result.note}<span class="detail-note">{row.result.note}</span>{/if}
+          {#if row.result.note}<span class="detail-note" data-testid={`results-row-reason-${sid}`}>{noteKey ? t(noteKey) : row.result.note}</span>{/if}
         </div>
       </div>
       <div class="detail-layout">
